@@ -1,0 +1,7 @@
+{
+  "title_selector": "h1.page-title, h1",
+  "date_selector": "time[datetime], .date, .publication-date",
+  "body_selector": ".field--name-body, article .content, main article",
+  "pdf_link_selector": "a[href*='.pdf'], a[href*='download']",
+  "notes": "EU AI Office official publications. Main domain: digital-strategy.ec.europa.eu/en/policies/ai-office"
+}

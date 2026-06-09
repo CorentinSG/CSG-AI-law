@@ -1,0 +1,8 @@
+
+> c-saint-girons-ai-law-intelligence@0.1.0 start:stable
+> next start --hostname 127.0.0.1 --port 3001
+
+▲ Next.js 16.2.6
+- Local:         http://127.0.0.1:3001
+- Network:       http://127.0.0.1:3001
+✓ Ready in 123ms

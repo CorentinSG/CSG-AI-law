@@ -1,0 +1,12 @@
+{
+  "state": "stopped",
+  "workerId": "local-worker-23744",
+  "pid": 23744,
+  "hostname": "CocoComputer",
+  "startedAt": "2026-06-08T14:05:18.784Z",
+  "updatedAt": "2026-06-08T14:05:20.122Z",
+  "cycle": 1,
+  "idleCycles": 1,
+  "stopRequested": false,
+  "lastError": null
+}

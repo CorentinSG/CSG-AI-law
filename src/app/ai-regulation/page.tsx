@@ -1,0 +1,584 @@
+import type { Metadata } from "next";
+import Link from "next/link";
+
+import { updateRepository } from "@/agents/ai-regulation/processors/updateRepository";
+import { CompactNewsCard } from "@/components/site/compact-news-card";
+import { FilterBar } from "@/components/site/filter-bar";
+import { IntelligenceHubTabs } from "@/components/site/intelligence-hub-tabs";
+import { IntelligenceSignal } from "@/components/site/intelligence-signal";
+import { LegalIntelligenceLegend } from "@/components/site/legal-intelligence-legend";
+import { MotionStagger } from "@/components/site/motion-stagger";
+import { NewsCard } from "@/components/site/news-card";
+import { CursorPaginationControls } from "@/components/site/pagination-controls";
+import { RegionPortalCard } from "@/components/site/region-portal-card";
+import { SectionHeading } from "@/components/site/section-heading";
+import { EmptyFilterState, hasActiveFilterParams } from "@/components/site/empty-filter-state";
+import { SiteShell } from "@/components/site/shell";
+import { UpdateCard } from "@/components/site/update-card";
+import { Card, CardContent } from "@/components/ui/card";
+import {
+  filterNewsItems,
+  normalizeNewsItemRecord,
+  type NormalizedNewsItemRecord,
+} from "@/content/ai-regulation/news";
+import {
+  getEuropeCountryProfiles,
+  getPriorityEuropeCountryProfiles,
+} from "@/content/ai-regulation/europe-country-profiles";
+import {
+  getPriorityUsStateProfiles,
+  getUsStateAiLawProfiles,
+} from "@/content/ai-regulation/us-state-ai-law-baseline";
+import { encodeCursor, parseCursorParam } from "@/lib/pagination";
+import type { RegulatoryUpdateFilters } from "@/db/repository-types";
+
+export const metadata: Metadata = {
+  title: "AI Legal Intelligence Hub",
+  description:
+    "A unified AI legal intelligence hub combining legal developments, source-backed monitoring, and region-structured AI law database coverage.",
+};
+
+export const dynamic = "force-dynamic";
+
+const databaseFilters = [
+  { key: "jurisdiction", label: "Jurisdiction" },
+  { key: "region", label: "Region" },
+  { key: "legalArea", label: "Legal area" },
+  { key: "developmentType", label: "Development type" },
+  { key: "importanceLevel", label: "Importance" },
+  { key: "publicationDate", label: "Date" },
+  { key: "tag", label: "Tag" },
+  { key: "sourceName", label: "Source" },
+];
+
+const newsFilters = [
+  { key: "region", label: "Region" },
+  { key: "jurisdiction", label: "Jurisdiction" },
+  { key: "sourceType", label: "Source type" },
+  { key: "verificationStatus", label: "Verification" },
+  { key: "topic", label: "Topic" },
+  { key: "developmentType", label: "Development" },
+  { key: "date", label: "Date" },
+];
+
+const pageSize = 18;
+
+type HubView = "overview" | "news" | "database";
+
+function parseView(value: string | undefined): HubView {
+  if (value === "news" || value === "database") {
+    return value;
+  }
+  return "overview";
+}
+
+// Uses listDistinctFilterValues() — fetches only lightweight filter columns
+// instead of loading all public updates into memory (B1 optimisation).
+async function collectDatabaseOptions() {
+  return updateRepository.listDistinctFilterValues("public");
+}
+
+async function getPublicNewsItems(afterCursor: import("@/lib/pagination").CursorPosition | null) {
+  const result = await updateRepository.getPublicNewsItemsCursorPage({
+    limit: pageSize,
+    after: afterCursor,
+  });
+
+  return {
+    ...result,
+    items: result.items.map(normalizeNewsItemRecord),
+  };
+}
+
+function collectNewsOptions(items: NormalizedNewsItemRecord[]) {
+  return {
+    region: Array.from(new Set(items.map((item) => item.region))).sort(),
+    jurisdiction: Array.from(new Set(items.map((item) => item.jurisdiction))).sort(),
+    sourceType: Array.from(new Set(items.map((item) => item.sourceType))).sort(),
+    verificationStatus: Array.from(
+      new Set(items.map((item) => item.verificationStatus)),
+    ).sort(),
+    topic: Array.from(new Set(items.flatMap((item) => item.topicTags))).sort(),
+    developmentType: Array.from(
+      new Set(items.map((item) => item.developmentType)),
+    ).sort(),
+    date: Array.from(
+      new Set(items.map((item) => item.publicationDate).filter(Boolean)),
+    ).sort() as string[],
+  };
+}
+
+export default async function AiRegulationPage({
+  searchParams,
+}: {
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
+}) {
+  const params = ((await searchParams) ?? {}) as Record<string, string>;
+  const activeView = parseView(params.view);
+  const afterCursor = parseCursorParam(params.after);
+  const dbAfterCursor = parseCursorParam(params.dbafter);
+
+  const [updatesPage, databaseOptions, newsPage] = await Promise.all([
+    updateRepository.listPublicUpdatesCursorPage(params as RegulatoryUpdateFilters, {
+      limit: pageSize,
+      after: dbAfterCursor,
+    }),
+    collectDatabaseOptions(),
+    getPublicNewsItems(afterCursor),
+  ]);
+
+  const updates = updatesPage.items;
+  const newsOptions = collectNewsOptions(newsPage.items);
+  const newsItems = filterNewsItems(newsPage.items, params);
+
+  const hubTabs = [
+    {
+      label: "Overview",
+      value: "overview",
+      href: "/ai-regulation?view=overview",
+      note: "A single legal-intelligence doorway: latest legal developments, structured database signals, and region-based orientation in one place.",
+    },
+    {
+      label: "AI Law News",
+      value: "news",
+      href: "/ai-regulation?view=news",
+      note: "Recent legal and policy developments, with source, date, and verification posture visible at a glance.",
+    },
+    {
+      label: "Legal Database",
+      value: "database",
+      href: "/ai-regulation?view=database",
+      note: "Human-reviewed, source-backed legal intelligence entries, organized by region, jurisdiction, and legal signal.",
+    },
+  ] as const;
+
+  const europeProfiles = getPriorityEuropeCountryProfiles();
+  const allEuropeProfiles = getEuropeCountryProfiles();
+  const usProfiles = getPriorityUsStateProfiles();
+  const allUsProfiles = getUsStateAiLawProfiles();
+
+  const verifiedNewsCount = newsPage.items.filter(
+    (item) =>
+      item.verificationStatus === "official_verified" ||
+      item.verificationStatus === "corroborated" ||
+      item.verificationStatus === "published_news",
+  ).length;
+  const discoveryNewsCount = newsPage.items.filter(
+    (item) =>
+      item.verificationStatus === "discovery_only" ||
+      item.verificationStatus === "media_reported" ||
+      item.verificationStatus === "needs_official_source",
+  ).length;
+
+  const overviewNewsItems = newsPage.items.slice(0, 5);
+  const overviewUpdates = updates.slice(0, 3);
+
+  // Region-filtered news for portal cards
+  const europeNewsCount = newsPage.items.filter((i) => i.region === "Europe").length;
+  const usNewsCount = newsPage.items.filter(
+    (i) => i.region === "United States" || i.region === "North America",
+  ).length;
+
+  return (
+    <SiteShell className="space-y-10">
+      <section className="space-y-6">
+        <SectionHeading
+          eyebrow="Unified public legal intelligence hub"
+          title="AI legal intelligence, finally readable at a glance."
+          description="A single public hub combining legal developments and the structured AI law database. News, monitor entries, Europe, and United States coverage now sit under one clearer intelligence doorway, while remaining distinct by reliability, region, and legal function."
+          actions={
+            <Link
+              href={activeView === "news" ? "/ai-regulation?view=database" : "/ai-regulation?view=news"}
+              className="text-sm uppercase tracking-[0.16em] text-zinc-800 underline decoration-black/15 underline-offset-4"
+            >
+              {activeView === "news" ? "Open legal database" : "Open legal developments"}
+            </Link>
+          }
+        />
+
+        <IntelligenceHubTabs tabs={[...hubTabs]} activeValue={activeView} />
+
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+          <IntelligenceSignal
+            label="Published legal database items"
+            value={updatesPage.hasMore ? `${updatesPage.limit}+` : String(updatesPage.items.length)}
+            note="Human-reviewed and manually published monitor entries only."
+            tone="positive"
+          />
+          <IntelligenceSignal
+            label="Recent legal developments"
+            value={newsPage.hasMore ? `${newsPage.limit}+` : String(newsPage.items.length)}
+            note="The broader legal developments layer, clearly labeled by source reliability."
+            tone="informative"
+          />
+          <IntelligenceSignal
+            label="Europe baseline"
+            value={`${allEuropeProfiles.length} states`}
+            note="EU and Member State tracking stays structurally separate from U.S. coverage."
+            tone="neutral"
+          />
+          <IntelligenceSignal
+            label="U.S. baseline"
+            value={`${allUsProfiles.length} states`}
+            note="Federal and state-level AI law are grouped into a dedicated U.S. structure."
+            tone="neutral"
+          />
+        </div>
+      </section>
+
+      {activeView === "overview" ? (
+        <>
+          {/* --- Section 1: Latest AI law news (5 items, compact, scannable) --- */}
+          <section className="space-y-4">
+            <div className="flex items-center justify-between gap-4">
+              <SectionHeading
+                eyebrow="Latest AI law news"
+                title="Recent legal developments across all monitored regions"
+              />
+              <Link
+                href="/ai-regulation?view=news"
+                className="shrink-0 text-sm uppercase tracking-[0.16em] text-zinc-600 underline decoration-black/15 underline-offset-4"
+              >
+                All news →
+              </Link>
+            </div>
+
+            {overviewNewsItems.length > 0 ? (
+              <div className="grid gap-3">
+                {overviewNewsItems.map((item) => (
+                  <CompactNewsCard key={item.id} item={item} horizontal />
+                ))}
+              </div>
+            ) : (
+              <Card className="rounded-[1.8rem] border-black/6 bg-white/90 shadow-sm">
+                <CardContent className="p-6">
+                  <div className="flex items-center gap-3">
+                    <span className="h-2 w-2 rounded-full bg-zinc-200" />
+                    <p className="text-sm text-zinc-500">
+                      No public legal developments yet. The intelligence layer is monitoring — source-backed items will appear here once published.
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+          </section>
+
+          {/* --- Section 2: Region portals — Europe + US --- */}
+          <section className="space-y-4">
+            <SectionHeading
+              eyebrow="Regional intelligence"
+              title="Choose a region for in-depth coverage"
+            />
+            <div className="grid gap-5 lg:grid-cols-2">
+              <RegionPortalCard
+                region="europe"
+                title="Europe"
+                description="EU AI Act, European Commission, EU AI Office, EDPB, CJEU, and Member State implementation. Binding law and soft law kept clearly separate."
+                href="/ai-regulation/europe"
+                liveLabel="Europe news"
+                liveCount={europeNewsCount}
+                dbCount={updatesPage.items.length}
+                highlights={europeProfiles.map((p) => ({ label: p.countryName, href: `/ai-regulation/europe/${p.slug}` }))}
+                isLive
+              />
+              <RegionPortalCard
+                region="united-states"
+                title="United States"
+                description="Federal Register, White House, NIST, FTC, EEOC, CFPB, SEC, and 50-state coverage. Federal and state layers remain deliberately separated."
+                href="/ai-regulation/united-states"
+                liveLabel="U.S. news"
+                liveCount={usNewsCount}
+                dbCount={updatesPage.items.length}
+                highlights={usProfiles.map((p) => ({ label: p.stateName, href: `/ai-regulation/united-states/${p.slug}` }))}
+                isLive
+              />
+            </div>
+          </section>
+
+          {/* --- Section 3: Database preview (3 entries) --- */}
+          <section className="space-y-4">
+            <div className="flex items-center justify-between gap-4">
+              <SectionHeading
+                eyebrow="Legal database"
+                title="Latest published monitor entries"
+              />
+              <Link
+                href="/ai-regulation?view=database"
+                className="shrink-0 text-sm uppercase tracking-[0.16em] text-zinc-600 underline decoration-black/15 underline-offset-4"
+              >
+                Full database →
+              </Link>
+            </div>
+            <MotionStagger className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+              {overviewUpdates.length > 0 ? (
+                overviewUpdates.map((update) => (
+                  <UpdateCard
+                    key={update.id}
+                    update={update}
+                    href={`/ai-regulation/${update.id}`}
+                  />
+                ))
+              ) : (
+                <Card className="rounded-[1.8rem] border-black/6 bg-white/90 shadow-sm md:col-span-2 xl:col-span-3">
+                  <CardContent className="p-6">
+                    <p className="text-sm text-zinc-500">
+                      No published database entries yet. The structured legal database stays intentionally empty until a human reviewer approves and manually publishes an entry.
+                    </p>
+                  </CardContent>
+                </Card>
+              )}
+            </MotionStagger>
+          </section>
+
+          {/* --- Section 4: Source posture (compact) --- */}
+          <section className="grid gap-5 lg:grid-cols-[1.1fr_0.9fr]">
+            <Card className="rounded-[2rem] border-black/6 bg-white/90 shadow-[0_18px_50px_rgba(15,15,15,0.04)]">
+              <CardContent className="space-y-4 p-6">
+                <p className="font-mono text-[11px] uppercase tracking-[0.28em] text-zinc-600">
+                  Source posture
+                </p>
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <IntelligenceSignal
+                    label="Officially verified"
+                    value={String(verifiedNewsCount)}
+                    note="Officially confirmed or corroborated items."
+                    tone="positive"
+                  />
+                  <IntelligenceSignal
+                    label="Discovery / media"
+                    value={String(discoveryNewsCount)}
+                    note="Broader signals, clearly labeled as non-authoritative."
+                    tone="warning"
+                  />
+                </div>
+              </CardContent>
+            </Card>
+            <Card className="rounded-[2rem] border-black/6 bg-white/90 shadow-[0_18px_50px_rgba(15,15,15,0.04)]">
+              <CardContent className="p-6">
+                <p className="font-mono text-[11px] uppercase tracking-[0.28em] text-zinc-600">
+                  How to read this hub
+                </p>
+                <LegalIntelligenceLegend />
+              </CardContent>
+            </Card>
+          </section>
+        </>
+      ) : null}
+
+      {activeView === "news" ? (
+        <>
+          <section className="space-y-6">
+            <SectionHeading
+              eyebrow="AI Law News"
+              title="Legal developments, with the source and date visible immediately."
+              description="This desk is meant to be fast to read and hard to misunderstand. Each card foregrounds publication date, source, jurisdiction, and verification posture before you dive deeper."
+            />
+            <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+              <IntelligenceSignal
+                label="News items"
+                value={newsPage.hasMore ? `${newsPage.limit}+` : String(newsPage.items.length)}
+                note="Public legal developments currently visible in the unified hub."
+                tone="informative"
+              />
+              <IntelligenceSignal
+                label="Officially supported"
+                value={String(verifiedNewsCount)}
+                note="Items carrying official support or strong corroboration."
+                tone="positive"
+              />
+              <IntelligenceSignal
+                label="Discovery-led"
+                value={String(discoveryNewsCount)}
+                note="Items surfaced from non-official sources and labeled accordingly."
+                tone="warning"
+              />
+              <IntelligenceSignal
+                label="Regions"
+                value="Europe + U.S."
+                note="The feed stays organized so regional legal context is never blurred."
+                tone="neutral"
+              />
+            </div>
+            <Card className="rounded-[1.9rem] border-black/6 bg-white/85 shadow-[0_18px_50px_rgba(15,15,15,0.04)]">
+              <CardContent className="grid gap-5 p-6 md:grid-cols-3">
+                <div>
+                  <p className="font-mono text-[11px] uppercase tracking-[0.28em] text-zinc-600">
+                    Source first
+                  </p>
+                  <p className="mt-3 text-sm leading-7 text-zinc-700">
+                    Readers should be able to identify the source and the verification posture before treating a development as authority.
+                  </p>
+                </div>
+                <div>
+                  <p className="font-mono text-[11px] uppercase tracking-[0.28em] text-zinc-600">
+                    Date clarity
+                  </p>
+                  <p className="mt-3 text-sm leading-7 text-zinc-700">
+                    Publication date and event date stay distinct so recent reporting is not confused with the underlying legal event.
+                  </p>
+                </div>
+                <div>
+                  <p className="font-mono text-[11px] uppercase tracking-[0.28em] text-zinc-600">
+                    Conversion rule
+                  </p>
+                  <p className="mt-3 text-sm leading-7 text-zinc-700">
+                    News can inform the reader quickly, but only the reviewed database layer should be treated as the final curated monitor.
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+          </section>
+
+          <FilterBar
+            searchParams={params}
+            options={newsOptions}
+            basePath="/ai-regulation"
+            filters={newsFilters}
+            persistentParams={{ view: "news" }}
+          />
+
+          {newsItems.length > 0 ? (
+            <MotionStagger className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+              {newsItems.map((item) => (
+                <NewsCard key={item.id} item={item} />
+              ))}
+            </MotionStagger>
+          ) : (
+            <EmptyFilterState
+              resetHref="/ai-regulation?view=news"
+              hasActiveFilters={hasActiveFilterParams(params, newsFilters.map((f) => f.key))}
+            />
+          )}
+
+          <CursorPaginationControls
+            basePath="/ai-regulation"
+            searchParams={params}
+            nextCursorEncoded={newsPage.nextCursor ? encodeCursor(newsPage.nextCursor) : null}
+            cursorParamKey="after"
+          />
+        </>
+      ) : null}
+
+      {activeView === "database" ? (
+        <>
+          <section className="space-y-6">
+            <SectionHeading
+              eyebrow="Structured legal database"
+              title="The public AI law database, split clearly by region."
+              description="Europe and the United States remain deliberately separated so jurisdiction never gets muddled. Within each region, country and state-level profiles are available as their own subparts."
+            />
+            <div className="grid gap-6 lg:grid-cols-2">
+              <Card className="rounded-[2rem] border-black/6 bg-white/90 shadow-[0_18px_50px_rgba(15,15,15,0.04)]">
+                <CardContent className="space-y-5 p-7">
+                  <div className="flex items-start justify-between gap-4">
+                    <div>
+                      <p className="font-mono text-[11px] uppercase tracking-[0.28em] text-zinc-600">
+                        Europe
+                      </p>
+                      <p className="mt-3 font-display text-3xl font-medium uppercase tracking-[-0.05em] text-zinc-950">
+                        EU framework and Member State profiles
+                      </p>
+                    </div>
+                    <Link
+                      href="/ai-regulation/europe"
+                      className="text-sm uppercase tracking-[0.16em] text-zinc-800 underline decoration-black/15 underline-offset-4"
+                    >
+                      Europe hub
+                    </Link>
+                  </div>
+                  <p className="text-sm leading-7 text-zinc-700">
+                    Priority jurisdictions are available as dedicated subparts, while the Europe hub keeps the timeline, map, and national implementation posture distinct.
+                  </p>
+                  <div className="flex flex-wrap gap-2">
+                    {europeProfiles.map((profile) => (
+                      <Link
+                        key={profile.slug}
+                        href={`/ai-regulation/europe/${profile.slug}`}
+                        className="rounded-full border border-black/8 bg-zinc-50 px-3 py-1.5 text-xs uppercase tracking-[0.16em] text-zinc-700 transition hover:bg-zinc-100"
+                      >
+                        {profile.countryName}
+                      </Link>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="rounded-[2rem] border-black/6 bg-white/90 shadow-[0_18px_50px_rgba(15,15,15,0.04)]">
+                <CardContent className="space-y-5 p-7">
+                  <div className="flex items-start justify-between gap-4">
+                    <div>
+                      <p className="font-mono text-[11px] uppercase tracking-[0.28em] text-zinc-600">
+                        United States
+                      </p>
+                      <p className="mt-3 font-display text-3xl font-medium uppercase tracking-[-0.05em] text-zinc-950">
+                        Federal layer and state-by-state subparts
+                      </p>
+                    </div>
+                    <Link
+                      href="/ai-regulation/united-states"
+                      className="text-sm uppercase tracking-[0.16em] text-zinc-800 underline decoration-black/15 underline-offset-4"
+                    >
+                      U.S. hub
+                    </Link>
+                  </div>
+                  <p className="text-sm leading-7 text-zinc-700">
+                    Priority state profiles act as readable entry points into the broader federal and state architecture.
+                  </p>
+                  <div className="flex flex-wrap gap-2">
+                    {usProfiles.map((profile) => (
+                      <Link
+                        key={profile.slug}
+                        href={`/ai-regulation/united-states/${profile.slug}`}
+                        className="rounded-full border border-black/8 bg-zinc-50 px-3 py-1.5 text-xs uppercase tracking-[0.16em] text-zinc-700 transition hover:bg-zinc-100"
+                      >
+                        {profile.stateName}
+                      </Link>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </section>
+
+          <FilterBar
+            searchParams={params}
+            options={databaseOptions}
+            basePath="/ai-regulation"
+            filters={databaseFilters}
+            persistentParams={{ view: "database" }}
+          />
+
+          {updates.length > 0 ? (
+            <Card className="rounded-[2rem] border-black/6 bg-white/70 shadow-[0_18px_50px_rgba(15,15,15,0.04)]">
+              <CardContent className="grid gap-6 p-6 md:grid-cols-2 xl:grid-cols-3">
+                {updates.map((update) => (
+                  <UpdateCard
+                    key={update.id}
+                    update={update}
+                    href={`/ai-regulation/${update.id}`}
+                  />
+                ))}
+              </CardContent>
+            </Card>
+          ) : (
+            <EmptyFilterState
+              resetHref="/ai-regulation?view=database"
+              hasActiveFilters={hasActiveFilterParams(params, databaseFilters.map((f) => f.key))}
+              title={!dbAfterCursor ? "No published database entries yet" : undefined}
+              body={!dbAfterCursor
+                ? "The structured legal database stays intentionally empty until a human reviewer approves and manually publishes an entry."
+                : undefined}
+            />
+          )}
+
+          <CursorPaginationControls
+            basePath="/ai-regulation"
+            searchParams={params}
+            nextCursorEncoded={updatesPage.nextCursor ? encodeCursor(updatesPage.nextCursor) : null}
+            cursorParamKey="dbafter"
+          />
+        </>
+      ) : null}
+    </SiteShell>
+  );
+}

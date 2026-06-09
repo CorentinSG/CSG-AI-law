@@ -1,0 +1,39 @@
+import { describe, expect, it } from "vitest";
+
+import {
+  getFeaturedResearchEntry,
+  getPublicResearchEntries,
+  getPublicResearchEntryBySlug,
+  getRelatedResearchEntries,
+} from "@/content/research";
+
+describe("research content registry", () => {
+  it("exposes published and forthcoming entries publicly but hides drafts", () => {
+    const entries = getPublicResearchEntries();
+
+    expect(entries.length).toBeGreaterThanOrEqual(6);
+    expect(entries.some((entry) => entry.status === "draft")).toBe(false);
+    expect(entries.some((entry) => entry.status === "forthcoming")).toBe(true);
+    expect(entries.some((entry) => entry.status === "published")).toBe(true);
+  });
+
+  it("returns null for draft slugs in the public resolver", () => {
+    expect(getPublicResearchEntryBySlug("from-monitoring-to-meaning")).toBeNull();
+  });
+
+  it("returns the configured featured public entry", () => {
+    const featured = getFeaturedResearchEntry();
+
+    expect(featured?.slug).toBe("emerging-architecture-ai-regulation");
+  });
+
+  it("returns related entries without including the current article", () => {
+    const featured = getFeaturedResearchEntry();
+    expect(featured).not.toBeNull();
+
+    const related = getRelatedResearchEntries(featured!, 3);
+
+    expect(related.length).toBeGreaterThan(0);
+    expect(related.some((entry) => entry.slug === featured!.slug)).toBe(false);
+  });
+});

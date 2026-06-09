@@ -1,0 +1,383 @@
+import type { Metadata } from "next";
+import Link from "next/link";
+
+import { updateRepository } from "@/agents/ai-regulation/processors/updateRepository";
+import { LiveLegalIntelligencePanel } from "@/components/site/live-legal-intelligence-panel";
+import { SectionHeading } from "@/components/site/section-heading";
+import { UsAiTimeline } from "@/components/site/us-ai-timeline";
+import { SiteShell } from "@/components/site/shell";
+import { UsImplementationMap } from "@/components/site/us-implementation-map";
+import { UpdateCard } from "@/components/site/update-card";
+import { Card, CardContent } from "@/components/ui/card";
+import { getSourceVerificationRecordsForHub } from "@/content/ai-regulation/source-verification";
+import {
+  usFederalBaselineEntries,
+  usFederalTimelineEntries,
+} from "@/content/ai-regulation/us-ai-legal-baseline";
+import {
+  usAiCaseLawEntries,
+  usAiCaseLawSources,
+} from "@/content/ai-regulation/us-ai-case-law";
+import { usAiSoftLawBaseline } from "@/content/ai-regulation/us-ai-soft-law";
+import {
+  filterRegionalLiveItems,
+  getRegionalLastCheckedAt,
+  getRegionalSourceActivity,
+} from "@/content/ai-regulation/live-intelligence";
+import { normalizeNewsItemRecord } from "@/content/ai-regulation/news";
+import { usStateMapStatuses } from "@/content/ai-regulation/us-map";
+import { getPriorityUsStateProfiles } from "@/content/ai-regulation/us-state-ai-law-baseline";
+
+export const metadata: Metadata = {
+  title: "United States Hub",
+  description:
+    "United States AI regulation monitoring across federal agencies, state-level regulators, official soft-law sources, and human-reviewed legal intelligence entries.",
+};
+
+export const dynamic = "force-dynamic";
+
+const unitedStatesFocusCards = [
+  {
+    title: "What changed federally",
+    body: "Start here for Federal Register, White House, EEOC, CFPB, NIST, and other official federal signals that can affect AI governance or legal obligations.",
+  },
+  {
+    title: "Which states are moving",
+    body: "State activity stays separated from the federal layer so enacted law, drafts, and regulator action are not blurred together.",
+  },
+  {
+    title: "What to watch next",
+    body: "Soft law, standards, and agency frameworks remain visible, but clearly labeled so they are not mistaken for binding law.",
+  },
+];
+
+export default async function UnitedStatesAiRegulationPage() {
+  const [updates, newsItems, sources, sourceHealthChecks] = await Promise.all([
+    updateRepository.listPublicUpdates({ region: "North America" }),
+    updateRepository.getPublicNewsItems(30),
+    updateRepository.getSources(),
+    updateRepository.getSourceHealthChecks(undefined, 30),
+  ]);
+
+  const verificationRecords = getSourceVerificationRecordsForHub("united-states", {
+    sources,
+    sourceHealthChecks,
+  });
+  const priorityStates = getPriorityUsStateProfiles();
+  const regionalLiveItems = filterRegionalLiveItems(
+    newsItems.map(normalizeNewsItemRecord),
+    "North America",
+  ).slice(0, 6);
+  const liveLastCheckedAt = getRegionalLastCheckedAt(
+    sourceHealthChecks,
+    sources,
+    "North America",
+  );
+  const liveActivity = getRegionalSourceActivity(
+    sourceHealthChecks,
+    sources,
+    "North America",
+  );
+
+  return (
+    <SiteShell className="space-y-10">
+      {/* --- Header: brief, editorial, actionable --- */}
+      <section className="space-y-4">
+        <div className="flex items-start justify-between gap-4">
+          <SectionHeading
+            eyebrow="United States intelligence hub"
+            title="United States"
+            description="What changed federally, which states are moving, what is official law versus governance posture."
+          />
+          <Link
+            href="/ai-regulation/europe"
+            className="mt-2 shrink-0 text-sm uppercase tracking-[0.16em] text-zinc-600 underline decoration-black/15 underline-offset-4"
+          >
+            Europe hub →
+          </Link>
+        </div>
+
+        {/* Compact focus cards */}
+        <div className="grid gap-3 sm:grid-cols-3">
+          {unitedStatesFocusCards.map((card) => (
+            <div
+              key={card.title}
+              className="rounded-[1.5rem] border border-black/6 bg-white/80 p-4 shadow-sm"
+            >
+              <p className="font-mono text-[9px] uppercase tracking-[0.24em] text-zinc-500">{card.title}</p>
+              <p className="mt-2 text-sm leading-6 text-zinc-700">{card.body}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* --- Section 1: Live intelligence FIRST --- */}
+      <section className="space-y-5">
+        <div className="flex items-center gap-3">
+          <span className="relative flex h-2.5 w-2.5">
+            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-red-400 opacity-60" />
+            <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-red-500" />
+          </span>
+          <p className="font-mono text-[10px] uppercase tracking-[0.28em] text-red-600">
+            Live U.S. monitoring
+          </p>
+        </div>
+        <LiveLegalIntelligencePanel
+          title="Latest U.S. AI law developments"
+          description="Federal and state-level AI law signals. Source, date, and verification posture stay visible immediately."
+          regionLabel="United States"
+          items={regionalLiveItems}
+          lastCheckedAt={liveLastCheckedAt}
+          activity={liveActivity}
+        />
+      </section>
+
+      <section className="space-y-6">
+        <SectionHeading
+          eyebrow="Federal baseline"
+          title="Federal AI legal architecture"
+          description="A verified source baseline for federal rulemaking, agencies, standards, and congressional monitoring posture. Binding effect is not inferred unless item-level source review supports it."
+        />
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+          {usFederalBaselineEntries.slice(0, 6).map((entry) => (
+            <Card
+              key={entry.id}
+              className="rounded-[1.8rem] border-black/6 bg-white shadow-[0_14px_40px_rgba(15,15,15,0.04)]"
+            >
+              <CardContent className="space-y-3 p-6">
+                <p className="font-display text-2xl font-medium uppercase tracking-[-0.05em] text-zinc-950">
+                  {entry.shortTitle}
+                </p>
+                <p className="font-mono text-[11px] uppercase tracking-[0.24em] text-zinc-500">
+                  {entry.authorityType.replaceAll("_", " ")} / {entry.bindingStatus.replaceAll("_", " ")}
+                </p>
+                <p className="text-sm leading-7 text-zinc-700">{entry.summary}</p>
+                <a
+                  href={entry.officialSourceUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-sm uppercase tracking-[0.16em] text-zinc-900 underline decoration-black/15 underline-offset-4"
+                >
+                  Official source
+                </a>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </section>
+
+      <section className="space-y-6">
+        <SectionHeading
+          eyebrow="U.S. timeline"
+          title="U.S. AI law source timeline"
+          description="Baseline milestones currently reflect verified official-source checkpoints rather than a complete history of U.S. AI law."
+        />
+        <Card className="rounded-[2rem] border-white/10 bg-[linear-gradient(180deg,rgba(12,18,28,0.96),rgba(17,24,39,0.9))] text-white shadow-[0_24px_70px_rgba(15,23,42,0.22)]">
+          <CardContent className="p-6 md:p-8">
+            <UsAiTimeline entries={usFederalTimelineEntries} />
+          </CardContent>
+        </Card>
+      </section>
+
+      <section className="space-y-6">
+        <SectionHeading
+          eyebrow="State-by-state baseline"
+          title="U.S. state AI law map"
+          description="All 50 states plus D.C. are represented. States are not labeled as enacted unless official source review supports that status."
+        />
+        <Card className="rounded-[2rem] border-white/10 bg-[linear-gradient(180deg,rgba(10,16,28,0.94),rgba(17,24,39,0.88))] text-white shadow-[0_24px_70px_rgba(15,23,42,0.22)]">
+          <CardContent className="space-y-6 p-6 md:p-8">
+            <UsImplementationMap states={usStateMapStatuses} />
+            <div className="grid gap-3 md:grid-cols-3">
+              <div className="rounded-[1.3rem] border border-white/10 bg-white/[0.05] p-4 text-sm text-zinc-300">
+                <p className="font-mono text-[11px] uppercase tracking-[0.26em] text-zinc-500">
+                  Needs review
+                </p>
+                <p className="mt-2">
+                  No state-specific AI law status is asserted without official-source review.
+                </p>
+              </div>
+              <div className="rounded-[1.3rem] border border-white/10 bg-white/[0.05] p-4 text-sm text-zinc-300">
+                <p className="font-mono text-[11px] uppercase tracking-[0.26em] text-zinc-500">
+                  Official source required
+                </p>
+                <p className="mt-2">
+                  Discovery trackers can generate leads, but official state sources control.
+                </p>
+              </div>
+              <div className="rounded-[1.3rem] border border-white/10 bg-white/[0.05] p-4 text-sm text-zinc-300">
+                <p className="font-mono text-[11px] uppercase tracking-[0.26em] text-zinc-500">
+                  Published-only monitor
+                </p>
+                <p className="mt-2">
+                  Drafts, discovery leads, and unverified state claims remain private.
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </section>
+
+      <section className="space-y-6">
+        <SectionHeading
+          eyebrow="Priority states"
+          title="First-wave state profiles"
+          description="The first state-source pass focuses on California, Colorado, New York, Illinois, Texas, Connecticut, Utah, Virginia, Washington, and Maryland."
+        />
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+          {priorityStates.map((profile) => (
+            <Card
+              key={profile.slug}
+              className="rounded-[1.8rem] border-black/6 bg-white shadow-[0_14px_40px_rgba(15,15,15,0.04)]"
+            >
+              <CardContent className="space-y-3 p-6">
+                <p className="font-display text-2xl font-medium uppercase tracking-[-0.05em] text-zinc-950">
+                  {profile.stateName}
+                </p>
+                <p className="font-mono text-[11px] uppercase tracking-[0.24em] text-zinc-500">
+                  {profile.aiLawStatusLabel} / confidence {profile.confidenceLevel}
+                </p>
+                <p className="text-sm leading-7 text-zinc-700">{profile.publicSummary}</p>
+                <Link
+                  href={`/ai-regulation/united-states/${profile.slug}`}
+                  className="inline-block text-sm uppercase tracking-[0.16em] text-zinc-900 underline decoration-black/15 underline-offset-4"
+                >
+                  Open state profile
+                </Link>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </section>
+
+      <section className="grid gap-6 lg:grid-cols-[1fr_1fr]">
+        <div className="space-y-6">
+          <SectionHeading
+            eyebrow="Case law architecture"
+            title="U.S. case-law sources"
+            description="Case-law sources are prepared without inventing cases, holdings, procedural posture, or facts."
+          />
+          <div className="space-y-4">
+            {usAiCaseLawSources.map((source) => (
+              <Card
+                key={source.id}
+                className="rounded-[1.8rem] border-black/6 bg-white shadow-[0_14px_40px_rgba(15,15,15,0.04)]"
+              >
+                <CardContent className="space-y-3 p-6">
+                  <p className="font-display text-2xl font-medium uppercase tracking-[-0.05em] text-zinc-950">
+                    {source.name}
+                  </p>
+                  <p className="text-sm leading-7 text-zinc-700">{source.note}</p>
+                  <a
+                    href={source.sourceUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="text-sm uppercase tracking-[0.16em] text-zinc-900 underline decoration-black/15 underline-offset-4"
+                  >
+                    Source reference
+                  </a>
+                </CardContent>
+              </Card>
+            ))}
+            <Card className="rounded-[1.8rem] border-black/6 bg-white shadow-[0_14px_40px_rgba(15,15,15,0.04)]">
+              <CardContent className="p-6 text-sm leading-7 text-zinc-700">
+                Verified U.S. AI case entries currently published from this baseline:{" "}
+                {usAiCaseLawEntries.length}. The system prefers no case entry over an
+                unsupported case summary.
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+        <div className="space-y-6">
+          <SectionHeading
+            eyebrow="Soft law and standards"
+            title="U.S. governance frameworks"
+            description="Soft law, technical standards, and agency guidance are classified separately from binding law."
+          />
+          <div className="space-y-4">
+            {usAiSoftLawBaseline.slice(0, 5).map((entry) => (
+              <Card
+                key={entry.id}
+                className="rounded-[1.8rem] border-black/6 bg-white shadow-[0_14px_40px_rgba(15,15,15,0.04)]"
+              >
+                <CardContent className="space-y-3 p-6">
+                  <p className="font-display text-2xl font-medium uppercase tracking-[-0.05em] text-zinc-950">
+                    {entry.title}
+                  </p>
+                  <p className="font-mono text-[11px] uppercase tracking-[0.24em] text-zinc-500">
+                    {entry.authorityType.replaceAll("_", " ")} / {entry.bindingStatus.replaceAll("_", " ")}
+                  </p>
+                  <p className="text-sm leading-7 text-zinc-700">{entry.summary}</p>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="space-y-6">
+        <SectionHeading
+          eyebrow="Official source posture"
+          title="U.S. monitoring sources"
+          description="This hub uses only official public sources that are reachable from the scan runtime. Runtime-blocked official endpoints are kept inactive rather than treated as healthy."
+        />
+        <div className="grid gap-4 lg:grid-cols-2">
+          {verificationRecords.map((record) => (
+            <Card
+              key={record.sourceId}
+              className="rounded-[1.8rem] border-black/6 bg-white shadow-[0_14px_40px_rgba(15,15,15,0.04)]"
+            >
+              <CardContent className="space-y-3 p-6">
+                <div className="flex flex-wrap gap-2">
+                  <span className="rounded-full border border-black/8 bg-zinc-50 px-2.5 py-1 text-[11px] uppercase tracking-[0.24em] text-zinc-700">
+                    {record.sourceId}
+                  </span>
+                  <span className="rounded-full border border-black/8 bg-zinc-50 px-2.5 py-1 text-[11px] uppercase tracking-[0.24em] text-zinc-700">
+                    {record.responseStatus ?? "n/a"}
+                  </span>
+                  <span className="rounded-full border border-black/8 bg-zinc-50 px-2.5 py-1 text-[11px] uppercase tracking-[0.24em] text-zinc-700">
+                    {record.recommendation}
+                  </span>
+                </div>
+                <a
+                  href={record.sourceUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="block text-sm text-zinc-800 underline decoration-black/15 underline-offset-4"
+                >
+                  {record.sourceUrl}
+                </a>
+                <p className="text-sm leading-7 text-zinc-700">{record.note}</p>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </section>
+
+      <section className="space-y-6">
+        <SectionHeading
+          eyebrow="Published monitor items"
+          title="Latest published U.S. entries"
+          description="Only human-reviewed and manually published items are shown. Accessibility problems at a source do not override the publication workflow."
+        />
+        <Card className="rounded-[2rem] border-black/6 bg-white/70 shadow-[0_18px_50px_rgba(15,15,15,0.04)]">
+          <CardContent className="grid gap-6 p-6 md:grid-cols-2 xl:grid-cols-3">
+            {updates.length > 0 ? (
+              updates.slice(0, 6).map((update) => (
+                <UpdateCard
+                  key={update.id}
+                  update={update}
+                  href={`/ai-regulation/${update.id}`}
+                />
+              ))
+            ) : (
+              <div className="rounded-[1.6rem] border border-black/6 bg-white p-6 text-sm leading-7 text-zinc-700 xl:col-span-3">
+                No published U.S.-specific entries are currently available. Monitoring and review can continue without exposing unpublished material.
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </section>
+    </SiteShell>
+  );
+}

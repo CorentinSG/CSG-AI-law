@@ -1,0 +1,7 @@
+{
+  "title_selector": "h1.node__title, h1",
+  "date_selector": "time[datetime], .submitted, .date",
+  "body_selector": ".field--name-body, .node--type-press-release .field--name-body",
+  "pdf_link_selector": "a[href*='.pdf']",
+  "notes": "FTC press releases and statements. Domain: ftc.gov/news-events"
+}

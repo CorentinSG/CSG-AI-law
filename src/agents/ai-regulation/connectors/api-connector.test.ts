@@ -1,0 +1,246 @@
+import { afterEach, describe, expect, it, vi } from "vitest";
+
+import { ApiConnector } from "@/agents/ai-regulation/connectors/api-connector";
+import type { RegulationSource } from "@/agents/ai-regulation/types";
+import { resetEnvForTests } from "@/lib/env";
+
+function makeSource(overrides: Partial<RegulationSource>): RegulationSource {
+  return {
+    id: "src-api-test",
+    name: "Test API Source",
+    jurisdiction: "France",
+    region: "Europe",
+    country: "France",
+    sourceUrl: "https://example.test/api",
+    sourceType: "API",
+    scanFrequency: "daily",
+    active: true,
+    lastScannedAt: null,
+    notes: "test",
+    reliabilityLevel: "high",
+    preferredExtractionMethod: "api",
+    config: {},
+    createdAt: "2026-06-02T00:00:00.000Z",
+    updatedAt: "2026-06-02T00:00:00.000Z",
+    ...overrides,
+  };
+}
+
+afterEach(() => {
+  vi.restoreAllMocks();
+  delete process.env.NEWSAPI_API_KEY;
+  delete process.env.JUDILIBRE_API_KEYID;
+  process.env.ADMIN_AUTH_SECRET = "test-admin-secret-1234567890";
+  resetEnvForTests();
+});
+
+process.env.ADMIN_AUTH_SECRET = "test-admin-secret-1234567890";
+
+describe("ApiConnector", () => {
+  it("returns a safe zero-result warning when NewsAPI credentials are missing", async () => {
+    const connector = new ApiConnector();
+    const result = await connector.scan(
+      makeSource({
+        id: "src-fr-newsapi-ai",
+        sourceUrl: "https://newsapi.org/v2/everything?q=ai",
+        config: { apiProvider: "newsapi" },
+        sourceType: "media_source",
+        reliabilityLevel: "medium",
+      }),
+    );
+
+    expect(result.items).toHaveLength(0);
+    expect(result.zeroResultsReason).toContain("NEWSAPI_API_KEY");
+  });
+
+  it("maps NewsAPI discovery articles into candidate items", async () => {
+    process.env.NEWSAPI_API_KEY = "test-key";
+    resetEnvForTests();
+    vi.spyOn(globalThis, "fetch").mockResolvedValue(
+      new Response(
+        JSON.stringify({
+          articles: [
+            {
+              source: { id: "reuters", name: "Reuters" },
+              title: "France AI Act and CNIL developments",
+              description: "A legal update involving the AI Act and CNIL.",
+              content: "Further details on AI regulation in France.",
+              url: "https://example.com/reuters-ai",
+              publishedAt: "2026-06-02T10:00:00.000Z",
+            },
+          ],
+        }),
+        { status: 200, headers: { "Content-Type": "application/json" } },
+      ) as Response,
+    );
+
+    const connector = new ApiConnector();
+    const result = await connector.scan(
+      makeSource({
+        id: "src-fr-newsapi-ai",
+        sourceUrl: "https://newsapi.org/v2/everything?q=ai",
+        config: { apiProvider: "newsapi" },
+        sourceType: "media_source",
+        reliabilityLevel: "medium",
+      }),
+    );
+
+    expect(result.items).toHaveLength(1);
+    expect(result.items[0]?.title).toContain("France AI Act");
+  });
+
+  it("filters out AI articles without a legal or regulatory angle", async () => {
+    process.env.NEWSAPI_API_KEY = "test-key";
+    resetEnvForTests();
+    vi.spyOn(globalThis, "fetch").mockResolvedValue(
+      new Response(
+        JSON.stringify({
+          articles: [
+            {
+              source: { id: "tech", name: "Tech Outlet" },
+              title: "New artificial intelligence model released for consumers",
+              description: "A product launch with no legal angle.",
+              content: "This article discusses model features and benchmarks.",
+              url: "https://example.com/product-ai",
+              publishedAt: "2026-06-02T10:00:00.000Z",
+            },
+          ],
+        }),
+        { status: 200, headers: { "Content-Type": "application/json" } },
+      ) as Response,
+    );
+
+    const connector = new ApiConnector();
+    const result = await connector.scan(
+      makeSource({
+        id: "src-eu-major-press-newsapi-ai",
+        sourceUrl: "https://newsapi.org/v2/everything?q=ai",
+        config: {
+          apiProvider: "newsapi",
+          allowedDomains: ["reuters.com"],
+        },
+        sourceType: "media_source",
+        reliabilityLevel: "medium",
+      }),
+    );
+
+    expect(result.items).toHaveLength(0);
+    expect(result.zeroResultsReason).toContain("AI-plus-legal-regulatory");
+  });
+
+  it("keeps only major-press legal AI articles from allowed domains", async () => {
+    process.env.NEWSAPI_API_KEY = "test-key";
+    resetEnvForTests();
+    vi.spyOn(globalThis, "fetch").mockResolvedValue(
+      new Response(
+        JSON.stringify({
+          articles: [
+            {
+              source: { id: "reuters", name: "Reuters" },
+              title: "EU AI Act regulation enters new enforcement phase",
+              description: "A legal update on artificial intelligence regulation in Europe.",
+              content: "Commission guidance and enforcement posture are discussed.",
+              url: "https://www.reuters.com/world/europe/eu-ai-act-regulation-update-2026-06-02/",
+              publishedAt: "2026-06-02T10:00:00.000Z",
+            },
+            {
+              source: { id: "blog", name: "Random Blog" },
+              title: "AI regulation commentary",
+              description: "Commentary post",
+              content: "Blog discussion of AI law.",
+              url: "https://randomblog.example/ai-law",
+              publishedAt: "2026-06-02T11:00:00.000Z",
+            },
+          ],
+        }),
+        { status: 200, headers: { "Content-Type": "application/json" } },
+      ) as Response,
+    );
+
+    const connector = new ApiConnector();
+    const result = await connector.scan(
+      makeSource({
+        id: "src-eu-major-press-newsapi-ai",
+        name: "Europe AI legal major press (NewsAPI)",
+        sourceUrl: "https://newsapi.org/v2/everything?q=ai",
+        config: {
+          apiProvider: "newsapi",
+          allowedDomains: ["reuters.com", "politico.eu"],
+        },
+        sourceType: "media_source",
+        reliabilityLevel: "medium",
+      }),
+    );
+
+    expect(result.items).toHaveLength(1);
+    expect(result.items[0]?.url).toContain("reuters.com");
+  });
+
+  it("maps Judilibre decisions when a KeyId is available", async () => {
+    process.env.JUDILIBRE_API_KEYID = "test-key-id";
+    resetEnvForTests();
+    vi.spyOn(globalThis, "fetch").mockResolvedValue(
+      new Response(
+        JSON.stringify({
+          results: [
+            {
+              id: "decision-1",
+              title: "Arrêt relatif à l'intelligence artificielle",
+              summary: "Résumé de la décision.",
+              text: "Texte de la décision.",
+              number: "24-10.001",
+              formation: "Chambre sociale",
+              jurisdiction: "Cour de cassation",
+              date: "2026-05-20",
+              files: [{ type: "text/html", url: "https://example.test/decision-1" }],
+            },
+          ],
+        }),
+        { status: 200, headers: { "Content-Type": "application/json" } },
+      ) as Response,
+    );
+
+    const connector = new ApiConnector();
+    const result = await connector.scan(
+      makeSource({
+        id: "src-fr-judilibre-ai",
+        name: "Judilibre AI-related decisions",
+        sourceUrl: "https://api.piste.gouv.fr/cassation/judilibre/v1.0/search?query=intelligence%20artificielle",
+        config: { apiProvider: "judilibre" },
+        sourceType: "court_database",
+      }),
+    );
+
+    expect(result.items).toHaveLength(1);
+    expect(result.items[0]?.metadata?.number).toBe("24-10.001");
+  });
+
+  it("returns a non-fatal warning when Judilibre rejects the request", async () => {
+    process.env.JUDILIBRE_API_KEYID = "invalid-key";
+    resetEnvForTests();
+    vi.spyOn(globalThis, "fetch").mockResolvedValue(
+      new Response(JSON.stringify({ message: "bad request" }), {
+        status: 400,
+        headers: { "Content-Type": "application/json" },
+      }) as Response,
+    );
+
+    const connector = new ApiConnector();
+    const result = await connector.scan(
+      makeSource({
+        id: "src-fr-judilibre-ai",
+        name: "Judilibre AI-related decisions",
+        sourceUrl: "https://api.piste.gouv.fr/cassation/judilibre/v1.0/search?query=intelligence%20artificielle",
+        config: { apiProvider: "judilibre" },
+        sourceType: "court_database",
+      }),
+    );
+
+    expect(result.items).toHaveLength(0);
+    expect(result.errors).toHaveLength(0);
+    expect(result.warnings[0]).toContain(
+      "Judilibre official-case-law discovery could not be queried safely",
+    );
+    expect(result.zeroResultsReason).toContain("400");
+  });
+});

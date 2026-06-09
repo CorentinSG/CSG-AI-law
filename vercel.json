@@ -1,0 +1,25 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "crons": [
+    {
+      "path": "/api/cron/ai-regulation-scan",
+      "schedule": "0 12 * * *"
+    },
+    {
+      "path": "/api/cron/ai-regulation-france-scan",
+      "schedule": "30 12 * * *"
+    },
+    {
+      "path": "/api/cron/ai-regulation-spain-scan",
+      "schedule": "0 13 * * *"
+    },
+    {
+      "path": "/api/cron/ai-regulation-italy-scan",
+      "schedule": "30 13 * * *"
+    },
+    {
+      "path": "/api/cron/ai-regulation-germany-scan",
+      "schedule": "0 14 * * *"
+    }
+  ]
+}
