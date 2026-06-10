@@ -75,6 +75,58 @@ Multi-agent project. Always update this file after meaningful changes. Include: 
 | 2026-06-10 | T-RT0A P-RT0 repo hygiene | Removed `french-louisiana-map-video/` (216 files) + stray root dev artifacts (codex/next logs, preview pngs, tmp html), untracked `.runtime/`, extended `.gitignore` (`*.log`, `.codex-*`, `.tmp-*`, `.runtime/`, preview dirs), fixed stale T-ING1 paragraph in master context §7. Committed as `4d34443`. No src changes |
 | 2026-06-10 | T-RT0B P-RT0 cron coverage | Added NL/BE/AT/SE/IE crons to `vercel.json` (10 daily crons, 12:00–16:30, 30-min stagger). Ingestion cron deferred (route auth out of `vercel.json only` scope). Hobby plan may cap cron count |
 | 2026-06-10 | T-RT0C P-RT0 public-page ISR | 5 public `/ai-regulation/*` + `/standards` pages → `revalidate=300` (ISR); hub + `[id]` kept dynamic (searchParams / unpublish-immediacy, both documented inline). Build-verified render modes; 397 tests |
+| 2026-06-10 | T-RT1C admin freshness dashboard | `AdminFreshnessPanel` + pure `summarizeRuntimeHealth` (3 tests) on the main admin page: per-source SLO badges (stale/degraded/healthy/inactive), stale+degraded attention list, high-priority-at-risk note; consumes T-RT1A `getSourceRuntimeHealthSummaries()` (UI only, no logic duplication). 405 tests |
+| 2026-06-10 | T-RT1A runtime source health backend | Added `sourceRuntimeHealth.ts` backend summaries from `source_health_checks`, scan logs, scan jobs, and ingestion logs; cadence-aware thresholds from country registries with scan-frequency fallback; derived `healthy/degraded/stale/inactive` state and consecutive failure counts; 402 tests |
+
+---
+
+## Phase: Runtime Source Health Backend (T-RT1A) - Codex 1
+
+**Date**: 2026-06-10
+**Agent**: Codex 1
+**Status**: Completed | 402 tests | lint 0 errors | typecheck clean | build clean
+
+### Problem solved
+
+The new P-RT plan needed a backend source-health contract before any admin freshness dashboard work. We already persisted source-health checks, scan logs, scan jobs, and ingestion logs, but there was no single reusable source-level summary turning those signals into an operational state.
+
+### Design
+
+- Added `src/agents/ai-regulation/sourceRuntimeHealth.ts` with:
+  - `buildSourceRuntimeHealthSummaries(...)` for deterministic pure summarization
+  - `getSourceRuntimeHealthSummaries(...)` for repository-backed loading
+- Each summary now includes:
+  - derived state: `healthy` / `degraded` / `stale` / `inactive`
+  - freshness status
+  - cadence thresholds
+  - consecutive failure count
+  - latest success / failure / scan-job timestamps
+  - latest parser / response signals
+  - human-readable reasons
+- Thresholds come from the existing country monitoring registries when available; non-registry sources fall back to scan-frequency defaults so the contract also covers sources like NY Courts.
+- Added one small repository wrapper in `updateRepository.ts` so the helper can read ingestion logs cleanly.
+
+### Files changed
+
+```text
+src/agents/ai-regulation/sourceRuntimeHealth.ts
+src/agents/ai-regulation/sourceRuntimeHealth.test.ts
+src/agents/ai-regulation/processors/updateRepository.ts
+```
+
+### Verification
+
+`npm test` | `npm run lint` | `npm run typecheck` | `npm run build`
+
+### Limitations
+
+- This slice creates the backend contract only; no admin UI consumes it yet.
+- Failure streaks are derived from recent persisted attempts, so extremely long histories still depend on repository read limits.
+- No alerting is sent yet; that remains for `T-RT1B`.
+
+### Next step
+
+- `T-RT1C`: have the admin freshness dashboard consume `getSourceRuntimeHealthSummaries(...)` instead of rebuilding cadence/failure logic in the UI.
 
 ---
 

@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { updateRepository } from "@/agents/ai-regulation/processors/updateRepository";
+import { getSourceRuntimeHealthSummaries } from "@/agents/ai-regulation/sourceRuntimeHealth";
 import { summarizeAiPlanning } from "@/app/admin/ai-regulation/ai-planning";
 import {
   buildEuropeVerificationSummary,
@@ -29,6 +30,7 @@ import { AdminReviewQueue } from "./_components/AdminReviewQueue";
 import { AdminSourcePanel } from "./_components/AdminSourcePanel";
 import { AdminCoveragePanel } from "./_components/AdminCoveragePanel";
 import { AdminAiPanel } from "./_components/AdminAiPanel";
+import { AdminFreshnessPanel } from "./_components/AdminFreshnessPanel";
 
 export const dynamic = "force-dynamic";
 const reviewQueuePageSize = 18;
@@ -68,7 +70,7 @@ export default async function AdminAiRegulationPage({
   const params = ((await searchParams) ?? {}) as Record<string, string>;
   const page = parsePageParam(params.page, 1);
   const leadsPage = parsePageParam(params.leadsPage, 1);
-  const [updatesPage, sources, scanLogs, processingLogs, rawItems, scanJobs, options, sourceHealthChecks, discoveryLeadsPage] = await Promise.all([
+  const [updatesPage, sources, scanLogs, processingLogs, rawItems, scanJobs, options, sourceHealthChecks, discoveryLeadsPage, runtimeHealth] = await Promise.all([
     updateRepository.listUpdatesPage(params, {
       limit: reviewQueuePageSize,
       offset: getOffsetFromPage(page, reviewQueuePageSize),
@@ -88,6 +90,7 @@ export default async function AdminAiRegulationPage({
       limit: discoveryLeadsPageSize,
       offset: getOffsetFromPage(leadsPage, discoveryLeadsPageSize),
     }),
+    getSourceRuntimeHealthSummaries(),
   ]);
   const updates = updatesPage.items;
   const aiPlanning = summarizeAiPlanning(processingLogs, rawItems);
@@ -193,6 +196,10 @@ export default async function AdminAiRegulationPage({
           tone="informative"
           theme="dark"
         />
+      </section>
+
+      <section>
+        <AdminFreshnessPanel summaries={runtimeHealth} />
       </section>
 
       <section className="grid gap-6 lg:grid-cols-[1fr_1fr]">
