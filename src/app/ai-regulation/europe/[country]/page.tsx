@@ -11,6 +11,7 @@ import { getIrelandLiveLegalIntelligenceData } from "@/agents/ai-regulation/irel
 import { getItalyLiveLegalIntelligenceData } from "@/agents/ai-regulation/italyLegalNewsAgent";
 import { getSpainLiveLegalIntelligenceData } from "@/agents/ai-regulation/spainLegalNewsAgent";
 import { updateRepository } from "@/agents/ai-regulation/processors/updateRepository";
+import { groupCountryIntelligenceSourcesByFamily } from "@/agents/ai-regulation/utils/country-intelligence-view";
 import { IntelligenceSignal } from "@/components/site/intelligence-signal";
 import { LiveLegalIntelligencePanel } from "@/components/site/live-legal-intelligence-panel";
 import { getFranceAiIntelligenceSnapshot } from "@/content/ai-regulation/france-ai-intelligence";
@@ -135,7 +136,7 @@ export default async function EuropeCountryPage({
   const profile = getEuropeCountryProfileBySlug(country);
   if (!profile) notFound();
 
-  const [updates, franceLiveData, germanyLiveData, spainLiveData, italyLiveData, netherlandsLiveData, belgiumLiveData, austriaLiveData, swedenLiveData, irelandLiveData] =
+  const [updates, franceLiveData, germanyLiveData, spainLiveData, italyLiveData, netherlandsLiveData, belgiumLiveData, austriaLiveData, swedenLiveData, irelandLiveData, dbCountry, dbCountrySources] =
     await Promise.all([
     updateRepository.listPublicUpdates(),
     profile.slug === "france" ? getFranceLiveLegalIntelligenceData(6) : Promise.resolve(null),
@@ -147,6 +148,8 @@ export default async function EuropeCountryPage({
     profile.slug === "austria" ? getAustriaLiveLegalIntelligenceData(6) : Promise.resolve(null),
     profile.slug === "sweden" ? getSwedenLiveLegalIntelligenceData(6) : Promise.resolve(null),
     profile.slug === "ireland" ? getIrelandLiveLegalIntelligenceData(6) : Promise.resolve(null),
+    updateRepository.getCountryIntelligenceBySlug(profile.slug),
+    updateRepository.listCountryIntelligenceSources(`country-${profile.slug}`),
     ]);
   const franceSnapshot =
     profile.slug === "france" ? getFranceAiIntelligenceSnapshot() : null;
@@ -174,6 +177,40 @@ export default async function EuropeCountryPage({
 
   const statusMeta = europeImplementationStatusTaxonomy[profile.implementationStatus];
 
+  // F8: prefer the editable DB editorial fields when present, falling back to
+  // the verified TypeScript baseline. Blank/empty DB fields keep the baseline,
+  // so an admin edit on /admin/ai-regulation/countries reflects here without a
+  // redeployment, and structural content is never lost.
+  const publicSummary = dbCountry?.publicSummary ?? profile.publicSummary;
+  const editorialNotes = dbCountry?.editorialNotes
+    ? dbCountry.editorialNotes
+        .split(/\r?\n/)
+        .map((entry) => entry.trim())
+        .filter(Boolean)
+    : profile.editorialNotes;
+  const missingSourceWarnings =
+    dbCountry?.missingSourceWarnings && dbCountry.missingSourceWarnings.length > 0
+      ? dbCountry.missingSourceWarnings
+      : profile.missingSourceWarnings;
+
+  // F8C: render the three source families from the normalized
+  // `country_intelligence_sources` table when present, falling back per family
+  // to the verified TypeScript baseline. The DB rows were seeded from the TS
+  // layer, so the displayed content is identical until an admin edits sources.
+  const dbSources = groupCountryIntelligenceSourcesByFamily(dbCountrySources);
+  const nationalAIRegulationSources =
+    dbSources.regulation.length > 0
+      ? dbSources.regulation
+      : profile.nationalAIRegulationSources;
+  const nationalCaseLawSources =
+    dbSources.caseLaw.length > 0
+      ? dbSources.caseLaw
+      : profile.nationalCaseLawSources;
+  const nationalSoftLawSources =
+    dbSources.softLaw.length > 0
+      ? dbSources.softLaw
+      : profile.nationalSoftLawSources;
+
   return (
     <SiteShell className="space-y-10">
       <section className="space-y-5">
@@ -188,7 +225,7 @@ export default async function EuropeCountryPage({
           <SectionHeading
             eyebrow="Country profile"
             title={profile.countryName}
-            description={profile.publicSummary}
+            description={publicSummary}
           />
         </div>
         <div className="flex flex-wrap gap-2">
@@ -2658,7 +2695,7 @@ export default async function EuropeCountryPage({
                 Missing source warnings
               </p>
               <ul className="mt-2 space-y-2">
-                {profile.missingSourceWarnings.map((item) => (
+                {missingSourceWarnings.map((item) => (
                   <li key={item}>{item}</li>
                 ))}
               </ul>
@@ -2668,7 +2705,7 @@ export default async function EuropeCountryPage({
                 Editorial notes
               </p>
               <ul className="mt-2 space-y-2">
-                {profile.editorialNotes.map((item) => (
+                {editorialNotes.map((item) => (
                   <li key={item}>{item}</li>
                 ))}
               </ul>
@@ -2680,17 +2717,17 @@ export default async function EuropeCountryPage({
       <section className="grid gap-6 lg:grid-cols-3">
         <SourceList
           title="National AI regulation sources"
-          items={profile.nationalAIRegulationSources}
+          items={nationalAIRegulationSources}
           emptyMessage="No official national AI regulation source verified yet."
         />
         <SourceList
           title="Case-law source posture"
-          items={profile.nationalCaseLawSources}
+          items={nationalCaseLawSources}
           emptyMessage="No official national case-law source verified yet."
         />
         <SourceList
           title="Soft law and guidance sources"
-          items={profile.nationalSoftLawSources}
+          items={nationalSoftLawSources}
           emptyMessage="No official soft-law or guidance source verified yet."
         />
       </section>

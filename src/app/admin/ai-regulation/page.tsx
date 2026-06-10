@@ -156,6 +156,12 @@ export default async function AdminAiRegulationPage({
         >
           Open source diagnostics
         </Link>
+        <Link
+          href="/admin/ai-regulation/countries"
+          className="ml-3 inline-flex rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-zinc-100 transition hover:bg-white/10"
+        >
+          Edit country profiles
+        </Link>
       </section>
 
       <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">

@@ -66,7 +66,141 @@ Multi-agent project. Always update this file after meaningful changes. Include: 
 | 2026-06-08 | T-IE1 Ireland monitoring | Ireland is the 9th first-wave EU country with a full live monitoring stack; DPC as primary anchor (EDPB member, lead SA for Big Tech EU establishments); 3 scan profiles + cron route + page sections; 363 tests |
 | 2026-06-08 | F7 migration 008 | `008_review_transition_rpc.sql` applied to remote Supabase via SQL Editor — `transition_review_status` RPC now live |
 | 2026-06-08 | F8A country_intelligence seed | `scripts/seed-country-intelligence.ts` created; `seed-supabase.ts` extended; migration 006 applied + authority_type constraint broadened (added soft_law/case_law_source/guidance_source); 27 profiles + 77 sources upserted to remote Supabase |
-| 2026-06-08 | T-ING1 Firecrawl + Scrapling ingestion pipeline | Dual ingestion engine: Firecrawl (Node.js SDK, broad discovery) + Scrapling Python sidecar worker (targeted official sources) + hybrid mode; dedup (URL normalization + SHA-256 content hash); AI classify → admin review → never auto-publish; INGESTION_SECRET-protected `/api/ingestion/run`; migration 009 (pending Supabase apply); 8 seed sources; 384 tests |
+| 2026-06-08 | T-ING1 Firecrawl + Scrapling ingestion pipeline | Dual ingestion engine: Firecrawl (Node.js SDK, broad discovery) + Scrapling Python sidecar worker (targeted official sources) + hybrid mode; dedup (URL normalization + SHA-256 content hash); AI classify → admin review → never auto-publish; INGESTION_SECRET-protected `/api/ingestion/run`; migration 009 applied to Supabase; 8 sources seeded; 384 tests |
+| 2026-06-09 | Production deployment | GitHub CorentinSG/CSG-AI-law (private); Vercel csg-ai-law.vercel.app; Framework Preset: Next.js (corrected from "Other"); env vars: APP_DATA_MODE=supabase, Supabase URL/keys, ADMIN_AUTH_SECRET, CRON_SECRET, INGESTION_SECRET, FIRECRAWL_API_KEY, AI_ENABLE_PROCESSING=false; migration 009 applied; 8 ingestion sources seeded |
+| 2026-06-09 | F8B country profile admin editor + public override | Admin editor `/admin/ai-regulation/countries` (+`[slug]` form, `saveCountryProfileEditorial` action, 4 tests) edits country_intelligence editorial fields (publicSummary, implementationNotes, editorialNotes, missingSourceWarnings, reviewStatus, reviewedBy); public country page overrides publicSummary/editorialNotes/missingSourceWarnings from DB when present, TS baseline otherwise; structural content unchanged; 388 tests |
+| 2026-06-09 | F8C-1 source lists from DB | Public country page renders the 3 source families from `country_intelligence_sources` (helper `groupCountryIntelligenceSourcesByFamily` + 4 tests; groups by authorityType, sorts by source-id index, strips family note prefix), per-family TS fallback; no schema change; deterministic id fetch in existing Promise.all; 392 tests |
+| 2026-06-10 | F8C-2 admin source CRUD | Country `[slug]` editor gains add/update/remove of official sources (`addCountrySource`/`updateCountrySource`/`removeCountrySource` on `replaceCountryIntelligenceSources`, 5 tests); two server actions per row via `formAction`; new ids `country-source-<slug>-custom-<n>`; sources now live-editable. Build gotcha fixed: `'use server'` files export async only. 397 tests |
+
+---
+
+## Phase: Admin Source CRUD per Country (F8C-2) — Claude Code
+
+**Date**: 2026-06-10
+**Agent**: Claude Code
+**Status**: Completed | 397 tests | lint 0 errors | typecheck clean | build clean
+
+### Problem solved
+
+After F8C-1 the public page reads source lists from the DB, but they could only change via re-running the seed (which mirrors TS). F8C-2 makes the official sources live-editable from the admin, completing the editable read/write loop for the largest structural block.
+
+### Design
+
+- Three server actions in `countries/actions.ts`, all admin-gated, all built on the existing `replaceCountryIntelligenceSources(countryId, sources[])`: load the full set → apply one change → write the whole set back.
+  - `addCountrySource`: appends; id = `country-source-<slug>-custom-<n>` where n = max existing trailing index + 1; `publicAccessible: true`, `lastCheckedAt: null` defaults; ignores blank title/URL.
+  - `updateCountrySource`: maps the set, replacing only the row whose id matches; no-op if id unknown.
+  - `removeCountrySource`: filters the target id out; no-op if absent.
+- Editor `[slug]/page.tsx` "Official sources" section: each source is a form with Save (`action`) + Remove (`formAction`) — two server actions on one form — plus an "Add a source" form. authorityType select is labelled with the public list each value maps to. Note prefix (`family:`) stripped for display, stored plain.
+- `parseTriState` (yes/no/unknown → boolean/null), `parseResponseStatus`, `parseAuthorityType` (validates against the allowed set) guard inputs.
+
+### Files changed
+
+```
+src/app/admin/ai-regulation/countries/actions.ts          — addCountrySource/updateCountrySource/removeCountrySource + helpers
+src/app/admin/ai-regulation/countries/[slug]/page.tsx     — Official sources section (per-source forms + add form)
+src/app/admin/ai-regulation/countries/actions.test.ts     — 5 new tests (append/preserve, blank-ignore, targeted update, unknown no-op, targeted remove)
+```
+
+### Verification
+
+`npm test` (397 passed; default 5s per-test timeout flakes under OneDrive I/O load — `--test-timeout=30000` gives a clean run; failures were timeouts, never assertions) | `npm run lint` (0 errors) | `npm run typecheck` (clean) | `npm run build` (clean).
+
+### Gotcha
+
+`'use server'` modules may only export async functions. A non-async `export const countrySourceAuthorityTypes` there failed the build with "Failed to collect page data for /admin/ai-regulation/countries/[slug]". Fixed by making the constant non-exported (the editor page has its own labelled option list).
+
+### Guardrails preserved
+
+Admin-gated; no auto-publish; no fabrication (admin authors sources — exactly the intended human-in-the-loop); source hierarchy semantics intact (authorityType drives the family). Public page still falls back to TS per family if the DB set is emptied.
+
+### Limitations / next steps
+
+- **F8C-3**: migrate the remaining scalar/array structural fields (authority maps, implementation measures, per-category notes, latest updates, status labels) to an expanded schema; only then can `europe-member-state-implementation.ts` be retired.
+
+---
+
+## Phase: Source-Family Lists Rendered from DB (F8C-1) — Claude Code
+
+**Date**: 2026-06-09
+**Agent**: Claude Code
+**Status**: Completed | 392 tests | lint 0 errors | typecheck clean | build clean
+
+### Problem solved
+
+F8C aims to finish moving country content off the TypeScript file. The largest structural block is the three source-family lists (national AI regulation, case-law, soft-law). These were already seeded into `country_intelligence_sources` (77 rows) by F8A, but the public page still rendered them from the TS arrays. This slice switches the read path for those lists to the DB — the single biggest structural chunk — with zero schema change and zero content-loss risk.
+
+### Design
+
+- New pure helper `groupCountryIntelligenceSourcesByFamily(sources)` reconstructs the three families from flat DB rows using `authorityType` (`case_law_source` → case-law, `guidance_source` → soft-law, everything else → regulation; note `soft_law` source-type stays in the regulation family — only the explicit `guidance_source` marker is soft-law).
+- Within each family, sorts by the trailing 1-based index in the source id (`country-source-<slug>-<family>-<n>`) so order matches the authored TS order regardless of repository return order.
+- Strips the seed's `family:` note prefix and normalizes nullable institution/runtimeAccessible/responseStatus to match the `SourceList` view-model exactly.
+- Page fetches `listCountryIntelligenceSources(\`country-${slug}\`)` in the existing Promise.all — the country id is deterministic (`country-<slug>`), so no extra round trip / waterfall.
+- Per-family fallback: if the DB has no sources for a family, that family renders from the TS baseline. DB rows were seeded from TS, so output is identical until an admin edits sources.
+
+### Files changed
+
+```
+src/agents/ai-regulation/utils/country-intelligence-view.ts       — NEW helper + view-model types
+src/agents/ai-regulation/utils/country-intelligence-view.test.ts  — NEW: 4 tests (family routing, index ordering, note/null normalization, empty)
+src/app/ai-regulation/europe/[country]/page.tsx                   — fetch + group DB sources; 3 SourceList usages now DB-backed with TS fallback
+```
+
+### Verification
+
+`npm test` (392 passed) | `npm run lint` (0 errors) | `npm run typecheck` (clean) | `npm run build` (clean).
+
+### Guardrails preserved
+
+Source hierarchy and verified content unchanged (DB seeded from the same verified TS); no fabrication; no auto-publish; per-family TS fallback prevents any content loss.
+
+### Limitations / next steps
+
+- **F8C-2**: admin source CRUD (add/edit/remove/toggle sources per country) via `replaceCountryIntelligenceSources` so the source lists become live-editable like the editorial fields.
+- **F8C-3**: migrate remaining scalar/array structural fields (authority maps, implementation measures, per-category notes, latest updates, status labels) to an expanded schema; only then can the TS file be retired.
+
+---
+
+## Phase: Country Profile Admin Editor + Public Editorial Override (F8B) — Claude Code
+
+**Date**: 2026-06-09
+**Agent**: Claude Code
+**Status**: Completed | 388 tests | lint 0 errors | typecheck clean | build clean
+
+### Problem solved
+
+F8 aims to move country profiles off the 2100-line `europe-member-state-implementation.ts` into editable DB storage so profiles can change without a redeployment. F8A seeded the normalized `country_intelligence` table, but nothing could edit it (the DB just mirrored the TS), and the public pages still read TS exclusively. A naive "read everything from DB" swap was rejected: the DB table is a flattened subset and would have dropped ~70% of the rich legal content (authority maps, case-law/soft-law source lists, per-category notes, latest updates) from public pages — a content-loss regression.
+
+### Design
+
+Scoped, non-destructive slice:
+- **Admin editor** edits only the mutable EDITORIAL fields (publicSummary, implementationNotes, editorialNotes, missingSourceWarnings, reviewStatus, reviewedBy). Structural fields are read-only and preserved from the existing row.
+- **Public page override**: the country page prefers DB editorial values when present and falls back to the verified TS baseline when the DB field is blank/empty. Structural content always renders from TS. Net effect: an admin edit reflects live, nothing is ever lost.
+- Reversible mapping reused from the seed: editorialNotes array ⇄ `\n`-joined string; missingSourceWarnings array ⇄ array; publicSummary string ⇄ string.
+
+### Files changed
+
+```
+src/app/admin/ai-regulation/countries/page.tsx          — NEW: index list of all country profiles (review status, last reviewed, edit link)
+src/app/admin/ai-regulation/countries/[slug]/page.tsx   — NEW: per-country editor form + read-only context panel
+src/app/admin/ai-regulation/countries/actions.ts        — NEW: saveCountryProfileEditorial server action (admin-gated, upsertCountryIntelligence)
+src/app/admin/ai-regulation/countries/actions.test.ts   — NEW: 4 tests (merge persist, invalid status fallback, blank→baseline, missing row throws)
+src/app/ai-regulation/europe/[country]/page.tsx         — DB editorial override added to existing Promise.all + 3 render sites
+src/app/admin/ai-regulation/page.tsx                    — "Edit country profiles" discoverability link
+```
+
+### Verification
+
+`npm test` (388 passed) | `npm run lint` (0 errors) | `npm run typecheck` (clean) | `npm run build` (clean).
+
+### Guardrails preserved
+
+Editorial text only; no auto-publish; no fabrication (admin authors the text); structural legal content (authority designations, source hierarchy) untouched; `/admin/*` protected by `src/proxy.ts` middleware; server action gated by `assertAdminServerActionAccess()`.
+
+### Limitations / next steps
+
+- Metadata `description` (in `generateMetadata`) still uses the TS publicSummary; only the rendered body reflects DB edits. Low-impact; can be wired later if needed.
+- Editor covers Europe country_intelligence rows (the only region seeded). 
+- **F8C (optional)**: migrate structural content (authority maps, source lists, per-category notes, latest updates) into an expanded DB schema for a full TS retirement.
 
 ---
 
@@ -570,11 +704,146 @@ npm run typecheck clean
 npm run build     /api/ingestion/run registered ✓
 ```
 
-### Pending (user action required)
+### Completed (were pending, now done — 2026-06-09)
 
-- Apply migration `src/db/migrations/009_ingestion_pipeline.sql` to remote Supabase via SQL Editor
-- Add `INGESTION_SECRET` (min 16 chars) to Vercel/prod environment variables
-- Add `FIRECRAWL_API_KEY` to Vercel/prod environment variables for Firecrawl/hybrid sources
+- Migration 009 applied to remote Supabase — made idempotent with `drop policy if exists` before `create policy`
+- `INGESTION_SECRET` set on Vercel
+- `FIRECRAWL_API_KEY` set on Vercel
+- `npm run seed:ingestion-sources` run — 8 sources created in production DB
+- Site deployed: https://csg-ai-law.vercel.app
+
+### Still pending
+
 - Optionally add `SCRAPLING_WORKER_URL` if running the Python sidecar remotely
-- Run `npm run seed:ingestion-sources` after migration applied to register the 8 initial sources
-- Start Python worker for Scrapling sources: `cd scrapling_worker && pip install -r requirements.txt && python worker.py`
+- Deploy Scrapling Python worker: `cd scrapling_worker && pip install -r requirements.txt && python worker.py`
+
+---
+
+## Phase: Production Deployment — GitHub + Vercel — Claude Code
+
+**Date**: 2026-06-09  
+**Agent**: Claude Code  
+**Status**: Completed
+
+### What was done
+
+Complete first production deployment of the project to GitHub + Vercel, plus all post-T-ING1 production setup steps.
+
+#### 1. Code fixes (4 typecheck errors from T-ING1)
+
+| Error | Root cause | Fix |
+|-------|-----------|-----|
+| `id` not in `RawRegulatoryItemInput` | `RawRegulatoryItemInput = Omit<..., "id" \| "createdAt" \| "updatedAt">` | Removed `id: randomUUID()` in orchestrator; removed `id: "raw-test-001"` / `id: "raw-dedup-001"` in tests |
+| `duplicateOf` missing | Required field in `RawRegulatoryItemInput` | Added `duplicateOf: null` to all three `createRawRegulatoryItem` call sites |
+| `IngestionSource` cast in route.ts | Type removed from orchestrator exports | Changed `source as IngestionSource` to plain `source` |
+| Unused imports | `vi`, `scrapeUrl`, `IngestionLog` | Removed all three |
+
+#### 2. Migration 009 — idempotency fix
+
+- First attempt failed: `policy "service_role_all_ingestion_logs" already exists` (partial prior run)
+- Fix: added `drop policy if exists "service_role_all_ingestion_logs" on ingestion_logs;` before the `create policy` line in `src/db/migrations/009_ingestion_pipeline.sql`
+- Applied successfully via Supabase SQL Editor
+
+#### 3. `sourceToInsert` mapper fix
+
+`src/db/supabase-mappers.ts` — the 4 new migration 009 columns were missing from `sourceToInsert`. Added:
+
+```typescript
+ingestion_method: source.ingestionMethod,
+source_category: source.sourceCategory,
+scrapling_config: source.scraplingConfig,
+crawl_root_url: source.crawlRootUrl,
+```
+
+Also added these 4 columns to `legacyUnsupportedSourceColumns` in `supabase-repository.ts` so they are stripped safely when falling back to a pre-migration-009 schema.
+
+#### 4. Seed script — dotenv fix
+
+`scripts/seed-ingestion-sources.ts` — `import "dotenv/config"` reads `.env`, not `.env.local`. Changed to:
+
+```typescript
+import { config } from "dotenv";
+config({ path: ".env.local" });
+```
+
+Also: `npm install dotenv` (package was missing).
+
+#### 5. Seed run — 8 sources created in production
+
+```
+npm run seed:ingestion-sources
+```
+
+Sources: `eur-lex-new-acts`, `edpb-news`, `ai-office-docs`, `cnil-actualites`, `ico-guidance`, `nist-ai-publications`, `bafin-digital-finance`, `dpc-news`
+
+#### 6. GitHub + Vercel
+
+- GitHub repo: `CorentinSG/CSG-AI-law` (private) — https://github.com/CorentinSG/CSG-AI-law
+- Git was re-initialized inside the project folder. The first push had git root at the parent `CSG Law/` folder; all files were nested under a subdirectory, preventing Vercel from detecting Next.js. Corrected with a force push from the correct root.
+- Vercel project: `csg-ai-law` — https://csg-ai-law.vercel.app
+- **Framework Preset issue**: initial detect was "Other" (because of the wrong git root push). All URLs returned `404: NOT_FOUND` at infra level even though the build compiled all 104+ routes. Fixed by changing Framework Settings → "Next.js" and redeploying.
+
+#### 7. Environment variables set on Vercel
+
+| Variable | Purpose | Notes |
+|----------|---------|-------|
+| `APP_DATA_MODE` | `supabase` | Switches repository from memory to Supabase |
+| `NEXT_PUBLIC_SUPABASE_URL` | Supabase project URL | Public — exposed to browser |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase anon/public key | Public — exposed to browser; RLS controls access |
+| `SUPABASE_SERVICE_ROLE_KEY` | Supabase service role key | Server-only — bypasses RLS; used in API routes + cron |
+| `ADMIN_AUTH_SECRET` | Admin panel password | Protects all `/admin/*` routes; must be ≥ 32 chars |
+| `CRON_SECRET` | Cron route authentication | Protects all `/api/cron/*` routes; sent as `Authorization: Bearer <token>` header by Vercel cron scheduler |
+| `INGESTION_SECRET` | Ingestion API authentication | Protects `/api/ingestion/run`; **distinct** from CRON_SECRET and ADMIN_AUTH_SECRET |
+| `FIRECRAWL_API_KEY` | Firecrawl Node.js SDK key | Required for `firecrawl` and `hybrid` ingestion methods |
+| `AI_ENABLE_PROCESSING` | `false` | Keeps OpenAI processing disabled; default off — do not change unless deliberately enabling AI classify |
+| `SCRAPLING_WORKER_URL` | *(not yet set)* | URL of the Flask Scrapling sidecar; required for `scrapling` and `hybrid` sources |
+
+**Vercel project settings:**
+
+| Setting | Value |
+|---------|-------|
+| Project name | `csg-ai-law` |
+| Framework Preset | **Next.js** (was incorrectly "Other" on first deploy — caused 404 on all routes) |
+| Root Directory | *(empty — project is at git root)* |
+| Build Command | *(default: `next build`)* |
+| Output Directory | *(default: `.next`)* |
+| Node.js version | 22.x |
+| Region | iad1 (US East) |
+| Production branch | `main` |
+
+#### 8. npm packages added
+
+`@mendable/firecrawl-js`, `dotenv`
+
+### Files changed
+
+```
+src/agents/ingestion/ingestionOrchestrator.ts   — removed id/IngestionLog/scrapeUrl; added duplicateOf: null
+src/agents/ingestion/ingestion.test.ts          — removed id fields; added duplicateOf: null; removed unused vi import
+src/app/api/ingestion/run/route.ts              — removed IngestionSource cast
+src/db/migrations/009_ingestion_pipeline.sql   — added drop policy if exists for idempotency
+src/db/supabase-mappers.ts                     — added ingestion columns to sourceToInsert
+src/db/repositories/supabase-repository.ts     — added migration 009 columns to legacyUnsupportedSourceColumns
+scripts/seed-ingestion-sources.ts              — dotenv config({ path: ".env.local" })
+package.json                                   — @mendable/firecrawl-js + dotenv
+```
+
+### Verification
+
+```
+npm test          384 tests ✓
+npm run lint      0 errors
+npm run typecheck clean
+npm run build     104+ routes compiled ✓
+```
+
+### Known limitations
+
+- Scrapling Python sidecar not yet deployed — `scrapling` and `hybrid` ingestion methods non-operational until `SCRAPLING_WORKER_URL` is set and the Flask worker is running
+- `/api/ingestion/run` live but not yet smoke-tested in production
+
+### Next steps
+
+1. Deploy Scrapling Python worker (VPS, Railway, Fly.io) and set `SCRAPLING_WORKER_URL` on Vercel
+2. Smoke-test `/api/ingestion/run` with a `firecrawl`-method source
+3. Monitor `ingestion_logs` table in Supabase for first run results

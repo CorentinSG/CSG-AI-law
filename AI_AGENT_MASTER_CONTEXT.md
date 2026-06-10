@@ -2,28 +2,30 @@
 
 Project: `c-saint-girons-ai-law-intelligence` — C. Saint-Girons, Esq | AI Law & Legal Intelligence
 Purpose: fast-start machine context for AI agents resuming work. Repository code is the final authority over this file.
-Last synchronized: 2026-06-08 (T-ING1 Firecrawl + Scrapling dual ingestion pipeline complete — 384 tests; T-IE1 Ireland live monitoring stack complete; F7 migration 008 applied; F8A country_intelligence seed applied to remote Supabase — 27 profiles + 77 sources; broader F8 read-path migration still open)
+Last synchronized: 2026-06-09 (T-ING1 ingestion pipeline in production — migration 009 applied, 8 sources seeded, Vercel deployment live at csg-ai-law.vercel.app; production setup complete: GitHub CorentinSG/CSG-AI-law, Vercel csg-ai-law.vercel.app, Framework Preset corrected to Next.js, all env vars set)
 
 ---
 
 ## 1. Active Operating Context
 
-**Current state (2026-06-08):**
-- Test suite: 384 tests | lint | typecheck | build — all green
+**Current state (2026-06-09):**
+- Test suite: 397 tests | lint | typecheck | build — all green
+- **Production deployment**: site live at https://csg-ai-law.vercel.app — GitHub repo CorentinSG/CSG-AI-law (private); Vercel project csg-ai-law; Framework Preset: Next.js; env vars set: APP_DATA_MODE=supabase, NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY, SUPABASE_SERVICE_ROLE_KEY, ADMIN_AUTH_SECRET, CRON_SECRET, INGESTION_SECRET, FIRECRAWL_API_KEY, AI_ENABLE_PROCESSING=false; SCRAPLING_WORKER_URL not yet set
 - 9 EU countries with full live monitoring stack: FR, DE, ES, IT, NL, BE, AT, SE, IE
 - 1 EU country with first-wave profile only (no live stack): PL
 - Scan runtime: P-C3 complete — queue-drain semantics, optimistic claim, lease heartbeat, blockedByRunningJobs guard, local worker, structured blocker ownership summaries
 - Admin: discovery_leads backend + admin UX + pagination complete (P-C1, P-C2, T-C1/C2 all done)
+- **T-ING1 live**: migration 009 applied to Supabase; 8 ingestion sources seeded; `/api/ingestion/run` live (INGESTION_SECRET-protected); Firecrawl sources operational; Scrapling sidecar not yet deployed (scrapling/hybrid methods require Python worker)
 - **F1 in progress**: public monitor `/ai-regulation` uses keyset (cursor-based) pagination on news/database tabs, and backend cursor primitives now exist for `scan_jobs` + `discovery_leads`; broader admin/server pagination migration is still open
-- **F8 in progress**: normalized `country_intelligence` storage now exists with Europe-derived seed fallback, but public/admin country pages still read the TS profile layer directly
+- **F8 in progress**: normalized `country_intelligence` storage seeded to Supabase; **F8B done** — admin editor at `/admin/ai-regulation/countries` edits editorial fields, public page overrides publicSummary/editorialNotes/missingSourceWarnings from DB. **F8C-1 done** — public page renders the three source-family lists from `country_intelligence_sources` (grouped via `groupCountryIntelligenceSourcesByFamily`), per-family TS fallback. **F8C-2 done** — admin source CRUD (add/update/remove per country via `replaceCountryIntelligenceSources`) in the `[slug]` editor. Still TS-only: authority maps, implementation measures, per-category notes, latest updates, status labels (F8C-3)
 - Open: F-series roadmap below
 
 **Open F-series roadmap (priority order):**
-- **T-ING1** ✓ — Firecrawl + Scrapling dual ingestion pipeline complete (384 tests); migration 009 pending Supabase apply; INGESTION_SECRET + FIRECRAWL_API_KEY needed in prod env
+- **T-ING1** ✓ — Firecrawl + Scrapling dual ingestion pipeline complete and in production (384 tests); migration 009 applied; 8 sources seeded; INGESTION_SECRET + FIRECRAWL_API_KEY set on Vercel; Scrapling Python sidecar not yet deployed (scrapling/hybrid sources non-operational until deployed)
 - **F5e** ✓ — Ireland is now the 9th first-wave EU country with a full live monitoring stack (T-IE1 done)
 - **F1** — Broader cursor-based pagination migration (public hub and heavy backend surfaces partially migrated; many admin/server surfaces still offset/page-number)
 - **F7** ✓ — `008_review_transition_rpc.sql` applied to remote Supabase (2026-06-08, confirmed Success)
-- **F8** — Move `europe-member-state-implementation.ts` (~2100+ lines) to DB-backed storage — **F8A done**: 27 country_intelligence + 77 source rows seeded to remote Supabase (2026-06-08); read-path migration (pages read from DB instead of TS) still open
+- **F8** — Move `europe-member-state-implementation.ts` (~2100+ lines) to DB-backed storage — **F8A done**: 27 country_intelligence + 77 source rows seeded (2026-06-08). **F8B done**: admin editorial editor + public-page editorial override. **F8C-1 done** (2026-06-09): public page renders the three source-family lists from `country_intelligence_sources` (per-family TS fallback). **F8C-2 done**: admin source CRUD (`addCountrySource`/`updateCountrySource`/`removeCountrySource` built on `replaceCountryIntelligenceSources`) in the `[slug]` editor — sources are now live-editable. Remaining: **F8C-3** migrate scalar/array structural fields (authority maps, measures, per-category notes, latest updates, status labels) to an expanded schema for full TS retirement
 - **F6** — Upstash Redis rate limiting (env vars wired; in-memory fallback active)
 - **F3** — Fully detached production worker (scan:worker-local exists; not yet distributed service)
 
@@ -97,7 +99,7 @@ This is a law-firm site AND a private/admin legal monitoring system. The AI Regu
 `/` | `/contact` | `/research` | `/research/[slug]` | `/standards` | `/ai-regulation` | `/ai-regulation/[id]` | `/ai-regulation/europe` | `/ai-regulation/europe/[country]` | `/ai-regulation/united-states` | `/ai-regulation/united-states/[state]` | `/news` | `/news/[slug]` | `/robots.txt` | `/sitemap.xml`
 
 ### Admin routes
-`/admin/ai-regulation` | `/admin/ai-regulation/[id]` | `/admin/ai-regulation/sources/[sourceId]` | `/admin/ai-regulation/news` | `/admin/ai-regulation/data-quality`
+`/admin/ai-regulation` | `/admin/ai-regulation/[id]` | `/admin/ai-regulation/sources/[sourceId]` | `/admin/ai-regulation/news` | `/admin/ai-regulation/data-quality` | `/admin/ai-regulation/countries` | `/admin/ai-regulation/countries/[slug]`
 
 ### Key UX rules
 - Nav order: Home → AI Law Hub → Europe → US → Notes → Standards → Contact
@@ -122,7 +124,7 @@ This is a law-firm site AND a private/admin legal monitoring system. The AI Regu
 - 006: `country_intelligence` + `country_intelligence_sources` tables — applied 2026-06-08; constraint fixed post-apply to include `soft_law`, `case_law_source`, `guidance_source`; 27 profiles + 77 sources seeded
 - 007: `discovery_leads` table
 - 008: `transition_review_status` atomic RPC — applied 2026-06-08 (F7 confirmed)
-- 009: **PENDING** — extend `regulation_sources` (ingestion_method, source_category, scrapling_config, crawl_root_url), extend `raw_regulatory_items` (markdown, html_snapshot, content_hash, extraction_method, published_at, fetched_at), add `ingestion_logs` table — apply via Supabase SQL Editor (`src/db/migrations/009_ingestion_pipeline.sql`)
+- 009: applied 2026-06-09 — extend `regulation_sources` (ingestion_method, source_category, scrapling_config, crawl_root_url), extend `raw_regulatory_items` (markdown, html_snapshot, content_hash, extraction_method, published_at, fetched_at), add `ingestion_logs` table; migration was made idempotent with `drop policy if exists` before apply
 
 ### Review and publication workflow
 ```
@@ -259,18 +261,27 @@ These are known and accepted — do not silently "fix" them without understandin
 
 - Scan jobs execute inline after queueing; no detached production worker yet (F3)
 - `discovery_leads` admin/review workflow adoption substantially done but incomplete in edge areas
-- `europe-member-state-implementation.ts` is still the active read source for Europe profiles; normalized `country_intelligence` storage now exists and 27 profiles + 77 sources are seeded to remote Supabase (F8A done), but the read-path migration (pages reading from DB instead of TS) under F8B is still open
+- `europe-member-state-implementation.ts` still holds the SCALAR structural content (authority maps, implementation measures, per-category notes, latest updates, status labels). EDITORIAL fields (F8B) and the three SOURCE-FAMILY lists (F8C-1) render from the DB with per-field/per-family TS fallback, and sources are admin-editable (F8C-2). Scalar structural fields not yet migrated (F8C-3), so the TS file cannot be fully retired yet
 - Findings persistence exists but finding-resolution workflow (resolved/closed state) is incomplete
 - Pagination is mixed: public hub flows and some heavy backend surfaces use cursor pagination, but many admin/server surfaces still use offset/page-number pagination (F1 still open)
 - Migrations 006, 007, 008 all applied to remote Supabase; migration 006 constraint extended post-apply to include `soft_law`, `case_law_source`, `guidance_source`
 - Legifrance runtime: may hit Cloudflare challenge; scan degrades gracefully with explicit zeroResultsReason
 - NY Courts Part 161: HTTP 403 from this environment; parser-ready but runtime-blocked; seed + regression remain active
 - Some filter option collection helpers still derive choices from broad reads (minor optimization pending)
-- Ingestion pipeline (T-ING1): migration 009 not yet applied to remote Supabase; INGESTION_SECRET + FIRECRAWL_API_KEY not yet in prod env; Scrapling Python sidecar (`scrapling_worker/`) not yet deployed; 8 seed sources not yet registered in prod DB
+- Ingestion pipeline (T-ING1): migration 009 applied to remote Supabase; INGESTION_SECRET + FIRECRAWL_API_KEY set in prod env; 8 seed sources registered; `/api/ingestion/run` live and Firecrawl sources operational. Remaining gap: the Scrapling Python sidecar (`scrapling_worker/`) is not yet deployed, so `scrapling`/`hybrid` ingestion methods are non-operational until `SCRAPLING_WORKER_URL` points at a running worker (P-RT2C)
 
 ---
 
 ## 8. Recent Critical Phases
+
+### F8C-2: Admin source CRUD per country (Claude Code, 2026-06-10) — 397 tests
+Country profile editor (`/admin/ai-regulation/countries/[slug]`) gained an "Official sources" section: each stored source is an editable form (title, URL, institution, authority type, runtime accessible, response status, active, note) with Save + Remove buttons (two server actions on one form via `formAction`), plus an "Add a source" form. Three new actions in `countries/actions.ts`: `addCountrySource`, `updateCountrySource`, `removeCountrySource` — all admin-gated, all built on `replaceCountryIntelligenceSources` (load full set → apply single change → write back). New source ids = `country-source-<slug>-custom-<n>` (n = max existing trailing index + 1). authorityType decides the public list (case_law_source → case-law, guidance_source → soft-law, else → regulation). 5 new action tests. NOTE: `'use server'` files may only export async functions — a non-async `export const` there fails the build with "Failed to collect page data"; keep shared constants non-exported or in a separate module.
+
+### F8C-1: Source-family lists rendered from DB (Claude Code, 2026-06-09) — 392 tests
+Public country page now renders the three source families (national AI regulation, case-law, soft-law) from the normalized `country_intelligence_sources` table instead of the TS arrays, with per-family fallback to TS when the DB has no sources for that family. New helper `src/agents/ai-regulation/utils/country-intelligence-view.ts` (`groupCountryIntelligenceSourcesByFamily`, 4 tests): groups DB rows by `authorityType` (`case_law_source` → case-law, `guidance_source` → soft-law, else → regulation), sorts by the trailing index in the source id, strips the `family:` note prefix, normalizes nullable institution/runtimeAccessible/responseStatus. Page fetches `listCountryIntelligenceSources(\`country-${slug}\`)` in the existing Promise.all (deterministic id, no waterfall). DB rows were seeded from TS so display is identical until sources are edited. No schema change, no new migration. Source CRUD (F8C-2) and scalar structural fields (F8C-3) remain.
+
+### F8B: Country profile admin editor + public editorial override (Claude Code, 2026-06-09) — 388 tests
+Admin editor for `country_intelligence` editorial fields. New files: `src/app/admin/ai-regulation/countries/page.tsx` (index list of all profiles), `src/app/admin/ai-regulation/countries/[slug]/page.tsx` (per-country editor form), `src/app/admin/ai-regulation/countries/actions.ts` (`saveCountryProfileEditorial` server action, `assertAdminServerActionAccess`-gated, `upsertCountryIntelligence`), `actions.test.ts` (4 tests). Editable: publicSummary, implementationNotes, editorialNotes (one per line → `\n`-joined), missingSourceWarnings (one per line), reviewStatus, reviewedBy; `lastReviewedAt` refreshed on save. Structural fields (status/confidence/citation/authority maps) are NOT editable — preserved from existing row to prevent drift/content loss. Public page `src/app/ai-regulation/europe/[country]/page.tsx` now fetches `getCountryIntelligenceBySlug(profile.slug)` in the existing Promise.all and overrides publicSummary/editorialNotes/missingSourceWarnings with DB values when present (empty/null DB field → TS baseline). Discoverability link added to main admin page. `/admin/*` auth via `src/proxy.ts` middleware. Guardrails preserved: editorial text only, no auto-publish, no fabrication, structural legal content untouched.
 
 ### T-ING1: Firecrawl + Scrapling dual ingestion pipeline (Claude Code, 2026-06-08) — 384 tests
 New ingestion track distinct from the existing cron/scan pipeline. Sources with `ingestion_method = firecrawl | scrapling | hybrid | existing` are routed through a new orchestrator. Firecrawl (Node.js `@mendable/firecrawl-js`) handles broad discovery; Scrapling Python sidecar (`scrapling_worker/` Flask app on port 8765) handles targeted structured extraction from official pages. Hybrid mode: Firecrawl `mapUrl` discovers links, Scrapling extracts each. URL normalization + SHA-256 content hash deduplication before insert. All items land as `raw_regulatory_items` with `processingStatus: "new"` — never auto-published. `INGESTION_SECRET` bearer token protects `/api/ingestion/run`. New tables/columns via migration 009 (pending remote Supabase apply). 8 EU + US seed sources defined in `src/agents/ingestion/seedSources.ts`. Scrapling worker config in `scrapling_worker/extractors/*.json`.
