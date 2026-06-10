@@ -63,6 +63,14 @@ const existingRow = {
   publicSummary: "Old summary.",
   editorialNotes: "Old note A\nOld note B",
   missingSourceWarnings: ["old warning"],
+  implementationMeasures: ["Measure A"],
+  competentAuthorities: ["CNIL", "ARCOM"],
+  marketSurveillanceAuthorities: ["DGCCRF"],
+  notifyingAuthorities: [],
+  relevantMinistries: ["Ministry of Justice"],
+  nationalAIRegulationNotes: "Regulation notes.",
+  nationalCaseLawNotes: "Case-law notes.",
+  nationalSoftLawNotes: null,
   lastReviewedAt: "2026-06-01T00:00:00.000Z",
   reviewedBy: "seed-profile",
   reviewStatus: "needs_review" as const,
@@ -111,6 +119,10 @@ describe("country profile editorial action", () => {
     expect(input.countryName).toBe("France");
     expect(input.implementationStatus).toBe("competent_authority_designated");
     expect(input.citationQualityStatus).toBe("partial");
+    // Structural content (F8C-3) is preserved through an editorial save.
+    expect(input.competentAuthorities).toEqual(["CNIL", "ARCOM"]);
+    expect(input.implementationMeasures).toEqual(["Measure A"]);
+    expect(input.nationalAIRegulationNotes).toBe("Regulation notes.");
     // Review timestamp refreshed (not the old value).
     expect(input.lastReviewedAt).not.toBe(existingRow.lastReviewedAt);
 

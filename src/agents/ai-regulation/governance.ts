@@ -237,6 +237,16 @@ export interface CountryIntelligence {
   publicSummary?: string | null;
   editorialNotes?: string | null;
   missingSourceWarnings: string[];
+  // Structural content (F8C-3 / migration 010). Authority maps, implementation
+  // measures, and per-category notes previously held only in the TS layer.
+  implementationMeasures: string[];
+  competentAuthorities: string[];
+  marketSurveillanceAuthorities: string[];
+  notifyingAuthorities: string[];
+  relevantMinistries: string[];
+  nationalAIRegulationNotes?: string | null;
+  nationalCaseLawNotes?: string | null;
+  nationalSoftLawNotes?: string | null;
   lastReviewedAt?: string | null;
   reviewedBy?: string | null;
   reviewStatus: CountryReviewStatus;

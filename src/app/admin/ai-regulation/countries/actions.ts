@@ -89,6 +89,15 @@ export async function saveCountryProfileEditorial(formData: FormData) {
     primaryOfficialSourceTitle: existing.primaryOfficialSourceTitle ?? null,
     lastOfficialSourceCheck: existing.lastOfficialSourceCheck ?? null,
     citationQualityStatus: existing.citationQualityStatus,
+    // Structural content preserved from the existing row (edited elsewhere/seed).
+    implementationMeasures: existing.implementationMeasures ?? [],
+    competentAuthorities: existing.competentAuthorities ?? [],
+    marketSurveillanceAuthorities: existing.marketSurveillanceAuthorities ?? [],
+    notifyingAuthorities: existing.notifyingAuthorities ?? [],
+    relevantMinistries: existing.relevantMinistries ?? [],
+    nationalAIRegulationNotes: existing.nationalAIRegulationNotes ?? null,
+    nationalCaseLawNotes: existing.nationalCaseLawNotes ?? null,
+    nationalSoftLawNotes: existing.nationalSoftLawNotes ?? null,
     // Editable editorial fields.
     implementationNotes: optionalText(formData.get("implementationNotes")),
     publicSummary: optionalText(formData.get("publicSummary")),

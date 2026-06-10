@@ -476,6 +476,30 @@ export function mapCountryIntelligenceRow(row: Row): CountryIntelligence {
     missingSourceWarnings: Array.isArray(row.missing_source_warnings)
       ? (row.missing_source_warnings as string[])
       : [],
+    implementationMeasures: Array.isArray(row.implementation_measures)
+      ? (row.implementation_measures as string[])
+      : [],
+    competentAuthorities: Array.isArray(row.competent_authorities)
+      ? (row.competent_authorities as string[])
+      : [],
+    marketSurveillanceAuthorities: Array.isArray(row.market_surveillance_authorities)
+      ? (row.market_surveillance_authorities as string[])
+      : [],
+    notifyingAuthorities: Array.isArray(row.notifying_authorities)
+      ? (row.notifying_authorities as string[])
+      : [],
+    relevantMinistries: Array.isArray(row.relevant_ministries)
+      ? (row.relevant_ministries as string[])
+      : [],
+    nationalAIRegulationNotes: row.national_ai_regulation_notes
+      ? String(row.national_ai_regulation_notes)
+      : null,
+    nationalCaseLawNotes: row.national_case_law_notes
+      ? String(row.national_case_law_notes)
+      : null,
+    nationalSoftLawNotes: row.national_soft_law_notes
+      ? String(row.national_soft_law_notes)
+      : null,
     lastReviewedAt: row.last_reviewed_at ? String(row.last_reviewed_at) : null,
     reviewedBy: row.reviewed_by ? String(row.reviewed_by) : null,
     reviewStatus: String(row.review_status) as CountryIntelligence["reviewStatus"],
@@ -832,6 +856,14 @@ export function countryIntelligenceToInsert(country: Partial<CountryIntelligence
     public_summary: country.publicSummary,
     editorial_notes: country.editorialNotes,
     missing_source_warnings: country.missingSourceWarnings ?? [],
+    implementation_measures: country.implementationMeasures ?? [],
+    competent_authorities: country.competentAuthorities ?? [],
+    market_surveillance_authorities: country.marketSurveillanceAuthorities ?? [],
+    notifying_authorities: country.notifyingAuthorities ?? [],
+    relevant_ministries: country.relevantMinistries ?? [],
+    national_ai_regulation_notes: country.nationalAIRegulationNotes ?? null,
+    national_case_law_notes: country.nationalCaseLawNotes ?? null,
+    national_soft_law_notes: country.nationalSoftLawNotes ?? null,
     last_reviewed_at: country.lastReviewedAt,
     reviewed_by: country.reviewedBy,
     review_status: country.reviewStatus,
