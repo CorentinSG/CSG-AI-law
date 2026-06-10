@@ -38,7 +38,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { env } from "@/lib/env";
 import { formatDisplayDate } from "@/lib/utils";
 
-export const dynamic = "force-dynamic";
+// ISR (T-RT0C): serve from cache, revalidate every 5 min. The F8 country-editor
+// actions call revalidatePath(`/ai-regulation/europe/${slug}`), so admin edits
+// to a profile or its sources surface promptly instead of waiting for the window.
+export const revalidate = 300;
 
 export async function generateStaticParams() {
   return getEuropeCountryProfiles().map((profile) => ({

@@ -38,6 +38,9 @@ export const metadata: Metadata = {
     "A unified AI legal intelligence hub combining legal developments, source-backed monitoring, and region-structured AI law database coverage.",
 };
 
+// Stays dynamic (not ISR like the other public /ai-regulation pages, T-RT0C):
+// this hub renders from searchParams (filters, tabs, cursor pagination), which
+// forces per-request rendering — `revalidate` would have no effect here.
 export const dynamic = "force-dynamic";
 
 const databaseFilters = [
