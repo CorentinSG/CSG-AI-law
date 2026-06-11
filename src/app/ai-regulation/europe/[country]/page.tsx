@@ -214,6 +214,28 @@ export default async function EuropeCountryPage({
       ? dbSources.softLaw
       : profile.nationalSoftLawSources;
 
+  // F8C-3b: structural content (authority maps, measures, per-category notes)
+  // from the DB when present, per-field TS fallback. Arrays fall back when
+  // empty; notes fall back when null/blank.
+  const implementationMeasures = dbCountry?.implementationMeasures.length
+    ? dbCountry.implementationMeasures
+    : profile.nationalImplementationMeasures;
+  const competentAuthorities = dbCountry?.competentAuthorities.length
+    ? dbCountry.competentAuthorities
+    : profile.nationalCompetentAuthorities;
+  const marketSurveillanceAuthorities = dbCountry?.marketSurveillanceAuthorities.length
+    ? dbCountry.marketSurveillanceAuthorities
+    : profile.marketSurveillanceAuthorities;
+  const notifyingAuthorities = dbCountry?.notifyingAuthorities.length
+    ? dbCountry.notifyingAuthorities
+    : profile.notifyingAuthorities;
+  const nationalAIRegulationNotes =
+    dbCountry?.nationalAIRegulationNotes ?? profile.nationalAIRegulationNotes;
+  const nationalCaseLawNotes =
+    dbCountry?.nationalCaseLawNotes ?? profile.nationalCaseLawNotes;
+  const nationalSoftLawNotes =
+    dbCountry?.nationalSoftLawNotes ?? profile.nationalSoftLawNotes;
+
   return (
     <SiteShell className="space-y-10">
       <section className="space-y-5">
@@ -2632,9 +2654,9 @@ export default async function EuropeCountryPage({
               <p className="font-mono text-[11px] uppercase tracking-[0.24em] text-zinc-500">
                 National implementation measures
               </p>
-              {profile.nationalImplementationMeasures.length > 0 ? (
+              {implementationMeasures.length > 0 ? (
                 <ul className="mt-2 space-y-2">
-                  {profile.nationalImplementationMeasures.map((item) => (
+                  {implementationMeasures.map((item) => (
                     <li key={item}>{item}</li>
                   ))}
                 </ul>
@@ -2647,9 +2669,9 @@ export default async function EuropeCountryPage({
                 <p className="font-mono text-[11px] uppercase tracking-[0.24em] text-zinc-500">
                   Competent authorities
                 </p>
-                {profile.nationalCompetentAuthorities.length > 0 ? (
+                {competentAuthorities.length > 0 ? (
                   <ul className="mt-2 space-y-2">
-                    {profile.nationalCompetentAuthorities.map((item) => (
+                    {competentAuthorities.map((item) => (
                       <li key={item}>{item}</li>
                     ))}
                   </ul>
@@ -2661,13 +2683,13 @@ export default async function EuropeCountryPage({
                 <p className="font-mono text-[11px] uppercase tracking-[0.24em] text-zinc-500">
                   Market surveillance / notifying
                 </p>
-                {profile.marketSurveillanceAuthorities.length > 0 ||
-                profile.notifyingAuthorities.length > 0 ? (
+                {marketSurveillanceAuthorities.length > 0 ||
+                notifyingAuthorities.length > 0 ? (
                   <div className="mt-2 space-y-2">
-                    {profile.marketSurveillanceAuthorities.map((item) => (
+                    {marketSurveillanceAuthorities.map((item) => (
                       <p key={item}>{item}</p>
                     ))}
-                    {profile.notifyingAuthorities.map((item) => (
+                    {notifyingAuthorities.map((item) => (
                       <p key={item}>{item}</p>
                     ))}
                   </div>
@@ -2821,19 +2843,19 @@ export default async function EuropeCountryPage({
               <p className="font-mono text-[11px] uppercase tracking-[0.24em] text-zinc-500">
                 National AI regulation notes
               </p>
-              <p className="mt-2">{profile.nationalAIRegulationNotes}</p>
+              <p className="mt-2">{nationalAIRegulationNotes}</p>
             </div>
             <div>
               <p className="font-mono text-[11px] uppercase tracking-[0.24em] text-zinc-500">
                 National case law notes
               </p>
-              <p className="mt-2">{profile.nationalCaseLawNotes}</p>
+              <p className="mt-2">{nationalCaseLawNotes}</p>
             </div>
             <div>
               <p className="font-mono text-[11px] uppercase tracking-[0.24em] text-zinc-500">
                 National soft law / guidance notes
               </p>
-              <p className="mt-2">{profile.nationalSoftLawNotes}</p>
+              <p className="mt-2">{nationalSoftLawNotes}</p>
             </div>
           </CardContent>
         </Card>
