@@ -2,18 +2,19 @@
 
 Project: `c-saint-girons-ai-law-intelligence` — C. Saint-Girons, Esq | AI Law & Legal Intelligence
 Purpose: fast-start machine context for AI agents resuming work. Repository code is the final authority over this file.
-Last synchronized: 2026-06-09 (T-ING1 ingestion pipeline in production — migration 009 applied, 8 sources seeded, Vercel deployment live at csg-ai-law.vercel.app; production setup complete: GitHub CorentinSG/CSG-AI-law, Vercel csg-ai-law.vercel.app, Framework Preset corrected to Next.js, all env vars set)
+Last synchronized: 2026-06-10 (T-ING1 ingestion pipeline in production — migration 009 applied, 8 sources seeded, Vercel deployment live at csg-ai-law.vercel.app; production setup complete: GitHub CorentinSG/CSG-AI-law, Vercel csg-ai-law.vercel.app, Framework Preset corrected to Next.js, all env vars set; token-efficiency coordination protocol added to AGENT_COORDINATION.md; T-RT1A source runtime health backend completed)
 
 ---
 
 ## 1. Active Operating Context
 
-**Current state (2026-06-09):**
-- Test suite: 397 tests | lint | typecheck | build — all green
+**Current state (2026-06-10):**
+- Test suite: 402 tests | lint | typecheck | build — all green
 - **Production deployment**: site live at https://csg-ai-law.vercel.app — GitHub repo CorentinSG/CSG-AI-law (private); Vercel project csg-ai-law; Framework Preset: Next.js; env vars set: APP_DATA_MODE=supabase, NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY, SUPABASE_SERVICE_ROLE_KEY, ADMIN_AUTH_SECRET, CRON_SECRET, INGESTION_SECRET, FIRECRAWL_API_KEY, AI_ENABLE_PROCESSING=false; SCRAPLING_WORKER_URL not yet set
 - 9 EU countries with full live monitoring stack: FR, DE, ES, IT, NL, BE, AT, SE, IE
 - 1 EU country with first-wave profile only (no live stack): PL
 - Scan runtime: P-C3 complete — queue-drain semantics, optimistic claim, lease heartbeat, blockedByRunningJobs guard, local worker, structured blocker ownership summaries
+- **P-RT1A done**: backend source runtime health summaries now exist in `src/agents/ai-regulation/sourceRuntimeHealth.ts`, combining `source_health_checks`, scan logs, scan jobs, and ingestion logs into per-source `healthy/degraded/stale/inactive` states with cadence-aware thresholds and consecutive failure counts
 - Admin: discovery_leads backend + admin UX + pagination complete (P-C1, P-C2, T-C1/C2 all done)
 - **T-ING1 live**: migration 009 applied to Supabase; 8 ingestion sources seeded; `/api/ingestion/run` live (INGESTION_SECRET-protected); Firecrawl sources operational; Scrapling sidecar not yet deployed (scrapling/hybrid methods require Python worker)
 - **F1 in progress**: public monitor `/ai-regulation` uses keyset (cursor-based) pagination on news/database tabs, and backend cursor primitives now exist for `scan_jobs` + `discovery_leads`; broader admin/server pagination migration is still open
@@ -26,7 +27,7 @@ Last synchronized: 2026-06-09 (T-ING1 ingestion pipeline in production — migra
 - **F1** — Broader cursor-based pagination migration (public hub and heavy backend surfaces partially migrated; many admin/server surfaces still offset/page-number)
 - **F7** ✓ — `008_review_transition_rpc.sql` applied to remote Supabase (2026-06-08, confirmed Success)
 - **F8** — Move `europe-member-state-implementation.ts` (~2100+ lines) to DB-backed storage — **F8A done**: 27 country_intelligence + 77 source rows seeded (2026-06-08). **F8B done**: admin editorial editor + public-page editorial override. **F8C-1 done** (2026-06-09): public page renders the three source-family lists from `country_intelligence_sources` (per-family TS fallback). **F8C-2 done**: admin source CRUD (`addCountrySource`/`updateCountrySource`/`removeCountrySource` built on `replaceCountryIntelligenceSources`) in the `[slug]` editor — sources are now live-editable. Remaining: **F8C-3** migrate scalar/array structural fields (authority maps, measures, per-category notes, latest updates, status labels) to an expanded schema for full TS retirement
-- **F6** — Upstash Redis rate limiting (env vars wired; in-memory fallback active)
+- **F6** ✓ — Upstash Redis rate limiting activated 2026-06-11: `UPSTASH_REDIS_REST_URL`/`_TOKEN` set in Vercel; scan route now distributed-rate-limited (5/60s per IP), in-memory fallback retained for local/dev
 - **F3** — Fully detached production worker (scan:worker-local exists; not yet distributed service)
 
 ---
@@ -153,6 +154,7 @@ regulatory_source, raw_regulatory_item, ai_regulatory_update, source_reference, 
 - After meaningful changes: update `PROJECT_LOGBOOK.md` + this file
 - Peer code review only when user explicitly requests it
 - `AGENT_COORDINATION.md` is the live anti-collision layer; this file is the architectural memory
+- Token-efficiency rule: before writing to the other agent, check the live board, then the Decision / Agreement Log, then Inter-agent comments; only write on claim, ownership change, blocker, handoff, or completion
 
 ### Verification sequence (run before declaring completion)
 ```
