@@ -89,15 +89,18 @@ export async function saveCountryProfileEditorial(formData: FormData) {
     primaryOfficialSourceTitle: existing.primaryOfficialSourceTitle ?? null,
     lastOfficialSourceCheck: existing.lastOfficialSourceCheck ?? null,
     citationQualityStatus: existing.citationQualityStatus,
-    // Structural content preserved from the existing row (edited elsewhere/seed).
-    implementationMeasures: existing.implementationMeasures ?? [],
-    competentAuthorities: existing.competentAuthorities ?? [],
-    marketSurveillanceAuthorities: existing.marketSurveillanceAuthorities ?? [],
-    notifyingAuthorities: existing.notifyingAuthorities ?? [],
-    relevantMinistries: existing.relevantMinistries ?? [],
-    nationalAIRegulationNotes: existing.nationalAIRegulationNotes ?? null,
-    nationalCaseLawNotes: existing.nationalCaseLawNotes ?? null,
-    nationalSoftLawNotes: existing.nationalSoftLawNotes ?? null,
+    // Structural content (F8C-3c) — editable; blank arrays/notes fall back to
+    // the TS baseline on the public page.
+    implementationMeasures: parseTextareaList(formData.get("implementationMeasures")),
+    competentAuthorities: parseTextareaList(formData.get("competentAuthorities")),
+    marketSurveillanceAuthorities: parseTextareaList(
+      formData.get("marketSurveillanceAuthorities"),
+    ),
+    notifyingAuthorities: parseTextareaList(formData.get("notifyingAuthorities")),
+    relevantMinistries: parseTextareaList(formData.get("relevantMinistries")),
+    nationalAIRegulationNotes: optionalText(formData.get("nationalAIRegulationNotes")),
+    nationalCaseLawNotes: optionalText(formData.get("nationalCaseLawNotes")),
+    nationalSoftLawNotes: optionalText(formData.get("nationalSoftLawNotes")),
     // Editable editorial fields.
     implementationNotes: optionalText(formData.get("implementationNotes")),
     publicSummary: optionalText(formData.get("publicSummary")),

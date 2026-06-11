@@ -75,6 +75,7 @@ export default async function AdminCountryProfileEditorPage({
 
   const editorialNotesText = country.editorialNotes ?? "";
   const missingWarningsText = (country.missingSourceWarnings ?? []).join("\n");
+  const linesOf = (values: string[] | null | undefined) => (values ?? []).join("\n");
 
   return (
     <SiteShell className="space-y-8" variant="admin" showFooter={false}>
@@ -157,6 +158,116 @@ export default async function AdminCountryProfileEditorPage({
                   defaultValue={missingWarningsText}
                   className={inputClass}
                 />
+              </div>
+
+              <div className="space-y-4 rounded-2xl border border-white/10 bg-black/20 p-4">
+                <p className="text-xs uppercase tracking-[0.24em] text-zinc-400">
+                  Structural content (one item per line; blank = use verified
+                  baseline)
+                </p>
+                <div className="grid gap-4 md:grid-cols-2">
+                  <div className="space-y-2">
+                    <label className={labelClass} htmlFor="competentAuthorities">
+                      Competent authorities
+                    </label>
+                    <textarea
+                      id="competentAuthorities"
+                      name="competentAuthorities"
+                      rows={3}
+                      defaultValue={linesOf(country.competentAuthorities)}
+                      className={inputClass}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className={labelClass} htmlFor="implementationMeasures">
+                      Implementation measures
+                    </label>
+                    <textarea
+                      id="implementationMeasures"
+                      name="implementationMeasures"
+                      rows={3}
+                      defaultValue={linesOf(country.implementationMeasures)}
+                      className={inputClass}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label
+                      className={labelClass}
+                      htmlFor="marketSurveillanceAuthorities"
+                    >
+                      Market surveillance authorities
+                    </label>
+                    <textarea
+                      id="marketSurveillanceAuthorities"
+                      name="marketSurveillanceAuthorities"
+                      rows={2}
+                      defaultValue={linesOf(country.marketSurveillanceAuthorities)}
+                      className={inputClass}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className={labelClass} htmlFor="notifyingAuthorities">
+                      Notifying authorities
+                    </label>
+                    <textarea
+                      id="notifyingAuthorities"
+                      name="notifyingAuthorities"
+                      rows={2}
+                      defaultValue={linesOf(country.notifyingAuthorities)}
+                      className={inputClass}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className={labelClass} htmlFor="relevantMinistries">
+                      Relevant ministries / agencies
+                    </label>
+                    <textarea
+                      id="relevantMinistries"
+                      name="relevantMinistries"
+                      rows={2}
+                      defaultValue={linesOf(country.relevantMinistries)}
+                      className={inputClass}
+                    />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <label className={labelClass} htmlFor="nationalAIRegulationNotes">
+                    National AI regulation notes
+                  </label>
+                  <textarea
+                    id="nationalAIRegulationNotes"
+                    name="nationalAIRegulationNotes"
+                    rows={2}
+                    defaultValue={country.nationalAIRegulationNotes ?? ""}
+                    className={inputClass}
+                  />
+                </div>
+                <div className="grid gap-4 md:grid-cols-2">
+                  <div className="space-y-2">
+                    <label className={labelClass} htmlFor="nationalCaseLawNotes">
+                      Case-law notes
+                    </label>
+                    <textarea
+                      id="nationalCaseLawNotes"
+                      name="nationalCaseLawNotes"
+                      rows={2}
+                      defaultValue={country.nationalCaseLawNotes ?? ""}
+                      className={inputClass}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className={labelClass} htmlFor="nationalSoftLawNotes">
+                      Soft-law / guidance notes
+                    </label>
+                    <textarea
+                      id="nationalSoftLawNotes"
+                      name="nationalSoftLawNotes"
+                      rows={2}
+                      defaultValue={country.nationalSoftLawNotes ?? ""}
+                      className={inputClass}
+                    />
+                  </div>
+                </div>
               </div>
 
               <div className="grid gap-4 md:grid-cols-2">

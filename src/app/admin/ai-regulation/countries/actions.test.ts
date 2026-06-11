@@ -97,6 +97,9 @@ describe("country profile editorial action", () => {
     formData.set("implementationNotes", "Refreshed implementation notes.");
     formData.set("editorialNotes", "Note one\n  Note two  \n\nNote three");
     formData.set("missingSourceWarnings", "Warning one\nWarning two");
+    formData.set("competentAuthorities", "CNIL\nARCOM");
+    formData.set("implementationMeasures", "Measure X");
+    formData.set("nationalAIRegulationNotes", "New regulation notes.");
     formData.set("reviewStatus", "verified");
     formData.set("reviewedBy", "CSG");
 
@@ -119,10 +122,10 @@ describe("country profile editorial action", () => {
     expect(input.countryName).toBe("France");
     expect(input.implementationStatus).toBe("competent_authority_designated");
     expect(input.citationQualityStatus).toBe("partial");
-    // Structural content (F8C-3) is preserved through an editorial save.
+    // Structural content (F8C-3c) is now editable from the form.
     expect(input.competentAuthorities).toEqual(["CNIL", "ARCOM"]);
-    expect(input.implementationMeasures).toEqual(["Measure A"]);
-    expect(input.nationalAIRegulationNotes).toBe("Regulation notes.");
+    expect(input.implementationMeasures).toEqual(["Measure X"]);
+    expect(input.nationalAIRegulationNotes).toBe("New regulation notes.");
     // Review timestamp refreshed (not the old value).
     expect(input.lastReviewedAt).not.toBe(existingRow.lastReviewedAt);
 
