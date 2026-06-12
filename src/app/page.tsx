@@ -21,7 +21,10 @@ export const metadata: Metadata = {
     "Attorney-led AI law, legal intelligence, regulatory monitoring, and comparative analysis focused on artificial intelligence governance and legal systems.",
 };
 
-export const dynamic = "force-dynamic";
+// T-OPS7: the homepage only reads public, non-personalized published data
+// (no searchParams/cookies), so it is served as cached HTML via ISR instead of
+// re-rendering per request — same 300s cadence as the other public pages.
+export const revalidate = 300;
 
 const entryPoints = [
   {
