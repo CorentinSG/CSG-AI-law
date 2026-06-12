@@ -20,6 +20,23 @@ const reviewStatuses: readonly CountryReviewStatus[] = [
   "flagged",
 ];
 
+const countryEditorialAuditFields = [
+  "implementationMeasures",
+  "competentAuthorities",
+  "marketSurveillanceAuthorities",
+  "notifyingAuthorities",
+  "relevantMinistries",
+  "nationalAIRegulationNotes",
+  "nationalCaseLawNotes",
+  "nationalSoftLawNotes",
+  "implementationNotes",
+  "publicSummary",
+  "editorialNotes",
+  "missingSourceWarnings",
+  "reviewStatus",
+  "reviewedBy",
+] as const;
+
 function parseTextareaList(input: FormDataEntryValue | null): string[] {
   if (typeof input !== "string") return [];
   return input
@@ -32,6 +49,29 @@ function optionalText(input: FormDataEntryValue | null): string | null {
   if (typeof input !== "string") return null;
   const trimmed = input.trim();
   return trimmed.length > 0 ? trimmed : null;
+}
+
+function listEquals(left: string[] | null | undefined, right: string[] | null | undefined) {
+  return JSON.stringify(left ?? []) === JSON.stringify(right ?? []);
+}
+
+function computeChangedCountryEditorialFields(
+  existing: Awaited<ReturnType<typeof updateRepository.getCountryIntelligenceBySlug>>,
+  next: CountryIntelligenceUpsertInput,
+) {
+  if (!existing) return [...countryEditorialAuditFields];
+
+  return countryEditorialAuditFields.filter((field) => {
+    const previousValue = existing[field];
+    const nextValue = next[field];
+    if (Array.isArray(previousValue) || Array.isArray(nextValue)) {
+      return !listEquals(
+        Array.isArray(previousValue) ? previousValue : [],
+        Array.isArray(nextValue) ? nextValue : [],
+      );
+    }
+    return previousValue !== nextValue;
+  });
 }
 
 /**
@@ -111,9 +151,30 @@ export async function saveCountryProfileEditorial(formData: FormData) {
     lastReviewedAt: new Date().toISOString(),
     reviewedBy: optionalText(formData.get("reviewedBy")) ?? "admin-editor",
     reviewStatus,
+    needsReReview: false,
   };
 
-  await updateRepository.upsertCountryIntelligence(input);
+  const saved = await updateRepository.upsertCountryIntelligence(input);
+  const changedFields = computeChangedCountryEditorialFields(existing, input);
+  await updateRepository.addCountryProfileReviewEvent({
+    countryId: saved.id,
+    countrySlug: saved.slug,
+    eventType:
+      existing.reviewStatus !== saved.reviewStatus
+        ? "review_status_changed"
+        : "editorial_saved",
+    actor: saved.reviewedBy ?? "admin-editor",
+    previousReviewStatus: existing.reviewStatus,
+    nextReviewStatus: saved.reviewStatus,
+    previousNeedsReReview: existing.needsReReview,
+    nextNeedsReReview: saved.needsReReview,
+    notes: "Country profile editorial fields saved from admin.",
+    metadata: {
+      changedFields,
+      previousLastReviewedAt: existing.lastReviewedAt,
+      nextLastReviewedAt: saved.lastReviewedAt,
+    },
+  });
 
   revalidatePath("/admin/ai-regulation/countries");
   revalidatePath(`/admin/ai-regulation/countries/${slug}`);

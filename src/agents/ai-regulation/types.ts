@@ -103,6 +103,43 @@ export interface TraceabilityMetadata {
   publicationStatus?: string;
 }
 
+export interface ReviewAssistClassification {
+  jurisdiction: Jurisdiction;
+  developmentType: DevelopmentType;
+  legalArea: LegalArea;
+  importanceLevel: ImportanceLevel;
+  confidenceLevel: ConfidenceLevel;
+  tags: string[];
+}
+
+export interface ReviewAssistSummary {
+  oneSentenceSummary: string;
+  summary: string;
+  whatHappened: string;
+  whyItMatters: string;
+  practicalImpact: string;
+  affectedParties: string[];
+  keyObligations: string[];
+  complianceDeadlines: string[];
+  enforcementRisk: string;
+}
+
+export interface ReviewAssistMetadata {
+  generatedAt: string;
+  modelUsed: string;
+  promptVersion: string;
+  planningDecision: string;
+  planningDecisionReason: string | null;
+  estimatedCostUsd: number;
+  estimatedInputTokens: number;
+  estimatedOutputTokens: number;
+  humanReviewRequired: true;
+  publicationStatus: "hidden";
+  citationQualityStatus: "needs_manual_verification";
+  suggestedClassification: ReviewAssistClassification;
+  suggestedSummary: ReviewAssistSummary;
+}
+
 export interface RawRegulatoryItem {
   id: string;
   sourceId: string;

@@ -1,5 +1,6 @@
 import type {
   CountryIntelligence,
+  CountryProfileReviewEventInput,
   CountryIntelligenceSource,
   DataQualityFindingInput,
   DiscoveryLead,
@@ -11,6 +12,7 @@ import type {
   SourceHealthCheckInput,
   VerificationAttemptInput,
 } from "@/agents/ai-regulation/governance";
+import type { IngestionLog } from "@/agents/ingestion/types";
 import type {
   AiProcessingLog,
   AiRegulatoryUpdate,
@@ -203,6 +205,9 @@ export const updateRepository = {
   async addSourceHealthCheck(check: SourceHealthCheckInput) {
     return getAiRegulationRepository().createSourceHealthCheck(check);
   },
+  async getIngestionLogs(sourceId?: string, limit?: number): Promise<IngestionLog[]> {
+    return getAiRegulationRepository().listIngestionLogs(limit, sourceId);
+  },
   async updateReviewStatus(
     id: string,
     status: AiRegulatoryUpdate["status"],
@@ -244,6 +249,12 @@ export const updateRepository = {
   },
   async upsertCountryIntelligence(input: CountryIntelligenceUpsertInput) {
     return getAiRegulationRepository().upsertCountryIntelligence(input);
+  },
+  async getCountryProfileReviewEvents(countryId: string, limit?: number) {
+    return getAiRegulationRepository().listCountryProfileReviewEvents(limit, countryId);
+  },
+  async addCountryProfileReviewEvent(event: CountryProfileReviewEventInput) {
+    return getAiRegulationRepository().createCountryProfileReviewEvent(event);
   },
   async listCountryIntelligenceSources(countryId: string): Promise<CountryIntelligenceSource[]> {
     return getAiRegulationRepository().listCountryIntelligenceSources(countryId);

@@ -4,6 +4,7 @@ import type {
   CountryImplementationConfidence,
   CountryReviewStatus,
 } from "@/agents/ai-regulation/governance";
+import { computeCountryNeedsReReview } from "@/agents/ai-regulation/country-review";
 import type {
   CountryIntelligenceSourceWriteInput,
   CountryIntelligenceUpsertInput,
@@ -115,6 +116,7 @@ export function mapEuropeCountryProfileToCountryIntelligenceInput(
     lastReviewedAt: profile.lastReviewedDate,
     reviewedBy: "seed-profile",
     reviewStatus: mapReviewStatus(profile.sourceVerificationStatus),
+    needsReReview: computeCountryNeedsReReview(profile.lastReviewedDate),
   };
 }
 

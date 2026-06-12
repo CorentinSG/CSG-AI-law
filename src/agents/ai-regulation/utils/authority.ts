@@ -99,6 +99,16 @@ export function inferAuthorityType(input: {
   }
 }
 
+/**
+ * Priority rank for an authority type — lower means higher legal authority
+ * (Binding law = 0 … Other = last). Used to order the admin review queue so
+ * the most authoritative items surface first.
+ */
+export function getAuthorityPriorityRank(authorityType: AuthorityType): number {
+  const index = authorityTypesByLabel.indexOf(authorityType);
+  return index === -1 ? authorityTypesByLabel.length : index;
+}
+
 export function getAuthorityPresentation(authorityType: AuthorityType) {
   switch (authorityType) {
     case "Binding law":

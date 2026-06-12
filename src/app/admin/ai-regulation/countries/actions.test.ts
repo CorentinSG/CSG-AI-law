@@ -4,6 +4,7 @@ const revalidatePath = vi.fn();
 const assertAdminServerActionAccess = vi.fn();
 const getCountryIntelligenceBySlug = vi.fn();
 const upsertCountryIntelligence = vi.fn();
+const addCountryProfileReviewEvent = vi.fn();
 const listCountryIntelligenceSources = vi.fn();
 const replaceCountryIntelligenceSources = vi.fn();
 
@@ -19,6 +20,7 @@ vi.mock("@/agents/ai-regulation/processors/updateRepository", () => ({
   updateRepository: {
     getCountryIntelligenceBySlug,
     upsertCountryIntelligence,
+    addCountryProfileReviewEvent,
     listCountryIntelligenceSources,
     replaceCountryIntelligenceSources,
   },
@@ -74,6 +76,7 @@ const existingRow = {
   lastReviewedAt: "2026-06-01T00:00:00.000Z",
   reviewedBy: "seed-profile",
   reviewStatus: "needs_review" as const,
+  needsReReview: false,
   createdAt: "2026-06-01T00:00:00.000Z",
   updatedAt: "2026-06-01T00:00:00.000Z",
 };
@@ -83,7 +86,11 @@ describe("country profile editorial action", () => {
     vi.clearAllMocks();
     assertAdminServerActionAccess.mockResolvedValue(undefined);
     getCountryIntelligenceBySlug.mockResolvedValue(existingRow);
-    upsertCountryIntelligence.mockResolvedValue(existingRow);
+    upsertCountryIntelligence.mockImplementation(async (input) => ({
+      ...existingRow,
+      ...input,
+      needsReReview: false,
+    }));
   });
 
   it("requires admin access and persists merged editorial fields", async () => {
@@ -128,6 +135,16 @@ describe("country profile editorial action", () => {
     expect(input.nationalAIRegulationNotes).toBe("New regulation notes.");
     // Review timestamp refreshed (not the old value).
     expect(input.lastReviewedAt).not.toBe(existingRow.lastReviewedAt);
+    expect(addCountryProfileReviewEvent).toHaveBeenCalledOnce();
+    expect(addCountryProfileReviewEvent.mock.calls[0][0]).toMatchObject({
+      countryId: "country-france",
+      countrySlug: "france",
+      eventType: "review_status_changed",
+      previousReviewStatus: "needs_review",
+      nextReviewStatus: "verified",
+      previousNeedsReReview: false,
+      nextNeedsReReview: false,
+    });
 
     expect(revalidatePath).toHaveBeenCalledWith("/admin/ai-regulation/countries");
     expect(revalidatePath).toHaveBeenCalledWith(
@@ -149,6 +166,9 @@ describe("country profile editorial action", () => {
 
     const input = upsertCountryIntelligence.mock.calls[0][0];
     expect(input.reviewStatus).toBe("needs_review");
+    expect(addCountryProfileReviewEvent.mock.calls[0][0].eventType).toBe(
+      "editorial_saved",
+    );
   });
 
   it("stores blank editable fields as null/empty so the page uses the baseline", async () => {
@@ -185,6 +205,7 @@ describe("country profile editorial action", () => {
       /No country_intelligence row/,
     );
     expect(upsertCountryIntelligence).not.toHaveBeenCalled();
+    expect(addCountryProfileReviewEvent).not.toHaveBeenCalled();
   });
 });
 

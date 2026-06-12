@@ -1,10 +1,22 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import {
+  drainNextQueuedJob,
+  triggerSourceScan,
+} from "@/app/admin/ai-regulation/actions";
 
-const queueAndDrainScanJob = vi.fn();
-const recoverStaleRunningScanJobs = vi.fn();
-const processNextQueuedScanJob = vi.fn();
-const revalidatePath = vi.fn();
-const assertAdminServerActionAccess = vi.fn();
+const {
+  queueAndDrainScanJob,
+  recoverStaleRunningScanJobs,
+  processNextQueuedScanJob,
+  revalidatePath,
+  assertAdminServerActionAccess,
+} = vi.hoisted(() => ({
+  queueAndDrainScanJob: vi.fn(),
+  recoverStaleRunningScanJobs: vi.fn(),
+  processNextQueuedScanJob: vi.fn(),
+  revalidatePath: vi.fn(),
+  assertAdminServerActionAccess: vi.fn(),
+}));
 
 vi.mock("next/cache", () => ({
   revalidatePath,
@@ -30,7 +42,6 @@ describe("admin ai-regulation actions", () => {
   });
 
   it("triggerSourceScan uses queue-drain semantics for manual scans", async () => {
-    const { triggerSourceScan } = await import("@/app/admin/ai-regulation/actions");
     const formData = new FormData();
     formData.set("sourceId", "src-federal-register-ai");
 
@@ -49,8 +60,6 @@ describe("admin ai-regulation actions", () => {
   });
 
   it("drainNextQueuedJob claims work under the admin-action lease owner", async () => {
-    const { drainNextQueuedJob } = await import("@/app/admin/ai-regulation/actions");
-
     await drainNextQueuedJob();
 
     expect(processNextQueuedScanJob).toHaveBeenCalledWith({

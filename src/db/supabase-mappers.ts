@@ -1,6 +1,7 @@
 import type { IngestionLog } from "@/agents/ingestion/types";
 import type {
   CountryIntelligence,
+  CountryProfileReviewEvent,
   CountryIntelligenceSource,
   DataQualityFinding,
   DiscoveryLead,
@@ -11,6 +12,7 @@ import type {
   SourceHealthCheck,
   VerificationAttempt,
 } from "@/agents/ai-regulation/governance";
+import { computeCountryNeedsReReview } from "@/agents/ai-regulation/country-review";
 import type {
   AiProcessingLog,
   AiRegulatoryUpdate,
@@ -296,6 +298,31 @@ export function mapReviewEventRow(row: Row): ReviewEvent {
   };
 }
 
+export function mapCountryProfileReviewEventRow(row: Row): CountryProfileReviewEvent {
+  return {
+    id: String(row.id),
+    countryId: String(row.country_id),
+    countrySlug: String(row.country_slug),
+    eventType: row.event_type as CountryProfileReviewEvent["eventType"],
+    actor: String(row.actor),
+    previousReviewStatus: row.previous_review_status
+      ? String(row.previous_review_status)
+      : null,
+    nextReviewStatus: row.next_review_status ? String(row.next_review_status) : null,
+    previousNeedsReReview:
+      typeof row.previous_needs_re_review === "boolean"
+        ? row.previous_needs_re_review
+        : null,
+    nextNeedsReReview: Boolean(row.next_needs_re_review),
+    notes: row.notes ? String(row.notes) : null,
+    metadata:
+      row.metadata && typeof row.metadata === "object"
+        ? (row.metadata as Record<string, unknown>)
+        : {},
+    createdAt: String(row.created_at),
+  };
+}
+
 export function mapDataQualityFindingRow(row: Row): DataQualityFinding {
   return {
     id: String(row.id),
@@ -445,6 +472,7 @@ export function mapSourceHealthCheckRow(row: Row): SourceHealthCheck {
 }
 
 export function mapCountryIntelligenceRow(row: Row): CountryIntelligence {
+  const lastReviewedAt = row.last_reviewed_at ? String(row.last_reviewed_at) : null;
   return {
     id: String(row.id),
     region: String(row.region) as CountryIntelligence["region"],
@@ -500,9 +528,13 @@ export function mapCountryIntelligenceRow(row: Row): CountryIntelligence {
     nationalSoftLawNotes: row.national_soft_law_notes
       ? String(row.national_soft_law_notes)
       : null,
-    lastReviewedAt: row.last_reviewed_at ? String(row.last_reviewed_at) : null,
+    lastReviewedAt,
     reviewedBy: row.reviewed_by ? String(row.reviewed_by) : null,
     reviewStatus: String(row.review_status) as CountryIntelligence["reviewStatus"],
+    needsReReview:
+      typeof row.needs_re_review === "boolean"
+        ? row.needs_re_review
+        : computeCountryNeedsReReview(lastReviewedAt),
     createdAt: String(row.created_at),
     updatedAt: String(row.updated_at),
   };
@@ -711,6 +743,25 @@ export function reviewEventToInsert(event: Partial<ReviewEvent>) {
   };
 }
 
+export function countryProfileReviewEventToInsert(
+  event: Partial<CountryProfileReviewEvent>,
+) {
+  return {
+    id: event.id,
+    country_id: event.countryId,
+    country_slug: event.countrySlug,
+    event_type: event.eventType,
+    actor: event.actor,
+    previous_review_status: event.previousReviewStatus,
+    next_review_status: event.nextReviewStatus,
+    previous_needs_re_review: event.previousNeedsReReview,
+    next_needs_re_review: event.nextNeedsReReview,
+    notes: event.notes,
+    metadata: event.metadata ?? {},
+    created_at: event.createdAt,
+  };
+}
+
 export function dataQualityFindingToInsert(
   finding: Partial<DataQualityFinding>,
 ) {
@@ -867,6 +918,10 @@ export function countryIntelligenceToInsert(country: Partial<CountryIntelligence
     last_reviewed_at: country.lastReviewedAt,
     reviewed_by: country.reviewedBy,
     review_status: country.reviewStatus,
+    needs_re_review:
+      typeof country.needsReReview === "boolean"
+        ? country.needsReReview
+        : computeCountryNeedsReReview(country.lastReviewedAt),
     created_at: country.createdAt,
     updated_at: country.updatedAt,
   };

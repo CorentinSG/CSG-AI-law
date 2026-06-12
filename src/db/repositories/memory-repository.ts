@@ -2,6 +2,8 @@ import { randomUUID } from "node:crypto";
 
 import type {
   CountryIntelligence,
+  CountryProfileReviewEvent,
+  CountryProfileReviewEventInput,
   CountryIntelligenceSource,
   DataQualityFinding,
   DataQualityFindingInput,
@@ -20,6 +22,7 @@ import type {
   VerificationAttempt,
   VerificationAttemptInput,
 } from "@/agents/ai-regulation/governance";
+import { computeCountryNeedsReReview } from "@/agents/ai-regulation/country-review";
 import type {
   AiProcessingLog,
   AiRegulatoryUpdate,
@@ -173,8 +176,19 @@ function createCountryIntelligenceRecord(
   const now = nextTimestamp();
   return {
     ...input,
+    needsReReview: computeCountryNeedsReReview(input.lastReviewedAt),
     createdAt: now,
     updatedAt: now,
+  };
+}
+
+function createCountryProfileReviewEventRecord(
+  input: CountryProfileReviewEventInput,
+): CountryProfileReviewEvent {
+  return {
+    ...input,
+    id: `country-review-${randomUUID()}`,
+    createdAt: nextTimestamp(),
   };
 }
 
@@ -840,10 +854,26 @@ export class MemoryAiRegulationRepository implements AiRegulationRepository {
     const updated: CountryIntelligence = {
       ...store.countryIntelligence[existingIndex],
       ...input,
+      needsReReview: computeCountryNeedsReReview(input.lastReviewedAt),
       updatedAt: nextTimestamp(),
     };
     store.countryIntelligence[existingIndex] = updated;
     return updated;
+  }
+
+  async listCountryProfileReviewEvents(limit?: number, countryId?: string) {
+    const events = countryId
+      ? getMockStore().countryProfileReviewEvents.filter(
+          (event) => event.countryId === countryId,
+        )
+      : getMockStore().countryProfileReviewEvents;
+    return typeof limit === "number" ? events.slice(0, limit) : events;
+  }
+
+  async createCountryProfileReviewEvent(input: CountryProfileReviewEventInput) {
+    const record = createCountryProfileReviewEventRecord(input);
+    getMockStore().countryProfileReviewEvents.unshift(record);
+    return record;
   }
 
   async listCountryIntelligenceSources(countryId: string) {

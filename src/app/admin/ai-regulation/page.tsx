@@ -1,6 +1,11 @@
 import Link from "next/link";
 
 import { updateRepository } from "@/agents/ai-regulation/processors/updateRepository";
+import type { ReviewAssistMetadata } from "@/agents/ai-regulation/types";
+import {
+  deriveUpdateAuthorityType,
+  getAuthorityPriorityRank,
+} from "@/agents/ai-regulation/utils/authority";
 import { getSourceRuntimeHealthSummaries } from "@/agents/ai-regulation/sourceRuntimeHealth";
 import { summarizeAiPlanning } from "@/app/admin/ai-regulation/ai-planning";
 import {
@@ -93,12 +98,42 @@ export default async function AdminAiRegulationPage({
     getSourceRuntimeHealthSummaries(),
   ]);
   const updates = updatesPage.items;
+  // T-RT4B: within-page prioritization so reviewers see actionable, higher-authority
+  // items first. needs_review rises to the top, then by source authority tier
+  // (Binding law → Other), then most recently detected. This reorders the loaded
+  // page only; global ordering across pages stays the repository's responsibility.
+  const prioritizedUpdates = [...updates].sort((a, b) => {
+    const aNeedsReview = a.status === "needs_review" ? 0 : 1;
+    const bNeedsReview = b.status === "needs_review" ? 0 : 1;
+    if (aNeedsReview !== bNeedsReview) return aNeedsReview - bNeedsReview;
+
+    const authorityDelta =
+      getAuthorityPriorityRank(deriveUpdateAuthorityType(a)) -
+      getAuthorityPriorityRank(deriveUpdateAuthorityType(b));
+    if (authorityDelta !== 0) return authorityDelta;
+
+    return (b.detectedDate ?? "").localeCompare(a.detectedDate ?? "");
+  });
   const aiPlanning = summarizeAiPlanning(processingLogs, rawItems);
   const latestAiResultByUpdateId = new Map(
     aiPlanning.enrichedOpenAiResults
       .filter((entry) => entry.regulatoryUpdateId)
       .map((entry) => [entry.regulatoryUpdateId!, entry]),
   );
+  // T-RT4B (after T-RT4A contract): surface the opt-in AI review-assist suggestion
+  // (rawMetadata.reviewAssist) per update, clearly as an UNVERIFIED suggestion.
+  const rawItemById = new Map(rawItems.map((item) => [item.id, item]));
+  const reviewAssistByUpdateId = new Map<string, ReviewAssistMetadata>();
+  for (const update of updates) {
+    const assist = rawItemById.get(update.rawItemId)?.rawMetadata?.reviewAssist;
+    if (
+      assist &&
+      typeof assist === "object" &&
+      "suggestedClassification" in (assist as Record<string, unknown>)
+    ) {
+      reviewAssistByUpdateId.set(update.id, assist as ReviewAssistMetadata);
+    }
+  }
 
   const latestLogBySource = new Map(
     sources.map((source) => [
@@ -466,13 +501,14 @@ export default async function AdminAiRegulationPage({
       </section>
 
       <AdminReviewQueue
-        updates={updates}
+        updates={prioritizedUpdates}
         sourceById={sourceById}
         sources={sources}
         params={params}
         page={page}
         updatesPage={updatesPage}
         latestAiResultByUpdateId={latestAiResultByUpdateId}
+        reviewAssistByUpdateId={reviewAssistByUpdateId}
         reviewQueuePageSize={reviewQueuePageSize}
         adminFilters={adminFilters}
       />

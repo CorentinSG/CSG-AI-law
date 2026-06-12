@@ -46,6 +46,29 @@ export interface ReviewEvent {
   createdAt: string;
 }
 
+export const countryProfileReviewEventTypes = [
+  "editorial_saved",
+  "review_status_changed",
+] as const;
+
+export type CountryProfileReviewEventType =
+  (typeof countryProfileReviewEventTypes)[number];
+
+export interface CountryProfileReviewEvent {
+  id: string;
+  countryId: string;
+  countrySlug: string;
+  eventType: CountryProfileReviewEventType;
+  actor: string;
+  previousReviewStatus: string | null;
+  nextReviewStatus: string | null;
+  previousNeedsReReview: boolean | null;
+  nextNeedsReReview: boolean;
+  notes: string | null;
+  metadata: Record<string, unknown>;
+  createdAt: string;
+}
+
 export interface DataQualityFinding {
   id: string;
   entityType: string;
@@ -154,6 +177,10 @@ export type VerificationAttemptInput = Omit<
 >;
 
 export type ReviewEventInput = Omit<ReviewEvent, "id" | "createdAt">;
+export type CountryProfileReviewEventInput = Omit<
+  CountryProfileReviewEvent,
+  "id" | "createdAt"
+>;
 
 export type DataQualityFindingInput = Omit<
   DataQualityFinding,
@@ -250,6 +277,7 @@ export interface CountryIntelligence {
   lastReviewedAt?: string | null;
   reviewedBy?: string | null;
   reviewStatus: CountryReviewStatus;
+  needsReReview: boolean;
   createdAt: string;
   updatedAt: string;
 }

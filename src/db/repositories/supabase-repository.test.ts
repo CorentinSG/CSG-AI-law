@@ -286,9 +286,12 @@ describe("Supabase column constants", () => {
     expect(repoSrc).toContain("async listCountryIntelligence(");
     expect(repoSrc).toContain("async getCountryIntelligenceBySlug(");
     expect(repoSrc).toContain("async upsertCountryIntelligence(");
+    expect(repoSrc).toContain("async listCountryProfileReviewEvents(");
+    expect(repoSrc).toContain("async createCountryProfileReviewEvent(");
     expect(repoSrc).toContain("async listCountryIntelligenceSources(");
     expect(repoSrc).toContain("async replaceCountryIntelligenceSources(");
     expect(repoSrc).toContain('.from("country_intelligence")');
+    expect(repoSrc).toContain('.from("country_profile_review_events")');
     expect(repoSrc).toContain('.from("country_intelligence_sources")');
   });
 

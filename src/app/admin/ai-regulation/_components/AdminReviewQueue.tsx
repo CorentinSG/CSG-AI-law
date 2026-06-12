@@ -1,6 +1,10 @@
 import Link from "next/link";
 
-import type { AiRegulatoryUpdate, RegulationSource } from "@/agents/ai-regulation/types";
+import type {
+  AiRegulatoryUpdate,
+  RegulationSource,
+  ReviewAssistMetadata,
+} from "@/agents/ai-regulation/types";
 import {
   deriveUpdateAuthorityType,
   getAuthorityPresentation,
@@ -32,6 +36,7 @@ interface Props {
   page: number;
   updatesPage: PagedResult<AiRegulatoryUpdate>;
   latestAiResultByUpdateId: Map<string, AiPlanEntry>;
+  reviewAssistByUpdateId: Map<string, ReviewAssistMetadata>;
   reviewQueuePageSize: number;
   adminFilters: { key: string; label: string }[];
 }
@@ -44,6 +49,7 @@ export function AdminReviewQueue({
   page,
   updatesPage,
   latestAiResultByUpdateId,
+  reviewAssistByUpdateId,
   reviewQueuePageSize,
   adminFilters,
 }: Props) {
@@ -53,6 +59,10 @@ export function AdminReviewQueue({
         <Card>
           <CardHeader>
             <CardTitle>Review queue</CardTitle>
+            <p className="text-xs text-zinc-500">
+              Ordered for review: items needing review first, then by source
+              authority (binding law → other), then most recently detected.
+            </p>
           </CardHeader>
           <CardContent className="space-y-4">
             {updates.length > 0 ? updates.map((update) => {
@@ -108,6 +118,29 @@ export function AdminReviewQueue({
                         </p>
                       ) : null}
                       <p className="text-xs text-zinc-500">{authority.shortNote}</p>
+                      {(() => {
+                        const assist = reviewAssistByUpdateId.get(update.id);
+                        if (!assist) return null;
+                        const c = assist.suggestedClassification;
+                        return (
+                          <div className="mt-2 rounded-xl border border-violet-400/30 bg-violet-500/10 p-3">
+                            <p className="text-[10px] font-medium uppercase tracking-[0.18em] text-violet-200">
+                              AI suggestion · unverified — human review still required
+                            </p>
+                            <p className="mt-1 text-xs text-violet-100">
+                              {c.developmentType} · {c.legalArea} · {c.jurisdiction} · importance{" "}
+                              {c.importanceLevel} · confidence {c.confidenceLevel}
+                            </p>
+                            <p className="mt-1 text-xs text-zinc-300">
+                              {assist.suggestedSummary.oneSentenceSummary}
+                            </p>
+                            <p className="mt-1 text-[10px] text-zinc-500">
+                              Suggested by {assist.modelUsed}. Not applied to the record and never a
+                              basis for publication.
+                            </p>
+                          </div>
+                        );
+                      })()}
                     </div>
                     <div className="flex flex-wrap gap-2">
                       {update.status === "needs_review" && !isDiscoveryLead ? (
