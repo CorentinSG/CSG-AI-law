@@ -27,6 +27,7 @@ describe("admin ai regulation scan route", () => {
   afterEach(() => {
     vi.resetModules();
     vi.clearAllMocks();
+    delete process.env.SCAN_JOB_ROUTE_ENQUEUE_ONLY;
   });
 
   it("rejects unauthenticated requests", async () => {
@@ -87,6 +88,7 @@ describe("admin ai regulation scan route", () => {
       trigger: "manual",
       requestedBy: "admin-api",
       scanProfile: "live_news_discovery_scan",
+      executionMode: "drain",
     });
     await expect(response.json()).resolves.toMatchObject({
       ok: true,
@@ -99,6 +101,56 @@ describe("admin ai regulation scan route", () => {
         id: "job-manual-processed",
       },
       blockingRunningJobSummaries: [],
+    });
+  });
+
+  it("switches the admin API to honest enqueue-only mode when the route flag is enabled", async () => {
+    process.env.SCAN_JOB_ROUTE_ENQUEUE_ONLY = "true";
+    requestHasValidAdminAuth.mockReturnValueOnce(true);
+    queueAndDrainScanJob.mockResolvedValueOnce({
+      queuedJob: {
+        id: "job-manual-queued",
+        sourceId: "src-1",
+        trigger: "manual",
+        requestedBy: "admin-api",
+        status: "queued",
+      },
+      processedJob: null,
+      queuedJobProcessedImmediately: false,
+      blockedByRunningJobs: [],
+      blockingRunningJobSummaries: [],
+      result: [],
+      stewardship: null,
+    });
+
+    const { POST } = await import("@/app/api/ai-regulation/scan/route");
+    const response = await POST(
+      new Request("http://localhost/api/ai-regulation/scan", {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+        },
+        body: JSON.stringify({
+          sourceId: "src-1",
+        }),
+      }),
+    );
+
+    expect(response.status).toBe(200);
+    expect(queueAndDrainScanJob).toHaveBeenCalledWith({
+      sourceId: "src-1",
+      trigger: "manual",
+      requestedBy: "admin-api",
+      scanProfile: undefined,
+      executionMode: "enqueue_only",
+    });
+    await expect(response.json()).resolves.toMatchObject({
+      ok: true,
+      queuedJobProcessedImmediately: false,
+      processedJob: null,
+      queuedJob: {
+        id: "job-manual-queued",
+      },
     });
   });
 

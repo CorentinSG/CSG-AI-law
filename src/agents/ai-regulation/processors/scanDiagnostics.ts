@@ -11,6 +11,20 @@ interface ScanDiagnosticInput {
   durationMs: number;
 }
 
+function formatDiagnosticEntry(
+  prefix: "warning" | "error",
+  message: string,
+) {
+  if (
+    message.startsWith("failure_report=") ||
+    message.startsWith("ai_result=")
+  ) {
+    return message;
+  }
+
+  return `${prefix}=${message}`;
+}
+
 export function buildScanDiagnosticMessages(input: ScanDiagnosticInput) {
   const messages = [
     `items_fetched=${input.itemsFetched}`,
@@ -30,11 +44,11 @@ export function buildScanDiagnosticMessages(input: ScanDiagnosticInput) {
   }
 
   for (const warning of input.parsingWarnings) {
-    messages.push(`warning=${warning}`);
+    messages.push(formatDiagnosticEntry("warning", warning));
   }
 
   for (const error of input.extractionErrors) {
-    messages.push(`error=${error}`);
+    messages.push(formatDiagnosticEntry("error", error));
   }
 
   return messages;

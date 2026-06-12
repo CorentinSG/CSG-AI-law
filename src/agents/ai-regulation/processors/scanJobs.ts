@@ -15,6 +15,28 @@ const DEFAULT_SCAN_JOB_LEASE_OWNER = "scan-worker";
 const DEFAULT_SCAN_JOB_HEARTBEAT_INTERVAL_MS = 10_000;
 const DEFAULT_SCAN_JOB_HEARTBEAT_TIMEOUT_MS = 45_000;
 
+export type QueueScanJobDispatchResult = {
+  queuedJob: ScanJob;
+  processedJob: ScanJob | null;
+  queuedJobProcessedImmediately: boolean;
+  blockedByRunningJobs: string[];
+  blockingRunningJobSummaries: BlockingRunningJobSummary[];
+  result: Awaited<ReturnType<typeof runAiRegulationScan>>;
+  stewardship: {
+    syncedCount: number;
+    highPriorityReviewItems: number;
+  } | null;
+};
+
+export type QueueAndDrainScanJobInput = {
+  sourceId?: string;
+  trigger: ScanTrigger;
+  requestedBy: string;
+  scanProfile?: ScanProfileId;
+  leaseOwner?: string;
+  executionMode?: "drain" | "enqueue_only";
+};
+
 export type BlockingRunningJobSummary = {
   jobId: string;
   sourceId: string | null;
@@ -444,15 +466,24 @@ export async function queueAndRunScanJob(input: {
   };
 }
 
-export async function queueAndDrainScanJob(input: {
-  sourceId?: string;
-  trigger: ScanTrigger;
-  requestedBy: string;
-  scanProfile?: ScanProfileId;
-  leaseOwner?: string;
-}) {
+export async function queueAndDrainScanJob(
+  input: QueueAndDrainScanJobInput,
+): Promise<QueueScanJobDispatchResult> {
   await recoverStaleRunningScanJobs();
   const queuedJob = await queueScanJob(input);
+
+  if (input.executionMode === "enqueue_only") {
+    return {
+      queuedJob,
+      processedJob: null,
+      queuedJobProcessedImmediately: false,
+      blockedByRunningJobs: [],
+      blockingRunningJobSummaries: [],
+      result: [],
+      stewardship: null,
+    };
+  }
+
   const blockingRunningJobs = await getHealthyRunningScanJobs();
 
   if (blockingRunningJobs.length > 0) {

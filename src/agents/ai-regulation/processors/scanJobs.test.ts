@@ -444,6 +444,24 @@ describe("scanJobs durability helpers", () => {
     expect(drained.processedJob?.status).toBe("succeeded");
   });
 
+  it("can enqueue a job without inline draining when route mode is queue-only", async () => {
+    const { queueAndDrainScanJob } = await import(
+      "@/agents/ai-regulation/processors/scanJobs"
+    );
+    const queued = await queueAndDrainScanJob({
+      sourceId: "src-live",
+      trigger: "scheduled",
+      requestedBy: "vercel-cron",
+      executionMode: "enqueue_only",
+    });
+
+    expect(queued.queuedJob.status).toBe("queued");
+    expect(queued.processedJob).toBeNull();
+    expect(queued.queuedJobProcessedImmediately).toBe(false);
+    expect(queued.blockedByRunningJobs).toEqual([]);
+    expect(runAiRegulationScan).not.toHaveBeenCalled();
+  });
+
   it("can drain multiple queued jobs serially for a local worker-style runner", async () => {
     jobs.push(
       {

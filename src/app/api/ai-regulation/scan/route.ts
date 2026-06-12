@@ -7,6 +7,7 @@ import {
   requestHasValidAdminAuth,
 } from "@/lib/admin-auth";
 import { getRepositoryMode } from "@/db/repository";
+import { isScanJobRouteEnqueueOnlyEnabled } from "@/lib/env";
 import { checkUpstashRateLimit } from "@/lib/upstash-rate-limit";
 
 function unauthorized() {
@@ -53,11 +54,14 @@ export async function POST(request: Request) {
     result,
   } =
     await queueAndDrainScanJob({
-    sourceId: body.sourceId,
-    trigger: "manual",
-    requestedBy: "admin-api",
-    scanProfile: getScanProfile(body.scanProfile)?.id ?? undefined,
-  });
+      sourceId: body.sourceId,
+      trigger: "manual",
+      requestedBy: "admin-api",
+      scanProfile: getScanProfile(body.scanProfile)?.id ?? undefined,
+      executionMode: isScanJobRouteEnqueueOnlyEnabled()
+        ? "enqueue_only"
+        : "drain",
+    });
 
   return NextResponse.json({
     ok: true,
