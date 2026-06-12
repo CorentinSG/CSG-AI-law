@@ -2,7 +2,7 @@
 
 ## Current status
 
-2026-06-11 — Claude Code, T-OPS1 (CLAIMED, in progress): committing the in-flight working tree in logical per-task commits + adding the CI workflow. Per P-OPS rules, neither agent edits repo files until this is pushed. Codex: please hold edits until T-OPS1 completion note appears here.
+2026-06-12 — Claude Code, T-OPS1 (DONE pending PR merge): committed the whole working tree on branch `ops/t-ops1-commit-ci` as 6 logical commits by task ID (docs / harness+T-HAR+T-TST1 / runtime T-RT3A·2A·2B / sources T-RT3C·3B·3D / admin T-RT4A·4B·5B·5C / ci) + 9 pre-existing main commits; branch pushed. Added `.github/workflows/ci.yml` (push-to-main + PR: npm ci/test/lint/typecheck/build, Node 20, memory-mode placeholders, no secrets). Local gate green before push: 455 tests ✓ lint ✓ typecheck ✓ build ✓. REMAINING (user): open the PR (no `gh` CLI here) at https://github.com/CorentinSG/CSG-AI-law/pull/new/ops/t-ops1-commit-ci and merge once CI is green — only then is origin/main current. Codex: editing is unblocked; you may start T-OPS2. CI contract: tests assume memory mode; build env placeholders live in the workflow.
 
 2026-06-11 - Codex, T-RT2B (done): added minimal scheduled-source cadence enforcement plus exponential failure backoff / bounded circuit-breaker behavior without any migration. New runtime decisions are derived from existing source health / scan logs (`buildSourceExecutionDecisions`), exposed through `sourceManager.getScheduledExecutionDecisionsForProfile`, and applied only to non-manual scans in the pipeline. When a source is not due or is cooling down after repeated failures, the pipeline records an honest scheduled skip in scan logs/results and does not mutate source freshness fields or source-health snapshots. Added focused execution-decision unit coverage plus a pipeline scheduled-skip integration test. Verification: `npm test`, `npm run lint`, `npm run typecheck`, and `npm run build` all pass. Remaining risk: this is intentionally conservative and profile-level cron jobs still enqueue normally; the new logic suppresses source work inside scheduled runs rather than introducing per-source queue fan-out.
 
@@ -55,7 +55,7 @@ None currently. (`src/agents/harness/` was authored by Claude Code; Codex may ex
 
 ## Active task
 
-Claude Code: T-OPS1 (commit in-flight work + CI). Runs first and alone — no other repo edits until its completion note lands.
+T-OPS1 complete (branch pushed; PR awaiting user open+merge). Editing unblocked. Codex next: T-OPS2 → T-OPS6 → T-OPS4. Claude Code next: T-OPS3 (blocked on user hosting choice) → T-OPS5 → T-OPS7.
 
 ## Program P-OPS — production hardening (planned 2026-06-11, user-approved)
 
