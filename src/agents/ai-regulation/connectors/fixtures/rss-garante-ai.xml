@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0">
+  <channel>
+    <title>Garante per la protezione dei dati personali - News</title>
+    <item>
+      <title>Intelligenza artificiale: provvedimento del Garante</title>
+      <link>https://www.garanteprivacy.it/home/docweb/-/docweb-display/docweb/999001</link>
+      <guid>garante-ai-1</guid>
+      <pubDate>Wed, 10 Jun 2026 09:00:00 GMT</pubDate>
+      <description>Il Garante pubblica indicazioni su sistemi di intelligenza artificiale e protezione dei dati.</description>
+      <category>Intelligenza artificiale</category>
+    </item>
+    <item>
+      <title>Comunicato stampa non correlato</title>
+      <link>https://www.garanteprivacy.it/home/docweb/-/docweb-display/docweb/999002</link>
+      <guid>garante-other-1</guid>
+      <pubDate>Tue, 09 Jun 2026 09:00:00 GMT</pubDate>
+      <description>Aggiornamento generale.</description>
+    </item>
+  </channel>
+</rss>

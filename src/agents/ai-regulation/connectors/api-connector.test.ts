@@ -1,8 +1,13 @@
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
+
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { ApiConnector } from "@/agents/ai-regulation/connectors/api-connector";
 import type { RegulationSource } from "@/agents/ai-regulation/types";
 import { resetEnvForTests } from "@/lib/env";
+
+const fixturesDir = join(process.cwd(), "src", "agents", "ai-regulation", "connectors", "fixtures");
 
 function makeSource(overrides: Partial<RegulationSource>): RegulationSource {
   return {
@@ -263,10 +268,14 @@ describe("ApiConnector", () => {
     expect(result.zeroResultsReason).toContain("LEGIFRANCE_PISTE_CLIENT_ID/SECRET");
   });
 
-  it("maps Legifrance results when PISTE credentials are available", async () => {
+  it("maps the golden Legifrance PISTE search fixture when credentials are available", async () => {
     process.env.LEGIFRANCE_PISTE_CLIENT_ID = "test-client";
     process.env.LEGIFRANCE_PISTE_CLIENT_SECRET = "test-secret";
     resetEnvForTests();
+    const pisteSearchFixture = readFileSync(
+      join(fixturesDir, "legifrance-piste-search.json"),
+      "utf8",
+    );
     const fetchMock = vi
       .spyOn(globalThis, "fetch")
       .mockResolvedValueOnce(
@@ -276,18 +285,10 @@ describe("ApiConnector", () => {
         }),
       )
       .mockResolvedValueOnce(
-        new Response(
-          JSON.stringify({
-            results: [
-              {
-                titles: [{ cid: "JORFTEXT000049000001", title: "Décret relatif à l'intelligence artificielle" }],
-                nature: "DECRET",
-                date: "2026-05-20",
-              },
-            ],
-          }),
-          { status: 200, headers: { "Content-Type": "application/json" } },
-        ),
+        new Response(pisteSearchFixture, {
+          status: 200,
+          headers: { "Content-Type": "application/json" },
+        }),
       );
 
     const connector = new ApiConnector();

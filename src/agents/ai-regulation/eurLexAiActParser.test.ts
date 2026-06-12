@@ -1,4 +1,6 @@
 import { describe, expect, it } from "vitest";
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 
 import {
   AI_ACT_CELEX,
@@ -11,38 +13,18 @@ import {
 } from "@/agents/ai-regulation/eurLexAiActParser";
 import type { RegulationSource } from "@/agents/ai-regulation/types";
 
-const eurLexAiActHtmlFixture = `
-<!doctype html>
-<html lang="en">
-  <head>
-    <title>Regulation (EU) 2024/1689</title>
-    <link rel="canonical" href="https://eur-lex.europa.eu/eli/reg/2024/1689/oj/eng" />
-  </head>
-  <body>
-    <div id="title">Regulation (EU) 2024/1689 of the European Parliament and of the Council</div>
-    <div class="eli-subdivision" id="cpt_I">
-      <p class="oj-ti-section-1">CHAPTER I</p>
-      <div class="eli-title">GENERAL PROVISIONS</div>
-    </div>
-    <div class="eli-subdivision" id="art_1">
-      <p class="oj-ti-art">Article 1</p>
-      <div class="eli-title">Subject matter\`\`</div>
-    </div>
-    <div class="eli-subdivision" id="art_5">
-      <p class="oj-ti-art">Article 5</p>
-      <div class="eli-title">Prohibited AI practices</div>
-    </div>
-    <div class="eli-subdivision" id="art_113">
-      <p class="oj-ti-art">Article 113</p>
-      <div class="eli-title">Entry into force and application</div>
-    </div>
-    <div class="eli-container" id="anx_III">
-      <p class="oj-doc-ti">ANNEX III</p>
-      <p class="oj-doc-ti">High-risk AI systems referred to in Article 6(2)</p>
-    </div>
-  </body>
-</html>
-`;
+const eurLexAiActHtmlFixture = readFileSync(
+  join(
+    process.cwd(),
+    "src",
+    "agents",
+    "ai-regulation",
+    "connectors",
+    "fixtures",
+    "eur-lex-ai-act.html",
+  ),
+  "utf8",
+);
 
 describe("parseEurLexAiActHtml", () => {
   it("extracts canonical metadata and key AI Act subdivisions from EUR-Lex HTML", () => {

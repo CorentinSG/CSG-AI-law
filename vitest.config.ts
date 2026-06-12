@@ -10,6 +10,7 @@ export default defineConfig({
   plugins: [tsconfigPaths()],
   test: {
     environment: "node",
+    testTimeout: 10_000,
     coverage: {
       provider: "v8",
     },

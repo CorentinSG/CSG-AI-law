@@ -36,6 +36,7 @@ const rawEnvSchema = z.object({
   ADMIN_USERNAME: z.string().min(1).default("admin"),
   ADMIN_PASSWORD: z.string().min(1).default("change-me"),
   CRON_SECRET: z.string().min(16).optional(),
+  ALERT_WEBHOOK_URL: z.string().url().optional(),
   // Upstash Redis — optional, enables distributed rate limiting (F6)
   // Install @upstash/redis and @upstash/ratelimit to activate.
   UPSTASH_REDIS_REST_URL: z.string().url().optional(),
@@ -82,6 +83,7 @@ export interface AppEnv {
   ADMIN_USERNAME: string;
   ADMIN_PASSWORD: string;
   CRON_SECRET?: string;
+  ALERT_WEBHOOK_URL?: string;
   /** Upstash Redis REST URL — enables distributed rate limiting when set (F6) */
   UPSTASH_REDIS_REST_URL?: string;
   /** Upstash Redis REST token — required alongside UPSTASH_REDIS_REST_URL (F6) */
@@ -129,6 +131,7 @@ function buildEnv(): AppEnv {
     ADMIN_USERNAME: process.env.ADMIN_USERNAME ?? "admin",
     ADMIN_PASSWORD: process.env.ADMIN_PASSWORD ?? "change-me",
     CRON_SECRET: process.env.CRON_SECRET,
+    ALERT_WEBHOOK_URL: process.env.ALERT_WEBHOOK_URL,
     UPSTASH_REDIS_REST_URL: process.env.UPSTASH_REDIS_REST_URL,
     UPSTASH_REDIS_REST_TOKEN: process.env.UPSTASH_REDIS_REST_TOKEN,
     SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY,

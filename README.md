@@ -2,6 +2,8 @@
 
 This repository contains the AI Regulation Monitor MVP for a legal intelligence platform focused on official AI regulatory developments.
 
+Future product scope: the platform is intended to expand beyond AI regulation into adjacent legal-intelligence verticals for personal data / privacy law and cloud law. These future domains should preserve the same separation between official-source-backed legal authority, discovery-only media signals, and human-reviewed publication.
+
 The current system supports:
 
 - a seed-backed in-memory repository for controlled local demo use

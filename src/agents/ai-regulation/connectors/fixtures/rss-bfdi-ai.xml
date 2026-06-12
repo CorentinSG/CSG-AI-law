@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0">
+  <channel>
+    <title>BfDI - Pressemitteilungen</title>
+    <item>
+      <title>BfDI veroeffentlicht Hinweise zu KI-Systemen</title>
+      <link>https://www.bfdi.bund.de/SharedDocs/Pressemitteilungen/DE/2026/ki-systeme.html</link>
+      <guid>bfdi-ai-1</guid>
+      <pubDate>Thu, 11 Jun 2026 08:30:00 GMT</pubDate>
+      <description>Der BfDI informiert ueber Datenschutzanforderungen fuer kuenstliche Intelligenz und automatisierte Entscheidungen.</description>
+      <category>Kuenstliche Intelligenz</category>
+    </item>
+  </channel>
+</rss>
