@@ -30,6 +30,8 @@ afterEach(() => {
   vi.restoreAllMocks();
   delete process.env.NEWSAPI_API_KEY;
   delete process.env.JUDILIBRE_API_KEYID;
+  delete process.env.LEGIFRANCE_PISTE_CLIENT_ID;
+  delete process.env.LEGIFRANCE_PISTE_CLIENT_SECRET;
   process.env.ADMIN_AUTH_SECRET = "test-admin-secret-1234567890";
   resetEnvForTests();
 });
@@ -242,5 +244,102 @@ describe("ApiConnector", () => {
       "Judilibre official-case-law discovery could not be queried safely",
     );
     expect(result.zeroResultsReason).toContain("400");
+  });
+
+  it("degrades honestly when Legifrance PISTE credentials are missing", async () => {
+    const connector = new ApiConnector();
+    const result = await connector.scan(
+      makeSource({
+        id: "src-fr-legifrance-ai",
+        name: "Legifrance AI legal texts",
+        sourceUrl: "https://api.piste.gouv.fr/dila/legifrance/lf-engine-app/search",
+        config: { apiProvider: "legifrance" },
+        sourceType: "legislative_database",
+      }),
+    );
+
+    expect(result.items).toHaveLength(0);
+    expect(result.errors).toHaveLength(0);
+    expect(result.zeroResultsReason).toContain("LEGIFRANCE_PISTE_CLIENT_ID/SECRET");
+  });
+
+  it("maps Legifrance results when PISTE credentials are available", async () => {
+    process.env.LEGIFRANCE_PISTE_CLIENT_ID = "test-client";
+    process.env.LEGIFRANCE_PISTE_CLIENT_SECRET = "test-secret";
+    resetEnvForTests();
+    const fetchMock = vi
+      .spyOn(globalThis, "fetch")
+      .mockResolvedValueOnce(
+        new Response(JSON.stringify({ access_token: "test-token" }), {
+          status: 200,
+          headers: { "Content-Type": "application/json" },
+        }),
+      )
+      .mockResolvedValueOnce(
+        new Response(
+          JSON.stringify({
+            results: [
+              {
+                titles: [{ cid: "JORFTEXT000049000001", title: "Décret relatif à l'intelligence artificielle" }],
+                nature: "DECRET",
+                date: "2026-05-20",
+              },
+            ],
+          }),
+          { status: 200, headers: { "Content-Type": "application/json" } },
+        ),
+      );
+
+    const connector = new ApiConnector();
+    const result = await connector.scan(
+      makeSource({
+        id: "src-fr-legifrance-ai",
+        name: "Legifrance AI legal texts",
+        sourceUrl: "https://api.piste.gouv.fr/dila/legifrance/lf-engine-app/search",
+        config: { apiProvider: "legifrance" },
+        sourceType: "legislative_database",
+      }),
+    );
+
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    expect(result.items).toHaveLength(1);
+    expect(result.items[0]?.title).toContain("intelligence artificielle");
+    expect(result.items[0]?.url).toBe(
+      "https://www.legifrance.gouv.fr/loda/id/JORFTEXT000049000001",
+    );
+    expect(result.items[0]?.metadata?.provider).toBe("legifrance");
+  });
+
+  it("returns a non-fatal warning when the Legifrance API rejects the request", async () => {
+    process.env.LEGIFRANCE_PISTE_CLIENT_ID = "test-client";
+    process.env.LEGIFRANCE_PISTE_CLIENT_SECRET = "test-secret";
+    resetEnvForTests();
+    vi.spyOn(globalThis, "fetch")
+      .mockResolvedValueOnce(
+        new Response(JSON.stringify({ access_token: "test-token" }), {
+          status: 200,
+          headers: { "Content-Type": "application/json" },
+        }),
+      )
+      .mockResolvedValueOnce(
+        new Response(JSON.stringify({ message: "bad request" }), { status: 400 }),
+      );
+
+    const connector = new ApiConnector();
+    const result = await connector.scan(
+      makeSource({
+        id: "src-fr-legifrance-ai",
+        name: "Legifrance AI legal texts",
+        sourceUrl: "https://api.piste.gouv.fr/dila/legifrance/lf-engine-app/search",
+        config: { apiProvider: "legifrance" },
+        sourceType: "legislative_database",
+      }),
+    );
+
+    expect(result.items).toHaveLength(0);
+    expect(result.errors).toHaveLength(0);
+    expect(result.warnings[0]).toContain(
+      "Legifrance official DILA/PISTE API could not be queried safely",
+    );
   });
 });
