@@ -2,6 +2,10 @@
 
 ## Current status
 
+2026-06-12 - Codex, T-OPS2 (CLAIMED/in progress): outbound alerting for stale/degraded source transitions, consecutive scan failures, and optional daily review-backlog digest. Scope owned while open: `src/lib/alerting.ts`, `src/lib/env.ts`, `.env.example`, backend pipeline/scan-job/worker hooks, and targeted tests. Guardrails: optional webhook only, off when unset, no secrets/item content in payloads, alert failures never fail scans.
+
+2026-06-12 — Claude Code, T-OPS7 (DONE, code part): homepage `src/app/page.tsx` switched from `force-dynamic` to ISR (`revalidate = 300`) — build now reports `/` as Static (Revalidate 5m), matching the other public pages; it only reads public non-personalized data so this is safe. Audit: `/ai-regulation` stays dynamic by design (renders from searchParams — ISR inapplicable, documented T-RT0C); ProfilePortrait already uses optimized `next/image` + priority LCP; JarvisOrb is a lightweight framer-motion animation. DEAD CODE found (not deleted per rules): `home-hero-visual.tsx`, `ui/demo.tsx`, `ui/splite.tsx` + the `@splinetool/react-spline` dep are imported by no route — Spline renders nowhere, so there was no homepage Spline cost to cut; safe to remove in a follow-up. 455 tests ✓ build ✓ lint ✓. REMAINING (user, needs running/prod app): run Lighthouse on `/`, `/ai-regulation`, a country page (target ≥90 desktop) + confirm ISR cache response headers in prod. Branch `ops/t-ops7-perf`.
+
 2026-06-12 — Claude Code, T-OPS5 (DONE): verified the 4 remaining DPAs and migrated where a feed genuinely exists. Sweden IMY → added scannable RSS source `src-se-imy-ai` (`https://www.imy.se/nyheter/rss`, verified live RSS 2.0) with Swedish+English AI-term filtering — note: these 4 DPAs were NOT seeded scannable sources (only monitoring descriptors), so IMY is ADDED, completing its existing descriptor id. No-feed/blocked (documented, not wired): AP/NL (site returns HTTP 403 to this runtime — unverifiable, not invented), DSB/AT (no autodiscovery feed), DPC/IE (no autodiscovery feed). 455 tests ✓ typecheck ✓ lint ✓. On branch `ops/t-ops5-imy-rss` (open after T-OPS1 merges).
 
 2026-06-12 — Claude Code, T-OPS1 (DONE pending PR merge): committed the whole working tree on branch `ops/t-ops1-commit-ci` as 6 logical commits by task ID (docs / harness+T-HAR+T-TST1 / runtime T-RT3A·2A·2B / sources T-RT3C·3B·3D / admin T-RT4A·4B·5B·5C / ci) + 9 pre-existing main commits; branch pushed. Added `.github/workflows/ci.yml` (push-to-main + PR: npm ci/test/lint/typecheck/build, Node 20, memory-mode placeholders, no secrets). Local gate green before push: 455 tests ✓ lint ✓ typecheck ✓ build ✓. REMAINING (user): open the PR (no `gh` CLI here) at https://github.com/CorentinSG/CSG-AI-law/pull/new/ops/t-ops1-commit-ci and merge once CI is green — only then is origin/main current. Codex: editing is unblocked; you may start T-OPS2. CI contract: tests assume memory mode; build env placeholders live in the workflow.
@@ -57,7 +61,7 @@ None currently. (`src/agents/harness/` was authored by Claude Code; Codex may ex
 
 ## Active task
 
-T-OPS1 complete (branch pushed; PR awaiting user open+merge). Editing unblocked. Codex next: T-OPS2 → T-OPS6 → T-OPS4. Claude Code next: T-OPS3 (blocked on user hosting choice) → T-OPS5 → T-OPS7.
+Codex owns T-OPS2 (CLAIMED/in progress): outbound alerting. T-OPS1 complete (branch pushed; PR awaiting user open+merge). Editing unblocked. Codex sequence after T-OPS2: T-OPS6 → T-OPS4. Claude Code next: T-OPS3 (blocked on user hosting choice) → T-OPS5 → T-OPS7.
 
 ## Program P-OPS — production hardening (planned 2026-06-11, user-approved)
 
