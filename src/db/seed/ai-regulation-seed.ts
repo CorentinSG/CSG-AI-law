@@ -1859,6 +1859,48 @@ export const regulationSourcesSeed: RegulationSource[] = [
     createdAt: now,
     updatedAt: now,
   },
+  {
+    // T-OPS5: Sweden DPA on its verified official RSS feed. The matching
+    // monitoring descriptor (src-se-imy-ai) already existed; this seeds the
+    // scannable source so it is actually fetched. AP/NL is blocked from this
+    // runtime (HTTP 403, unverifiable — not wired); DSB/AT and DPC/IE expose no
+    // official RSS feed and stay non-seeded (documented, scraping not added).
+    id: "src-se-imy-ai",
+    name: "IMY (Integritetsskyddsmyndigheten) news",
+    jurisdiction: "Sweden",
+    region: "Europe",
+    country: "Sweden",
+    sourceUrl: "https://www.imy.se/nyheter/rss",
+    sourceType: "RSS",
+    scanFrequency: "daily",
+    active: true,
+    lastScannedAt: null,
+    notes:
+      "Official Swedish DPA (IMY) RSS news feed (autodiscovery feed from imy.se), verified live RSS 2.0. It carries all IMY news and press releases, so deterministic AI-specific filtering remains mandatory because the feed is broader than AI law alone.",
+    reliabilityLevel: "high",
+    preferredExtractionMethod: "rss",
+    config: {
+      maxItems: 12,
+      includeAnyTerms: [
+        "artificiell intelligens",
+        "artificial intelligence",
+        "ai act",
+        "ai-förordningen",
+        "algoritm",
+        "deepfake",
+        "ansiktsigenkänning",
+        "maskininlärning",
+        "automatiserat beslut",
+      ],
+      rssScope: "imy_official_news_feed",
+      editorialNotes: [
+        "Official IMY source.",
+        "Deterministic AI filtering remains mandatory because the news feed is broader than AI alone.",
+      ],
+    },
+    createdAt: now,
+    updatedAt: now,
+  },
 ];
 
 export const rawRegulatoryItemsSeed: RawRegulatoryItem[] = [
