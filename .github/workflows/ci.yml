@@ -1,0 +1,31 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+# Tests run in memory mode; no real secrets are required. The values below are
+# obvious non-secret placeholders that only satisfy env validation so the
+# production build (`next build` sets NODE_ENV=production) does not fail on a
+# missing data mode / admin secret. They are NOT credentials.
+env:
+  APP_DATA_MODE: memory
+  ALLOW_MEMORY_MODE_IN_PRODUCTION: "true"
+  ADMIN_AUTH_SECRET: ci-placeholder-admin-secret-000000
+  CRON_SECRET: ci-placeholder-cron-secret-0000
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npm test
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm run build
