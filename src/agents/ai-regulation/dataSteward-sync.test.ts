@@ -1,6 +1,9 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
+import { syncLegalIntelligenceDataStewardFindings } from "@/agents/ai-regulation/dataSteward";
 
-const upsertDataQualityFinding = vi.fn();
+const { upsertDataQualityFinding } = vi.hoisted(() => ({
+  upsertDataQualityFinding: vi.fn(),
+}));
 
 vi.mock("@/agents/ai-regulation/processors/updateRepository", () => ({
   updateRepository: {
@@ -14,10 +17,6 @@ describe("syncLegalIntelligenceDataStewardFindings", () => {
   });
 
   it("persists source, discovery, citation, and coverage findings", async () => {
-    const { syncLegalIntelligenceDataStewardFindings } = await import(
-      "@/agents/ai-regulation/dataSteward"
-    );
-
     const result = await syncLegalIntelligenceDataStewardFindings({
       generatedAt: "2026-05-31T18:00:00.000Z",
       summary: {
