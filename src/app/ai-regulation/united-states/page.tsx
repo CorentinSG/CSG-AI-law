@@ -34,7 +34,9 @@ export const metadata: Metadata = {
     "United States AI regulation monitoring across federal agencies, state-level regulators, official soft-law sources, and human-reviewed legal intelligence entries.",
 };
 
-export const dynamic = "force-dynamic";
+// ISR (T-RT0C): serve from cache, revalidate every 5 min. Admin review/edit
+// actions call revalidatePath, so published changes surface promptly.
+export const revalidate = 300;
 
 const unitedStatesFocusCards = [
   {

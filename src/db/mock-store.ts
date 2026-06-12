@@ -1,5 +1,6 @@
 import type {
   CountryIntelligence,
+  CountryProfileReviewEvent,
   CountryIntelligenceSource,
   DataQualityFinding,
   DiscoveryLead,
@@ -35,6 +36,7 @@ interface MockStore {
   newsItems: NewsItemRecord[];
   sourceHealthChecks: SourceHealthCheck[];
   countryIntelligence: CountryIntelligence[];
+  countryProfileReviewEvents: CountryProfileReviewEvent[];
   countryIntelligenceSources: CountryIntelligenceSource[];
   ingestionLogs: IngestionLog[];
 }
@@ -72,6 +74,7 @@ export function resetMockStore() {
     newsItems: clone(seed.newsItems),
     sourceHealthChecks: clone(seed.sourceHealthChecks),
     countryIntelligence: clone(seed.countryIntelligence),
+    countryProfileReviewEvents: [],
     countryIntelligenceSources: clone(seed.countryIntelligenceSources),
     ingestionLogs: [],
   };

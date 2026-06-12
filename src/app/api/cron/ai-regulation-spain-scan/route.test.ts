@@ -86,6 +86,7 @@ describe("cron spain ai regulation scan route", () => {
       trigger: "scheduled",
       requestedBy: "vercel-cron-spain",
       scanProfile: "spain_official_legal_scan",
+      executionMode: "drain",
     });
     await expect(response.json()).resolves.toMatchObject({
       ok: true,
@@ -141,6 +142,7 @@ describe("cron spain ai regulation scan route", () => {
       trigger: "scheduled",
       requestedBy: "vercel-cron-spain",
       scanProfile: "spain_live_news_scan",
+      executionMode: "drain",
     });
     await expect(response.json()).resolves.toMatchObject({
       ok: true,

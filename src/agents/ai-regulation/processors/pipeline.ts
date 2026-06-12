@@ -6,6 +6,7 @@ import {
   planAiProcessingBatch,
 } from "@/agents/ai-regulation/processors/aiPlanning";
 import { processRegulatoryItemWithOpenAi } from "@/agents/ai-regulation/processors/openaiProcessor";
+import type { OpenAiProcessingSuccess } from "@/agents/ai-regulation/processors/openaiProcessor";
 import { aiSummarizer } from "@/agents/ai-regulation/processors/aiSummarizer";
 import { deduplicator } from "@/agents/ai-regulation/processors/deduplicator";
 import { deadlineExtractor } from "@/agents/ai-regulation/processors/deadlineExtractor";
@@ -27,7 +28,21 @@ import { sourceManager } from "@/agents/ai-regulation/processors/sourceManager";
 import { sourceScanner } from "@/agents/ai-regulation/processors/sourceScanner";
 import { updateRepository } from "@/agents/ai-regulation/processors/updateRepository";
 import { buildNewsItemFromUpdate } from "@/content/ai-regulation/news";
-import type { RegulationScanLog, TraceabilityMetadata, TraceabilityExtraction, TraceabilityRelevance, TraceabilityClassification } from "@/agents/ai-regulation/types";
+import type { ConnectorFetchMetadata } from "@/agents/ai-regulation/connectors/types";
+import {
+  buildFailureReport,
+  buildFailureReportLogMessage,
+} from "@/agents/harness/failure";
+import { addStep, createTrace, finishTrace, type TraceStep } from "@/agents/harness/trace";
+import type { SourceExecutionDecision } from "@/agents/ai-regulation/sourceRuntimeHealth";
+import type {
+  RegulationScanLog,
+  ReviewAssistMetadata,
+  TraceabilityMetadata,
+  TraceabilityExtraction,
+  TraceabilityRelevance,
+  TraceabilityClassification,
+} from "@/agents/ai-regulation/types";
 
 export type ScanTrigger = "manual" | "scheduled" | "scheduled_local_test";
 
@@ -76,6 +91,49 @@ function mergeTraceabilityMetadata(
         ...(patch.classification ?? {}),
       } as TraceabilityClassification,
     } as TraceabilityMetadata,
+  };
+}
+
+function buildReviewAssistMetadata(input: {
+  processedAt: string;
+  modelUsed: string;
+  promptVersion: string;
+  planningDecision: NonNullable<
+    ReturnType<typeof planAiProcessingBatch>[number]
+  >;
+  updatePatch: OpenAiProcessingSuccess["updatePatch"];
+}): ReviewAssistMetadata {
+  return {
+    generatedAt: input.processedAt,
+    modelUsed: input.modelUsed,
+    promptVersion: input.promptVersion,
+    planningDecision: input.planningDecision.decision,
+    planningDecisionReason: input.planningDecision.decisionReason,
+    estimatedCostUsd: input.planningDecision.estimatedCostUsd,
+    estimatedInputTokens: input.planningDecision.estimatedInputTokens,
+    estimatedOutputTokens: input.planningDecision.estimatedOutputTokens,
+    humanReviewRequired: true,
+    publicationStatus: "hidden",
+    citationQualityStatus: "needs_manual_verification",
+    suggestedClassification: {
+      jurisdiction: input.updatePatch.jurisdiction,
+      developmentType: input.updatePatch.developmentType,
+      legalArea: input.updatePatch.legalArea,
+      importanceLevel: input.updatePatch.importanceLevel,
+      confidenceLevel: input.updatePatch.confidenceLevel,
+      tags: input.updatePatch.tags,
+    },
+    suggestedSummary: {
+      oneSentenceSummary: input.updatePatch.oneSentenceSummary,
+      summary: input.updatePatch.summary,
+      whatHappened: input.updatePatch.whatHappened,
+      whyItMatters: input.updatePatch.whyItMatters,
+      practicalImpact: input.updatePatch.practicalImpact,
+      affectedParties: input.updatePatch.affectedParties,
+      keyObligations: input.updatePatch.keyObligations,
+      complianceDeadlines: input.updatePatch.complianceDeadlines,
+      enforcementRisk: input.updatePatch.enforcementRisk,
+    },
   };
 }
 
@@ -146,9 +204,40 @@ interface SourceScanState {
   extractionErrors: string[];
   responseStatus: number | null | undefined;
   zeroResultsReason: string | null | undefined;
+  fetchMetadata: ConnectorFetchMetadata | null;
+  scheduledExecutionDecision: SourceExecutionDecision | null;
   aiPendingCount: number;
   aiSkippedCount: number;
   aiEstimatedCostUsd: number;
+}
+
+function buildPipelineFailureReportMessage(input: {
+  taskInput: unknown;
+  agentConfig: Record<string, unknown>;
+  stepName: string;
+  stepKind: TraceStep["kind"];
+  error: unknown;
+  stepInput?: unknown;
+  stepOutput?: unknown;
+}) {
+  const errorMessage =
+    input.error instanceof Error ? input.error.message : String(input.error ?? "Unknown failure");
+  const trace = createTrace({
+    taskInput: input.taskInput,
+    agentConfig: input.agentConfig,
+  });
+
+  addStep(trace, {
+    name: input.stepName,
+    kind: input.stepKind,
+    input: input.stepInput,
+    output: input.stepOutput,
+    error: errorMessage,
+  });
+  finishTrace(trace, { status: "failed" });
+
+  const report = buildFailureReport(trace);
+  return report ? buildFailureReportLogMessage(report) : null;
 }
 
 // --- Stage 1 helper: scanSourcesForCandidates ---
@@ -161,11 +250,19 @@ async function scanSourcesForCandidates(
   scanProfile: ScanProfileId | undefined,
   scanJobId: string | null,
   sourceStates: Map<string, SourceScanState>,
+  scheduledExecutionDecisions?: Map<string, SourceExecutionDecision>,
 ): Promise<ProcessableCandidate[]> {
   const processableCandidates: ProcessableCandidate[] = [];
 
   for (const source of sources) {
     const state = sourceStates.get(source.id)!;
+    const executionDecision = scheduledExecutionDecisions?.get(source.id) ?? null;
+
+    if (executionDecision && !executionDecision.shouldScan) {
+      state.scheduledExecutionDecision = executionDecision;
+      state.zeroResultsReason = executionDecision.reason;
+      continue;
+    }
 
     try {
       const scanResult = await sourceScanner.scanSource(source);
@@ -173,6 +270,7 @@ async function scanSourcesForCandidates(
       state.itemsFound = scanResult.itemsFetched ?? candidates.length;
       state.responseStatus = scanResult.responseStatus;
       state.zeroResultsReason = scanResult.zeroResultsReason;
+      state.fetchMetadata = scanResult.fetchMetadata ?? null;
       state.parsingWarnings.push(...scanResult.warnings);
       state.extractionErrors.push(...scanResult.errors);
 
@@ -352,9 +450,34 @@ async function scanSourcesForCandidates(
 
       await sourceManager.updateLastScannedAt(source.id, new Date().toISOString());
     } catch (error) {
-      state.extractionErrors.push(
-        error instanceof Error ? error.message : "Unknown scan error",
-      );
+      const errorMessage =
+        error instanceof Error ? error.message : "Unknown scan error";
+      const failureReportMessage = buildPipelineFailureReportMessage({
+        taskInput: {
+          sourceId: source.id,
+          sourceName: source.name,
+          sourceUrl: source.sourceUrl,
+          trigger,
+          scanProfile: scanProfile ?? "default",
+          scanJobId,
+        },
+        agentConfig: {
+          pipelineStage: "scan_sources",
+          parserUsed: resolveParserUsed(source),
+        },
+        stepName: "scan_source",
+        stepKind: "retrieval",
+        error,
+        stepInput: {
+          sourceId: source.id,
+          sourceUrl: source.sourceUrl,
+        },
+      });
+
+      state.extractionErrors.push(errorMessage);
+      if (failureReportMessage) {
+        state.extractionErrors.push(failureReportMessage);
+      }
     }
   }
 
@@ -573,6 +696,21 @@ async function processAllCandidates(
             });
           } else {
             await updateRepository.saveUpdateEdits(update.id, aiResult.updatePatch);
+            const aiReviewAssistMetadata = buildReviewAssistMetadata({
+              processedAt: new Date().toISOString(),
+              modelUsed: aiResult.modelUsed,
+              promptVersion: aiResult.promptVersion,
+              planningDecision,
+              updatePatch: aiResult.updatePatch,
+            });
+            const rawItemWithReviewAssist = await updateRepository.updateRawItemMetadata(
+              entry.rawItem.id,
+              {
+                ...entry.rawItem.rawMetadata,
+                reviewAssist: aiReviewAssistMetadata,
+              },
+            );
+            entry.rawItem.rawMetadata = rawItemWithReviewAssist.rawMetadata;
             await updateRepository.addProcessingLog({
               rawItemId: entry.rawItem.id,
               regulatoryUpdateId: update.id,
@@ -586,6 +724,26 @@ async function processAllCandidates(
           }
         } catch (error) {
           state.processingFailures += 1;
+          const failureReportMessage = buildPipelineFailureReportMessage({
+            taskInput: {
+              sourceId: entry.source.id,
+              rawItemId: entry.rawItem.id,
+              regulatoryUpdateId: update.id,
+              candidateUrl: entry.candidate.url,
+            },
+            agentConfig: {
+              pipelineStage: "openai_processing",
+              model: env.AI_MODEL_SUMMARY,
+              processingDecision: planningDecision?.decision ?? "unplanned",
+            },
+            stepName: "openai_processing",
+            stepKind: "llm",
+            error,
+            stepInput: {
+              rawItemId: entry.rawItem.id,
+              regulatoryUpdateId: update.id,
+            },
+          });
           await updateRepository.addProcessingLog({
             rawItemId: entry.rawItem.id,
             regulatoryUpdateId: update.id,
@@ -594,10 +752,7 @@ async function processAllCandidates(
             processingStartedAt: entry.processingStartedAt,
             processingFinishedAt: new Date().toISOString(),
             status: "failed",
-            errorMessage:
-              error instanceof Error
-                ? `OpenAI processing failed safely: ${error.message}`
-                : "OpenAI processing failed safely.",
+            errorMessage: failureReportMessage ?? "OpenAI processing failed safely.",
           });
         }
       }
@@ -605,6 +760,25 @@ async function processAllCandidates(
       state.newItemsDetected += 1;
     } catch (error) {
       state.processingFailures += 1;
+      const failureReportMessage = buildPipelineFailureReportMessage({
+        taskInput: {
+          sourceId: entry.source.id,
+          rawItemId: entry.rawItem.id,
+          candidateUrl: entry.candidate.url,
+          candidateTitle: entry.candidate.title,
+        },
+        agentConfig: {
+          pipelineStage: "process_candidate",
+          parserUsed: resolveParserUsed(entry.source),
+        },
+        stepName: "process_candidate",
+        stepKind: "other",
+        error,
+        stepInput: {
+          rawItemId: entry.rawItem.id,
+          candidateUrl: entry.candidate.url,
+        },
+      });
       await updateRepository.addProcessingLog({
         rawItemId: entry.rawItem.id,
         regulatoryUpdateId: null,
@@ -613,8 +787,7 @@ async function processAllCandidates(
         processingStartedAt: entry.processingStartedAt,
         processingFinishedAt: new Date().toISOString(),
         status: "failed",
-        errorMessage:
-          error instanceof Error ? error.message : "Unknown processing failure",
+        errorMessage: failureReportMessage ?? "Unknown processing failure",
       });
     }
   }
@@ -670,7 +843,34 @@ async function finalizeSourceScan(
     duplicatesDetected: state.duplicatesDetected,
     errors: diagnosticMessages,
   });
+  if (state.scheduledExecutionDecision) {
+    return {
+      sourceId: source.id,
+      status,
+      itemsFound: state.itemsFound,
+      newItemsDetected: state.newItemsDetected,
+      duplicatesDetected: state.duplicatesDetected,
+      itemsFilteredOut: state.itemsFilteredOut,
+      processingFailures: state.processingFailures,
+      responseStatus: state.responseStatus ?? null,
+      warnings: state.parsingWarnings,
+      errors: state.extractionErrors,
+      durationMs,
+      zeroResultsReason: state.zeroResultsReason ?? null,
+      aiPendingCount: state.aiPendingCount,
+      aiSkippedCount: state.aiSkippedCount,
+      aiEstimatedCostUsd: Number(state.aiEstimatedCostUsd.toFixed(6)),
+      trigger,
+      scanProfile: scanProfile ?? "default",
+    };
+  }
   await updateRepository.updateSource(source.id, {
+    config: state.fetchMetadata
+      ? {
+          ...(source.config ?? {}),
+          runtimeFetchState: state.fetchMetadata.state,
+        }
+      : source.config,
     lastScannedAt: finishedAt,
     lastSuccessfulScanAt: status === "success" || status === "partial_success"
       ? finishedAt
@@ -762,6 +962,10 @@ export async function runAiRegulationScan(
   const scanJobId = options?.scanJobId ?? null;
   const scanProfile = options?.scanProfile;
   const activeSources = await sourceManager.getActiveSourcesForProfile(scanProfile);
+  const scheduledExecutionDecisions =
+    trigger === "manual"
+      ? undefined
+      : await sourceManager.getScheduledExecutionDecisionsForProfile(scanProfile);
   const sources = sourceId
     ? activeSources.filter((source) => source.id === sourceId)
     : activeSources;
@@ -782,6 +986,8 @@ export async function runAiRegulationScan(
       extractionErrors: [],
       responseStatus: null,
       zeroResultsReason: null,
+      fetchMetadata: null,
+      scheduledExecutionDecision: null,
       aiPendingCount: 0,
       aiSkippedCount: 0,
       aiEstimatedCostUsd: 0,
@@ -795,6 +1001,7 @@ export async function runAiRegulationScan(
     scanProfile,
     scanJobId,
     sourceStates,
+    scheduledExecutionDecisions,
   );
 
   // --- Stage 2: AI planning, update/news creation, optional OpenAI ---

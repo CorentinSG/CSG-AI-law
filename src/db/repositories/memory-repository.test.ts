@@ -597,9 +597,18 @@ describe("MemoryAiRegulationRepository", () => {
       publicSummary: france!.publicSummary,
       editorialNotes: france!.editorialNotes,
       missingSourceWarnings: france!.missingSourceWarnings,
+      implementationMeasures: france!.implementationMeasures,
+      competentAuthorities: france!.competentAuthorities,
+      marketSurveillanceAuthorities: france!.marketSurveillanceAuthorities,
+      notifyingAuthorities: france!.notifyingAuthorities,
+      relevantMinistries: france!.relevantMinistries,
+      nationalAIRegulationNotes: france!.nationalAIRegulationNotes,
+      nationalCaseLawNotes: france!.nationalCaseLawNotes,
+      nationalSoftLawNotes: france!.nationalSoftLawNotes,
       lastReviewedAt: france!.lastReviewedAt,
       reviewedBy: "Codex 1",
       reviewStatus: france!.reviewStatus,
+      needsReReview: france!.needsReReview,
     });
 
     expect(updated.implementationNotes).toBe("Backend extraction pilot active.");
@@ -625,5 +634,30 @@ describe("MemoryAiRegulationRepository", () => {
     const listedSources = await repository.listCountryIntelligenceSources(france!.id);
     expect(listedSources).toHaveLength(1);
     expect(listedSources[0]?.sourceTitle).toBe("France official pilot source");
+  });
+
+  it("records country profile editorial review events separately", async () => {
+    const france = await repository.getCountryIntelligenceBySlug("france");
+    expect(france).not.toBeNull();
+
+    const created = await repository.createCountryProfileReviewEvent({
+      countryId: france!.id,
+      countrySlug: france!.slug,
+      eventType: "editorial_saved",
+      actor: "Codex 1",
+      previousReviewStatus: france!.reviewStatus,
+      nextReviewStatus: "verified",
+      previousNeedsReReview: france!.needsReReview,
+      nextNeedsReReview: false,
+      notes: "Editorial review saved from admin.",
+      metadata: {
+        changedFields: ["publicSummary", "reviewStatus"],
+      },
+    });
+
+    expect(created.id).toMatch(/^country-review-/);
+    const events = await repository.listCountryProfileReviewEvents(10, france!.id);
+    expect(events.some((event) => event.id === created.id)).toBe(true);
+    expect(events[0]?.countrySlug).toBe("france");
   });
 });

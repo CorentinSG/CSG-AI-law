@@ -15,6 +15,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { env } from "@/lib/env";
 import { formatDisplayDate } from "@/lib/utils";
 
+// Stays dynamic (not ISR like the other public /ai-regulation pages, T-RT0C):
+// this is a single published monitor-item detail. If an item is unpublished
+// (e.g. a legal correction), it must drop from public immediately — the review
+// action does not revalidate this exact path, so caching it would risk serving
+// withdrawn legal content for up to the revalidate window. Keep it per-request.
 export const dynamic = "force-dynamic";
 
 export async function generateMetadata({

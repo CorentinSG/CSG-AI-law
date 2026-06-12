@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { runExistingDraftAiSmokeTest } from "@/agents/ai-regulation/processors/aiSmokeTest";
 
 import type {
   AiProcessingLog,
@@ -7,15 +8,17 @@ import type {
   RegulationSource,
 } from "@/agents/ai-regulation/types";
 
-const mockedUpdateRepository = {
-  listUpdates: vi.fn(),
-  getRawItems: vi.fn(),
-  getSources: vi.fn(),
-  getProcessingLogs: vi.fn(),
-  getUpdate: vi.fn(),
-  getRawItem: vi.fn(),
-  addProcessingLog: vi.fn(),
-};
+const { mockedUpdateRepository } = vi.hoisted(() => ({
+  mockedUpdateRepository: {
+    listUpdates: vi.fn(),
+    getRawItems: vi.fn(),
+    getSources: vi.fn(),
+    getProcessingLogs: vi.fn(),
+    getUpdate: vi.fn(),
+    getRawItem: vi.fn(),
+    addProcessingLog: vi.fn(),
+  },
+}));
 
 vi.mock("@/agents/ai-regulation/processors/updateRepository", () => ({
   updateRepository: mockedUpdateRepository,
@@ -125,7 +128,6 @@ const resetLog: AiProcessingLog = {
 
 describe("runExistingDraftAiSmokeTest fallback hydration", () => {
   beforeEach(() => {
-    vi.resetModules();
     Object.values(mockedUpdateRepository).forEach((mockFn) => mockFn.mockReset());
   });
 
@@ -137,10 +139,6 @@ describe("runExistingDraftAiSmokeTest fallback hydration", () => {
     mockedUpdateRepository.getUpdate.mockResolvedValue(smokeUpdate);
     mockedUpdateRepository.getRawItem.mockResolvedValue(smokeRaw);
     mockedUpdateRepository.addProcessingLog.mockResolvedValue(undefined);
-
-    const { runExistingDraftAiSmokeTest } = await import(
-      "@/agents/ai-regulation/processors/aiSmokeTest"
-    );
 
     const summary = await runExistingDraftAiSmokeTest();
 

@@ -1,6 +1,7 @@
 import Parser from "rss-parser";
 
 import type { ConnectorScanResult, SourceConnector } from "@/agents/ai-regulation/connectors/types";
+import { fetchTextWithConditionalCaching } from "@/agents/ai-regulation/connectors/conditional-fetch";
 import { buildExcerpt, buildStableCandidateId } from "@/agents/ai-regulation/connectors/connector-utils";
 import type { ExtractedCandidateItem, RegulationSource } from "@/agents/ai-regulation/types";
 
@@ -54,7 +55,39 @@ function getMaxItems(source: RegulationSource) {
 
 export class RssConnector implements SourceConnector {
   async scan(source: RegulationSource): Promise<ConnectorScanResult> {
-    const feed = await parser.parseURL(source.sourceUrl);
+    const fetchResult = await fetchTextWithConditionalCaching(source, {
+      Accept: "application/rss+xml, application/xml, text/xml;q=0.9, */*;q=0.8",
+    });
+    if (fetchResult.notModified) {
+      return {
+        items: [],
+        errors: [],
+        warnings: ["RSS source returned 304 Not Modified; parsing was skipped."],
+        responseStatus: fetchResult.response.status,
+        itemsFetched: 0,
+        zeroResultsReason: "The official RSS feed returned 304 Not Modified.",
+        fetchMetadata: fetchResult.fetchMetadata,
+      };
+    }
+    if (!fetchResult.response.ok) {
+      throw new Error(`RSS source request failed with ${fetchResult.response.status}`);
+    }
+    if (fetchResult.shortCircuitedByHash) {
+      return {
+        items: [],
+        errors: [],
+        warnings: [
+          "RSS source body hash matched the previous successful fetch; parsing was skipped.",
+        ],
+        responseStatus: fetchResult.response.status,
+        itemsFetched: 0,
+        zeroResultsReason:
+          "The official RSS feed content hash matched the previous successful fetch.",
+        fetchMetadata: fetchResult.fetchMetadata,
+      };
+    }
+
+    const feed = await parser.parseString(fetchResult.body);
     const includeAnyTerms = getConfiguredTerms(source, "includeAnyTerms");
     const excludeTerms = getConfiguredTerms(source, "excludeTerms");
     const maxItems = getMaxItems(source);
@@ -131,7 +164,7 @@ export class RssConnector implements SourceConnector {
           ? [`RSS connector limited processing to the first ${items.length} filtered items returned by the source.`]
           : []),
       ],
-      responseStatus: 200,
+      responseStatus: fetchResult.response.status,
       itemsFetched: items.length,
       zeroResultsReason:
         items.length === 0
@@ -139,6 +172,7 @@ export class RssConnector implements SourceConnector {
             ? "The official RSS feed responded, but no items matched the configured deterministic AI-regulation terms."
             : "The official RSS feed returned zero items."
           : null,
+      fetchMetadata: fetchResult.fetchMetadata,
     };
   }
 }

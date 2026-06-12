@@ -7,6 +7,7 @@ import {
   parseVisibleDate,
   resolveAbsoluteUrl,
 } from "@/agents/ai-regulation/connectors/connector-utils";
+import { fetchTextWithConditionalCaching } from "@/agents/ai-regulation/connectors/conditional-fetch";
 import {
   isConseilEtatSourceUrl,
   isCourCassationSourceUrl,
@@ -18,6 +19,10 @@ import {
   isLegifranceSourceUrl,
   parseLegifranceAiMaterials,
 } from "@/agents/ai-regulation/legifranceAiParser";
+import {
+  buildEurLexAiActCandidates,
+  isEurLexDocumentUrl,
+} from "@/agents/ai-regulation/eurLexAiActParser";
 import type {
   ConnectorScanResult,
   SourceConnector,
@@ -1310,14 +1315,36 @@ export class StaticPageConnector implements SourceConnector {
     await waitForCrawlDelay(source);
 
     let response: Response;
+    let html = "";
+    let fetchMetadata: ConnectorScanResult["fetchMetadata"] = null;
     try {
-      response = await fetch(source.sourceUrl, {
-        headers: {
-          "User-Agent":
-            "C-Saint-Girons-AI-Regulation-Monitor/0.1 (official-source-monitoring)",
-        },
-        next: { revalidate: 0 },
-      });
+      const fetchResult = await fetchTextWithConditionalCaching(source);
+      if (fetchResult.notModified) {
+        return {
+          items: [],
+          errors: [],
+          warnings: ["Static source returned 304 Not Modified; parsing was skipped."],
+          responseStatus: fetchResult.response.status,
+          itemsFetched: 0,
+          zeroResultsReason: "The official static source returned 304 Not Modified.",
+          fetchMetadata: fetchResult.fetchMetadata,
+        };
+      }
+      response = fetchResult.response;
+      fetchMetadata = fetchResult.fetchMetadata;
+      if (fetchResult.shortCircuitedByHash) {
+        return {
+          items: [],
+          errors: [],
+          warnings: ["Static source body hash matched the previous successful fetch; parsing was skipped."],
+          responseStatus: fetchResult.response.status,
+          itemsFetched: 0,
+          zeroResultsReason:
+            "The official static source content hash matched the previous successful fetch.",
+          fetchMetadata: fetchResult.fetchMetadata,
+        };
+      }
+      html = fetchResult.body;
     } catch (error) {
       if (isLegifranceSourceUrl(source.sourceUrl)) {
         const message =
@@ -1338,7 +1365,7 @@ export class StaticPageConnector implements SourceConnector {
     }
 
     if (!response.ok) {
-      const errorHtml = await response.text();
+      const errorHtml = html;
       if (isLegifranceSourceUrl(source.sourceUrl)) {
         if (isLegifranceChallengePage(errorHtml)) {
           return buildNonFatalStaticConstraintResult(
@@ -1362,7 +1389,6 @@ export class StaticPageConnector implements SourceConnector {
       throw new Error(`Static source request failed with ${response.status}`);
     }
 
-    let html = await response.text();
     if (isLegifranceSourceUrl(source.sourceUrl) && isLegifranceChallengePage(html)) {
       return buildNonFatalStaticConstraintResult(
         "Legifrance returned a Cloudflare challenge page for this scan run. The dedicated parser is ready, but this source currently requires manual review or an allowed access path.",
@@ -1451,6 +1477,10 @@ export class StaticPageConnector implements SourceConnector {
       items = parseFranceOfficialAiPage($, source);
       zeroResultsReason =
         "No targeted French official AI institutional materials were parsed from the official page.";
+    } else if (isEurLexDocumentUrl(source.sourceUrl)) {
+      items = buildEurLexAiActCandidates({ html, source });
+      zeroResultsReason =
+        "No EUR-Lex AI Act document metadata was parsed from the official structured document page.";
     } else if (/eur-lex\.europa\.eu/i.test(source.sourceUrl) && /search\.html/i.test(source.sourceUrl)) {
       items = parseEurLexSearch($, source);
       zeroResultsReason =
@@ -1487,6 +1517,7 @@ export class StaticPageConnector implements SourceConnector {
       responseStatus: response.status,
       itemsFetched: uniqueItems.length,
       zeroResultsReason: uniqueItems.length === 0 ? zeroResultsReason : null,
+      fetchMetadata,
     };
   }
 }

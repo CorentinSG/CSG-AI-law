@@ -3,14 +3,16 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { RssConnector } from "@/agents/ai-regulation/connectors/rss-connector";
 import type { RegulationSource } from "@/agents/ai-regulation/types";
 
-const { parseUrlMock } = vi.hoisted(() => ({
+const { parseUrlMock, parseStringMock } = vi.hoisted(() => ({
   parseUrlMock: vi.fn(),
+  parseStringMock: vi.fn(),
 }));
 
 vi.mock("rss-parser", () => {
   return {
     default: class MockParser {
       parseURL = parseUrlMock;
+      parseString = parseStringMock;
     },
   };
 });
@@ -40,6 +42,8 @@ function makeSource(overrides: Partial<RegulationSource>): RegulationSource {
 describe("RssConnector", () => {
   beforeEach(() => {
     parseUrlMock.mockReset();
+    parseStringMock.mockReset();
+    vi.stubGlobal("fetch", vi.fn());
   });
 
   afterEach(() => {
@@ -47,7 +51,7 @@ describe("RssConnector", () => {
   });
 
   it("filters RSS items deterministically using configured include terms", async () => {
-    parseUrlMock.mockResolvedValue({
+    parseStringMock.mockResolvedValue({
       title: "Agency Feed",
       items: [
         {
@@ -66,6 +70,14 @@ describe("RssConnector", () => {
         },
       ],
     });
+    vi.mocked(fetch).mockResolvedValue(
+      new Response("<rss />", {
+        status: 200,
+        headers: {
+          "content-type": "application/rss+xml",
+        },
+      }),
+    );
 
     const connector = new RssConnector();
     const result = await connector.scan(
@@ -83,7 +95,7 @@ describe("RssConnector", () => {
   });
 
   it("returns a clear zero-result reason when configured terms match nothing", async () => {
-    parseUrlMock.mockResolvedValue({
+    parseStringMock.mockResolvedValue({
       title: "Agency Feed",
       items: [
         {
@@ -95,6 +107,14 @@ describe("RssConnector", () => {
         },
       ],
     });
+    vi.mocked(fetch).mockResolvedValue(
+      new Response("<rss />", {
+        status: 200,
+        headers: {
+          "content-type": "application/rss+xml",
+        },
+      }),
+    );
 
     const connector = new RssConnector();
     const result = await connector.scan(
@@ -110,7 +130,7 @@ describe("RssConnector", () => {
   });
 
   it("handles RSS category objects from richer XML feeds without crashing", async () => {
-    parseUrlMock.mockResolvedValue({
+    parseStringMock.mockResolvedValue({
       title: "European Commission | Highlighted news",
       items: [
         {
@@ -132,6 +152,14 @@ describe("RssConnector", () => {
         },
       ],
     });
+    vi.mocked(fetch).mockResolvedValue(
+      new Response("<rss />", {
+        status: 200,
+        headers: {
+          "content-type": "application/rss+xml",
+        },
+      }),
+    );
 
     const connector = new RssConnector();
     const result = await connector.scan(

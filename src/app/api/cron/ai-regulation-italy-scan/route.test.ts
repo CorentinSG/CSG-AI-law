@@ -86,6 +86,7 @@ describe("cron italy ai regulation scan route", () => {
       trigger: "scheduled",
       requestedBy: "vercel-cron-italy",
       scanProfile: "italy_official_legal_scan",
+      executionMode: "drain",
     });
     await expect(response.json()).resolves.toMatchObject({
       ok: true,

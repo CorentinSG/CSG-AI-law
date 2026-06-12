@@ -30,7 +30,9 @@ export const metadata: Metadata = {
     "European Union and broader Europe AI regulation monitoring across official EU institutions, regulators, and carefully labeled soft-law or standards materials.",
 };
 
-export const dynamic = "force-dynamic";
+// ISR (T-RT0C): serve from cache, revalidate every 5 min. Admin review/edit
+// actions call revalidatePath, so published changes surface promptly.
+export const revalidate = 300;
 
 const authorityLayerLabel = {
   binding_law: "Binding EU law",

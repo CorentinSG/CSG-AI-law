@@ -4,6 +4,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 
 import type {
   CountryIntelligence,
+  CountryProfileReviewEventInput,
   DataQualityFindingInput,
   DiscoveryLead,
   DiscoveryLeadInput,
@@ -19,6 +20,7 @@ import type {
 } from "@/agents/ai-regulation/governance";
 import type { AiRegulatoryUpdate, RegulationSource } from "@/agents/ai-regulation/types";
 import type { IngestionLog, IngestionLogInput } from "@/agents/ingestion/types";
+import { computeCountryNeedsReReview } from "@/agents/ai-regulation/country-review";
 import { getSourceReferencesFromRawItem } from "@/agents/ai-regulation/citations";
 import { evaluatePublicationEligibility } from "@/agents/ai-regulation/publicationEligibility";
 import { buildNewsItemFromUpdate } from "@/content/ai-regulation/news";
@@ -26,7 +28,9 @@ import { isDiscoveryOnlySource } from "@/agents/ai-regulation/utils/discovery";
 import {
   countryIntelligenceSourceToInsert,
   countryIntelligenceToInsert,
+  countryProfileReviewEventToInsert,
   mapCountryIntelligenceRow,
+  mapCountryProfileReviewEventRow,
   mapCountryIntelligenceSourceRow,
   mapIngestionLogRow,
   dataQualityFindingToInsert,
@@ -358,6 +362,10 @@ export class SupabaseAiRegulationRepository implements AiRegulationRepository {
     string,
     ReturnType<typeof mapCountryIntelligenceSourceRow>[]
   >();
+  private readonly legacyCountryProfileReviewEvents = new Map<
+    string,
+    ReturnType<typeof mapCountryProfileReviewEventRow>
+  >();
 
   private createLegacyVerificationAttemptRecord(input: VerificationAttemptInput) {
     return mapVerificationAttemptRow(
@@ -420,8 +428,21 @@ export class SupabaseAiRegulationRepository implements AiRegulationRepository {
     return mapCountryIntelligenceRow(
       countryIntelligenceToInsert({
         ...input,
+        needsReReview: computeCountryNeedsReReview(input.lastReviewedAt),
         createdAt: timestamp,
         updatedAt: timestamp,
+      }),
+    );
+  }
+
+  private createLegacyCountryProfileReviewEventRecord(
+    input: CountryProfileReviewEventInput,
+  ) {
+    return mapCountryProfileReviewEventRow(
+      countryProfileReviewEventToInsert({
+        ...input,
+        id: `country-review-${randomUUID()}`,
+        createdAt: new Date().toISOString(),
       }),
     );
   }
@@ -1941,6 +1962,7 @@ export class SupabaseAiRegulationRepository implements AiRegulationRepository {
       .upsert(
         countryIntelligenceToInsert({
           ...input,
+          needsReReview: computeCountryNeedsReReview(input.lastReviewedAt),
           updatedAt: timestamp,
           createdAt: timestamp,
         }),
@@ -1955,6 +1977,7 @@ export class SupabaseAiRegulationRepository implements AiRegulationRepository {
             countryIntelligenceToInsert({
               ...existing,
               ...input,
+              needsReReview: computeCountryNeedsReReview(input.lastReviewedAt),
               updatedAt: timestamp,
               createdAt: existing.createdAt,
             }),
@@ -1965,6 +1988,49 @@ export class SupabaseAiRegulationRepository implements AiRegulationRepository {
     }
     handleError("Failed to upsert country intelligence", error);
     return mapCountryIntelligenceRow(data);
+  }
+
+  async listCountryProfileReviewEvents(limit = 50, countryId?: string) {
+    const client = requireAdminClient();
+    let query = client
+      .from("country_profile_review_events")
+      .select("*")
+      .order("created_at", { ascending: false })
+      .limit(limit);
+    if (countryId) {
+      query = query.eq("country_id", countryId);
+    }
+    const { data, error } = await query;
+    if (isMissingRelationError(error)) {
+      const events = Array.from(this.legacyCountryProfileReviewEvents.values()).filter(
+        (event) => (countryId ? event.countryId === countryId : true),
+      );
+      return events.slice(0, limit);
+    }
+    handleError("Failed to list country profile review events", error);
+    return (data ?? []).map(mapCountryProfileReviewEventRow);
+  }
+
+  async createCountryProfileReviewEvent(input: CountryProfileReviewEventInput) {
+    const client = requireAdminClient();
+    const { data, error } = await client
+      .from("country_profile_review_events")
+      .insert(
+        countryProfileReviewEventToInsert({
+          ...input,
+          id: `country-review-${randomUUID()}`,
+          createdAt: new Date().toISOString(),
+        }),
+      )
+      .select("*")
+      .single();
+    if (isMissingRelationError(error)) {
+      const record = this.createLegacyCountryProfileReviewEventRecord(input);
+      this.legacyCountryProfileReviewEvents.set(record.id, record);
+      return record;
+    }
+    handleError("Failed to create country profile review event", error);
+    return mapCountryProfileReviewEventRow(data);
   }
 
   async listCountryIntelligenceSources(countryId: string) {

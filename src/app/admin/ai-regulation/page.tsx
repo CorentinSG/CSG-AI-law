@@ -1,6 +1,12 @@
 import Link from "next/link";
 
 import { updateRepository } from "@/agents/ai-regulation/processors/updateRepository";
+import type { ReviewAssistMetadata } from "@/agents/ai-regulation/types";
+import {
+  deriveUpdateAuthorityType,
+  getAuthorityPriorityRank,
+} from "@/agents/ai-regulation/utils/authority";
+import { getSourceRuntimeHealthSummaries } from "@/agents/ai-regulation/sourceRuntimeHealth";
 import { summarizeAiPlanning } from "@/app/admin/ai-regulation/ai-planning";
 import {
   buildEuropeVerificationSummary,
@@ -29,6 +35,7 @@ import { AdminReviewQueue } from "./_components/AdminReviewQueue";
 import { AdminSourcePanel } from "./_components/AdminSourcePanel";
 import { AdminCoveragePanel } from "./_components/AdminCoveragePanel";
 import { AdminAiPanel } from "./_components/AdminAiPanel";
+import { AdminFreshnessPanel } from "./_components/AdminFreshnessPanel";
 
 export const dynamic = "force-dynamic";
 const reviewQueuePageSize = 18;
@@ -68,7 +75,7 @@ export default async function AdminAiRegulationPage({
   const params = ((await searchParams) ?? {}) as Record<string, string>;
   const page = parsePageParam(params.page, 1);
   const leadsPage = parsePageParam(params.leadsPage, 1);
-  const [updatesPage, sources, scanLogs, processingLogs, rawItems, scanJobs, options, sourceHealthChecks, discoveryLeadsPage] = await Promise.all([
+  const [updatesPage, sources, scanLogs, processingLogs, rawItems, scanJobs, options, sourceHealthChecks, discoveryLeadsPage, runtimeHealth] = await Promise.all([
     updateRepository.listUpdatesPage(params, {
       limit: reviewQueuePageSize,
       offset: getOffsetFromPage(page, reviewQueuePageSize),
@@ -88,14 +95,45 @@ export default async function AdminAiRegulationPage({
       limit: discoveryLeadsPageSize,
       offset: getOffsetFromPage(leadsPage, discoveryLeadsPageSize),
     }),
+    getSourceRuntimeHealthSummaries(),
   ]);
   const updates = updatesPage.items;
+  // T-RT4B: within-page prioritization so reviewers see actionable, higher-authority
+  // items first. needs_review rises to the top, then by source authority tier
+  // (Binding law → Other), then most recently detected. This reorders the loaded
+  // page only; global ordering across pages stays the repository's responsibility.
+  const prioritizedUpdates = [...updates].sort((a, b) => {
+    const aNeedsReview = a.status === "needs_review" ? 0 : 1;
+    const bNeedsReview = b.status === "needs_review" ? 0 : 1;
+    if (aNeedsReview !== bNeedsReview) return aNeedsReview - bNeedsReview;
+
+    const authorityDelta =
+      getAuthorityPriorityRank(deriveUpdateAuthorityType(a)) -
+      getAuthorityPriorityRank(deriveUpdateAuthorityType(b));
+    if (authorityDelta !== 0) return authorityDelta;
+
+    return (b.detectedDate ?? "").localeCompare(a.detectedDate ?? "");
+  });
   const aiPlanning = summarizeAiPlanning(processingLogs, rawItems);
   const latestAiResultByUpdateId = new Map(
     aiPlanning.enrichedOpenAiResults
       .filter((entry) => entry.regulatoryUpdateId)
       .map((entry) => [entry.regulatoryUpdateId!, entry]),
   );
+  // T-RT4B (after T-RT4A contract): surface the opt-in AI review-assist suggestion
+  // (rawMetadata.reviewAssist) per update, clearly as an UNVERIFIED suggestion.
+  const rawItemById = new Map(rawItems.map((item) => [item.id, item]));
+  const reviewAssistByUpdateId = new Map<string, ReviewAssistMetadata>();
+  for (const update of updates) {
+    const assist = rawItemById.get(update.rawItemId)?.rawMetadata?.reviewAssist;
+    if (
+      assist &&
+      typeof assist === "object" &&
+      "suggestedClassification" in (assist as Record<string, unknown>)
+    ) {
+      reviewAssistByUpdateId.set(update.id, assist as ReviewAssistMetadata);
+    }
+  }
 
   const latestLogBySource = new Map(
     sources.map((source) => [
@@ -156,6 +194,12 @@ export default async function AdminAiRegulationPage({
         >
           Open source diagnostics
         </Link>
+        <Link
+          href="/admin/ai-regulation/countries"
+          className="ml-3 inline-flex rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-zinc-100 transition hover:bg-white/10"
+        >
+          Edit country profiles
+        </Link>
       </section>
 
       <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
@@ -187,6 +231,10 @@ export default async function AdminAiRegulationPage({
           tone="informative"
           theme="dark"
         />
+      </section>
+
+      <section>
+        <AdminFreshnessPanel summaries={runtimeHealth} />
       </section>
 
       <section className="grid gap-6 lg:grid-cols-[1fr_1fr]">
@@ -453,13 +501,14 @@ export default async function AdminAiRegulationPage({
       </section>
 
       <AdminReviewQueue
-        updates={updates}
+        updates={prioritizedUpdates}
         sourceById={sourceById}
         sources={sources}
         params={params}
         page={page}
         updatesPage={updatesPage}
         latestAiResultByUpdateId={latestAiResultByUpdateId}
+        reviewAssistByUpdateId={reviewAssistByUpdateId}
         reviewQueuePageSize={reviewQueuePageSize}
         adminFilters={adminFilters}
       />

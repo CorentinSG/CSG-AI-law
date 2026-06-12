@@ -19,7 +19,9 @@ import {
 import { env } from "@/lib/env";
 import { formatDisplayDate } from "@/lib/utils";
 
-export const dynamic = "force-dynamic";
+// ISR (T-RT0C): serve from cache, revalidate every 5 min. Admin review/edit
+// actions call revalidatePath, so published changes surface promptly.
+export const revalidate = 300;
 
 export async function generateStaticParams() {
   return getUsStateAiLawProfiles().map((profile) => ({

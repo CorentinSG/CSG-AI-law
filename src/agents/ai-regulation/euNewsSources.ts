@@ -70,6 +70,15 @@ export const euNewsSourceRegistry: EuNewsSourceDescriptor[] = [
     category: "official_eu",
   },
   {
+    id: "eur-lex-ai-act",
+    sourceId: "src-eur-lex-ai-act",
+    name: "EUR-Lex AI Act consolidated text",
+    sourceAuthorityLevel: "official_eu_primary",
+    official: true,
+    region: "Europe",
+    category: "official_eu",
+  },
+  {
     id: "eur-lex-proposals-rss",
     sourceId: "src-eur-lex-proposals-rss",
     name: "EUR-Lex Commission proposals RSS",

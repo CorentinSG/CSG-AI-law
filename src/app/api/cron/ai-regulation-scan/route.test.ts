@@ -21,6 +21,7 @@ describe("cron ai regulation scan route", () => {
     delete process.env.NEXT_PUBLIC_SUPABASE_URL;
     delete process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
     delete process.env.SUPABASE_SERVICE_ROLE_KEY;
+    delete process.env.SCAN_JOB_ROUTE_ENQUEUE_ONLY;
   });
 
   it("rejects missing authorization header", async () => {
@@ -91,6 +92,7 @@ describe("cron ai regulation scan route", () => {
       sourceId: undefined,
       trigger: "scheduled",
       requestedBy: "vercel-cron",
+      executionMode: "drain",
     });
     await expect(response.json()).resolves.toMatchObject({
       ok: true,
@@ -148,10 +150,65 @@ describe("cron ai regulation scan route", () => {
       trigger: "scheduled",
       requestedBy: "vercel-cron",
       scanProfile: "live_news_discovery_scan",
+      executionMode: "drain",
     });
     await expect(response.json()).resolves.toMatchObject({
       ok: true,
       scanProfile: "live_news_discovery_scan",
+    });
+  });
+
+  it("returns an honest queued-only response when enqueue-only route mode is enabled", async () => {
+    process.env.CRON_SECRET = "1234567890abcdef";
+    process.env.ADMIN_AUTH_SECRET = "123456789012345678901234";
+    process.env.APP_DATA_MODE = "supabase";
+    process.env.NEXT_PUBLIC_SUPABASE_URL = "https://example.supabase.co";
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY = "anon-key";
+    process.env.SUPABASE_SERVICE_ROLE_KEY = "service-role-key";
+    process.env.SCAN_JOB_ROUTE_ENQUEUE_ONLY = "true";
+    const { resetEnvForTests } = await import("@/lib/env");
+    resetEnvForTests();
+
+    queueAndDrainScanJob.mockResolvedValueOnce({
+      queuedJob: {
+        id: "job-queued-only",
+        sourceId: null,
+        trigger: "scheduled",
+        requestedBy: "vercel-cron",
+        status: "queued",
+      },
+      processedJob: null,
+      queuedJobProcessedImmediately: false,
+      blockedByRunningJobs: [],
+      blockingRunningJobSummaries: [],
+      result: [],
+      stewardship: null,
+    });
+
+    const { GET } = await import("@/app/api/cron/ai-regulation-scan/route");
+    const response = await GET(
+      new Request("http://localhost/api/cron/ai-regulation-scan", {
+        headers: {
+          authorization: "Bearer 1234567890abcdef",
+        },
+      }),
+    );
+
+    expect(response.status).toBe(200);
+    expect(queueAndDrainScanJob).toHaveBeenCalledWith({
+      sourceId: undefined,
+      trigger: "scheduled",
+      requestedBy: "vercel-cron",
+      scanProfile: undefined,
+      executionMode: "enqueue_only",
+    });
+    await expect(response.json()).resolves.toMatchObject({
+      ok: true,
+      queuedJobProcessedImmediately: false,
+      processedJob: null,
+      queuedJob: {
+        id: "job-queued-only",
+      },
     });
   });
 

@@ -20,6 +20,26 @@
     {
       "path": "/api/cron/ai-regulation-germany-scan",
       "schedule": "0 14 * * *"
+    },
+    {
+      "path": "/api/cron/ai-regulation-netherlands-scan",
+      "schedule": "30 14 * * *"
+    },
+    {
+      "path": "/api/cron/ai-regulation-belgium-scan",
+      "schedule": "0 15 * * *"
+    },
+    {
+      "path": "/api/cron/ai-regulation-austria-scan",
+      "schedule": "30 15 * * *"
+    },
+    {
+      "path": "/api/cron/ai-regulation-sweden-scan",
+      "schedule": "0 16 * * *"
+    },
+    {
+      "path": "/api/cron/ai-regulation-ireland-scan",
+      "schedule": "30 16 * * *"
     }
   ]
 }

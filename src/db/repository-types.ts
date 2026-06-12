@@ -9,6 +9,8 @@ import type { IngestionLog, IngestionLogInput } from "@/agents/ingestion/types";
 import type {
   CountryIntelligence,
   CountryIntelligenceInput,
+  CountryProfileReviewEvent,
+  CountryProfileReviewEventInput,
   CountryIntelligenceSource,
   CountryIntelligenceSourceInput,
   DataQualityFinding,
@@ -295,6 +297,13 @@ export interface AiRegulationRepository {
   listCountryIntelligence(region?: CountryIntelligence["region"]): Promise<CountryIntelligence[]>;
   getCountryIntelligenceBySlug(slug: string): Promise<CountryIntelligence | null>;
   upsertCountryIntelligence(input: CountryIntelligenceUpsertInput): Promise<CountryIntelligence>;
+  listCountryProfileReviewEvents(
+    limit?: number,
+    countryId?: string,
+  ): Promise<CountryProfileReviewEvent[]>;
+  createCountryProfileReviewEvent(
+    input: CountryProfileReviewEventInput,
+  ): Promise<CountryProfileReviewEvent>;
   listCountryIntelligenceSources(countryId: string): Promise<CountryIntelligenceSource[]>;
   replaceCountryIntelligenceSources(
     countryId: string,

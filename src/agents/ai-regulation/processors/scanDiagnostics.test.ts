@@ -26,6 +26,26 @@ describe("scan diagnostics", () => {
     expect(messages.some((entry) => entry.startsWith("warning="))).toBe(true);
   });
 
+  it("passes through structured failure messages unchanged", () => {
+    const messages = buildScanDiagnosticMessages({
+      responseStatus: 403,
+      itemsFetched: 0,
+      itemsFilteredOut: 0,
+      itemsInserted: 0,
+      duplicatesDetected: 0,
+      processingFailures: 0,
+      parsingWarnings: [],
+      extractionErrors: ['failure_report={"runId":"trace-1"}'],
+      zeroResultsReason: null,
+      durationMs: 250,
+    });
+
+    expect(messages).toContain('failure_report={"runId":"trace-1"}');
+    expect(
+      messages.some((entry) => entry === 'error=failure_report={"runId":"trace-1"}'),
+    ).toBe(false);
+  });
+
   it("marks partial success when warnings exist alongside inserted items", () => {
     expect(
       deriveScanStatus({

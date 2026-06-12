@@ -11,6 +11,7 @@ import { getIrelandLiveLegalIntelligenceData } from "@/agents/ai-regulation/irel
 import { getItalyLiveLegalIntelligenceData } from "@/agents/ai-regulation/italyLegalNewsAgent";
 import { getSpainLiveLegalIntelligenceData } from "@/agents/ai-regulation/spainLegalNewsAgent";
 import { updateRepository } from "@/agents/ai-regulation/processors/updateRepository";
+import { groupCountryIntelligenceSourcesByFamily } from "@/agents/ai-regulation/utils/country-intelligence-view";
 import { IntelligenceSignal } from "@/components/site/intelligence-signal";
 import { LiveLegalIntelligencePanel } from "@/components/site/live-legal-intelligence-panel";
 import { getFranceAiIntelligenceSnapshot } from "@/content/ai-regulation/france-ai-intelligence";
@@ -37,7 +38,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { env } from "@/lib/env";
 import { formatDisplayDate } from "@/lib/utils";
 
-export const dynamic = "force-dynamic";
+// ISR (T-RT0C): serve from cache, revalidate every 5 min. The F8 country-editor
+// actions call revalidatePath(`/ai-regulation/europe/${slug}`), so admin edits
+// to a profile or its sources surface promptly instead of waiting for the window.
+export const revalidate = 300;
 
 export async function generateStaticParams() {
   return getEuropeCountryProfiles().map((profile) => ({
@@ -135,7 +139,7 @@ export default async function EuropeCountryPage({
   const profile = getEuropeCountryProfileBySlug(country);
   if (!profile) notFound();
 
-  const [updates, franceLiveData, germanyLiveData, spainLiveData, italyLiveData, netherlandsLiveData, belgiumLiveData, austriaLiveData, swedenLiveData, irelandLiveData] =
+  const [updates, franceLiveData, germanyLiveData, spainLiveData, italyLiveData, netherlandsLiveData, belgiumLiveData, austriaLiveData, swedenLiveData, irelandLiveData, dbCountry, dbCountrySources] =
     await Promise.all([
     updateRepository.listPublicUpdates(),
     profile.slug === "france" ? getFranceLiveLegalIntelligenceData(6) : Promise.resolve(null),
@@ -147,6 +151,8 @@ export default async function EuropeCountryPage({
     profile.slug === "austria" ? getAustriaLiveLegalIntelligenceData(6) : Promise.resolve(null),
     profile.slug === "sweden" ? getSwedenLiveLegalIntelligenceData(6) : Promise.resolve(null),
     profile.slug === "ireland" ? getIrelandLiveLegalIntelligenceData(6) : Promise.resolve(null),
+    updateRepository.getCountryIntelligenceBySlug(profile.slug),
+    updateRepository.listCountryIntelligenceSources(`country-${profile.slug}`),
     ]);
   const franceSnapshot =
     profile.slug === "france" ? getFranceAiIntelligenceSnapshot() : null;
@@ -174,6 +180,62 @@ export default async function EuropeCountryPage({
 
   const statusMeta = europeImplementationStatusTaxonomy[profile.implementationStatus];
 
+  // F8: prefer the editable DB editorial fields when present, falling back to
+  // the verified TypeScript baseline. Blank/empty DB fields keep the baseline,
+  // so an admin edit on /admin/ai-regulation/countries reflects here without a
+  // redeployment, and structural content is never lost.
+  const publicSummary = dbCountry?.publicSummary ?? profile.publicSummary;
+  const editorialNotes = dbCountry?.editorialNotes
+    ? dbCountry.editorialNotes
+        .split(/\r?\n/)
+        .map((entry) => entry.trim())
+        .filter(Boolean)
+    : profile.editorialNotes;
+  const missingSourceWarnings =
+    dbCountry?.missingSourceWarnings && dbCountry.missingSourceWarnings.length > 0
+      ? dbCountry.missingSourceWarnings
+      : profile.missingSourceWarnings;
+
+  // F8C: render the three source families from the normalized
+  // `country_intelligence_sources` table when present, falling back per family
+  // to the verified TypeScript baseline. The DB rows were seeded from the TS
+  // layer, so the displayed content is identical until an admin edits sources.
+  const dbSources = groupCountryIntelligenceSourcesByFamily(dbCountrySources);
+  const nationalAIRegulationSources =
+    dbSources.regulation.length > 0
+      ? dbSources.regulation
+      : profile.nationalAIRegulationSources;
+  const nationalCaseLawSources =
+    dbSources.caseLaw.length > 0
+      ? dbSources.caseLaw
+      : profile.nationalCaseLawSources;
+  const nationalSoftLawSources =
+    dbSources.softLaw.length > 0
+      ? dbSources.softLaw
+      : profile.nationalSoftLawSources;
+
+  // F8C-3b: structural content (authority maps, measures, per-category notes)
+  // from the DB when present, per-field TS fallback. Arrays fall back when
+  // empty; notes fall back when null/blank.
+  const implementationMeasures = dbCountry?.implementationMeasures.length
+    ? dbCountry.implementationMeasures
+    : profile.nationalImplementationMeasures;
+  const competentAuthorities = dbCountry?.competentAuthorities.length
+    ? dbCountry.competentAuthorities
+    : profile.nationalCompetentAuthorities;
+  const marketSurveillanceAuthorities = dbCountry?.marketSurveillanceAuthorities.length
+    ? dbCountry.marketSurveillanceAuthorities
+    : profile.marketSurveillanceAuthorities;
+  const notifyingAuthorities = dbCountry?.notifyingAuthorities.length
+    ? dbCountry.notifyingAuthorities
+    : profile.notifyingAuthorities;
+  const nationalAIRegulationNotes =
+    dbCountry?.nationalAIRegulationNotes ?? profile.nationalAIRegulationNotes;
+  const nationalCaseLawNotes =
+    dbCountry?.nationalCaseLawNotes ?? profile.nationalCaseLawNotes;
+  const nationalSoftLawNotes =
+    dbCountry?.nationalSoftLawNotes ?? profile.nationalSoftLawNotes;
+
   return (
     <SiteShell className="space-y-10">
       <section className="space-y-5">
@@ -188,7 +250,7 @@ export default async function EuropeCountryPage({
           <SectionHeading
             eyebrow="Country profile"
             title={profile.countryName}
-            description={profile.publicSummary}
+            description={publicSummary}
           />
         </div>
         <div className="flex flex-wrap gap-2">
@@ -2592,9 +2654,9 @@ export default async function EuropeCountryPage({
               <p className="font-mono text-[11px] uppercase tracking-[0.24em] text-zinc-500">
                 National implementation measures
               </p>
-              {profile.nationalImplementationMeasures.length > 0 ? (
+              {implementationMeasures.length > 0 ? (
                 <ul className="mt-2 space-y-2">
-                  {profile.nationalImplementationMeasures.map((item) => (
+                  {implementationMeasures.map((item) => (
                     <li key={item}>{item}</li>
                   ))}
                 </ul>
@@ -2607,9 +2669,9 @@ export default async function EuropeCountryPage({
                 <p className="font-mono text-[11px] uppercase tracking-[0.24em] text-zinc-500">
                   Competent authorities
                 </p>
-                {profile.nationalCompetentAuthorities.length > 0 ? (
+                {competentAuthorities.length > 0 ? (
                   <ul className="mt-2 space-y-2">
-                    {profile.nationalCompetentAuthorities.map((item) => (
+                    {competentAuthorities.map((item) => (
                       <li key={item}>{item}</li>
                     ))}
                   </ul>
@@ -2621,13 +2683,13 @@ export default async function EuropeCountryPage({
                 <p className="font-mono text-[11px] uppercase tracking-[0.24em] text-zinc-500">
                   Market surveillance / notifying
                 </p>
-                {profile.marketSurveillanceAuthorities.length > 0 ||
-                profile.notifyingAuthorities.length > 0 ? (
+                {marketSurveillanceAuthorities.length > 0 ||
+                notifyingAuthorities.length > 0 ? (
                   <div className="mt-2 space-y-2">
-                    {profile.marketSurveillanceAuthorities.map((item) => (
+                    {marketSurveillanceAuthorities.map((item) => (
                       <p key={item}>{item}</p>
                     ))}
-                    {profile.notifyingAuthorities.map((item) => (
+                    {notifyingAuthorities.map((item) => (
                       <p key={item}>{item}</p>
                     ))}
                   </div>
@@ -2658,7 +2720,7 @@ export default async function EuropeCountryPage({
                 Missing source warnings
               </p>
               <ul className="mt-2 space-y-2">
-                {profile.missingSourceWarnings.map((item) => (
+                {missingSourceWarnings.map((item) => (
                   <li key={item}>{item}</li>
                 ))}
               </ul>
@@ -2668,7 +2730,7 @@ export default async function EuropeCountryPage({
                 Editorial notes
               </p>
               <ul className="mt-2 space-y-2">
-                {profile.editorialNotes.map((item) => (
+                {editorialNotes.map((item) => (
                   <li key={item}>{item}</li>
                 ))}
               </ul>
@@ -2680,17 +2742,17 @@ export default async function EuropeCountryPage({
       <section className="grid gap-6 lg:grid-cols-3">
         <SourceList
           title="National AI regulation sources"
-          items={profile.nationalAIRegulationSources}
+          items={nationalAIRegulationSources}
           emptyMessage="No official national AI regulation source verified yet."
         />
         <SourceList
           title="Case-law source posture"
-          items={profile.nationalCaseLawSources}
+          items={nationalCaseLawSources}
           emptyMessage="No official national case-law source verified yet."
         />
         <SourceList
           title="Soft law and guidance sources"
-          items={profile.nationalSoftLawSources}
+          items={nationalSoftLawSources}
           emptyMessage="No official soft-law or guidance source verified yet."
         />
       </section>
@@ -2781,19 +2843,19 @@ export default async function EuropeCountryPage({
               <p className="font-mono text-[11px] uppercase tracking-[0.24em] text-zinc-500">
                 National AI regulation notes
               </p>
-              <p className="mt-2">{profile.nationalAIRegulationNotes}</p>
+              <p className="mt-2">{nationalAIRegulationNotes}</p>
             </div>
             <div>
               <p className="font-mono text-[11px] uppercase tracking-[0.24em] text-zinc-500">
                 National case law notes
               </p>
-              <p className="mt-2">{profile.nationalCaseLawNotes}</p>
+              <p className="mt-2">{nationalCaseLawNotes}</p>
             </div>
             <div>
               <p className="font-mono text-[11px] uppercase tracking-[0.24em] text-zinc-500">
                 National soft law / guidance notes
               </p>
-              <p className="mt-2">{profile.nationalSoftLawNotes}</p>
+              <p className="mt-2">{nationalSoftLawNotes}</p>
             </div>
           </CardContent>
         </Card>

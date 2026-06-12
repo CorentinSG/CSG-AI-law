@@ -7,7 +7,7 @@ import {
 } from "@/agents/ai-regulation/irelandNewsSources";
 import { queueAndDrainScanJob } from "@/agents/ai-regulation/processors/scanJobs";
 import { getRepositoryMode } from "@/db/repository";
-import { env } from "@/lib/env";
+import { env, isScanJobRouteEnqueueOnlyEnabled } from "@/lib/env";
 import { getCronAuthStatus } from "@/lib/cron-auth";
 
 function unauthorized(reason: string) {
@@ -60,11 +60,14 @@ async function handleScheduledIrelandScan(request: Request) {
     result,
   } =
     await queueAndDrainScanJob({
-    sourceId,
-    trigger: "scheduled",
-    requestedBy: "vercel-cron-ireland",
-    scanProfile,
-  });
+      sourceId,
+      trigger: "scheduled",
+      requestedBy: "vercel-cron-ireland",
+      scanProfile,
+      executionMode: isScanJobRouteEnqueueOnlyEnabled()
+        ? "enqueue_only"
+        : "drain",
+    });
 
   return NextResponse.json({
     ok: true,

@@ -46,7 +46,9 @@ const frameworkCards = [
   },
 ];
 
-export const dynamic = "force-dynamic";
+// ISR (T-RT0C): serve from cache, revalidate every 5 min. Admin review/edit
+// actions call revalidatePath, so published changes surface promptly.
+export const revalidate = 300;
 
 export default async function StandardsPage() {
   const publishedUpdates = await updateRepository.listPublicUpdates();

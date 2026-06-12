@@ -4,6 +4,7 @@ import type {
   CountryImplementationConfidence,
   CountryReviewStatus,
 } from "@/agents/ai-regulation/governance";
+import { computeCountryNeedsReReview } from "@/agents/ai-regulation/country-review";
 import type {
   CountryIntelligenceSourceWriteInput,
   CountryIntelligenceUpsertInput,
@@ -104,9 +105,18 @@ export function mapEuropeCountryProfileToCountryIntelligenceInput(
     editorialNotes:
       profile.editorialNotes.length > 0 ? profile.editorialNotes.join("\n") : null,
     missingSourceWarnings: profile.missingSourceWarnings,
+    implementationMeasures: profile.nationalImplementationMeasures,
+    competentAuthorities: profile.nationalCompetentAuthorities,
+    marketSurveillanceAuthorities: profile.marketSurveillanceAuthorities,
+    notifyingAuthorities: profile.notifyingAuthorities,
+    relevantMinistries: profile.relevantMinistriesOrAgencies,
+    nationalAIRegulationNotes: profile.nationalAIRegulationNotes,
+    nationalCaseLawNotes: profile.nationalCaseLawNotes,
+    nationalSoftLawNotes: profile.nationalSoftLawNotes,
     lastReviewedAt: profile.lastReviewedDate,
     reviewedBy: "seed-profile",
     reviewStatus: mapReviewStatus(profile.sourceVerificationStatus),
+    needsReReview: computeCountryNeedsReReview(profile.lastReviewedDate),
   };
 }
 
