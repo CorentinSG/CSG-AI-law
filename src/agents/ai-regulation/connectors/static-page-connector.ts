@@ -49,6 +49,15 @@ function getConfiguredCrawlDelayMs(source: RegulationSource) {
   return Math.max(0, delaySeconds) * 1000;
 }
 
+// P-SRC1: any official source can opt into honest degradation instead of a
+// scan-breaking throw when the runtime is blocked (HTTP error / fetch failure).
+// Generalizes the bespoke Legifrance / NY-Courts handling via config so new
+// official-page sources can be registered safely before a dedicated parser or
+// an allowed access path (e.g. the Scrapling worker) exists.
+function shouldHonestlyDegrade(source: RegulationSource) {
+  return source.config?.honestDegradeOnError === true;
+}
+
 async function waitForCrawlDelay(source: RegulationSource) {
   const delayMs = getConfiguredCrawlDelayMs(source);
   if (delayMs === 0) return;
@@ -1360,6 +1369,12 @@ export class StaticPageConnector implements SourceConnector {
           `NY Courts could not be queried safely in this run: ${message}. The targeted parser is ready, but this source currently requires manual review or a runtime access path that is not blocked by the court site.`,
         );
       }
+      if (shouldHonestlyDegrade(source)) {
+        const message = error instanceof Error ? error.message : "Unknown fetch failure";
+        return buildNonFatalStaticConstraintResult(
+          `${source.name} could not be queried safely in this run: ${message}. This official source is configured to degrade honestly (e.g. runtime-blocked); it needs manual review or an allowed access path such as the Scrapling worker.`,
+        );
+      }
 
       throw error;
     }
@@ -1382,6 +1397,12 @@ export class StaticPageConnector implements SourceConnector {
       if (isNyCourtsAiSourceUrl(source.sourceUrl)) {
         return buildNonFatalStaticConstraintResult(
           `NY Courts refused or constrained access for this scan run (HTTP ${response.status}). The targeted parser is ready, but this source currently requires manual review or a runtime access path that is not blocked by the court site.`,
+          response.status,
+        );
+      }
+      if (shouldHonestlyDegrade(source)) {
+        return buildNonFatalStaticConstraintResult(
+          `${source.name} refused or constrained access for this scan run (HTTP ${response.status}). This official source is configured to degrade honestly; it needs manual review or an allowed access path such as the Scrapling worker.`,
           response.status,
         );
       }

@@ -1901,6 +1901,117 @@ export const regulationSourcesSeed: RegulationSource[] = [
     createdAt: now,
     updatedAt: now,
   },
+  // ── P-SRC1: official DPA pages registered (their monitoring descriptor ids
+  // already exist) but kept INACTIVE until a dedicated parser + deterministic AI
+  // filtering + golden tests land (Codex), then flipped active:true. These DPAs
+  // publish no discoverable official RSS feed (verified 2026-06-12), so they use
+  // official-page scraping, not RSS. This also seeds the privacy/data-protection
+  // coverage the broadened product direction calls for.
+  {
+    id: "src-nl-ap-ai",
+    name: "Autoriteit Persoonsgegevens — algorithms & AI",
+    jurisdiction: "Netherlands",
+    region: "Europe",
+    country: "Netherlands",
+    sourceUrl: "https://autoriteitpersoonsgegevens.nl/en/themes/algorithms-ai",
+    sourceType: "regulator_page",
+    scanFrequency: "daily",
+    active: false,
+    lastScannedAt: null,
+    notes:
+      "Official Dutch DPA (AP) algorithms/AI page. No official RSS feed (verified). The site returns HTTP 403 to the scan runtime, so honestDegradeOnError is set — it reports an honest constraint instead of failing a scan until an allowed access path (Scrapling worker) or dedicated parser is in place. Inactive pending P-SRC1 dedicated parser (Codex).",
+    reliabilityLevel: "high",
+    preferredExtractionMethod: "html_static",
+    config: {
+      maxItems: 10,
+      authorityTypeHint: "Agency guidance",
+      honestDegradeOnError: true,
+      editorialNotes: [
+        "Official AP source.",
+        "Needs a dedicated parser + deterministic AI filtering before activation.",
+      ],
+    },
+    createdAt: now,
+    updatedAt: now,
+  },
+  {
+    id: "src-at-dsb-ai",
+    name: "Datenschutzbehörde (DSB) — official site",
+    jurisdiction: "Austria",
+    region: "Europe",
+    country: "Austria",
+    sourceUrl: "https://www.dsb.gv.at/",
+    sourceType: "regulator_page",
+    scanFrequency: "daily",
+    active: false,
+    lastScannedAt: null,
+    notes:
+      "Official Austrian DPA (DSB) site. No official RSS feed (verified); page is fetchable. Inactive pending P-SRC1 dedicated parser + deterministic AI filtering (Codex), then activate.",
+    reliabilityLevel: "high",
+    preferredExtractionMethod: "html_static",
+    config: {
+      maxItems: 10,
+      authorityTypeHint: "Agency guidance",
+      editorialNotes: [
+        "Official DSB source.",
+        "Needs a dedicated parser + deterministic AI filtering before activation.",
+      ],
+    },
+    createdAt: now,
+    updatedAt: now,
+  },
+  {
+    id: "src-ie-dpc-ai",
+    name: "Data Protection Commission (DPC) — latest news",
+    jurisdiction: "Ireland",
+    region: "Europe",
+    country: "Ireland",
+    sourceUrl: "https://www.dataprotection.ie/en/news-media/latest-news",
+    sourceType: "regulator_page",
+    scanFrequency: "daily",
+    active: false,
+    lastScannedAt: null,
+    notes:
+      "Official Irish DPA (DPC) latest-news page. No official RSS feed (verified); page is fetchable. Inactive pending P-SRC1 dedicated parser + deterministic AI filtering (Codex), then activate.",
+    reliabilityLevel: "high",
+    preferredExtractionMethod: "html_static",
+    config: {
+      maxItems: 10,
+      authorityTypeHint: "Agency guidance",
+      editorialNotes: [
+        "Official DPC source.",
+        "Needs a dedicated parser + deterministic AI filtering before activation.",
+      ],
+    },
+    createdAt: now,
+    updatedAt: now,
+  },
+  {
+    id: "src-be-apd-ai",
+    name: "Autorité de protection des données (APD) — actualités",
+    jurisdiction: "Belgium",
+    region: "Europe",
+    country: "Belgium",
+    sourceUrl: "https://www.autoriteprotectiondonnees.be/citoyen/actualites",
+    sourceType: "regulator_page",
+    scanFrequency: "daily",
+    active: false,
+    lastScannedAt: null,
+    notes:
+      "Official Belgian DPA (APD/GBA) news page. No official RSS feed (verified); page is fetchable (the NL host redirects to the FR host). Inactive pending P-SRC1 dedicated parser + deterministic AI filtering (Codex), then activate.",
+    reliabilityLevel: "high",
+    preferredExtractionMethod: "html_static",
+    config: {
+      maxItems: 10,
+      authorityTypeHint: "Agency guidance",
+      editorialNotes: [
+        "Official APD source.",
+        "Needs a dedicated parser + deterministic AI filtering before activation.",
+      ],
+    },
+    createdAt: now,
+    updatedAt: now,
+  },
 ];
 
 export const rawRegulatoryItemsSeed: RawRegulatoryItem[] = [
