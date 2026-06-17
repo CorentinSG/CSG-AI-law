@@ -32,7 +32,6 @@ export function SiteShell({
       <main
         className={cn(
           "mx-auto w-full max-w-7xl px-6 py-10 md:py-16",
-          !isAdmin && "lg:pl-36 xl:pl-44",
           className,
         )}
       >
