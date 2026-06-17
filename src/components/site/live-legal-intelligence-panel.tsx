@@ -40,8 +40,7 @@ function getActivitySummary(activity: LiveSourceActivityItem[]) {
   if (activity.length === 0) {
     return {
       title: "No public signals yet",
-      body:
-        "This live desk is active, but no source-backed developments are publicly visible yet for this region. Official-source monitoring and verification continue in the background.",
+      body: "Monitoring continues in the background.",
     };
   }
 
@@ -54,16 +53,14 @@ function getActivitySummary(activity: LiveSourceActivityItem[]) {
 
   if (blockedCount === activity.length) {
     return {
-      title: "Monitoring is active, but source access is degraded",
-      body:
-        "Recent checks reached the monitoring layer, but the tracked sources were blocked or inaccessible from this runtime. Nothing is shown publicly until the system can verify source-backed signals safely.",
+      title: "Source access degraded",
+      body: "Tracked sources were blocked or inaccessible; nothing shown until verified.",
     };
   }
 
   return {
     title: "No newly visible developments",
-    body:
-      "The monitoring loop is running, but there are no new public legal signals ready to show right now. This can mean the latest checks returned duplicates, older material, or leads still waiting for verification.",
+    body: "No new public legal signals ready to show right now.",
   };
 }
 
@@ -183,7 +180,7 @@ export function LiveLegalIntelligencePanel({
               ))
             ) : (
               <div className="rounded-[1.2rem] border border-dashed border-white/10 bg-black/10 p-4 text-sm text-zinc-400">
-                No recent source-health snapshot is publicly available yet for this region.
+                No source-health snapshot yet for this region.
               </div>
             )}
           </div>
@@ -300,7 +297,7 @@ export function LiveLegalIntelligencePanel({
                         Why nothing is listed
                       </p>
                       <p className="mt-3 text-sm leading-7 text-zinc-300">
-                        This panel shows only source-backed developments that are safe to expose publicly. Unverified discovery leads and private review drafts stay out of sight.
+                        Only source-backed, publicly safe developments appear here.
                       </p>
                     </div>
                     <div className="rounded-[1.3rem] border border-white/10 bg-black/10 p-4">
@@ -308,7 +305,7 @@ export function LiveLegalIntelligencePanel({
                         What happens next
                       </p>
                       <p className="mt-3 text-sm leading-7 text-zinc-300">
-                        New official or corroborated developments will appear here only after the monitoring layer has source, date, and verification posture ready to show clearly.
+                        New items appear once source, date, and verification are ready.
                       </p>
                     </div>
                   </div>

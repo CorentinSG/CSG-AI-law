@@ -56,18 +56,9 @@ const softLawBindingLabel = {
 } as const;
 
 const europeFocusCards = [
-  {
-    title: "What changed at EU level",
-    body: "Start here for AI Act milestones, AI Office developments, Commission materials, and other Union-level signals that can move obligations or governance posture.",
-  },
-  {
-    title: "Which Member States are moving",
-    body: "Country-level status stays conservative. If implementation or designation is not yet verified from an official source, the hub says so directly instead of guessing.",
-  },
-  {
-    title: "What to watch next",
-    body: "Guidance, soft law, standards, and supervisory signals are tracked separately so readers can tell binding law from governance influence at a glance.",
-  },
+  { title: "EU level", body: "AI Act milestones and Union-level signals." },
+  { title: "Member States", body: "Status only when officially verified." },
+  { title: "What to watch", body: "Guidance, soft law, and standards, tracked separately." },
 ];
 
 export default async function EuropeAiRegulationPage() {
@@ -94,7 +85,7 @@ export default async function EuropeAiRegulationPage() {
           <SectionHeading
             eyebrow="European intelligence hub"
             title="Europe"
-            description="What changed, what is binding, which Member States are moving. Status labels remain intentionally conservative."
+            description="What changed, what is binding, who is moving."
           />
           <Link
             href="/ai-regulation/united-states"
@@ -131,7 +122,7 @@ export default async function EuropeAiRegulationPage() {
         </div>
         <LiveLegalIntelligencePanel
           title="Latest Europe AI law developments"
-          description="Ranked by EU legal relevance: official source status, hard-law weight, AI Act relevance, Member State implementation, and recency."
+          description="Ranked by EU legal relevance and recency."
           regionLabel="Europe"
           items={euLiveData.items.map((entry) => entry.item)}
           lastCheckedAt={euLiveData.lastCheckedAt}
@@ -143,7 +134,7 @@ export default async function EuropeAiRegulationPage() {
         <SectionHeading
           eyebrow="Verified legal baseline"
           title="EU AI Act baseline"
-          description="A conservative source-backed baseline for Regulation (EU) 2024/1689. Article, recital, chapter, and annex pinpoints are not invented; they remain under parser or manual review where not explicitly captured."
+          description="Source-backed baseline for Regulation (EU) 2024/1689."
         />
         <Card className="rounded-[2rem] border-black/6 bg-white shadow-[0_18px_50px_rgba(15,15,15,0.04)]">
           <CardContent className="grid gap-6 p-6 lg:grid-cols-[1.1fr_0.9fr]">
@@ -227,7 +218,7 @@ export default async function EuropeAiRegulationPage() {
         <SectionHeading
           eyebrow="EU timeline"
           title="European Union AI regulatory timeline"
-          description="A verified chronological view of major EU AI Act milestones and implementation checkpoints. Each item links back to an official source."
+          description="Verified milestones, each linked to an official source."
         />
         <Card className="rounded-[2rem] border-white/10 bg-[linear-gradient(180deg,rgba(12,18,28,0.96),rgba(17,24,39,0.9))] text-white shadow-[0_24px_70px_rgba(15,23,42,0.22)]">
           <CardContent className="p-6 md:p-8">
@@ -241,7 +232,7 @@ export default async function EuropeAiRegulationPage() {
           <SectionHeading
             eyebrow="Governance baseline"
             title="EU governance actors"
-            description="Governance actors are shown separately from binding law. These entries help explain institutions and implementation posture, but they are not automatically treated as standalone legal obligations."
+            description="Institutions and posture — shown separately from binding law."
           />
           <div className="space-y-4">
             {europeGovernanceActors.map((actor) => (
@@ -274,7 +265,7 @@ export default async function EuropeAiRegulationPage() {
           <SectionHeading
             eyebrow="Case law architecture"
             title="European case-law sources"
-            description="The baseline prepares official court sources and now includes a first conservative wave of specifically verified CJEU entries. Case summaries remain narrow and source-backed."
+            description="Conservative, source-backed CJEU entries."
           />
           <div className="space-y-4">
             {europeAiCaseLawSources.map((source) => (
@@ -344,7 +335,7 @@ export default async function EuropeAiRegulationPage() {
         <SectionHeading
           eyebrow="Soft law and standards"
           title="European and international governance baseline"
-          description="Soft law, technical standards, and governance frameworks are labeled separately from binding law. They can influence compliance and governance posture without automatically creating binding legal duties."
+          description="Soft law and standards, labeled separately from binding law."
         />
         <div className="grid gap-3 md:grid-cols-3">
           <div className="rounded-[1.3rem] border border-black/6 bg-zinc-50 p-4 text-sm text-zinc-700">
@@ -404,7 +395,7 @@ export default async function EuropeAiRegulationPage() {
         <SectionHeading
           eyebrow="Member State implementation"
           title="Europe implementation map"
-          description="Country status is intentionally conservative. No Member State implementation claim is shown here unless it is backed by an official verified source."
+          description="Status shown only when backed by an official source."
         />
         <Card className="rounded-[2rem] border-white/10 bg-[linear-gradient(180deg,rgba(10,16,28,0.94),rgba(17,24,39,0.88))] text-white shadow-[0_24px_70px_rgba(15,23,42,0.22)]">
           <CardContent className="space-y-6 p-6 md:p-8">
@@ -443,7 +434,7 @@ export default async function EuropeAiRegulationPage() {
         <SectionHeading
           eyebrow="Priority jurisdictions"
           title="First-wave country profiles"
-          description="The first country-profile wave focuses on five priority jurisdictions with verified official source baselines. Other Member States remain visible on the map, but not yet fully profiled."
+          description="Five priority jurisdictions with verified baselines."
         />
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           {countryProfiles.map((profile) => (
@@ -475,7 +466,7 @@ export default async function EuropeAiRegulationPage() {
         <SectionHeading
           eyebrow="Official sources"
           title="Europe monitoring sources"
-          description="Only official public sources are used. Inaccessible or unstable sources are kept inactive and labeled accordingly."
+          description="Only official public sources; unstable ones stay inactive."
         />
         <div className="grid gap-4 lg:grid-cols-2">
           {verificationRecords.map((record) => {
@@ -517,7 +508,7 @@ export default async function EuropeAiRegulationPage() {
         <SectionHeading
           eyebrow="Published monitor items"
           title="Latest published Europe entries"
-          description="Only reviewed and manually published entries appear here. Drafts, raw captures, and unverified national implementation claims remain private."
+          description="Only human-reviewed, published entries appear here."
         />
         <Card className="rounded-[2rem] border-black/6 bg-white/70 shadow-[0_18px_50px_rgba(15,15,15,0.04)]">
           <CardContent className="grid gap-6 p-6 md:grid-cols-2 xl:grid-cols-3">

@@ -39,18 +39,9 @@ export const metadata: Metadata = {
 export const revalidate = 300;
 
 const unitedStatesFocusCards = [
-  {
-    title: "What changed federally",
-    body: "Start here for Federal Register, White House, EEOC, CFPB, NIST, and other official federal signals that can affect AI governance or legal obligations.",
-  },
-  {
-    title: "Which states are moving",
-    body: "State activity stays separated from the federal layer so enacted law, drafts, and regulator action are not blurred together.",
-  },
-  {
-    title: "What to watch next",
-    body: "Soft law, standards, and agency frameworks remain visible, but clearly labeled so they are not mistaken for binding law.",
-  },
+  { title: "Federal", body: "Official federal AI signals." },
+  { title: "States", body: "State activity, kept separate from federal." },
+  { title: "What to watch", body: "Soft law and standards, clearly labeled." },
 ];
 
 export default async function UnitedStatesAiRegulationPage() {

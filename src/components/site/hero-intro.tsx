@@ -47,7 +47,7 @@ export function HeroIntro() {
         />
         <ScrollTextReveal
           as="p"
-          text="A technologically driven legal practice focused on artificial intelligence, regulation, and modern legal intelligence."
+          text="AI, regulation, and legal intelligence."
           mode="paragraph"
           duration={0.9}
           className="max-w-sm text-base leading-7 text-zinc-700 md:text-lg"
