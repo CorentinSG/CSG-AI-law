@@ -4,7 +4,7 @@ import Link from "next/link";
 import { getEuropeLiveLegalIntelligenceData } from "@/agents/ai-regulation/euLegalNewsAgent";
 import { updateRepository } from "@/agents/ai-regulation/processors/updateRepository";
 import { EuAiTimeline } from "@/components/site/eu-ai-timeline";
-import { EuropeImplementationMap } from "@/components/site/europe-implementation-map";
+import { EuropeImplementationMap } from "@/components/site/europe-implementation-map.lazy";
 import { LiveLegalIntelligencePanel } from "@/components/site/live-legal-intelligence-panel";
 import { SectionHeading } from "@/components/site/section-heading";
 import { SiteShell } from "@/components/site/shell";

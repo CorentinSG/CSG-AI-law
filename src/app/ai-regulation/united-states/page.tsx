@@ -6,7 +6,7 @@ import { LiveLegalIntelligencePanel } from "@/components/site/live-legal-intelli
 import { SectionHeading } from "@/components/site/section-heading";
 import { UsAiTimeline } from "@/components/site/us-ai-timeline";
 import { SiteShell } from "@/components/site/shell";
-import { UsImplementationMap } from "@/components/site/us-implementation-map";
+import { UsImplementationMap } from "@/components/site/us-implementation-map.lazy";
 import { UpdateCard } from "@/components/site/update-card";
 import { Card, CardContent } from "@/components/ui/card";
 import { getSourceVerificationRecordsForHub } from "@/content/ai-regulation/source-verification";
