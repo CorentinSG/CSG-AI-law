@@ -188,7 +188,7 @@ export default async function AiRegulationPage({
         <SectionHeading
           eyebrow="Unified public legal intelligence hub"
           title="AI legal intelligence, finally readable at a glance."
-          description="A single public hub combining legal developments and the structured AI law database. News, monitor entries, Europe, and United States coverage now sit under one clearer intelligence doorway, while remaining distinct by reliability, region, and legal function."
+          description="One doorway to legal developments and the structured AI law database — kept distinct by reliability, region, and legal function."
           actions={
             <Link
               href={activeView === "news" ? "/ai-regulation?view=database" : "/ai-regulation?view=news"}
@@ -374,7 +374,7 @@ export default async function AiRegulationPage({
             <SectionHeading
               eyebrow="AI Law News"
               title="Legal developments, with the source and date visible immediately."
-              description="This desk is meant to be fast to read and hard to misunderstand. Each card foregrounds publication date, source, jurisdiction, and verification posture before you dive deeper."
+              description="Each card foregrounds date, source, jurisdiction, and verification posture."
             />
             <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
               <IntelligenceSignal
@@ -468,7 +468,7 @@ export default async function AiRegulationPage({
             <SectionHeading
               eyebrow="Structured legal database"
               title="The public AI law database, split clearly by region."
-              description="Europe and the United States remain deliberately separated so jurisdiction never gets muddled. Within each region, country and state-level profiles are available as their own subparts."
+              description="Europe and the United States stay separate; country and state profiles are their own subparts."
             />
             <div className="grid gap-6 lg:grid-cols-2">
               <Card className="rounded-[2rem] border-black/6 bg-white/90 shadow-[0_18px_50px_rgba(15,15,15,0.04)]">
