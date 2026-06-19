@@ -195,11 +195,11 @@ export default async function UnitedStatesAiRegulationPage() {
           title="U.S. state AI law map"
           description="All 50 states plus D.C. — enacted only when officially verified."
         />
-        <Card className="rounded-[2rem] border-white/10 bg-[linear-gradient(180deg,rgba(10,16,28,0.94),rgba(17,24,39,0.88))] text-white shadow-[0_24px_70px_rgba(15,23,42,0.22)]">
+        <Card className="rounded-[2rem] border-black/6 bg-white/70 shadow-[0_18px_50px_rgba(15,15,15,0.05)]">
           <CardContent className="space-y-6 p-6 md:p-8">
             <UsImplementationMap states={usStateMapStatuses} />
             <div className="grid gap-3 md:grid-cols-3">
-              <div className="rounded-[1.3rem] border border-white/10 bg-white/[0.05] p-4 text-sm text-zinc-300">
+              <div className="rounded-[1.3rem] border border-black/6 bg-zinc-50 p-4 text-sm text-zinc-600">
                 <p className="font-mono text-[11px] uppercase tracking-[0.26em] text-zinc-500">
                   Needs review
                 </p>
@@ -207,7 +207,7 @@ export default async function UnitedStatesAiRegulationPage() {
                   No state-specific AI law status is asserted without official-source review.
                 </p>
               </div>
-              <div className="rounded-[1.3rem] border border-white/10 bg-white/[0.05] p-4 text-sm text-zinc-300">
+              <div className="rounded-[1.3rem] border border-black/6 bg-zinc-50 p-4 text-sm text-zinc-600">
                 <p className="font-mono text-[11px] uppercase tracking-[0.26em] text-zinc-500">
                   Official source required
                 </p>
@@ -215,7 +215,7 @@ export default async function UnitedStatesAiRegulationPage() {
                   Discovery trackers can generate leads, but official state sources control.
                 </p>
               </div>
-              <div className="rounded-[1.3rem] border border-white/10 bg-white/[0.05] p-4 text-sm text-zinc-300">
+              <div className="rounded-[1.3rem] border border-black/6 bg-zinc-50 p-4 text-sm text-zinc-600">
                 <p className="font-mono text-[11px] uppercase tracking-[0.26em] text-zinc-500">
                   Published-only monitor
                 </p>
