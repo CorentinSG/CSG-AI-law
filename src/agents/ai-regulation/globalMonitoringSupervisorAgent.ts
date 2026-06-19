@@ -6,6 +6,7 @@ import {
   listUsMonitoringAgents,
   runUsMonitoringSupervisorAgent,
 } from "@/agents/ai-regulation/usMonitoringSupervisorAgent";
+import { supervisorMonitoringMandate } from "@/agents/ai-regulation/monitoringAgentMandate";
 import type { GenericCountryAgentProfileId } from "@/agents/ai-regulation/countryLegalNewsAgentFactory";
 import type { ScanTrigger } from "@/agents/ai-regulation/processors/pipeline";
 
@@ -23,6 +24,7 @@ export const globalMonitoringSupervisorAgent = {
   id: "global-monitoring-supervisor",
   label: "Global Monitoring Supervisor Agent",
   scope: "global",
+  mandate: supervisorMonitoringMandate,
   role:
     "Coordinates EU monitoring, US monitoring, and the design agent. This is the future conversation channel anchor for agent orchestration.",
 };
@@ -35,12 +37,14 @@ export function listGlobalMonitoringAgents() {
         id: "eu-monitoring-supervisor",
         label: "EU Monitoring Supervisor Agent",
         region: "Europe",
+        mandate: supervisorMonitoringMandate,
         managedAgents: listEuMonitoringAgents(),
       },
       {
         id: "us-monitoring-supervisor",
         label: "US Monitoring Supervisor Agent",
         region: "United States",
+        mandate: supervisorMonitoringMandate,
         managedAgents: listUsMonitoringAgents(),
       },
     ],

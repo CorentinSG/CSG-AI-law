@@ -26,6 +26,11 @@ import { runSlovakiaLegalNewsAgentScan } from "@/agents/ai-regulation/slovakiaLe
 import { runSloveniaLegalNewsAgentScan } from "@/agents/ai-regulation/sloveniaLegalNewsAgent";
 import { runSpainLegalNewsAgentScan } from "@/agents/ai-regulation/spainLegalNewsAgent";
 import { runSwedenLegalNewsAgentScan } from "@/agents/ai-regulation/swedenLegalNewsAgent";
+import {
+  jurisdictionMonitoringMandate,
+  supervisorMonitoringMandate,
+  type MonitoringAgentMandate,
+} from "@/agents/ai-regulation/monitoringAgentMandate";
 import type { ScanTrigger } from "@/agents/ai-regulation/processors/pipeline";
 
 type CountryAgentRunner = (options?: { trigger?: ScanTrigger }) => Promise<unknown>;
@@ -35,37 +40,38 @@ export interface MonitoringAgentDescriptor {
   label: string;
   scope: "eu" | "member_state";
   country?: string;
+  mandate: MonitoringAgentMandate;
   runner: CountryAgentRunner;
 }
 
 export const euMemberStateMonitoringAgents: MonitoringAgentDescriptor[] = [
-  { id: "austria", label: "Austria Legal News Agent", scope: "member_state", country: "Austria", runner: runAustriaLegalNewsAgentScan },
-  { id: "belgium", label: "Belgium Legal News Agent", scope: "member_state", country: "Belgium", runner: runBelgiumLegalNewsAgentScan },
-  { id: "bulgaria", label: "Bulgaria Legal News Agent", scope: "member_state", country: "Bulgaria", runner: runBulgariaLegalNewsAgentScan },
-  { id: "croatia", label: "Croatia Legal News Agent", scope: "member_state", country: "Croatia", runner: runCroatiaLegalNewsAgentScan },
-  { id: "cyprus", label: "Cyprus Legal News Agent", scope: "member_state", country: "Cyprus", runner: runCyprusLegalNewsAgentScan },
-  { id: "czechia", label: "Czechia Legal News Agent", scope: "member_state", country: "Czechia", runner: runCzechiaLegalNewsAgentScan },
-  { id: "denmark", label: "Denmark Legal News Agent", scope: "member_state", country: "Denmark", runner: runDenmarkLegalNewsAgentScan },
-  { id: "estonia", label: "Estonia Legal News Agent", scope: "member_state", country: "Estonia", runner: runEstoniaLegalNewsAgentScan },
-  { id: "finland", label: "Finland Legal News Agent", scope: "member_state", country: "Finland", runner: runFinlandLegalNewsAgentScan },
-  { id: "france", label: "France Legal News Agent", scope: "member_state", country: "France", runner: runFranceLegalNewsAgentScan },
-  { id: "germany", label: "Germany Legal News Agent", scope: "member_state", country: "Germany", runner: runGermanyLegalNewsAgentScan },
-  { id: "greece", label: "Greece Legal News Agent", scope: "member_state", country: "Greece", runner: runGreeceLegalNewsAgentScan },
-  { id: "hungary", label: "Hungary Legal News Agent", scope: "member_state", country: "Hungary", runner: runHungaryLegalNewsAgentScan },
-  { id: "ireland", label: "Ireland Legal News Agent", scope: "member_state", country: "Ireland", runner: runIrelandLegalNewsAgentScan },
-  { id: "italy", label: "Italy Legal News Agent", scope: "member_state", country: "Italy", runner: runItalyLegalNewsAgentScan },
-  { id: "latvia", label: "Latvia Legal News Agent", scope: "member_state", country: "Latvia", runner: runLatviaLegalNewsAgentScan },
-  { id: "lithuania", label: "Lithuania Legal News Agent", scope: "member_state", country: "Lithuania", runner: runLithuaniaLegalNewsAgentScan },
-  { id: "luxembourg", label: "Luxembourg Legal News Agent", scope: "member_state", country: "Luxembourg", runner: runLuxembourgLegalNewsAgentScan },
-  { id: "malta", label: "Malta Legal News Agent", scope: "member_state", country: "Malta", runner: runMaltaLegalNewsAgentScan },
-  { id: "netherlands", label: "Netherlands Legal News Agent", scope: "member_state", country: "Netherlands", runner: runNetherlandsLegalNewsAgentScan },
-  { id: "poland", label: "Poland Legal News Agent", scope: "member_state", country: "Poland", runner: runPolandLegalNewsAgentScan },
-  { id: "portugal", label: "Portugal Legal News Agent", scope: "member_state", country: "Portugal", runner: runPortugalLegalNewsAgentScan },
-  { id: "romania", label: "Romania Legal News Agent", scope: "member_state", country: "Romania", runner: runRomaniaLegalNewsAgentScan },
-  { id: "slovakia", label: "Slovakia Legal News Agent", scope: "member_state", country: "Slovakia", runner: runSlovakiaLegalNewsAgentScan },
-  { id: "slovenia", label: "Slovenia Legal News Agent", scope: "member_state", country: "Slovenia", runner: runSloveniaLegalNewsAgentScan },
-  { id: "spain", label: "Spain Legal News Agent", scope: "member_state", country: "Spain", runner: runSpainLegalNewsAgentScan },
-  { id: "sweden", label: "Sweden Legal News Agent", scope: "member_state", country: "Sweden", runner: runSwedenLegalNewsAgentScan },
+  { id: "austria", label: "Austria Legal News Agent", scope: "member_state", country: "Austria", mandate: jurisdictionMonitoringMandate, runner: runAustriaLegalNewsAgentScan },
+  { id: "belgium", label: "Belgium Legal News Agent", scope: "member_state", country: "Belgium", mandate: jurisdictionMonitoringMandate, runner: runBelgiumLegalNewsAgentScan },
+  { id: "bulgaria", label: "Bulgaria Legal News Agent", scope: "member_state", country: "Bulgaria", mandate: jurisdictionMonitoringMandate, runner: runBulgariaLegalNewsAgentScan },
+  { id: "croatia", label: "Croatia Legal News Agent", scope: "member_state", country: "Croatia", mandate: jurisdictionMonitoringMandate, runner: runCroatiaLegalNewsAgentScan },
+  { id: "cyprus", label: "Cyprus Legal News Agent", scope: "member_state", country: "Cyprus", mandate: jurisdictionMonitoringMandate, runner: runCyprusLegalNewsAgentScan },
+  { id: "czechia", label: "Czechia Legal News Agent", scope: "member_state", country: "Czechia", mandate: jurisdictionMonitoringMandate, runner: runCzechiaLegalNewsAgentScan },
+  { id: "denmark", label: "Denmark Legal News Agent", scope: "member_state", country: "Denmark", mandate: jurisdictionMonitoringMandate, runner: runDenmarkLegalNewsAgentScan },
+  { id: "estonia", label: "Estonia Legal News Agent", scope: "member_state", country: "Estonia", mandate: jurisdictionMonitoringMandate, runner: runEstoniaLegalNewsAgentScan },
+  { id: "finland", label: "Finland Legal News Agent", scope: "member_state", country: "Finland", mandate: jurisdictionMonitoringMandate, runner: runFinlandLegalNewsAgentScan },
+  { id: "france", label: "France Legal News Agent", scope: "member_state", country: "France", mandate: jurisdictionMonitoringMandate, runner: runFranceLegalNewsAgentScan },
+  { id: "germany", label: "Germany Legal News Agent", scope: "member_state", country: "Germany", mandate: jurisdictionMonitoringMandate, runner: runGermanyLegalNewsAgentScan },
+  { id: "greece", label: "Greece Legal News Agent", scope: "member_state", country: "Greece", mandate: jurisdictionMonitoringMandate, runner: runGreeceLegalNewsAgentScan },
+  { id: "hungary", label: "Hungary Legal News Agent", scope: "member_state", country: "Hungary", mandate: jurisdictionMonitoringMandate, runner: runHungaryLegalNewsAgentScan },
+  { id: "ireland", label: "Ireland Legal News Agent", scope: "member_state", country: "Ireland", mandate: jurisdictionMonitoringMandate, runner: runIrelandLegalNewsAgentScan },
+  { id: "italy", label: "Italy Legal News Agent", scope: "member_state", country: "Italy", mandate: jurisdictionMonitoringMandate, runner: runItalyLegalNewsAgentScan },
+  { id: "latvia", label: "Latvia Legal News Agent", scope: "member_state", country: "Latvia", mandate: jurisdictionMonitoringMandate, runner: runLatviaLegalNewsAgentScan },
+  { id: "lithuania", label: "Lithuania Legal News Agent", scope: "member_state", country: "Lithuania", mandate: jurisdictionMonitoringMandate, runner: runLithuaniaLegalNewsAgentScan },
+  { id: "luxembourg", label: "Luxembourg Legal News Agent", scope: "member_state", country: "Luxembourg", mandate: jurisdictionMonitoringMandate, runner: runLuxembourgLegalNewsAgentScan },
+  { id: "malta", label: "Malta Legal News Agent", scope: "member_state", country: "Malta", mandate: jurisdictionMonitoringMandate, runner: runMaltaLegalNewsAgentScan },
+  { id: "netherlands", label: "Netherlands Legal News Agent", scope: "member_state", country: "Netherlands", mandate: jurisdictionMonitoringMandate, runner: runNetherlandsLegalNewsAgentScan },
+  { id: "poland", label: "Poland Legal News Agent", scope: "member_state", country: "Poland", mandate: jurisdictionMonitoringMandate, runner: runPolandLegalNewsAgentScan },
+  { id: "portugal", label: "Portugal Legal News Agent", scope: "member_state", country: "Portugal", mandate: jurisdictionMonitoringMandate, runner: runPortugalLegalNewsAgentScan },
+  { id: "romania", label: "Romania Legal News Agent", scope: "member_state", country: "Romania", mandate: jurisdictionMonitoringMandate, runner: runRomaniaLegalNewsAgentScan },
+  { id: "slovakia", label: "Slovakia Legal News Agent", scope: "member_state", country: "Slovakia", mandate: jurisdictionMonitoringMandate, runner: runSlovakiaLegalNewsAgentScan },
+  { id: "slovenia", label: "Slovenia Legal News Agent", scope: "member_state", country: "Slovenia", mandate: jurisdictionMonitoringMandate, runner: runSloveniaLegalNewsAgentScan },
+  { id: "spain", label: "Spain Legal News Agent", scope: "member_state", country: "Spain", mandate: jurisdictionMonitoringMandate, runner: runSpainLegalNewsAgentScan },
+  { id: "sweden", label: "Sweden Legal News Agent", scope: "member_state", country: "Sweden", mandate: jurisdictionMonitoringMandate, runner: runSwedenLegalNewsAgentScan },
 ];
 
 export const euMonitoringAgents: MonitoringAgentDescriptor[] = [
@@ -73,6 +79,7 @@ export const euMonitoringAgents: MonitoringAgentDescriptor[] = [
     id: "eu",
     label: "EU Legal News Agent",
     scope: "eu",
+    mandate: supervisorMonitoringMandate,
     runner: runEuLegalNewsAgentScan,
   },
   ...euMemberStateMonitoringAgents,
@@ -84,6 +91,7 @@ export function listEuMonitoringAgents() {
     label: agent.label,
     scope: agent.scope,
     country: agent.country,
+    mandate: agent.mandate,
   }));
 }
 

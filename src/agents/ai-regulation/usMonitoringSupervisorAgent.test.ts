@@ -46,4 +46,27 @@ describe("US monitoring supervisor agent", () => {
       );
     }
   });
+
+  it("equips every US monitoring agent with legal-news and legal-database duties", () => {
+    for (const agent of listUsMonitoringAgents()) {
+      expect(agent.mandate.capabilities).toEqual(
+        expect.arrayContaining([
+          "legal_news_monitoring",
+          "legal_database_maintenance",
+          "hard_law_tracking",
+          "soft_law_tracking",
+          "case_law_and_decisions_tracking",
+        ]),
+      );
+      expect(agent.mandate.obligations).toEqual(
+        expect.arrayContaining([
+          "monitor_legal_news",
+          "update_legal_database",
+          "track_new_regulations",
+          "track_case_law_and_decisions",
+          "keep_country_or_state_profile_current",
+        ]),
+      );
+    }
+  });
 });

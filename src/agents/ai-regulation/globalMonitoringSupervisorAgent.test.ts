@@ -31,4 +31,29 @@ describe("global monitoring supervisor agent", () => {
     expect(euSupervisor?.managedAgents).toHaveLength(28);
     expect(usSupervisor?.managedAgents).toHaveLength(52);
   });
+
+  it("requires supervisors to audit child coverage for news, databases, hard law, soft law, and decisions", () => {
+    const registry = listGlobalMonitoringAgents();
+
+    expect(registry.supervisor.mandate.obligations).toEqual(
+      expect.arrayContaining([
+        "audit_child_agent_coverage",
+        "escalate_missing_sources",
+        "monitor_legal_news",
+        "update_legal_database",
+        "track_hard_law",
+        "track_soft_law",
+        "track_case_law_and_decisions",
+      ]),
+    );
+    for (const supervisor of registry.regionalSupervisors) {
+      expect(supervisor.mandate.coverage).toMatchObject({
+        legalNews: true,
+        legalDatabase: true,
+        hardLaw: true,
+        softLaw: true,
+        caseLawAndDecisions: true,
+      });
+    }
+  });
 });

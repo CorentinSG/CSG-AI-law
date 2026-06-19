@@ -57,6 +57,35 @@ describe("EU monitoring supervisor agent", () => {
     expect(agents.filter((agent) => agent.scope === "member_state")).toHaveLength(27);
   });
 
+  it("equips every EU monitoring agent with legal-news and legal-database duties", () => {
+    for (const agent of listEuMonitoringAgents()) {
+      expect(agent.mandate.capabilities).toEqual(
+        expect.arrayContaining([
+          "legal_news_monitoring",
+          "legal_database_maintenance",
+          "hard_law_tracking",
+          "soft_law_tracking",
+          "case_law_and_decisions_tracking",
+        ]),
+      );
+      expect(agent.mandate.obligations).toEqual(
+        expect.arrayContaining([
+          "monitor_legal_news",
+          "update_legal_database",
+          "track_new_regulations",
+          "track_case_law_and_decisions",
+        ]),
+      );
+      expect(agent.mandate.coverage).toMatchObject({
+        legalNews: true,
+        legalDatabase: true,
+        hardLaw: true,
+        softLaw: true,
+        caseLawAndDecisions: true,
+      });
+    }
+  });
+
   it("creates source registries for all newly added member-state agents", () => {
     expect(missingEuMemberStateAgentDefinitions).toHaveLength(18);
     for (const definition of missingEuMemberStateAgentDefinitions) {

@@ -8,6 +8,10 @@ import {
   usSubFederalMonitoringAgentDefinitions,
   type UsMonitoringAgentDefinition,
 } from "@/agents/ai-regulation/usMonitoringAgentDefinitions";
+import {
+  jurisdictionMonitoringMandate,
+  type MonitoringAgentMandate,
+} from "@/agents/ai-regulation/monitoringAgentMandate";
 import type { ScanTrigger } from "@/agents/ai-regulation/processors/pipeline";
 
 export type UsMonitoringAgentScope = "federal" | "state" | "district";
@@ -23,6 +27,7 @@ export interface UsMonitoringAgentDescriptor {
   scope: UsMonitoringAgentScope;
   jurisdiction: string;
   postalCode: string;
+  mandate: MonitoringAgentMandate;
   runner: UsAgentRunner;
   definition: UsMonitoringAgentDefinition;
 }
@@ -47,6 +52,7 @@ function createUsMonitoringAgentDescriptor(
     scope: definition.jurisdictionLevel,
     jurisdiction: definition.countryName,
     postalCode: definition.postalCode,
+    mandate: jurisdictionMonitoringMandate,
     runner: agent.runLegalNewsAgentScan,
     definition,
   };
@@ -72,5 +78,6 @@ export function listUsMonitoringAgents() {
     scope: agent.scope,
     jurisdiction: agent.jurisdiction,
     postalCode: agent.postalCode,
+    mandate: agent.mandate,
   }));
 }
