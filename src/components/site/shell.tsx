@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 
 import { CursorBot } from "@/components/site/cursor-bot";
+import { PageTransition } from "@/components/site/page-transition";
 import { SiteFooter } from "@/components/site/site-footer";
 import { SiteHeader } from "@/components/site/site-header";
 import { cn } from "@/lib/utils";
@@ -29,14 +30,16 @@ export function SiteShell({
     >
       {!isAdmin ? <CursorBot /> : null}
       <SiteHeader variant={variant} />
-      <main
-        className={cn(
-          "mx-auto w-full max-w-7xl px-6 py-10 md:py-16",
-          className,
-        )}
-      >
-        {children}
-      </main>
+      <PageTransition>
+        <main
+          className={cn(
+            "mx-auto w-full max-w-7xl px-6 py-10 md:py-16",
+            className,
+          )}
+        >
+          {children}
+        </main>
+      </PageTransition>
       {showFooter ? <SiteFooter /> : null}
     </div>
   );
