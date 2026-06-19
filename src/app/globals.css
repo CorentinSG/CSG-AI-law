@@ -1,4 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..700&family=Inter:wght@300;400;500;600;700&display=swap");
 @import "tailwindcss";
 
 :root {
@@ -18,7 +18,7 @@
     "Inter", -apple-system, BlinkMacSystemFont, "SF Pro Text",
     "Helvetica Neue", Arial, sans-serif;
   --font-display:
-    "Space Grotesk", "Avenir Next", "SF Pro Display", "Inter",
+    "Bricolage Grotesque", "Avenir Next", "SF Pro Display", "Inter",
     "Helvetica Neue", Arial, sans-serif;
   --font-serif:
     "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Georgia, serif;
@@ -115,6 +115,15 @@ a:hover {
   .premium-sheen::after {
     display: none;
   }
+}
+
+/* Hide scrollbars on horizontal rails (the scroll-spy hub nav) */
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
 }
 
 /* Thin gradient accent rule for section dividers */

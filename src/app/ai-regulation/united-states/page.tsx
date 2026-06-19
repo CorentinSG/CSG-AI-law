@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 import { updateRepository } from "@/agents/ai-regulation/processors/updateRepository";
+import { HubOrientation } from "@/components/site/hub-orientation";
+import { HubScrollNav } from "@/components/site/hub-scroll-nav";
 import { LiveLegalIntelligencePanel } from "@/components/site/live-legal-intelligence-panel";
 import { SectionHeading } from "@/components/site/section-heading";
 import { UsAiTimeline } from "@/components/site/us-ai-timeline";
@@ -104,14 +106,29 @@ export default async function UnitedStatesAiRegulationPage() {
         </div>
       </section>
 
+      <HubScrollNav
+        sections={[
+          { id: "live", label: "Live" },
+          { id: "federal", label: "Federal" },
+          { id: "timeline", label: "Timeline" },
+          { id: "states", label: "States" },
+          { id: "profiles", label: "Profiles" },
+          { id: "governance", label: "Governance" },
+          { id: "sources", label: "Sources" },
+          { id: "published", label: "Published" },
+        ]}
+      />
+
+      <HubOrientation />
+
       {/* --- Section 1: Live intelligence FIRST --- */}
-      <section className="space-y-5">
+      <section id="live" className="scroll-mt-28 space-y-5">
         <div className="flex items-center gap-3">
           <span className="relative flex h-2.5 w-2.5">
-            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-red-400 opacity-60" />
-            <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-red-500" />
+            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-60" />
+            <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-emerald-500" />
           </span>
-          <p className="font-mono text-[10px] uppercase tracking-[0.28em] text-red-600">
+          <p className="font-mono text-[10px] uppercase tracking-[0.28em] text-emerald-600">
             Live U.S. monitoring
           </p>
         </div>
@@ -125,7 +142,7 @@ export default async function UnitedStatesAiRegulationPage() {
         />
       </section>
 
-      <section className="space-y-6">
+      <section id="federal" className="scroll-mt-28 space-y-6">
         <SectionHeading
           eyebrow="Federal baseline"
           title="Federal AI legal architecture"
@@ -159,7 +176,7 @@ export default async function UnitedStatesAiRegulationPage() {
         </div>
       </section>
 
-      <section className="space-y-6">
+      <section id="timeline" className="scroll-mt-28 space-y-6">
         <SectionHeading
           eyebrow="U.S. timeline"
           title="U.S. AI law source timeline"
@@ -172,7 +189,7 @@ export default async function UnitedStatesAiRegulationPage() {
         </Card>
       </section>
 
-      <section className="space-y-6">
+      <section id="states" className="scroll-mt-28 space-y-6">
         <SectionHeading
           eyebrow="State-by-state baseline"
           title="U.S. state AI law map"
@@ -211,7 +228,7 @@ export default async function UnitedStatesAiRegulationPage() {
         </Card>
       </section>
 
-      <section className="space-y-6">
+      <section id="profiles" className="scroll-mt-28 space-y-6">
         <SectionHeading
           eyebrow="Priority states"
           title="First-wave state profiles"
@@ -243,7 +260,7 @@ export default async function UnitedStatesAiRegulationPage() {
         </div>
       </section>
 
-      <section className="grid gap-6 lg:grid-cols-[1fr_1fr]">
+      <section id="governance" className="scroll-mt-28 grid gap-6 lg:grid-cols-[1fr_1fr]">
         <div className="space-y-6">
           <SectionHeading
             eyebrow="Case law architecture"
@@ -308,7 +325,7 @@ export default async function UnitedStatesAiRegulationPage() {
         </div>
       </section>
 
-      <section className="space-y-6">
+      <section id="sources" className="scroll-mt-28 space-y-6">
         <SectionHeading
           eyebrow="Official source posture"
           title="U.S. monitoring sources"
@@ -347,7 +364,7 @@ export default async function UnitedStatesAiRegulationPage() {
         </div>
       </section>
 
-      <section className="space-y-6">
+      <section id="published" className="scroll-mt-28 space-y-6">
         <SectionHeading
           eyebrow="Published monitor items"
           title="Latest published U.S. entries"

@@ -13,13 +13,13 @@ colors:
   live: "#10b981"
 typography:
   display:
-    fontFamily: "Space Grotesk, Avenir Next, SF Pro Display, sans-serif"
+    fontFamily: "Bricolage Grotesque, Avenir Next, SF Pro Display, sans-serif"
     fontSize: "clamp(2.25rem, 6vw, 6rem)"
     fontWeight: 500
     lineHeight: 0.9
     letterSpacing: "-0.05em"
   headline:
-    fontFamily: "Space Grotesk, Avenir Next, sans-serif"
+    fontFamily: "Bricolage Grotesque, Avenir Next, sans-serif"
     fontSize: "clamp(1.5rem, 3vw, 2.25rem)"
     fontWeight: 500
     lineHeight: 1.05
@@ -78,7 +78,7 @@ components:
 
 This is a legal-intelligence instrument, not a vitrine. The interface behaves like a calm command post: precise, instrumental, futuristic — but it never raises its voice. Authority is signaled through restraint. Surfaces are light and glassy; type is ink-dark and editorial; a single gold accent acts like a status light on an otherwise quiet console. The reader is a skeptical legal professional who must judge a development's reliability in seconds, so every element earns its place by clarifying *what changed, where, and how verified* — never by decorating.
 
-The system rejects the flashy SaaS startup register outright: no purple gradients, no "Get started free" energy, no inflated marketing claims, no emoji. It equally rejects the generic navy-and-serif law-firm template and any neon/crypto "hacker" glow. Futurism here is carried by typography (Space Grotesk), light/glass materials, and exact spacing — not by loud color or gimmicks.
+The system rejects the flashy SaaS startup register outright: no purple gradients, no "Get started free" energy, no inflated marketing claims, no emoji. It equally rejects the generic navy-and-serif law-firm template and any neon/crypto "hacker" glow. Futurism here is carried by typography (Bricolage Grotesque), light/glass materials, and exact spacing — not by loud color or gimmicks.
 
 Motion is purposeful and fast, easing out on `[0.16, 1, 0.3, 1]`, and always has a reduced-motion fallback. Glass and a quiet light-sweep "sheen" are the premium materials; they appear on a few high-signal surfaces, never everywhere.
 
@@ -115,16 +115,16 @@ A warm-neutral, ink-on-light palette with one disciplined gold signal and a stru
 
 ## 3. Typography
 
-**Display Font:** Space Grotesk (with Avenir Next, SF Pro Display fallback)
+**Display Font:** Bricolage Grotesque (with Avenir Next, SF Pro Display fallback)
 **Body Font:** Inter (with system-ui fallback)
 **Label/Mono Font:** IBM Plex Mono
 
-**Character:** A geometric, slightly futuristic display (Space Grotesk) paired with the neutral, highly legible Inter — contrast on the geometric-vs-humanist axis, not two lookalike sans. Mono labels (IBM Plex Mono) add an instrument-panel precision to kickers and metadata.
+**Character:** A geometric, slightly futuristic display (Bricolage Grotesque) paired with the neutral, highly legible Inter — contrast on the geometric-vs-humanist axis, not two lookalike sans. Mono labels (IBM Plex Mono) add an instrument-panel precision to kickers and metadata.
 
 ### Hierarchy
-- **Display** (Space Grotesk 500, `clamp(2.25rem, 6vw, 6rem)`, line-height 0.9, tracking −0.05em, often UPPERCASE): hero and page titles. The single moment of scale.
-- **Headline** (Space Grotesk 500, `clamp(1.5rem, 3vw, 2.25rem)`, −0.04em): section titles.
-- **Title** (Space Grotesk / Inter 500, ~1.25rem): card titles, item names.
+- **Display** (Bricolage Grotesque 500, `clamp(2.25rem, 6vw, 6rem)`, line-height 0.9, tracking −0.05em, often UPPERCASE): hero and page titles. The single moment of scale.
+- **Headline** (Bricolage Grotesque 500, `clamp(1.5rem, 3vw, 2.25rem)`, −0.04em): section titles.
+- **Title** (Bricolage Grotesque / Inter 500, ~1.25rem): card titles, item names.
 - **Body** (Inter 400, 1rem, line-height 1.7): prose; capped at 65–75ch.
 - **Label** (IBM Plex Mono 500, 0.6875rem, tracking 0.3em, UPPERCASE): kickers, metadata, status chips.
 
@@ -176,7 +176,7 @@ A `premium-sheen` class sweeps a soft light band across a glass surface on hover
 - **Do** keep Signal Gold (`#9a6b1f`) to ≤10% of any screen — kickers, focus rings, a few marks.
 - **Do** float panels on wide, faint shadows (blur ≥24px, alpha ≤0.08) with an inset top highlight.
 - **Do** pair every status color with a label or icon (verified, binding, live).
-- **Do** give one display moment per viewport in Space Grotesk; step everything else down.
+- **Do** give one display moment per viewport in Bricolage Grotesque; step everything else down.
 - **Do** ship a `prefers-reduced-motion` fallback for every animation, including the sheen.
 - **Do** cap body measure at 65–75ch and keep body text ≥4.5:1 contrast.
 

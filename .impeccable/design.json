@@ -36,7 +36,7 @@
       }
     },
     "typographyMeta": {
-      "display": { "displayName": "Display", "purpose": "Hero and page titles — the single moment of scale, Space Grotesk uppercase." },
+      "display": { "displayName": "Display", "purpose": "Hero and page titles — the single moment of scale, Bricolage Grotesque uppercase." },
       "headline": { "displayName": "Headline", "purpose": "Section titles." },
       "body": { "displayName": "Body", "purpose": "Prose, capped 65–75ch, Inter." },
       "label": { "displayName": "Label", "purpose": "Mono kickers, metadata, status chips." }
@@ -88,7 +88,7 @@
       "refersTo": "card",
       "description": "Floating frosted panel — the core container for entry points and content blocks.",
       "html": "<div class=\"ds-card\"><span class=\"ds-card-icon\"><svg viewBox=\"0 0 24 24\" width=\"20\" height=\"20\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z\"/><path d=\"M14 2v6h6\"/></svg></span><h3>Notes</h3></div>",
-      "css": ".ds-card{display:flex;align-items:center;gap:1rem;background:linear-gradient(180deg,rgba(255,255,255,.56),rgba(255,255,255,.3));-webkit-backdrop-filter:blur(22px) saturate(120%);backdrop-filter:blur(22px) saturate(120%);border:1px solid rgba(255,255,255,.48);box-shadow:inset 0 1px 0 rgba(255,255,255,.7),0 24px 60px rgba(15,15,15,.06);border-radius:2rem;padding:1.5rem;transition:transform .3s cubic-bezier(.16,1,.3,1),box-shadow .3s cubic-bezier(.16,1,.3,1)}.ds-card:hover{transform:translateY(-2px);box-shadow:inset 0 1px 0 rgba(255,255,255,.7),0 28px 80px rgba(15,15,15,.08)}.ds-card-icon{display:flex;align-items:center;justify-content:center;width:2.75rem;height:2.75rem;border-radius:1rem;background:rgba(154,107,31,.12);color:#7c5214}.ds-card h3{margin:0;font-family:'Space Grotesk',sans-serif;font-size:1.6rem;font-weight:500;letter-spacing:-.05em;text-transform:uppercase;color:#111}"
+      "css": ".ds-card{display:flex;align-items:center;gap:1rem;background:linear-gradient(180deg,rgba(255,255,255,.56),rgba(255,255,255,.3));-webkit-backdrop-filter:blur(22px) saturate(120%);backdrop-filter:blur(22px) saturate(120%);border:1px solid rgba(255,255,255,.48);box-shadow:inset 0 1px 0 rgba(255,255,255,.7),0 24px 60px rgba(15,15,15,.06);border-radius:2rem;padding:1.5rem;transition:transform .3s cubic-bezier(.16,1,.3,1),box-shadow .3s cubic-bezier(.16,1,.3,1)}.ds-card:hover{transform:translateY(-2px);box-shadow:inset 0 1px 0 rgba(255,255,255,.7),0 28px 80px rgba(15,15,15,.08)}.ds-card-icon{display:flex;align-items:center;justify-content:center;width:2.75rem;height:2.75rem;border-radius:1rem;background:rgba(154,107,31,.12);color:#7c5214}.ds-card h3{margin:0;font-family:'Bricolage Grotesque',sans-serif;font-size:1.6rem;font-weight:500;letter-spacing:-.05em;text-transform:uppercase;color:#111}"
     },
     {
       "name": "Nav Item (active)",
@@ -119,7 +119,7 @@
       "Do keep Signal Gold (#9a6b1f) to ≤10% of any screen — kickers, focus rings, a few marks.",
       "Do float panels on wide, faint shadows (blur ≥24px, alpha ≤0.08) with an inset top highlight.",
       "Do pair every status color with a label or icon (verified, binding, live).",
-      "Do give one display moment per viewport in Space Grotesk; step everything else down.",
+      "Do give one display moment per viewport in Bricolage Grotesque; step everything else down.",
       "Do ship a prefers-reduced-motion fallback for every animation, including the sheen.",
       "Do cap body measure at 65–75ch and keep body text ≥4.5:1 contrast."
     ],

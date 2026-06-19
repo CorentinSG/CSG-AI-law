@@ -5,6 +5,8 @@ import { getEuropeLiveLegalIntelligenceData } from "@/agents/ai-regulation/euLeg
 import { updateRepository } from "@/agents/ai-regulation/processors/updateRepository";
 import { EuAiTimeline } from "@/components/site/eu-ai-timeline";
 import { EuropeImplementationMap } from "@/components/site/europe-implementation-map.lazy";
+import { HubOrientation } from "@/components/site/hub-orientation";
+import { HubScrollNav } from "@/components/site/hub-scroll-nav";
 import { LiveLegalIntelligencePanel } from "@/components/site/live-legal-intelligence-panel";
 import { SectionHeading } from "@/components/site/section-heading";
 import { SiteShell } from "@/components/site/shell";
@@ -109,14 +111,30 @@ export default async function EuropeAiRegulationPage() {
         </div>
       </section>
 
+      <HubScrollNav
+        sections={[
+          { id: "live", label: "Live" },
+          { id: "ai-act", label: "AI Act" },
+          { id: "timeline", label: "Timeline" },
+          { id: "governance", label: "Governance" },
+          { id: "standards", label: "Standards" },
+          { id: "map", label: "Map" },
+          { id: "countries", label: "Countries" },
+          { id: "sources", label: "Sources" },
+          { id: "published", label: "Published" },
+        ]}
+      />
+
+      <HubOrientation />
+
       {/* --- Section 1: Live intelligence FIRST --- */}
-      <section className="space-y-5">
+      <section id="live" className="scroll-mt-28 space-y-5">
         <div className="flex items-center gap-3">
           <span className="relative flex h-2.5 w-2.5">
-            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-indigo-400 opacity-60" />
-            <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-indigo-500" />
+            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-60" />
+            <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-emerald-500" />
           </span>
-          <p className="font-mono text-[10px] uppercase tracking-[0.28em] text-indigo-600">
+          <p className="font-mono text-[10px] uppercase tracking-[0.28em] text-emerald-600">
             Live EU monitoring
           </p>
         </div>
@@ -130,7 +148,7 @@ export default async function EuropeAiRegulationPage() {
         />
       </section>
 
-      <section className="space-y-6">
+      <section id="ai-act" className="scroll-mt-28 space-y-6">
         <SectionHeading
           eyebrow="Verified legal baseline"
           title="EU AI Act baseline"
@@ -214,7 +232,7 @@ export default async function EuropeAiRegulationPage() {
         </Card>
       </section>
 
-      <section className="space-y-6">
+      <section id="timeline" className="scroll-mt-28 space-y-6">
         <SectionHeading
           eyebrow="EU timeline"
           title="European Union AI regulatory timeline"
@@ -227,7 +245,7 @@ export default async function EuropeAiRegulationPage() {
         </Card>
       </section>
 
-      <section className="grid gap-6 lg:grid-cols-[1fr_1fr]">
+      <section id="governance" className="scroll-mt-28 grid gap-6 lg:grid-cols-[1fr_1fr]">
         <div className="space-y-6">
           <SectionHeading
             eyebrow="Governance baseline"
@@ -331,7 +349,7 @@ export default async function EuropeAiRegulationPage() {
         </div>
       </section>
 
-      <section className="space-y-6">
+      <section id="standards" className="scroll-mt-28 space-y-6">
         <SectionHeading
           eyebrow="Soft law and standards"
           title="European and international governance baseline"
@@ -391,7 +409,7 @@ export default async function EuropeAiRegulationPage() {
         </div>
       </section>
 
-      <section className="space-y-6">
+      <section id="map" className="scroll-mt-28 space-y-6">
         <SectionHeading
           eyebrow="Member State implementation"
           title="Europe implementation map"
@@ -430,7 +448,7 @@ export default async function EuropeAiRegulationPage() {
         </Card>
       </section>
 
-      <section className="space-y-6">
+      <section id="countries" className="scroll-mt-28 space-y-6">
         <SectionHeading
           eyebrow="Priority jurisdictions"
           title="First-wave country profiles"
@@ -462,7 +480,7 @@ export default async function EuropeAiRegulationPage() {
         </div>
       </section>
 
-      <section className="space-y-6">
+      <section id="sources" className="scroll-mt-28 space-y-6">
         <SectionHeading
           eyebrow="Official sources"
           title="Europe monitoring sources"
@@ -504,7 +522,7 @@ export default async function EuropeAiRegulationPage() {
         </div>
       </section>
 
-      <section className="space-y-6">
+      <section id="published" className="scroll-mt-28 space-y-6">
         <SectionHeading
           eyebrow="Published monitor items"
           title="Latest published Europe entries"
