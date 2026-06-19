@@ -62,7 +62,7 @@ export default async function HomePage() {
         <MotionReveal>
         <Link
           href="/ai-regulation"
-          className="group block rounded-[2.2rem] border border-black/6 bg-[radial-gradient(ellipse_at_top_left,rgba(99,102,241,0.06),transparent_45%),linear-gradient(180deg,rgba(255,255,255,0.97),rgba(248,248,252,0.97))] p-6 shadow-[0_20px_60px_rgba(15,15,15,0.05)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_28px_80px_rgba(15,15,15,0.08)] md:p-8"
+          className="premium-sheen group block rounded-[2.2rem] border border-black/6 bg-[radial-gradient(ellipse_at_top_left,rgba(30,41,59,0.05),transparent_45%),linear-gradient(180deg,rgba(255,255,255,0.97),rgba(248,248,252,0.97))] p-6 shadow-[0_20px_60px_rgba(15,15,15,0.05)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_28px_80px_rgba(15,15,15,0.08)] md:p-8"
         >
           <div className="flex items-start justify-between gap-4">
             <div className="flex items-center gap-2">
@@ -136,10 +136,10 @@ export default async function HomePage() {
             <Link
               key={entry.title}
               href={entry.href}
-              className="glass-panel-soft group flex items-center justify-between gap-4 rounded-[2rem] p-6 transition-transform duration-300 hover:-translate-y-0.5"
+              className="glass-panel-soft premium-sheen group flex items-center justify-between gap-4 rounded-[2rem] p-6 transition-transform duration-300 hover:-translate-y-0.5"
             >
               <div className="flex items-center gap-4">
-                <span className="flex size-11 items-center justify-center rounded-2xl bg-black/[0.04] text-zinc-700">
+                <span className="flex size-11 items-center justify-center rounded-2xl bg-accent-soft text-accent-strong transition group-hover:scale-105">
                   <entry.icon className="size-5" />
                 </span>
                 <h3 className="font-display text-[1.6rem] font-medium uppercase tracking-[-0.05em] text-zinc-950">
