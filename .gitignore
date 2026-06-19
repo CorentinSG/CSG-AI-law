@@ -53,3 +53,11 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# AI coding-agent local config + reinstallable skill bundles
+# (skills reinstall via `npx skills add` / `npx impeccable update`; some bundle
+#  large binary assets, so we track the manifest/agent/config, not the cache)
+.claude/settings.local.json
+.claude/skills/
+.agents/
+.github/skills/
