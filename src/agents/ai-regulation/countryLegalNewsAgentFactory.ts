@@ -423,10 +423,45 @@ export function createCountryLegalNewsAgent(
   }) {
     const trigger = options?.trigger ?? "scheduled_local_test";
     const profile = options?.profile ?? "live_news_scan";
-    return runAiRegulationScan(undefined, {
+    const sourceIds = sourceModule.getAgentSourceIds(profile);
+    const activeSources = await updateRepository.getSources();
+    const activeSourceIds = sourceIds.filter((sourceId) =>
+      activeSources.some((source) => source.active && source.id === sourceId),
+    );
+    const scanProfile = mapGenericProfileToScanProfile(profile);
+
+    if (activeSourceIds.length === 0) {
+      return {
+        trigger,
+        profile,
+        scanProfile,
+        sourceIds,
+        activeSourceIds,
+        status: "skipped" as const,
+        reason:
+          "No active scannable source is currently registered for this agent/profile.",
+      };
+    }
+
+    const results = [];
+    for (const sourceId of activeSourceIds) {
+      results.push(
+        ...(await runAiRegulationScan(sourceId, {
+          trigger,
+          scanProfile,
+        })),
+      );
+    }
+
+    return {
       trigger,
-      scanProfile: mapGenericProfileToScanProfile(profile),
-    });
+      profile,
+      scanProfile,
+      sourceIds,
+      activeSourceIds,
+      status: "completed" as const,
+      results,
+    };
   }
 
   return {
