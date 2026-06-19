@@ -183,6 +183,12 @@ function buildDiscoveryLeadCopy(input: {
   };
 }
 
+function shouldAutoPublishLegalDatabaseItem(input: {
+  discoveryOnlySource: boolean;
+}) {
+  return !input.discoveryOnlySource;
+}
+
 // --- Types shared across pipeline stages ---
 interface ProcessableCandidate {
   source: Awaited<ReturnType<typeof sourceManager.getActiveSourcesForProfile>>[number];
@@ -542,6 +548,12 @@ async function processAllCandidates(
 
     try {
       const discoveryOnlySource = isDiscoveryOnlySource(entry.source);
+      const autoPublishLegalDatabaseItem = shouldAutoPublishLegalDatabaseItem({
+        discoveryOnlySource,
+      });
+      const autoPublicationTimestamp = autoPublishLegalDatabaseItem
+        ? new Date().toISOString()
+        : null;
       const discoveryMetadata = discoveryOnlySource ? entry.candidate.metadata ?? {} : {};
       const summary = aiSummarizer.summarize({
         title: entry.candidate.title,
@@ -616,10 +628,10 @@ async function processAllCandidates(
               : []),
           ]),
         ),
-        status: "needs_review",
-        reviewedBy: null,
-        reviewedAt: null,
-        publishedAt: null,
+        status: autoPublishLegalDatabaseItem ? "published" : "needs_review",
+        reviewedBy: autoPublishLegalDatabaseItem ? "system:auto-official-source" : null,
+        reviewedAt: autoPublicationTimestamp,
+        publishedAt: autoPublicationTimestamp,
       });
       const updatedRawItem = await updateRepository.updateRawItemMetadata(
         entry.rawItem.id,

@@ -118,14 +118,31 @@ function verificationStatusFor(input: {
   source: RegulationSource | null;
   citationEligible: boolean;
   officialSourceFound: boolean;
+  corroboratingSources: SourceReference[];
 }): AiLawNewsVerificationStatus {
   if (input.update.status === "published" && input.citationEligible) {
     return "published_news";
+  }
+  if (input.corroboratingSources.length > 0) {
+    return "corroborated";
   }
   if (isDiscoveryOnlySource(input.source)) {
     return input.officialSourceFound ? "needs_review" : "discovery_only";
   }
   return input.officialSourceFound ? "official_verified" : "needs_review";
+}
+
+function isNewsPublicBySourceQuality(input: {
+  update: AiRegulatoryUpdate;
+  sourceReliability: AiLawNewsSourceReliability;
+  officialSourceFound: boolean;
+  citationEligible: boolean;
+  corroboratingSources: SourceReference[];
+}) {
+  if (input.update.status === "published") return true;
+  if (input.officialSourceFound && input.citationEligible) return true;
+  if (input.corroboratingSources.length > 0) return true;
+  return ["official_authority", "reputable_secondary"].includes(input.sourceReliability);
 }
 
 function datePrecisionFor(item: AiRegulatoryUpdate): AiLawNewsDatePrecision {
@@ -150,6 +167,19 @@ export function buildNewsItemFromUpdate(input: {
     citationAssessment.primaryOfficialSource?.url ??
     null;
   const eventDate = input.update.publicationDate;
+  const sourceReliability = reliabilityFor(input.source);
+  const corroboratingSources = sourceReferences.filter(
+    (reference) =>
+      reference.sourceRole === "supporting" ||
+      reference.sourceRole === "official_confirmation",
+  );
+  const publicBySourceQuality = isNewsPublicBySourceQuality({
+    update: input.update,
+    sourceReliability,
+    officialSourceFound,
+    citationEligible: citationAssessment.publicationEligible,
+    corroboratingSources,
+  });
 
   return {
     id: `news-${input.update.id}`,
@@ -167,7 +197,7 @@ export function buildNewsItemFromUpdate(input: {
     sourceName: input.update.sourceName,
     sourceUrl: input.update.sourceUrl,
     sourceType: sourceTypeFor(input.source),
-    sourceReliability: reliabilityFor(input.source),
+    sourceReliability,
     sourceJurisdiction: input.source?.jurisdiction ?? input.update.jurisdiction,
     jurisdiction: input.update.jurisdiction,
     region: input.update.region,
@@ -181,24 +211,23 @@ export function buildNewsItemFromUpdate(input: {
       source: input.source,
       citationEligible: citationAssessment.publicationEligible,
       officialSourceFound,
+      corroboratingSources,
     }),
     officialSourceFound,
     officialSourceUrl,
     sourceReferences,
-    corroboratingSources: sourceReferences.filter(
-      (reference) =>
-        reference.sourceRole === "supporting" ||
-        reference.sourceRole === "official_confirmation",
-    ),
+    corroboratingSources,
     exactDateOfInformation: eventDate,
     datePrecision: datePrecisionFor(input.update),
     citationQuality: citationAssessment.qualityStatus,
-    publicVisibilityStatus: input.update.status === "published" ? "public" : "admin_only",
+    publicVisibilityStatus: publicBySourceQuality ? "public" : "admin_only",
     reviewerNotes:
       input.update.status === "published"
         ? "Published news derived from a human-reviewed AI Regulation Monitor entry."
-        : "Admin-only news lead; not public until reviewed.",
-    relatedMonitorItemId: input.update.status === "published" ? input.update.id : null,
+        : publicBySourceQuality
+          ? "Automatically public news item based on serious source quality, official confirmation, or cross-source corroboration."
+          : "Admin-only news lead; not public until reviewed.",
+    relatedMonitorItemId: publicBySourceQuality ? input.update.id : null,
   };
 }
 

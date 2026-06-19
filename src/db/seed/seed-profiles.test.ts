@@ -3,13 +3,22 @@ import { describe, expect, it } from "vitest";
 import { buildSeedDataset } from "@/db/seed/seed-profiles";
 
 describe("buildSeedDataset", () => {
-  it("keeps production-safe seeded updates private by default", () => {
+  it("keeps production-safe seeded updates private except official auto-publications", () => {
     const dataset = buildSeedDataset("production_safe");
     expect(dataset.updates.length).toBeGreaterThan(0);
-    expect(dataset.updates.every((update) => update.status === "needs_review")).toBe(
-      true,
-    );
-    expect(dataset.updates.every((update) => update.publishedAt === null)).toBe(true);
+    expect(
+      dataset.updates.every(
+        (update) =>
+          update.status === "needs_review" ||
+          (update.status === "published" &&
+            update.reviewedBy === "system:auto-official-source"),
+      ),
+    ).toBe(true);
+    expect(
+      dataset.updates
+        .filter((update) => update.status === "needs_review")
+        .every((update) => update.publishedAt === null),
+    ).toBe(true);
     expect(dataset.reviewEvents).toEqual([]);
   });
 

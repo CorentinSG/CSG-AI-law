@@ -57,6 +57,10 @@ function clone<T>(value: T): T {
 }
 
 function toProductionSafeUpdate(update: AiRegulatoryUpdate): AiRegulatoryUpdate {
+  if (update.status === "published" && update.reviewedBy === "system:auto-official-source") {
+    return update;
+  }
+
   return {
     ...update,
     status: "needs_review",

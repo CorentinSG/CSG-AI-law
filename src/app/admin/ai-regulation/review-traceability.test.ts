@@ -30,7 +30,7 @@ describe("review-traceability", () => {
     expect(trace.sourceId).toBe("src-nycourts-part-161-ai");
     expect(trace.officialSource).toBe(true);
     expect(trace.effectiveDate).toBe("2026-06-01");
-    expect(trace.publicationStatus).toBe("hidden");
+    expect(trace.publicationStatus).toBe("public");
     expect(trace.checklist).toHaveLength(9);
     expect(trace.checklist.some((item) => item.question.includes("civil and criminal cases"))).toBe(
       true,
@@ -40,7 +40,7 @@ describe("review-traceability", () => {
     );
   });
 
-  it("flags unpublished production-safe drafts as hidden and review-required", () => {
+  it("keeps official auto-published production-safe items public", () => {
     const dataset = buildSeedDataset("production_safe");
     const update = dataset.updates.find((item) => item.id === "upd-026");
     const rawItem = dataset.rawItems.find((item) => item.id === "raw-028");
@@ -58,8 +58,8 @@ describe("review-traceability", () => {
       sourceReferences,
     });
 
-    expect(trace.reviewStatus).toBe("needs_review");
-    expect(trace.publicationStatus).toBe("hidden");
-    expect(trace.reviewRequired).toBe(true);
+    expect(trace.reviewStatus).toBe("published");
+    expect(trace.publicationStatus).toBe("public");
+    expect(trace.reviewRequired).toBe(false);
   });
 });

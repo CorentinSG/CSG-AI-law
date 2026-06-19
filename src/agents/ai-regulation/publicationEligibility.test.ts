@@ -130,16 +130,15 @@ describe("evaluatePublicationEligibility", () => {
     ).toBe(true);
   });
 
-  it("blocks publication when the item is not yet approved", () => {
+  it("allows automatic publication before admin approval when an official source is confirmed", () => {
     const result = evaluatePublicationEligibility({
       update: { ...baseUpdate, status: "needs_review" },
       rawItem: baseRawItem,
       source: baseSource,
     });
 
-    expect(result.eligible).toBe(false);
-    expect(
-      result.blockingReasons.some((reason) => reason.includes("human-review approval")),
-    ).toBe(true);
+    expect(result.eligible).toBe(true);
+    expect(result.blockingReasons).toEqual([]);
+    expect(result.recommendedAction).toContain("automatic publication");
   });
 });

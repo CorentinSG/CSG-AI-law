@@ -20,7 +20,26 @@ export interface PublicationEligibilityAssessment {
 
 function hasOfficialLikeSource(references: SourceReference[]) {
   return references.some((reference) =>
-    ["official", "court", "regulator", "standards_body"].includes(reference.sourceType),
+    [
+      "official",
+      "court",
+      "regulator",
+      "government",
+      "parliament",
+      "legislation",
+      "policy",
+      "standards_body",
+    ].includes(reference.sourceType),
+  );
+}
+
+function isOfficialSourceConfirmed(input: {
+  verification: ReturnType<typeof extractVerificationMetadata> | null;
+  references: SourceReference[];
+}) {
+  return (
+    input.verification?.officialSourceFound === true ||
+    hasOfficialLikeSource(input.references)
   );
 }
 
@@ -51,13 +70,20 @@ export function evaluatePublicationEligibility(input: {
   const verification = input.rawItem
     ? extractVerificationMetadata(input.rawItem)
     : null;
+  const officialSourceConfirmed = isOfficialSourceConfirmed({
+    verification,
+    references,
+  });
 
   const blockingReasons: string[] = [];
   const warnings = [...citation.warnings];
 
-  if (!["approved", "published"].includes(input.update.status)) {
+  if (
+    !officialSourceConfirmed &&
+    !["approved", "published"].includes(input.update.status)
+  ) {
     blockingReasons.push(
-      "Item has not completed the required human-review approval step.",
+      "Item has not completed the required human-review approval step and no official source has been confirmed.",
     );
   }
 
@@ -106,7 +132,7 @@ export function evaluatePublicationEligibility(input: {
     );
   }
 
-  if (verification && !verification.officialSourceFound) {
+  if (verification && !verification.officialSourceFound && !hasOfficialLikeSource(references)) {
     blockingReasons.push("Official source confirmation is still missing.");
   }
 
@@ -116,7 +142,9 @@ export function evaluatePublicationEligibility(input: {
     warnings,
     recommendedAction:
       blockingReasons.length === 0
-        ? "Item is eligible for manual publication when the reviewer is satisfied."
+        ? officialSourceConfirmed
+          ? "Item is eligible for automatic publication because an official source is confirmed."
+          : "Item is eligible for manual publication when the reviewer is satisfied."
         : "Resolve the blocking reasons, attach precise official citations, and keep the item non-public until approval is complete.",
   };
 }

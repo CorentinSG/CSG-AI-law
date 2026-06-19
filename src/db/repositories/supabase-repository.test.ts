@@ -380,7 +380,7 @@ describe("listRegulatoryUpdatesPage pagination", () => {
 // 5. Publication eligibility gate
 // ---------------------------------------------------------------------------
 describe("evaluatePublicationEligibility", () => {
-  it("blocks items without human approval", () => {
+  it("blocks items without human approval when no official source is confirmed", () => {
     const result = evaluatePublicationEligibility({
       update: {
         status: "needs_review",
@@ -402,6 +402,46 @@ describe("evaluatePublicationEligibility", () => {
     expect(result.blockingReasons.some((r) =>
       r.toLowerCase().includes("human-review") || r.toLowerCase().includes("approval"),
     )).toBe(true);
+  });
+
+  it("allows official-source legal database items without admin approval", () => {
+    const result = evaluatePublicationEligibility({
+      update: {
+        status: "needs_review",
+        title: "EU AI Act",
+        jurisdiction: "European Union",
+        developmentType: "Regulation",
+        sourceName: "EUR-Lex",
+        sourceUrl: "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32024R1689",
+        publicationDate: "2024-07-12",
+        detectedDate: "2024-07-12",
+      },
+      rawItem: {
+        detectedAt: "2024-07-12T00:00:00Z",
+        rawMetadata: { verification: { verificationStatus: "verified_for_review", officialSourceFound: true } },
+      },
+      source: { name: "EUR-Lex", config: {} },
+      sourceReferences: [
+        {
+          sourceRole: "primary",
+          title: "Regulation (EU) 2024/1689",
+          institution: "European Parliament and Council",
+          url: "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32024R1689",
+          canonicalUrl: null,
+          sourceType: "official",
+          authorityType: "legislation",
+          publicationDate: "2024-07-12",
+          retrievedAt: "2024-07-12T00:00:00Z",
+          lastVerifiedAt: "2024-07-12T00:00:00Z",
+          reliabilityLevel: "high",
+          verificationStatus: "official_verified",
+          jurisdiction: "European Union",
+        },
+      ],
+    });
+
+    expect(result.eligible).toBe(true);
+    expect(result.blockingReasons).toEqual([]);
   });
 
   it("blocks discovery-only sources from publication", () => {

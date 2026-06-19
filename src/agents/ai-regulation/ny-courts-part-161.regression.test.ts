@@ -304,15 +304,16 @@ describe("NY Courts Part 161 regression harness", () => {
     expect(discoveryOnlyAssessment.warnings[0]).toContain("No official or authoritative source");
   });
 
-  it("keeps newly detected Part 161 items in needs_review and hidden from public pages", () => {
+  it("publishes official Part 161 items without admin approval", () => {
     const dataset = buildSeedDataset("production_safe");
     const update = dataset.updates.find((item) => item.id === "upd-026");
     const newsItem = dataset.newsItems.find((item) => item.regulatoryUpdateId === "upd-026");
 
-    expect(update?.status).toBe("needs_review");
-    expect(update?.publishedAt).toBeNull();
-    expect(newsItem?.publicVisibilityStatus).toBe("admin_only");
-    expect(newsItem?.relatedMonitorItemId).toBeNull();
+    expect(update?.status).toBe("published");
+    expect(update?.reviewedBy).toBe("system:auto-official-source");
+    expect(update?.publishedAt).not.toBeNull();
+    expect(newsItem?.publicVisibilityStatus).toBe("public");
+    expect(newsItem?.relatedMonitorItemId).toBe("upd-026");
   });
 
   it("rejects common false positives that should not become regulatory items", () => {
@@ -365,6 +366,7 @@ describe("NY Courts Part 161 regression harness", () => {
       "New York State Unified Court System",
     );
     expect(nyCourtsRawItem?.rawMetadata.scope).toEqual(["civil cases", "criminal cases"]);
-    expect(nyCourtsUpdate?.status).toBe("approved");
+    expect(nyCourtsUpdate?.status).toBe("published");
+    expect(nyCourtsUpdate?.reviewedBy).toBe("system:auto-official-source");
   });
 });
