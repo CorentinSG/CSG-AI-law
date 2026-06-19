@@ -3,6 +3,7 @@ import { randomUUID } from "node:crypto";
 import type { ScanJob } from "@/agents/ai-regulation/governance";
 import type { ScanProfileId } from "@/agents/ai-regulation/scanProfiles";
 import { runDataStewardSync } from "@/agents/ai-regulation/processors/dataStewardSync";
+import { alertOnDailyReviewBacklog } from "@/lib/alerting";
 import {
   runAiRegulationScan,
   type ScanTrigger,
@@ -270,6 +271,10 @@ async function executeClaimedScanJob(processingJob: ScanJob) {
         dataStewardFindingsSynced: stewardship.persisted.syncedCount,
         highPriorityReviewItems: stewardship.report.summary.highPriorityReviewItems,
       },
+    });
+    await alertOnDailyReviewBacklog({
+      job: updatedJob,
+      needsReviewBacklogSize: stewardship.report.summary.highPriorityReviewItems,
     });
 
     return {

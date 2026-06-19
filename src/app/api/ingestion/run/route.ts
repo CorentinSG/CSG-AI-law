@@ -142,8 +142,20 @@ async function handleIngestionRun(request: Request): Promise<NextResponse> {
   }
 }
 
-export async function GET(request: Request) {
-  return handleIngestionRun(request);
+export async function GET() {
+  return NextResponse.json(
+    {
+      ok: false,
+      error: "Method Not Allowed",
+      reason: "Use POST to trigger ingestion.",
+    },
+    {
+      status: 405,
+      headers: {
+        Allow: "POST",
+      },
+    },
+  );
 }
 
 export async function POST(request: Request) {

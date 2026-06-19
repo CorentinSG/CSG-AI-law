@@ -2,6 +2,14 @@
 
 ## Current status
 
+2026-06-18 - Codex, T-OPS2 (DONE on `ops/t-ops9-ux`): restored outbound alerting on the current branch without touching Claude-owned UX files. Added optional `ALERT_WEBHOOK_URL`, compact source/daily-review alert payloads, pipeline + scan-job hooks, and targeted coverage. Alerting stays disabled when unset; webhook failures never fail scans; payloads avoid secrets and item content. Verification: targeted alerting/scan-job/pipeline tests pass, `npm run typecheck` passes, `npm run lint` passes.
+
+2026-06-18 - Codex, T-OPS6 (DONE on `ops/t-ops9-ux`): added production `GET /api/health` with public coarse status and authenticated detail via `CRON_SECRET` bearer. Snapshot reports DB reachability, newest successful scan age globally and by scan profile, worker heartbeat age from running scan-job leases when available, pending `needs_review` count, app version, and commit SHA. Uses bounded recent reads only; public response omits operational details. Verification: health route/lib tests pass, `npm run typecheck` passes.
+
+2026-06-18 - Codex, T-OPS8 (DONE on `ops/t-ops9-ux`): completed the three focused security hardening fixes. Cron bearer comparison now uses length-checked `timingSafeEqual`; production env fails fast if admin credentials remain `admin`/`change-me`; `/api/ingestion/run` no longer triggers ingestion via GET and returns 405 with `Allow: POST`. Verification: targeted cron/env/ingestion tests pass, `npm test` passes, `npm run typecheck` passes, `npm run lint` passes, and `npm run build` passes when provided non-default admin credentials. A plain local build now intentionally fails if `.env.local` still uses the default admin credentials.
+
+2026-06-18 - Claude Code, T-OPS7 (DONE on `ops/t-ops9-ux`): committed public performance pass `3d48a53` (`perf(public): defer below-the-fold interactive implementation maps (T-OPS7)`). Europe and United States implementation maps are deferred through lazy components so below-the-fold interactive payload is delayed. Codex recorded this line after Claude's commit to avoid editing `AI_TASKS.md` from both agents at once.
+
 2026-06-12 - Codex, T-OPS2 (CLAIMED/in progress): outbound alerting for stale/degraded source transitions, consecutive scan failures, and optional daily review-backlog digest. Scope owned while open: `src/lib/alerting.ts`, `src/lib/env.ts`, `.env.example`, backend pipeline/scan-job/worker hooks, and targeted tests. Guardrails: optional webhook only, off when unset, no secrets/item content in payloads, alert failures never fail scans.
 
 2026-06-12 — Claude Code, T-OPS7 (DONE, code part): homepage `src/app/page.tsx` switched from `force-dynamic` to ISR (`revalidate = 300`) — build now reports `/` as Static (Revalidate 5m), matching the other public pages; it only reads public non-personalized data so this is safe. Audit: `/ai-regulation` stays dynamic by design (renders from searchParams — ISR inapplicable, documented T-RT0C); ProfilePortrait already uses optimized `next/image` + priority LCP; JarvisOrb is a lightweight framer-motion animation. DEAD CODE found (not deleted per rules): `home-hero-visual.tsx`, `ui/demo.tsx`, `ui/splite.tsx` + the `@splinetool/react-spline` dep are imported by no route — Spline renders nowhere, so there was no homepage Spline cost to cut; safe to remove in a follow-up. 455 tests ✓ build ✓ lint ✓. REMAINING (user, needs running/prod app): run Lighthouse on `/`, `/ai-regulation`, a country page (target ≥90 desktop) + confirm ISR cache response headers in prod. Branch `ops/t-ops7-perf`.
@@ -61,25 +69,51 @@ None currently. (`src/agents/harness/` was authored by Claude Code; Codex may ex
 
 ## Active task
 
-Codex owns T-OPS2 (CLAIMED/in progress): outbound alerting. T-OPS1 complete (branch pushed; PR awaiting user open+merge). Editing unblocked. Codex sequence after T-OPS2: T-OPS6 → T-OPS4. Claude Code next: T-OPS3 (blocked on user hosting choice) → T-OPS5 → T-OPS7.
+Codex completed T-OPS2, T-OPS6, and T-OPS8 on `ops/t-ops9-ux`: outbound alerting + production health endpoint + focused security hardening. T-OPS1 complete (branch pushed; PR awaiting user open+merge). Editing unblocked. Codex sequence after T-OPS8: T-OPS4. Claude Code next: T-OPS3 (blocked on user hosting choice) -> T-OPS5 -> T-OPS9 -> T-OPS7.
 
 ## Program P-OPS — production hardening (planned 2026-06-11, user-approved)
 
-Context for both agents (full review done 2026-06-11): P-RT is essentially delivered (455 tests, ISR live, 10 crons, cadence/backoff, conditional fetch, review-assist, re-review audit). The remaining weaknesses are operational, in priority order: (1) ~73 modified files are sitting UNCOMMITTED in the working tree, (2) there is no CI — "all green" claims are only as good as the last local run, and the full suite is flaky under load (5 auth-rejection route tests hit the 5s timeout when the whole suite runs, pass in isolation and on rerun), (3) T-RT1B outbound alerting was never built — a dead source is still only visible by opening the admin dashboard, (4) the worker and the Scrapling sidecar are not deployed, so enqueue-only mode cannot be enabled and scrapling/hybrid sources are dead, (5) T-RT3D has 4 DPAs left unchecked (AP/NL, DSB/AT, IMY/SE, DPC/IE), (6) no production health endpoint / uptime monitoring.
+Context for both agents (DEEP code-level review done 2026-06-11, second pass): P-RT is essentially delivered (455 tests, ISR live incl. homepage, 10 crons, cadence/backoff, conditional fetch, review-assist, re-review audit). Auth is genuinely strong (admin = constant-time HMAC sessions + httpOnly/secure cookies; ingestion = timingSafeEqual bearer; AI cost guardrails enforce budget + token + per-scan caps). The remaining weaknesses, in priority order:
+
+OPERATIONAL (highest risk):
+1. ~73 modified files sit UNCOMMITTED in the working tree — all recent P-RT work is one accident away from loss.
+2. No CI. "All green" is only as good as the last manual local run, and the suite is FLAKY under load: 5 auth-rejection route tests hit the 5s timeout when the full suite runs in parallel, pass in isolation/on rerun. Real bug or test-infra bug, it makes the suite untrustworthy.
+3. Migrations 010 (country_intelligence structural fields) and 011 (country_profile_review_events) have NO "applied to remote" marker anywhere — they may not be live in prod Supabase. If unapplied, T-RT5A/T-RT5B features fail or silently fall back. MUST be verified before trusting those features in prod.
+4. T-RT1B outbound alerting never built — a dead source is only visible by opening the admin dashboard.
+5. Worker + Scrapling sidecar not deployed → enqueue-only mode can't be enabled, scrapling/hybrid sources are dead.
+6. No production health endpoint / uptime monitoring.
+
+CORRECTNESS / SECURITY HARDENING (lower risk, real):
+7. `src/lib/cron-auth.ts` compares the bearer with a plain `!==` (NOT constant-time) — inconsistent with admin-auth and ingestion which both use timingSafeEqual. Tighten it.
+8. `ADMIN_PASSWORD` defaults to `"change-me"` and `ADMIN_USERNAME` to `"admin"` with NO production guard — a deploy that forgets to set them ships with admin/change-me. env.ts already hard-fails on missing ADMIN_AUTH_SECRET; add the same fail-fast for default admin creds in production.
+9. `/api/ingestion/run` accepts GET as well as POST to trigger a mutation (GET should be safe/idempotent). Keep POST, drop or guard GET.
+
+HYGIENE / POLISH:
+10. `@splinetool/react-spline` + `@splinetool/runtime` are still in package.json dependencies but have ZERO references in src (Spline code was removed) — dead deps bloating install.
+11. No custom `not-found.tsx` (404) and no `loading.tsx` skeletons on public routes (error.tsx boundaries DO exist). UX polish gap.
+12. T-RT3D has 4 DPAs left unchecked (AP/NL, DSB/AT, IMY/SE, DPC/IE).
+13. README.md is 2091 lines — doc bloat; low priority.
 
 Execution rules for this program:
-- T-OPS1 runs FIRST and ALONE. Neither agent edits any repo file while T-OPS1 is in progress (it commits the whole working tree). Claim it explicitly.
-- After T-OPS1: Codex sequence is T-OPS2 → T-OPS6 → T-OPS4. Claude Code sequence is T-OPS3 → T-OPS5 → T-OPS7. One task per agent at a time.
-- File-ownership boundaries during the program: `src/lib/env.ts` + `.env.example` belong to Codex while T-OPS2 is open (Claude must not touch them); `vercel.json`, `.github/**`, `docs/**`, source registries and `src/content/**` belong to Claude Code; repository/processor/test files belong to Codex. Any contract a task exposes must be stated in its completion note so the consumer task can start.
+- T-OPS1 runs FIRST and ALONE. Neither agent edits any repo file while T-OPS1 is in progress (it commits the whole working tree + verifies migrations). Claim it explicitly.
+- After T-OPS1, the two agents run fully parallel, NO shared files:
+  - Codex sequence:        T-OPS2 (alerting) → T-OPS6 (health endpoint) → T-OPS8 (security hardening) → T-OPS4 (test reliability).
+  - Claude Code sequence:  T-OPS3 (worker deploy) → T-OPS5 (DPA RSS) → T-OPS9 (dead-deps + 404/loading) → T-OPS7 (perf pass).
+  - One task per agent at a time. Claim on the line above before starting.
+- File-ownership boundaries (hard walls, do not cross):
+  - Codex owns: `src/lib/env.ts`, `src/lib/cron-auth.ts`, `.env.example`, `src/lib/alerting.ts` (new), `src/app/api/health/**` (new), repository/processor/worker/test files, `vitest.config.ts`, `src/agents/harness/**`.
+  - Claude Code owns: `vercel.json`, `.github/**`, `docs/**`, `package.json` deps (T-OPS9), source registries (`*NewsSources.ts`), `src/content/**`, public/admin page + component files, `not-found.tsx`/`loading.tsx` (new).
+  - `package.json`: Codex may add scripts; Claude Code owns the dependencies block (T-OPS9). If both must touch it, the one who needs it later rebases after the other's commit — coordinate via a one-line note here, do not edit concurrently.
+  - Any contract a task exposes (e.g. T-OPS2 freshness-state shape consumed by an alert) must be restated in its completion note.
 - Guardrails restated: no auto-publish, AI off by default, token/scan/budget limits untouched, no secrets in code or alert payloads.
 
-### T-OPS1 (Claude Code) — Commit the in-flight work + CI pipeline
+### T-OPS1 (Claude Code) — Commit the in-flight work + CI + migration verification
 
-- Objective: zero uncommitted work; every future push verified by CI instead of trusting local runs.
-- Steps: (a) group the ~73 modified/untracked files into logical commits per task ID (T-RT2A/2B/3A/3B/3C/3D-partial/4A/4B/5B/5C, harness T-HAR1–4, T-TST1, AGENTS/AI_TASKS/DECISIONS doc reorg); (b) push; (c) add `.github/workflows/ci.yml`: on push + PR, run `npm ci`, `npm test`, `npm run lint`, `npm run typecheck`, `npm run build` (Node 20, no secrets needed — tests run in memory mode).
-- Success criteria: `git status` clean; CI workflow green on GitHub for the pushed head.
+- Objective: zero uncommitted work; every future push verified by CI; certainty about which migrations are live in prod.
+- Steps: (a) group the ~73 modified/untracked files into logical commits per task ID (T-RT2A/2B/3A/3B/3C/3D-partial/4A/4B/5B/5C, harness T-HAR1–4, T-TST1, AGENTS/AI_TASKS/DECISIONS doc reorg, migrations 010/011); (b) push; (c) add `.github/workflows/ci.yml`: on push + PR, run `npm ci`, `npm test`, `npm run lint`, `npm run typecheck`, `npm run build` (Node 20, no secrets — tests run in memory mode); (d) VERIFY migrations 010 + 011 are applied to remote Supabase (query `information_schema` for the new columns/table, or apply them idempotently) and record the result in a one-line note here. If they are NOT applied, applying them is part of this task (user approval required before running SQL against prod).
+- Success criteria: `git status` clean; CI green on GitHub for the pushed head; migrations 010/011 confirmed applied (or applied) and noted.
 - Files: `.github/workflows/ci.yml` (new) only; everything else is commits, not edits.
-- Verification: CI run visible green; local suite green before push.
+- Verification: CI run visible green; local suite green before push; migration check output recorded.
 
 ### T-OPS2 (Codex) — Outbound alerting (delivers the missing T-RT1B)
 
@@ -124,6 +158,27 @@ Execution rules for this program:
 - Scope: verify ISR actually serves cached HTML in prod (response headers); audit the homepage Spline runtime cost (`@splinetool/*` is heavy — lazy-load it or replace with a static visual on mobile if it tanks the score); lazy-load below-the-fold heavy components; run Lighthouse on `/`, `/ai-regulation`, one country page; fix what the audit surfaces within UI files.
 - Success criteria: Lighthouse performance ≥ 90 on the three audited pages (desktop), no regression in tests/build.
 - Files: public page/components files only.
+
+### T-OPS8 (Codex) — Security hardening (3 focused fixes)
+
+- Objective: close the small auth/method inconsistencies found in the deep review. All three are low-risk, high-confidence, backend-owned.
+- Scope:
+  1. `src/lib/cron-auth.ts`: replace the `authHeader !== \`Bearer ${CRON_SECRET}\`` comparison with a length-checked `timingSafeEqual` (mirror the ingestion route pattern). Keep behavior + reasons identical; add a test asserting a wrong-but-same-length secret is rejected.
+  2. `src/lib/env.ts`: in production (`NODE_ENV==='production'`), hard-fail `buildEnv()` if `ADMIN_USERNAME`/`ADMIN_PASSWORD` are still the defaults (`admin`/`change-me`) — same `EnvValidationError` pattern already used for ADMIN_AUTH_SECRET. Dev/test keep the convenient defaults. Add tests for both tiers.
+  3. `src/app/api/ingestion/run/route.ts`: drop the `GET` handler (or make it return 405) so a mutation is only triggered by `POST`. Update the route test.
+- Success criteria: targeted tests prove constant-time rejection + prod default-cred fail + GET no longer ingests; full suite + lint + typecheck + build green.
+- Files: `src/lib/cron-auth.ts` (+test), `src/lib/env.ts` (+test), `src/app/api/ingestion/run/route.ts` (+test). NO overlap with T-OPS2 if T-OPS2 finished its env.ts edit first — otherwise sequence after T-OPS2 (both touch env.ts; Codex does them in order, so no conflict).
+- Out of scope: any auth redesign, any new secret, any change to the working credential flow.
+
+### T-OPS9 (Claude Code) — Dead deps + 404/loading polish
+
+- Objective: lean install + complete the public UX shell.
+- Scope:
+  1. Remove `@splinetool/react-spline` and `@splinetool/runtime` from `package.json` (zero references in src — confirmed in the deep review); run `npm install` to update the lockfile; verify `npm run build` still passes.
+  2. Add a branded `src/app/not-found.tsx` (404) consistent with the public design, and `loading.tsx` skeletons for the heavier public routes (`/ai-regulation`, `/ai-regulation/europe`, country/state pages) so navigation has instant feedback under ISR misses. Match existing `error.tsx` styling.
+- Success criteria: build green with smaller dep tree; visiting an unknown route shows the branded 404; route transitions show a skeleton, not a blank gap.
+- Files: `package.json` + lockfile, `src/app/not-found.tsx` (new), `src/app/**/loading.tsx` (new). NO backend files.
+- Note: Spline removal touches `package.json` deps — Claude Code owns that block per the boundaries above; if Codex needs a script added to package.json meanwhile, coordinate order in a one-line note.
 
 ### User actions needed (not agent work)
 

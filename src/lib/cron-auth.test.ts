@@ -50,4 +50,21 @@ describe("cron auth", () => {
       reason: "authorized",
     });
   });
+
+  it("rejects a wrong bearer token even when it has the expected length", () => {
+    process.env.CRON_SECRET = "1234567890abcdef";
+    process.env.ADMIN_AUTH_SECRET = "123456789012345678901234";
+    resetEnvForTests();
+
+    const request = new Request("http://localhost/api/cron", {
+      headers: {
+        authorization: "Bearer 1234567890abcdee",
+      },
+    });
+
+    expect(getCronAuthStatus(request)).toEqual({
+      ok: false,
+      reason: "invalid_cron_secret",
+    });
+  });
 });

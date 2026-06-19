@@ -35,6 +35,7 @@ import {
 } from "@/agents/harness/failure";
 import { addStep, createTrace, finishTrace, type TraceStep } from "@/agents/harness/trace";
 import type { SourceExecutionDecision } from "@/agents/ai-regulation/sourceRuntimeHealth";
+import { alertOnSourceScanFinalized } from "@/lib/alerting";
 import type {
   RegulationScanLog,
   ReviewAssistMetadata,
@@ -923,6 +924,15 @@ async function finalizeSourceScan(
       state.extractionErrors[0] ??
       state.parsingWarnings[0] ??
       "Stable on latest scan.",
+  });
+  await alertOnSourceScanFinalized({
+    sourceBeforeUpdate: source,
+    scanStatus: status,
+    trigger,
+    scanProfile: scanProfile ?? "default",
+    scanJobId,
+    responseStatus: state.responseStatus ?? null,
+    checkedAt: finishedAt,
   });
 
   return {
