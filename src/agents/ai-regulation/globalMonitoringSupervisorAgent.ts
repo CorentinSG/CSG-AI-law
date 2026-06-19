@@ -9,6 +9,10 @@ import {
   runUsMonitoringSupervisorAgent,
 } from "@/agents/ai-regulation/usMonitoringSupervisorAgent";
 import { supervisorMonitoringMandate } from "@/agents/ai-regulation/monitoringAgentMandate";
+import {
+  listAgentApiCapabilities,
+  listMissingAgentApiCapabilities,
+} from "@/agents/ai-regulation/agentApiCapabilities";
 import type { GenericCountryAgentProfileId } from "@/agents/ai-regulation/countryLegalNewsAgentFactory";
 import type { ScanTrigger } from "@/agents/ai-regulation/processors/pipeline";
 
@@ -47,6 +51,8 @@ export function listGlobalMonitoringAgents() {
       },
     ],
     crossFunctionalAgents: [designMonitoringAgent],
+    apiCapabilities: listAgentApiCapabilities(),
+    missingApiCapabilities: listMissingAgentApiCapabilities(),
   };
 }
 
@@ -100,6 +106,8 @@ export async function runGlobalMonitoringSupervisorAgent(options?: {
     succeeded: results.filter((result) => result.status === "succeeded").length,
     failed: results.filter((result) => result.status === "failed").length,
     designAgent: designMonitoringAgent,
+    apiCapabilities: listAgentApiCapabilities(),
+    missingApiCapabilities: listMissingAgentApiCapabilities(),
     results,
   };
 }

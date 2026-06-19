@@ -68,8 +68,14 @@ describe("global monitoring supervisor agent", () => {
           "central_legal_database_distribution",
           "local_legal_timeline_generation",
           "hard_law_soft_law_case_law_classification",
+          "api_accelerated_monitoring",
         ]),
       );
+      expect(supervisor.needs.apiInstructions).toMatchObject({
+        useNativeApisWhenAvailable: true,
+        noAdminInterventionForOfficialSourcePublication: true,
+        noAdminInterventionForSeriousOrCorroboratedLegalNews: true,
+      });
       expect(supervisor.needs.databaseInstructions).toMatchObject({
         centralBackendStore: "ai_regulatory_updates",
         jurisdictionProfileStore: "country_intelligence",
@@ -77,5 +83,27 @@ describe("global monitoring supervisor agent", () => {
         distributionKey: "jurisdiction_country_region",
       });
     }
+  });
+
+  it("exposes API capabilities and missing user setup to the boss supervisor", () => {
+    const registry = listGlobalMonitoringAgents();
+
+    expect(registry.apiCapabilities).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          id: "gdelt-doc-api",
+          status: "available",
+        }),
+        expect.objectContaining({
+          id: "newsapi",
+          envVars: ["NEWSAPI_API_KEY"],
+        }),
+        expect.objectContaining({
+          id: "courtlistener-recap",
+          status: "planned",
+        }),
+      ]),
+    );
+    expect(Array.isArray(registry.missingApiCapabilities)).toBe(true);
   });
 });
