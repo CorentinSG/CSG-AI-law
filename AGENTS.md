@@ -58,6 +58,15 @@ Default verification sequence for meaningful code changes: `npm test`, `npm run 
 - Bug fixes: reproduce first when practical. New behavior: define verification. Refactors: verify behavior before and after.
 - Run relevant tests/lint/typecheck/build; if verification cannot run, explain why.
 
+## Current publication policy
+
+This section supersedes any older blanket "human review before publication" wording.
+
+- Legal-news sections may auto-publish when the item comes from a serious/reputable legal-regulatory source, an official authority, or is corroborated by multiple sources.
+- Country/state legal database entries may auto-publish when the underlying information comes from an official source.
+- Discovery-only, weak, informal, or unverified sources stay admin-only until verification.
+- Do not reintroduce blanket human-review copy in public pages, admin UI text, tests, or seed data.
+
 ## Content and domain rules
 
 - Never invent publications, speaking engagements, research, dates, achievements, or unsupported source-backed claims.
