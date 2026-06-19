@@ -2,7 +2,7 @@ import Link from "next/link";
 
 const footerNav = [
   { href: "/", label: "Home" },
-  { href: "/research", label: "Notes & Commentary" },
+  { href: "/research", label: "Notes" },
   { href: "/ai-regulation", label: "AI Law Hub" },
   { href: "/standards", label: "Standards" },
   { href: "/contact", label: "Contact" },
@@ -20,13 +20,10 @@ export function SiteFooter() {
             AI Law &amp; Legal Intelligence
           </p>
           <p className="max-w-2xl text-sm leading-6 text-zinc-600">
-            Attorney-led research, monitoring, and analysis at the intersection
-            of artificial intelligence, regulation, legal intelligence, and
-            comparative legal systems.
+            AI law, regulatory monitoring, and legal intelligence.
           </p>
           <p className="max-w-2xl text-xs leading-6 text-zinc-500">
-            Content is provided for legal research and informational purposes
-            only and does not constitute legal advice.
+            For informational purposes only — not legal advice.
           </p>
         </div>
 

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { LucideIcon } from "lucide-react";
 import {
+  ChevronDown,
   FileText,
   Globe,
   Home,
@@ -12,27 +13,40 @@ import {
   Mail,
   Menu,
   Scale,
+  Search,
   ShieldCheck,
   Sparkles,
   X,
 } from "lucide-react";
 import { AnimatePresence, motion, useScroll, useSpring } from "framer-motion";
 
+import { SiteSearch } from "@/components/site/site-search";
 import { cn } from "@/lib/utils";
 
-type NavItem = { href: string; label: string; icon: LucideIcon };
+type NavLeaf = { href: string; label: string; icon: LucideIcon; hint?: string };
+type NavGroup = { label: string; icon: LucideIcon; match: string; children: NavLeaf[] };
+type NavNode = NavLeaf | NavGroup;
 
-const publicNavItems: NavItem[] = [
+const isGroup = (node: NavNode): node is NavGroup => "children" in node;
+
+const publicNav: NavNode[] = [
   { href: "/", label: "Home", icon: Home },
-  { href: "/ai-regulation", label: "Hub", icon: Scale },
-  { href: "/ai-regulation/europe", label: "Europe", icon: Globe },
-  { href: "/ai-regulation/united-states", label: "US", icon: Landmark },
+  {
+    label: "AI Law",
+    icon: Scale,
+    match: "/ai-regulation",
+    children: [
+      { href: "/ai-regulation", label: "Hub overview", icon: Scale },
+      { href: "/ai-regulation/europe", label: "Europe", icon: Globe },
+      { href: "/ai-regulation/united-states", label: "United States", icon: Landmark },
+    ],
+  },
   { href: "/research", label: "Notes", icon: FileText },
   { href: "/standards", label: "Standards", icon: ShieldCheck },
   { href: "/contact", label: "Contact", icon: Mail },
 ];
 
-const adminNavItems: NavItem[] = [
+const adminNav: NavNode[] = [
   { href: "/", label: "Site", icon: Home },
   { href: "/ai-regulation", label: "Hub", icon: Scale },
   { href: "/admin/ai-regulation", label: "Review", icon: ShieldCheck },
@@ -41,25 +55,25 @@ const adminNavItems: NavItem[] = [
 
 const ease: [number, number, number, number] = [0.16, 1, 0.3, 1];
 
+function openSearch() {
+  window.dispatchEvent(new Event("site-search:open"));
+}
+
 export function SiteHeader({
   variant = "public",
 }: {
   variant?: "public" | "admin";
 }) {
   const pathname = usePathname();
-  const navItems = variant === "admin" ? adminNavItems : publicNavItems;
+  const nav = variant === "admin" ? adminNav : publicNav;
   const isAdmin = variant === "admin";
 
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [groupOpen, setGroupOpen] = useState<string | null>(null);
 
-  // Scroll-progress bar
   const { scrollYProgress } = useScroll();
-  const progress = useSpring(scrollYProgress, {
-    stiffness: 120,
-    damping: 30,
-    mass: 0.3,
-  });
+  const progress = useSpring(scrollYProgress, { stiffness: 120, damping: 30, mass: 0.3 });
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 12);
@@ -68,19 +82,32 @@ export function SiteHeader({
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  // Only the most specific matching item is active (longest matching href),
-  // so a parent like "/ai-regulation" doesn't also light up on "/ai-regulation/europe".
-  const activeHref = navItems.reduce<string | null>((best, item) => {
-    const matches =
-      item.href === "/"
+  const nodeActive = (node: NavNode) =>
+    isGroup(node)
+      ? pathname === node.match || pathname?.startsWith(`${node.match}`)
+      : node.href === "/"
         ? pathname === "/"
-        : pathname === item.href || pathname?.startsWith(`${item.href}/`);
-    if (!matches) return best;
-    if (!best || item.href.length > best.length) return item.href;
-    return best;
-  }, null);
+        : pathname === node.href || pathname?.startsWith(`${node.href}/`);
 
-  const isActive = (href: string) => href === activeHref;
+  const linkTone = (active: boolean) =>
+    active
+      ? isAdmin
+        ? "text-white"
+        : "text-zinc-950"
+      : isAdmin
+        ? "text-zinc-400 hover:text-white"
+        : "text-zinc-500 hover:text-zinc-950";
+
+  const activePill = (
+    <motion.span
+      layoutId={`nav-pill-${variant}`}
+      className={cn(
+        "absolute inset-0 -z-10 rounded-full",
+        isAdmin ? "bg-white/12" : "bg-black/[0.06] shadow-[inset_0_1px_0_rgba(255,255,255,0.6)]",
+      )}
+      transition={{ type: "spring", stiffness: 380, damping: 32 }}
+    />
+  );
 
   return (
     <motion.header
@@ -96,6 +123,7 @@ export function SiteHeader({
           : "border-b border-transparent bg-transparent backdrop-blur-0",
       )}
     >
+      <SiteSearch />
       <div
         className={cn(
           "mx-auto flex max-w-7xl items-center justify-between gap-4 px-6 transition-[padding] duration-500",
@@ -142,71 +170,187 @@ export function SiteHeader({
                 : "border border-black/5 bg-white/40 backdrop-blur-md",
           )}
         >
-          {navItems.map((item) => {
-            const active = isActive(item.href);
+          {nav.map((node) => {
+            const active = Boolean(nodeActive(node));
+            if (!isGroup(node)) {
+              return (
+                <Link
+                  key={node.href}
+                  href={node.href}
+                  scroll={false}
+                  className={cn(
+                    "relative flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[12px] tracking-[0.02em] transition-colors",
+                    linkTone(active),
+                  )}
+                >
+                  {active ? activePill : null}
+                  <node.icon className="h-4 w-4" />
+                  {node.label}
+                </Link>
+              );
+            }
+            const open = groupOpen === node.label;
             return (
-              <Link
-                key={item.href}
-                href={item.href}
-                scroll={false}
-                className={cn(
-                  "relative flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[12px] tracking-[0.02em] transition-colors",
-                  active
-                    ? isAdmin
-                      ? "text-white"
-                      : "text-zinc-950"
-                    : isAdmin
-                      ? "text-zinc-400 hover:text-white"
-                      : "text-zinc-500 hover:text-zinc-950",
-                )}
-              >
-                {active ? (
-                  <motion.span
-                    layoutId={`nav-pill-${variant}`}
-                    className={cn(
-                      "absolute inset-0 -z-10 rounded-full",
-                      isAdmin
-                        ? "bg-white/12"
-                        : "bg-black/[0.06] shadow-[inset_0_1px_0_rgba(255,255,255,0.6)]",
-                    )}
-                    transition={{ type: "spring", stiffness: 380, damping: 32 }}
+              <div key={node.label} className="relative">
+                <button
+                  type="button"
+                  onClick={() => setGroupOpen(open ? null : node.label)}
+                  aria-expanded={open}
+                  className={cn(
+                    "relative flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[12px] tracking-[0.02em] transition-colors",
+                    linkTone(active || open),
+                  )}
+                >
+                  {active ? activePill : null}
+                  <node.icon className="h-4 w-4" />
+                  {node.label}
+                  <ChevronDown
+                    className={cn("h-3.5 w-3.5 transition-transform", open && "rotate-180")}
                   />
-                ) : null}
-                <item.icon className="h-4 w-4" />
-                {item.label}
-              </Link>
+                </button>
+                <AnimatePresence>
+                  {open ? (
+                    <>
+                      <button
+                        type="button"
+                        aria-hidden
+                        tabIndex={-1}
+                        onClick={() => setGroupOpen(null)}
+                        className="fixed inset-0 z-[54] cursor-default"
+                      />
+                      <motion.div
+                        initial={{ opacity: 0, y: -8, scale: 0.98 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, y: -8, scale: 0.98 }}
+                        transition={{ duration: 0.22, ease }}
+                        className={cn(
+                          "absolute left-0 top-[calc(100%+0.5rem)] z-[55] w-64 origin-top-left overflow-hidden rounded-2xl border p-1.5 shadow-[0_24px_60px_rgba(15,15,15,0.14)]",
+                          isAdmin
+                            ? "border-white/10 bg-[rgba(10,12,18,0.96)] backdrop-blur-2xl"
+                            : "border-black/8 bg-[rgba(247,246,241,0.97)] backdrop-blur-2xl",
+                        )}
+                      >
+                        {node.children.map((child) => {
+                          const childActive =
+                            pathname === child.href ||
+                            (child.href !== "/ai-regulation" &&
+                              pathname?.startsWith(`${child.href}/`));
+                          return (
+                            <Link
+                              key={child.href}
+                              href={child.href}
+                              scroll={false}
+                              onClick={() => setGroupOpen(null)}
+                              className={cn(
+                                "flex items-start gap-3 rounded-xl px-3 py-2.5 transition-colors",
+                                childActive
+                                  ? "bg-accent-soft"
+                                  : isAdmin
+                                    ? "hover:bg-white/5"
+                                    : "hover:bg-black/[0.04]",
+                              )}
+                            >
+                              <span
+                                className={cn(
+                                  "mt-0.5 flex size-7 shrink-0 items-center justify-center rounded-lg",
+                                  childActive
+                                    ? "bg-accent text-white"
+                                    : isAdmin
+                                      ? "bg-white/10 text-zinc-300"
+                                      : "bg-black/[0.05] text-zinc-600",
+                                )}
+                              >
+                                <child.icon className="h-4 w-4" />
+                              </span>
+                              <span>
+                                <span
+                                  className={cn(
+                                    "block text-sm font-medium",
+                                    isAdmin ? "text-zinc-100" : "text-zinc-900",
+                                  )}
+                                >
+                                  {child.label}
+                                </span>
+                                {child.hint ? (
+                                  <span className="block text-[12px] text-zinc-500">
+                                    {child.hint}
+                                  </span>
+                                ) : null}
+                              </span>
+                            </Link>
+                          );
+                        })}
+                      </motion.div>
+                    </>
+                  ) : null}
+                </AnimatePresence>
+              </div>
             );
           })}
         </nav>
 
-        {/* Mobile toggle */}
-        <button
-          type="button"
-          onClick={() => setMenuOpen((v) => !v)}
-          className={cn(
-            "relative flex h-10 w-10 items-center justify-center rounded-full border lg:hidden",
-            isAdmin
-              ? "border-white/15 bg-white/5 text-white"
-              : "border-black/8 bg-white/60 text-zinc-900 backdrop-blur-md",
-          )}
-          aria-label={menuOpen ? "Close menu" : "Open menu"}
-          aria-expanded={menuOpen}
-        >
-          <motion.span
-            animate={{ rotate: menuOpen ? 90 : 0, opacity: menuOpen ? 0 : 1 }}
-            transition={{ duration: 0.3, ease }}
-            className="absolute"
+        {/* Right cluster: search + mobile toggle */}
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={openSearch}
+            className={cn(
+              "hidden items-center gap-2 rounded-full border px-3 py-2 text-[12px] transition lg:flex",
+              isAdmin
+                ? "border-white/10 bg-white/5 text-zinc-300 hover:text-white"
+                : "border-black/8 bg-white/50 text-zinc-500 backdrop-blur-md hover:text-zinc-900",
+            )}
+            aria-label="Search the site"
           >
-            <Menu className="h-5 w-5" />
-          </motion.span>
-          <motion.span
-            animate={{ rotate: menuOpen ? 0 : -90, opacity: menuOpen ? 1 : 0 }}
-            transition={{ duration: 0.3, ease }}
-            className="absolute"
+            <Search className="h-4 w-4" />
+            <span>Search</span>
+            <span className="rounded border border-black/10 px-1.5 py-0.5 font-mono text-[10px] text-zinc-400">
+              ⌘K
+            </span>
+          </button>
+
+          {/* Mobile: search + hamburger */}
+          <button
+            type="button"
+            onClick={openSearch}
+            className={cn(
+              "flex h-10 w-10 items-center justify-center rounded-full border lg:hidden",
+              isAdmin
+                ? "border-white/15 bg-white/5 text-white"
+                : "border-black/8 bg-white/60 text-zinc-900 backdrop-blur-md",
+            )}
+            aria-label="Search the site"
           >
-            <X className="h-5 w-5" />
-          </motion.span>
-        </button>
+            <Search className="h-5 w-5" />
+          </button>
+          <button
+            type="button"
+            onClick={() => setMenuOpen((v) => !v)}
+            className={cn(
+              "relative flex h-10 w-10 items-center justify-center rounded-full border lg:hidden",
+              isAdmin
+                ? "border-white/15 bg-white/5 text-white"
+                : "border-black/8 bg-white/60 text-zinc-900 backdrop-blur-md",
+            )}
+            aria-label={menuOpen ? "Close menu" : "Open menu"}
+            aria-expanded={menuOpen}
+          >
+            <motion.span
+              animate={{ rotate: menuOpen ? 90 : 0, opacity: menuOpen ? 0 : 1 }}
+              transition={{ duration: 0.3, ease }}
+              className="absolute"
+            >
+              <Menu className="h-5 w-5" />
+            </motion.span>
+            <motion.span
+              animate={{ rotate: menuOpen ? 0 : -90, opacity: menuOpen ? 1 : 0 }}
+              transition={{ duration: 0.3, ease }}
+              className="absolute"
+            >
+              <X className="h-5 w-5" />
+            </motion.span>
+          </button>
+        </div>
       </div>
 
       {/* Scroll progress bar */}
@@ -237,33 +381,66 @@ export function SiteHeader({
             )}
           >
             <div className="mx-auto flex max-w-7xl flex-col gap-1">
-              {navItems.map((item, i) => {
-                const active = isActive(item.href);
+              {nav.map((node, i) => {
+                if (!isGroup(node)) {
+                  const active = Boolean(nodeActive(node));
+                  return (
+                    <motion.div
+                      key={node.href}
+                      initial={{ opacity: 0, x: -12 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ duration: 0.32, ease, delay: 0.04 * i }}
+                    >
+                      <Link
+                        href={node.href}
+                        scroll={false}
+                        onClick={() => setMenuOpen(false)}
+                        className={cn(
+                          "flex items-center gap-3 rounded-2xl px-4 py-3 text-[14px] transition-colors",
+                          active
+                            ? isAdmin
+                              ? "bg-white/10 text-white"
+                              : "bg-black/[0.06] text-zinc-950"
+                            : linkTone(false),
+                        )}
+                      >
+                        <node.icon className="h-[18px] w-[18px]" />
+                        {node.label}
+                      </Link>
+                    </motion.div>
+                  );
+                }
                 return (
                   <motion.div
-                    key={item.href}
+                    key={node.label}
                     initial={{ opacity: 0, x: -12 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ duration: 0.32, ease, delay: 0.04 * i }}
+                    className="mt-1"
                   >
-                    <Link
-                      href={item.href}
-                      scroll={false}
-                      onClick={() => setMenuOpen(false)}
-                      className={cn(
-                        "flex items-center gap-3 rounded-2xl px-4 py-3 text-[14px] transition-colors",
-                        active
-                          ? isAdmin
-                            ? "bg-white/10 text-white"
-                            : "bg-black/[0.06] text-zinc-950"
-                          : isAdmin
-                            ? "text-zinc-400 hover:text-white"
-                            : "text-zinc-500 hover:text-zinc-950",
-                      )}
-                    >
-                      <item.icon className="h-[18px] w-[18px]" />
-                      {item.label}
-                    </Link>
+                    <p className="flex items-center gap-2 px-4 pb-1 pt-2 font-mono text-[10px] uppercase tracking-[0.24em] text-zinc-400">
+                      <node.icon className="h-3.5 w-3.5" />
+                      {node.label}
+                    </p>
+                    {node.children.map((child) => (
+                      <Link
+                        key={child.href}
+                        href={child.href}
+                        scroll={false}
+                        onClick={() => setMenuOpen(false)}
+                        className={cn(
+                          "ml-3 flex items-center gap-3 rounded-2xl px-4 py-2.5 text-[14px] transition-colors",
+                          pathname?.startsWith(child.href) && child.href !== "/ai-regulation"
+                            ? "bg-black/[0.06] text-zinc-950"
+                            : pathname === child.href
+                              ? "bg-black/[0.06] text-zinc-950"
+                              : linkTone(false),
+                        )}
+                      >
+                        <child.icon className="h-[18px] w-[18px]" />
+                        {child.label}
+                      </Link>
+                    ))}
                   </motion.div>
                 );
               })}

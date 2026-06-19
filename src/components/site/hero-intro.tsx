@@ -45,13 +45,6 @@ export function HeroIntro() {
           duration={1}
           className="font-display max-w-[17rem] text-balance text-[3rem] font-medium uppercase leading-[0.88] tracking-[-0.06em] text-zinc-950 sm:max-w-4xl sm:text-[3.7rem] md:text-[5.8rem] xl:text-[7rem]"
         />
-        <ScrollTextReveal
-          as="p"
-          text="AI, regulation, and legal intelligence."
-          mode="paragraph"
-          duration={0.9}
-          className="max-w-sm text-base leading-7 text-zinc-700 md:text-lg"
-        />
       </div>
 
       <motion.div

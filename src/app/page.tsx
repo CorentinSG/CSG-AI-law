@@ -56,7 +56,6 @@ export default async function HomePage() {
       {/* --- AI Law Hub: featured entry point + live news preview --- */}
       <section className="space-y-4">
         <SectionHeading
-          eyebrow="AI legal intelligence"
           title="AI Law Hub"
         />
 
@@ -130,7 +129,6 @@ export default async function HomePage() {
       {/* --- Secondary entry points: Notes + Standards --- */}
       <section className="space-y-4">
         <SectionHeading
-          eyebrow="Also on this site"
           title="Notes and standards"
         />
         <MotionStagger className="grid gap-4 lg:grid-cols-2">

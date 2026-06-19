@@ -50,7 +50,7 @@ export function HubOrientation({ note }: { note?: string }) {
         </div>
         <p className="mt-3 flex items-center gap-2 text-[12px] leading-5 text-zinc-500">
           <span className="inline-flex size-1.5 shrink-0 rounded-full bg-emerald-500" />
-          {note ?? "Nothing is shown publicly unless it is backed by a verified official source."}
+          {note ?? "Official sources only."}
         </p>
       </div>
     </MotionReveal>

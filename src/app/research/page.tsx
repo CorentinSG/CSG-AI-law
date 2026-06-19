@@ -108,7 +108,6 @@ export default function ResearchPage() {
         <SectionHeading
           eyebrow="Categories"
           title="An organized editorial structure"
-          description="Organized by recurring lines of inquiry."
         />
         <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
           {categoryCounts.map((item) => {
@@ -117,10 +116,8 @@ export default function ResearchPage() {
               <FeatureCard
                 key={item.category}
                 icon={Icon}
-                eyebrow="Editorial category"
                 title={item.category}
-                description={`${item.count} public note${item.count > 1 ? "s" : ""} currently visible in this category.`}
-                cta="Editorial structure in progress"
+                description={`${item.count} note${item.count !== 1 ? "s" : ""}`}
               />
             );
           })}
@@ -131,7 +128,6 @@ export default function ResearchPage() {
         <SectionHeading
           eyebrow="Published notes"
           title="Current public notes"
-          description="Public notes and commentary; forthcoming ones are marked."
         />
         <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
           {publishedEntries.map((entry) => (
@@ -152,8 +148,7 @@ export default function ResearchPage() {
       <section className="space-y-8 border-t border-black/6 pt-16">
         <SectionHeading
           eyebrow="In development"
-          title="Forthcoming notes and commentary topics"
-          description="Previews of where the section is heading."
+          title="Forthcoming notes"
           actions={
             <Link
               href="/ai-regulation"
