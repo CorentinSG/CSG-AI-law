@@ -8,6 +8,7 @@ import { EuropeImplementationMap } from "@/components/site/europe-implementation
 import { HubOrientation } from "@/components/site/hub-orientation";
 import { HubScrollNav } from "@/components/site/hub-scroll-nav";
 import { LiveLegalIntelligencePanel } from "@/components/site/live-legal-intelligence-panel";
+import { MotionStagger, MotionStaggerItem } from "@/components/site/motion-stagger";
 import { SectionHeading } from "@/components/site/section-heading";
 import { SiteShell } from "@/components/site/shell";
 import { UpdateCard } from "@/components/site/update-card";
@@ -98,17 +99,16 @@ export default async function EuropeAiRegulationPage() {
         </div>
 
         {/* Compact methodology note */}
-        <div className="grid gap-3 sm:grid-cols-3">
+        <MotionStagger className="grid gap-3 sm:grid-cols-3" stagger={0.08}>
           {europeFocusCards.map((card) => (
-            <div
-              key={card.title}
-              className="rounded-[1.5rem] border border-black/6 bg-white/80 p-4 shadow-sm"
-            >
-              <p className="font-mono text-[9px] uppercase tracking-[0.24em] text-zinc-500">{card.title}</p>
-              <p className="mt-2 text-sm leading-6 text-zinc-700">{card.body}</p>
-            </div>
+            <MotionStaggerItem key={card.title}>
+              <div className="rounded-[1.5rem] border border-black/6 bg-white/80 p-4 shadow-sm transition duration-300 hover:-translate-y-0.5 hover:shadow-md">
+                <p className="font-mono text-[9px] uppercase tracking-[0.24em] text-zinc-500">{card.title}</p>
+                <p className="mt-2 text-sm leading-6 text-zinc-700">{card.body}</p>
+              </div>
+            </MotionStaggerItem>
           ))}
-        </div>
+        </MotionStagger>
       </section>
 
       <HubScrollNav
@@ -212,22 +212,21 @@ export default async function EuropeAiRegulationPage() {
                 Open official EUR-Lex text
               </a>
             </div>
-            <div className="space-y-3">
+            <MotionStagger className="space-y-3" stagger={0.1}>
               {europeAiActBaseline.phasedApplicationDates.map((milestone) => (
-                <div
-                  key={`${milestone.date}-${milestone.label}`}
-                  className="rounded-2xl border border-black/6 bg-zinc-50 p-4"
-                >
-                  <p className="font-mono text-[11px] uppercase tracking-[0.24em] text-zinc-500">
-                    {milestone.date} / confidence {milestone.confidence}
-                  </p>
-                  <p className="mt-2 font-medium text-zinc-950">{milestone.label}</p>
-                  <p className="mt-2 text-sm leading-7 text-zinc-700">
-                    {milestone.legalEffect}
-                  </p>
-                </div>
+                <MotionStaggerItem key={`${milestone.date}-${milestone.label}`}>
+                  <div className="rounded-2xl border border-black/6 bg-zinc-50 p-4 transition duration-200 hover:bg-white hover:shadow-sm">
+                    <p className="font-mono text-[11px] uppercase tracking-[0.24em] text-zinc-500">
+                      {milestone.date} / confidence {milestone.confidence}
+                    </p>
+                    <p className="mt-2 font-medium text-zinc-950">{milestone.label}</p>
+                    <p className="mt-2 text-sm leading-7 text-zinc-700">
+                      {milestone.legalEffect}
+                    </p>
+                  </div>
+                </MotionStaggerItem>
               ))}
-            </div>
+            </MotionStagger>
           </CardContent>
         </Card>
       </section>
@@ -252,32 +251,31 @@ export default async function EuropeAiRegulationPage() {
             title="EU governance actors"
             description="Institutions and posture — shown separately from binding law."
           />
-          <div className="space-y-4">
+          <MotionStagger className="space-y-4" stagger={0.09}>
             {europeGovernanceActors.map((actor) => (
-              <Card
-                key={actor.id}
-                className="rounded-[1.8rem] border-black/6 bg-white shadow-[0_14px_40px_rgba(15,15,15,0.04)]"
-              >
-                <CardContent className="space-y-3 p-6">
-                  <p className="font-display text-2xl font-medium uppercase tracking-[-0.05em] text-zinc-950">
-                    {actor.name}
-                  </p>
-                  <div className="flex flex-wrap gap-2">
-                    <span className="rounded-full border border-cyan-200 bg-cyan-50 px-3 py-1 text-[11px] uppercase tracking-[0.24em] text-cyan-900">
-                      {authorityLayerLabel[actor.authorityLayer]}
-                    </span>
-                    <span className="rounded-full border border-zinc-200 bg-zinc-50 px-3 py-1 text-[11px] uppercase tracking-[0.24em] text-zinc-700">
-                      {governanceBindingLabel[actor.bindingStatusLabel]}
-                    </span>
-                  </div>
-                  <p className="text-sm leading-7 text-zinc-700">{actor.role}</p>
-                  <p className="text-xs uppercase tracking-[0.2em] text-zinc-500">
-                    citation {actor.citationQualityStatus} / confidence {actor.confidenceLevel}
-                  </p>
-                </CardContent>
-              </Card>
+              <MotionStaggerItem key={actor.id}>
+                <Card className="rounded-[1.8rem] border-black/6 bg-white shadow-[0_14px_40px_rgba(15,15,15,0.04)] transition duration-300 hover:-translate-y-0.5 hover:shadow-[0_20px_50px_rgba(15,15,15,0.07)]">
+                  <CardContent className="space-y-3 p-6">
+                    <p className="font-display text-2xl font-medium uppercase tracking-[-0.05em] text-zinc-950">
+                      {actor.name}
+                    </p>
+                    <div className="flex flex-wrap gap-2">
+                      <span className="rounded-full border border-cyan-200 bg-cyan-50 px-3 py-1 text-[11px] uppercase tracking-[0.24em] text-cyan-900">
+                        {authorityLayerLabel[actor.authorityLayer]}
+                      </span>
+                      <span className="rounded-full border border-zinc-200 bg-zinc-50 px-3 py-1 text-[11px] uppercase tracking-[0.24em] text-zinc-700">
+                        {governanceBindingLabel[actor.bindingStatusLabel]}
+                      </span>
+                    </div>
+                    <p className="text-sm leading-7 text-zinc-700">{actor.role}</p>
+                    <p className="text-xs uppercase tracking-[0.2em] text-zinc-500">
+                      citation {actor.citationQualityStatus} / confidence {actor.confidenceLevel}
+                    </p>
+                  </CardContent>
+                </Card>
+              </MotionStaggerItem>
             ))}
-          </div>
+          </MotionStagger>
         </div>
         <div className="space-y-6">
           <SectionHeading
@@ -381,32 +379,31 @@ export default async function EuropeAiRegulationPage() {
             </p>
           </div>
         </div>
-        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+        <MotionStagger className="grid gap-4 md:grid-cols-2 xl:grid-cols-3" stagger={0.07}>
           {europeAiSoftLawBaseline.map((entry) => (
-            <Card
-              key={entry.id}
-              className="rounded-[1.8rem] border-black/6 bg-white shadow-[0_14px_40px_rgba(15,15,15,0.04)]"
-            >
-              <CardContent className="space-y-3 p-6">
-                <p className="font-display text-2xl font-medium uppercase tracking-[-0.05em] text-zinc-950">
-                  {entry.title}
-                </p>
-                <p className="font-mono text-[11px] uppercase tracking-[0.24em] text-zinc-500">
-                  {entry.authorityType.replaceAll("_", " ")} / {softLawBindingLabel[entry.bindingStatus]}
-                </p>
-                <p className="text-sm leading-7 text-zinc-700">{entry.summary}</p>
-                <a
-                  href={entry.sourceUrl}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="text-sm uppercase tracking-[0.16em] text-zinc-900 underline decoration-black/15 underline-offset-4"
-                >
-                  Official source
-                </a>
-              </CardContent>
-            </Card>
+            <MotionStaggerItem key={entry.id}>
+              <Card className="h-full rounded-[1.8rem] border-black/6 bg-white shadow-[0_14px_40px_rgba(15,15,15,0.04)] transition duration-300 hover:-translate-y-0.5 hover:shadow-[0_20px_50px_rgba(15,15,15,0.07)]">
+                <CardContent className="space-y-3 p-6">
+                  <p className="font-display text-2xl font-medium uppercase tracking-[-0.05em] text-zinc-950">
+                    {entry.title}
+                  </p>
+                  <p className="font-mono text-[11px] uppercase tracking-[0.24em] text-zinc-500">
+                    {entry.authorityType.replaceAll("_", " ")} / {softLawBindingLabel[entry.bindingStatus]}
+                  </p>
+                  <p className="text-sm leading-7 text-zinc-700">{entry.summary}</p>
+                  <a
+                    href={entry.sourceUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="text-sm uppercase tracking-[0.16em] text-zinc-900 underline decoration-black/15 underline-offset-4"
+                  >
+                    Official source
+                  </a>
+                </CardContent>
+              </Card>
+            </MotionStaggerItem>
           ))}
-        </div>
+        </MotionStagger>
       </section>
 
       <section id="map" className="scroll-mt-28 space-y-6">

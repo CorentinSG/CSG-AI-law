@@ -56,6 +56,7 @@ export default async function HomePage() {
       {/* --- AI Law Hub: featured entry point + live news preview --- */}
       <section className="space-y-4">
         <SectionHeading
+          eyebrow="Regulatory intelligence"
           title="AI Law Hub"
         />
 

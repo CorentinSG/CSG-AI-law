@@ -7,7 +7,7 @@ import { FilterBar } from "@/components/site/filter-bar";
 import { IntelligenceHubTabs } from "@/components/site/intelligence-hub-tabs";
 import { IntelligenceSignal } from "@/components/site/intelligence-signal";
 import { LegalIntelligenceLegend } from "@/components/site/legal-intelligence-legend";
-import { MotionStagger } from "@/components/site/motion-stagger";
+import { MotionStagger, MotionStaggerItem } from "@/components/site/motion-stagger";
 import { NewsCard } from "@/components/site/news-card";
 import { CursorPaginationControls } from "@/components/site/pagination-controls";
 import { RegionPortalCard } from "@/components/site/region-portal-card";
@@ -185,28 +185,36 @@ export default async function AiRegulationPage({
 
         <IntelligenceHubTabs tabs={[...hubTabs]} activeValue={activeView} />
 
-        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-          <IntelligenceSignal
-            label="Published legal database items"
-            value={updatesPage.hasMore ? `${updatesPage.limit}+` : String(updatesPage.items.length)}
-            tone="positive"
-          />
-          <IntelligenceSignal
-            label="Recent legal developments"
-            value={newsPage.hasMore ? `${newsPage.limit}+` : String(newsPage.items.length)}
-            tone="informative"
-          />
-          <IntelligenceSignal
-            label="Europe baseline"
-            value={`${allEuropeProfiles.length} states`}
-            tone="neutral"
-          />
-          <IntelligenceSignal
-            label="U.S. baseline"
-            value={`${allUsProfiles.length} states`}
-            tone="neutral"
-          />
-        </div>
+        <MotionStagger className="grid gap-4 md:grid-cols-2 xl:grid-cols-4" stagger={0.07}>
+          <MotionStaggerItem>
+            <IntelligenceSignal
+              label="Published legal database items"
+              value={updatesPage.hasMore ? `${updatesPage.limit}+` : String(updatesPage.items.length)}
+              tone="positive"
+            />
+          </MotionStaggerItem>
+          <MotionStaggerItem>
+            <IntelligenceSignal
+              label="Recent legal developments"
+              value={newsPage.hasMore ? `${newsPage.limit}+` : String(newsPage.items.length)}
+              tone="informative"
+            />
+          </MotionStaggerItem>
+          <MotionStaggerItem>
+            <IntelligenceSignal
+              label="Europe baseline"
+              value={`${allEuropeProfiles.length} states`}
+              tone="neutral"
+            />
+          </MotionStaggerItem>
+          <MotionStaggerItem>
+            <IntelligenceSignal
+              label="U.S. baseline"
+              value={`${allUsProfiles.length} states`}
+              tone="neutral"
+            />
+          </MotionStaggerItem>
+        </MotionStagger>
       </section>
 
       {activeView === "overview" ? (
@@ -227,11 +235,13 @@ export default async function AiRegulationPage({
             </div>
 
             {overviewNewsItems.length > 0 ? (
-              <div className="grid gap-3">
+              <MotionStagger className="grid gap-3" stagger={0.06}>
                 {overviewNewsItems.map((item) => (
-                  <CompactNewsCard key={item.id} item={item} horizontal />
+                  <MotionStaggerItem key={item.id}>
+                    <CompactNewsCard item={item} horizontal />
+                  </MotionStaggerItem>
                 ))}
-              </div>
+              </MotionStagger>
             ) : (
               <Card className="rounded-[1.8rem] border-black/6 bg-white/90 shadow-sm">
                 <CardContent className="p-6">
@@ -252,30 +262,34 @@ export default async function AiRegulationPage({
               eyebrow="Regional intelligence"
               title="Europe and United States"
             />
-            <div className="grid gap-5 lg:grid-cols-2">
-              <RegionPortalCard
-                region="europe"
-                title="Europe"
-                description="EU AI Act and Member State implementation."
-                href="/ai-regulation/europe"
-                liveLabel="Europe news"
-                liveCount={europeNewsCount}
-                dbCount={updatesPage.items.length}
-                highlights={europeProfiles.map((p) => ({ label: p.countryName, href: `/ai-regulation/europe/${p.slug}` }))}
-                isLive
-              />
-              <RegionPortalCard
-                region="united-states"
-                title="United States"
-                description="Federal and 50-state AI law coverage."
-                href="/ai-regulation/united-states"
-                liveLabel="U.S. news"
-                liveCount={usNewsCount}
-                dbCount={updatesPage.items.length}
-                highlights={usProfiles.map((p) => ({ label: p.stateName, href: `/ai-regulation/united-states/${p.slug}` }))}
-                isLive
-              />
-            </div>
+            <MotionStagger className="grid gap-5 lg:grid-cols-2" stagger={0.12}>
+              <MotionStaggerItem>
+                <RegionPortalCard
+                  region="europe"
+                  title="Europe"
+                  description="EU AI Act and Member State implementation."
+                  href="/ai-regulation/europe"
+                  liveLabel="Europe news"
+                  liveCount={europeNewsCount}
+                  dbCount={updatesPage.items.length}
+                  highlights={europeProfiles.map((p) => ({ label: p.countryName, href: `/ai-regulation/europe/${p.slug}` }))}
+                  isLive
+                />
+              </MotionStaggerItem>
+              <MotionStaggerItem>
+                <RegionPortalCard
+                  region="united-states"
+                  title="United States"
+                  description="Federal and 50-state AI law coverage."
+                  href="/ai-regulation/united-states"
+                  liveLabel="U.S. news"
+                  liveCount={usNewsCount}
+                  dbCount={updatesPage.items.length}
+                  highlights={usProfiles.map((p) => ({ label: p.stateName, href: `/ai-regulation/united-states/${p.slug}` }))}
+                  isLive
+                />
+              </MotionStaggerItem>
+            </MotionStagger>
           </section>
 
           {/* --- Section 3: Database preview (3 entries) --- */}
