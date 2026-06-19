@@ -7,9 +7,17 @@ import {
 } from "@/agents/ai-regulation/usMonitoringAgents";
 import type { GenericCountryAgentProfileId } from "@/agents/ai-regulation/countryLegalNewsAgentFactory";
 import type { ScanTrigger } from "@/agents/ai-regulation/processors/pipeline";
+import { usManagerNeeds } from "@/agents/ai-regulation/regionalManagerNeeds";
 
 export { listUsMonitoringAgents, usFederalMonitoringAgent, usMonitoringAgents, usStateMonitoringAgents };
 export type { UsMonitoringAgentDescriptor };
+
+export const usMonitoringSupervisorManager = {
+  id: "us-monitoring-supervisor",
+  label: "US Monitoring Supervisor Agent",
+  region: "United States",
+  needs: usManagerNeeds,
+};
 
 export async function runUsMonitoringSupervisorAgent(options?: {
   trigger?: ScanTrigger;
@@ -41,6 +49,7 @@ export async function runUsMonitoringSupervisorAgent(options?: {
   }
 
   return {
+    manager: usMonitoringSupervisorManager,
     trigger,
     profile,
     totalAgents: selectedAgents.length,

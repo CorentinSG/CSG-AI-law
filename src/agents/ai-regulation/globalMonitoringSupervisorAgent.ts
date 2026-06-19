@@ -1,9 +1,11 @@
 import {
   listEuMonitoringAgents,
+  euMonitoringSupervisorManager,
   runEuMonitoringSupervisorAgent,
 } from "@/agents/ai-regulation/euMonitoringSupervisorAgent";
 import {
   listUsMonitoringAgents,
+  usMonitoringSupervisorManager,
   runUsMonitoringSupervisorAgent,
 } from "@/agents/ai-regulation/usMonitoringSupervisorAgent";
 import { supervisorMonitoringMandate } from "@/agents/ai-regulation/monitoringAgentMandate";
@@ -34,16 +36,12 @@ export function listGlobalMonitoringAgents() {
     supervisor: globalMonitoringSupervisorAgent,
     regionalSupervisors: [
       {
-        id: "eu-monitoring-supervisor",
-        label: "EU Monitoring Supervisor Agent",
-        region: "Europe",
+        ...euMonitoringSupervisorManager,
         mandate: supervisorMonitoringMandate,
         managedAgents: listEuMonitoringAgents(),
       },
       {
-        id: "us-monitoring-supervisor",
-        label: "US Monitoring Supervisor Agent",
-        region: "United States",
+        ...usMonitoringSupervisorManager,
         mandate: supervisorMonitoringMandate,
         managedAgents: listUsMonitoringAgents(),
       },

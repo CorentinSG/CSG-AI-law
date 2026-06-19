@@ -56,4 +56,26 @@ describe("global monitoring supervisor agent", () => {
       });
     }
   });
+
+  it("exposes manager needs for precision and central database distribution", () => {
+    const registry = listGlobalMonitoringAgents();
+
+    for (const supervisor of registry.regionalSupervisors) {
+      expect(supervisor.needs.requestedCapabilities).toEqual(
+        expect.arrayContaining([
+          "verified_official_source_inventory",
+          "jurisdiction_specific_news_portfolio",
+          "central_legal_database_distribution",
+          "local_legal_timeline_generation",
+          "hard_law_soft_law_case_law_classification",
+        ]),
+      );
+      expect(supervisor.needs.databaseInstructions).toMatchObject({
+        centralBackendStore: "ai_regulatory_updates",
+        jurisdictionProfileStore: "country_intelligence",
+        timelineSource: "published_and_verified_regulatory_updates",
+        distributionKey: "jurisdiction_country_region",
+      });
+    }
+  });
 });

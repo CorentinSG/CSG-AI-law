@@ -36,6 +36,7 @@ import {
   type AgentSourceMandate,
   type EuMemberStateSourceMandateSlug,
 } from "@/agents/ai-regulation/euMemberStateSourceMandates";
+import { euManagerNeeds } from "@/agents/ai-regulation/regionalManagerNeeds";
 import type { ScanTrigger } from "@/agents/ai-regulation/processors/pipeline";
 
 type CountryAgentRunner = (options?: { trigger?: ScanTrigger }) => Promise<unknown>;
@@ -95,6 +96,13 @@ export const euMonitoringAgents: MonitoringAgentDescriptor[] = [
   ...euMemberStateMonitoringAgents,
 ];
 
+export const euMonitoringSupervisorManager = {
+  id: "eu-monitoring-supervisor",
+  label: "EU Monitoring Supervisor Agent",
+  region: "Europe",
+  needs: euManagerNeeds,
+};
+
 export function listEuMonitoringAgents() {
   return euMonitoringAgents.map((agent) => ({
     id: agent.id,
@@ -134,6 +142,7 @@ export async function runEuMonitoringSupervisorAgent(options?: {
   }
 
   return {
+    manager: euMonitoringSupervisorManager,
     trigger,
     totalAgents: selectedAgents.length,
     succeeded: results.filter((result) => result.status === "succeeded").length,
