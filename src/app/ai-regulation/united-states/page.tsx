@@ -80,7 +80,7 @@ export default async function UnitedStatesAiRegulationPage() {
           <SectionHeading
             eyebrow="United States intelligence hub"
             title="United States"
-            description="What changed federally, which states are moving, what is official law versus governance posture."
+            description="What changed federally, which states are moving."
           />
           <Link
             href="/ai-regulation/europe"
@@ -117,7 +117,7 @@ export default async function UnitedStatesAiRegulationPage() {
         </div>
         <LiveLegalIntelligencePanel
           title="Latest U.S. AI law developments"
-          description="Federal and state-level AI law signals. Source, date, and verification posture stay visible immediately."
+          description="Federal and state-level AI law signals."
           regionLabel="United States"
           items={regionalLiveItems}
           lastCheckedAt={liveLastCheckedAt}
@@ -129,7 +129,7 @@ export default async function UnitedStatesAiRegulationPage() {
         <SectionHeading
           eyebrow="Federal baseline"
           title="Federal AI legal architecture"
-          description="A verified source baseline for federal rulemaking, agencies, standards, and congressional monitoring posture. Binding effect is not inferred unless item-level source review supports it."
+          description="Verified federal rulemaking, agency, and standards baseline."
         />
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           {usFederalBaselineEntries.slice(0, 6).map((entry) => (
@@ -163,7 +163,7 @@ export default async function UnitedStatesAiRegulationPage() {
         <SectionHeading
           eyebrow="U.S. timeline"
           title="U.S. AI law source timeline"
-          description="Baseline milestones currently reflect verified official-source checkpoints rather than a complete history of U.S. AI law."
+          description="Verified official-source checkpoints, not a full history."
         />
         <Card className="rounded-[2rem] border-white/10 bg-[linear-gradient(180deg,rgba(12,18,28,0.96),rgba(17,24,39,0.9))] text-white shadow-[0_24px_70px_rgba(15,23,42,0.22)]">
           <CardContent className="p-6 md:p-8">
@@ -176,7 +176,7 @@ export default async function UnitedStatesAiRegulationPage() {
         <SectionHeading
           eyebrow="State-by-state baseline"
           title="U.S. state AI law map"
-          description="All 50 states plus D.C. are represented. States are not labeled as enacted unless official source review supports that status."
+          description="All 50 states plus D.C. — enacted only when officially verified."
         />
         <Card className="rounded-[2rem] border-white/10 bg-[linear-gradient(180deg,rgba(10,16,28,0.94),rgba(17,24,39,0.88))] text-white shadow-[0_24px_70px_rgba(15,23,42,0.22)]">
           <CardContent className="space-y-6 p-6 md:p-8">
@@ -215,7 +215,7 @@ export default async function UnitedStatesAiRegulationPage() {
         <SectionHeading
           eyebrow="Priority states"
           title="First-wave state profiles"
-          description="The first state-source pass focuses on California, Colorado, New York, Illinois, Texas, Connecticut, Utah, Virginia, Washington, and Maryland."
+          description="First pass: CA, CO, NY, IL, TX, CT, UT, VA, WA, MD."
         />
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           {priorityStates.map((profile) => (
@@ -248,7 +248,7 @@ export default async function UnitedStatesAiRegulationPage() {
           <SectionHeading
             eyebrow="Case law architecture"
             title="U.S. case-law sources"
-            description="Case-law sources are prepared without inventing cases, holdings, procedural posture, or facts."
+            description="Court sources only — no invented cases or holdings."
           />
           <div className="space-y-4">
             {usAiCaseLawSources.map((source) => (
@@ -285,7 +285,7 @@ export default async function UnitedStatesAiRegulationPage() {
           <SectionHeading
             eyebrow="Soft law and standards"
             title="U.S. governance frameworks"
-            description="Soft law, technical standards, and agency guidance are classified separately from binding law."
+            description="Soft law and standards, classified separately from binding law."
           />
           <div className="space-y-4">
             {usAiSoftLawBaseline.slice(0, 5).map((entry) => (
@@ -312,7 +312,7 @@ export default async function UnitedStatesAiRegulationPage() {
         <SectionHeading
           eyebrow="Official source posture"
           title="U.S. monitoring sources"
-          description="This hub uses only official public sources that are reachable from the scan runtime. Runtime-blocked official endpoints are kept inactive rather than treated as healthy."
+          description="Only reachable official public sources; blocked ones stay inactive."
         />
         <div className="grid gap-4 lg:grid-cols-2">
           {verificationRecords.map((record) => (
@@ -351,7 +351,7 @@ export default async function UnitedStatesAiRegulationPage() {
         <SectionHeading
           eyebrow="Published monitor items"
           title="Latest published U.S. entries"
-          description="Only human-reviewed and manually published items are shown. Accessibility problems at a source do not override the publication workflow."
+          description="Only human-reviewed, published items appear here."
         />
         <Card className="rounded-[2rem] border-black/6 bg-white/70 shadow-[0_18px_50px_rgba(15,15,15,0.04)]">
           <CardContent className="grid gap-6 p-6 md:grid-cols-2 xl:grid-cols-3">

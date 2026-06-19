@@ -79,10 +79,7 @@ export default async function StandardsPage() {
           Influential frameworks matter, even when they are not binding law
         </h1>
         <p className="max-w-3xl text-lg leading-8 text-zinc-700">
-          The platform tracks authoritative governance frameworks, standards,
-          and policy materials that can influence compliance design, procurement
-          expectations, risk management, supervisory reasoning, and internal AI
-          governance decisions even when they do not operate as binding law.
+          Authoritative governance frameworks and standards that shape compliance — even when not binding law.
         </p>
       </section>
 
@@ -114,7 +111,7 @@ export default async function StandardsPage() {
         <SectionHeading
           eyebrow="Tracked categories"
           title="Current soft-law and standards coverage"
-          description="The monitoring architecture now explicitly accommodates governance frameworks, standards, and best-practice materials as first-class research objects alongside hard law."
+          description="Frameworks and standards tracked alongside hard law."
         />
         <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
           {frameworkCards.map((item) => (
@@ -127,7 +124,7 @@ export default async function StandardsPage() {
         <SectionHeading
           eyebrow="Related research"
           title="Research notes on soft law and standards"
-          description="These notes explain why governance frameworks and standards matter without overstating their legal force."
+          description="Why frameworks matter — without overstating their force."
         />
         <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
           {relatedResearch.map((entry) => (
@@ -149,7 +146,7 @@ export default async function StandardsPage() {
         <SectionHeading
           eyebrow="Published items"
           title="Published standards and governance updates"
-          description="Only reviewed and published items appear here. Drafts, internal notes, and unpublished review materials remain private."
+          description="Only reviewed, published items appear here."
           actions={
             <Link href="/ai-regulation" className="text-sm uppercase tracking-[0.16em] text-zinc-800">
               View AI law hub

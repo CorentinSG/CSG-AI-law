@@ -54,9 +54,7 @@ export default function ResearchPage() {
           Notes, commentary, and legal analysis on AI law
         </h1>
         <p className="max-w-3xl text-lg leading-8 text-zinc-700">
-          This section is a space for notes, reflections, short legal analysis,
-          and commentary on AI regulation, governance, legal technology, and
-          comparative developments alongside the monitoring system.
+          Notes and commentary on AI regulation, governance, and legal technology.
         </p>
       </section>
 
@@ -110,7 +108,7 @@ export default function ResearchPage() {
         <SectionHeading
           eyebrow="Categories"
           title="An organized editorial structure"
-          description="The section is organized around recurring lines of inquiry rather than a generic reverse-chronological feed."
+          description="Organized by recurring lines of inquiry."
         />
         <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
           {categoryCounts.map((item) => {
@@ -133,7 +131,7 @@ export default function ResearchPage() {
         <SectionHeading
           eyebrow="Published notes"
           title="Current public notes"
-          description="These are public notes and commentary pieces already visible on the site. Forthcoming notes remain clearly marked as in development."
+          description="Public notes and commentary; forthcoming ones are marked."
         />
         <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
           {publishedEntries.map((entry) => (
@@ -155,7 +153,7 @@ export default function ResearchPage() {
         <SectionHeading
           eyebrow="In development"
           title="Forthcoming notes and commentary topics"
-          description="These previews are public on purpose. They show where the section is heading without pretending that unfinished notes are already complete."
+          description="Previews of where the section is heading."
           actions={
             <Link
               href="/ai-regulation"
