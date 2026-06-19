@@ -86,6 +86,51 @@ describe("EU monitoring supervisor agent", () => {
     }
   });
 
+  it("assigns legal-news and official database source mandates to every member-state agent", () => {
+    const memberStateAgents = listEuMonitoringAgents().filter(
+      (agent) => agent.scope === "member_state",
+    );
+
+    for (const agent of memberStateAgents) {
+      expect(agent.sourceMandate?.legalNewsSources.length).toBeGreaterThanOrEqual(5);
+      expect(agent.sourceMandate?.legalNewsSources).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            id: "news-iapp-ai-law",
+            use: "legal_news_monitoring",
+          }),
+          expect.objectContaining({
+            id: "news-euractiv-tech-ai",
+            use: "legal_news_monitoring",
+          }),
+          expect.objectContaining({
+            id: "news-mlex-ai",
+            use: "legal_news_monitoring",
+          }),
+        ]),
+      );
+      expect(agent.sourceMandate?.officialDatabaseSources).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            sourceType: "data_protection_authority",
+            use: "legal_database_monitoring",
+          }),
+          expect.objectContaining({
+            sourceType: "official_journal",
+            coverage: expect.arrayContaining(["hard_law"]),
+          }),
+          expect.objectContaining({
+            sourceType: "court_or_case_law",
+            coverage: expect.arrayContaining(["case_law_and_decisions"]),
+          }),
+        ]),
+      );
+      expect(
+        agent.sourceMandate?.officialDatabaseSources.flatMap((source) => source.coverage),
+      ).toEqual(expect.arrayContaining(["hard_law", "soft_law", "case_law_and_decisions"]));
+    }
+  });
+
   it("creates source registries for all newly added member-state agents", () => {
     expect(missingEuMemberStateAgentDefinitions).toHaveLength(18);
     for (const definition of missingEuMemberStateAgentDefinitions) {
