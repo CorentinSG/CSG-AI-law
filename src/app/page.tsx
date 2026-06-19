@@ -5,6 +5,7 @@ import { ArrowUpRight, Database, FileText, Globe, Landmark, ShieldCheck } from "
 import { updateRepository } from "@/agents/ai-regulation/processors/updateRepository";
 import { getFeaturedResearchEntry, getPublicResearchEntries } from "@/content/research";
 import { HeroIntro } from "@/components/site/hero-intro";
+import { HeroSignalField } from "@/components/site/hero-signal-field";
 import { MotionReveal } from "@/components/site/motion-reveal";
 import { MotionStagger } from "@/components/site/motion-stagger";
 import { ProfilePortrait } from "@/components/site/profile-portrait";
@@ -43,6 +44,7 @@ export default async function HomePage() {
   return (
     <SiteShell className="space-y-14 md:space-y-20">
       <section className="relative isolate overflow-hidden rounded-[2.8rem] border border-black/5 bg-[linear-gradient(180deg,rgba(255,255,255,0.9),rgba(248,248,245,0.72))] px-6 py-10 shadow-[0_30px_90px_rgba(15,15,15,0.05)] md:px-12 md:py-14 lg:min-h-[80vh] lg:px-16 lg:py-20">
+        <HeroSignalField className="absolute inset-0 z-0" />
         <div className="absolute inset-y-0 right-[-8rem] top-0 z-0 hidden w-[44rem] lg:block xl:right-[-10rem] xl:w-[52rem]">
           <ProfilePortrait priority large side ghost className="h-full" />
         </div>

@@ -12,6 +12,11 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Installed AI design-skill bundles (reinstallable, not project source).
+    ".claude/skills/**",
+    ".agents/**",
+    ".github/skills/**",
+    ".impeccable/**",
   ]),
 ]);
 
