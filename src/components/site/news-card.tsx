@@ -21,7 +21,7 @@ export function NewsCard({ item }: { item: AiLawNewsItem }) {
         </h2>
         <p className="mt-3 text-sm leading-7 text-zinc-700">{item.shortSummary}</p>
         <div className="mt-5 grid gap-3 md:grid-cols-2">
-          <div className="rounded-[1.4rem] border border-black/6 bg-white/70 p-4">
+          <div className="rounded-[1.4rem] border border-black/6 bg-white/60 p-4">
             <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-zinc-500">
               Published
             </p>
@@ -34,7 +34,7 @@ export function NewsCard({ item }: { item: AiLawNewsItem }) {
                 : "Exact event date not detected."}
             </p>
           </div>
-          <div className="rounded-[1.4rem] border border-black/6 bg-zinc-50/80 p-4">
+          <div className="rounded-[1.4rem] border border-black/6 bg-white/60 p-4">
             <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-zinc-500">
               Source
             </p>
@@ -44,7 +44,7 @@ export function NewsCard({ item }: { item: AiLawNewsItem }) {
             </p>
           </div>
         </div>
-        <div className="mt-5 rounded-[1.4rem] border border-black/6 bg-zinc-50/80 p-4">
+        <div className="mt-5 rounded-[1.4rem] border border-black/6 bg-white/60 p-4">
           <p className="font-mono text-[10px] uppercase tracking-[0.24em] text-zinc-500">
             At a glance
           </p>

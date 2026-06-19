@@ -361,7 +361,7 @@ export function SiteHeader({
           "h-px origin-left",
           isAdmin
             ? "bg-gradient-to-r from-amber-300/60 via-amber-200/40 to-transparent"
-            : "bg-gradient-to-r from-zinc-900/40 via-zinc-900/20 to-transparent",
+            : "bg-gradient-to-r from-accent/70 via-accent/30 to-transparent",
         )}
       />
 

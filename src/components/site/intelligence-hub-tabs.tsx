@@ -21,7 +21,7 @@ export function IntelligenceHubTabs({
         className,
       )}
     >
-      <div className="flex flex-wrap gap-2">
+      <div className="no-scrollbar flex gap-2 overflow-x-auto">
         {tabs.map((tab) => {
           const active = tab.value === activeValue;
 
@@ -31,7 +31,7 @@ export function IntelligenceHubTabs({
               href={tab.href}
               scroll={false}
               className={cn(
-                "relative inline-flex min-w-[10rem] flex-1 items-center justify-center overflow-hidden rounded-full px-4 py-3 text-center font-mono text-[11px] uppercase tracking-[0.18em] transition-colors",
+                "relative inline-flex shrink-0 items-center justify-center overflow-hidden rounded-full px-4 py-3 text-center font-mono text-[11px] uppercase tracking-[0.18em] transition-colors",
                 active ? "text-zinc-950" : "text-zinc-500 hover:text-zinc-900",
               )}
             >

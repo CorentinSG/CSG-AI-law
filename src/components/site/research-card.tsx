@@ -22,7 +22,7 @@ export function ResearchCard({
 }) {
   const content = (
     <MotionStaggerItem className="h-full">
-      <Card className="glass-panel-soft h-full rounded-[1.9rem] text-zinc-900">
+      <Card className="glass-panel-soft premium-sheen h-full rounded-[1.9rem] text-zinc-900 transition duration-300 hover:-translate-y-0.5 hover:shadow-[0_24px_60px_rgba(15,15,15,0.08)]">
         <CardHeader className="space-y-3">
           <div className="flex items-center justify-between gap-3">
             <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-zinc-500">{category}</p>

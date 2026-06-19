@@ -66,10 +66,10 @@ export function HeroIntro() {
         <Link
           href="/research"
           scroll={false}
-          className="inline-flex items-center gap-2 rounded-full bg-zinc-950 px-6 py-3 text-sm font-medium uppercase tracking-[0.18em] text-white shadow-[0_12px_30px_rgba(17,17,17,0.12)]"
+          className="group inline-flex items-center gap-2 rounded-full bg-zinc-950 px-6 py-3 text-sm font-medium uppercase tracking-[0.18em] text-white shadow-[0_12px_30px_rgba(17,17,17,0.12)] transition-shadow duration-300 hover:shadow-[0_16px_40px_rgba(17,17,17,0.22)]"
         >
           Notes
-          <ArrowRight className="size-4" />
+          <ArrowRight className="size-4 transition-transform duration-300 group-hover:translate-x-0.5" />
         </Link>
         <Link
           href="/ai-regulation"
