@@ -115,6 +115,15 @@ a:hover {
   .premium-sheen::after {
     display: none;
   }
+  .animate-spotlight {
+    animation: none;
+    opacity: 1;
+    transform: translate(-50%, -40%) scale(1);
+  }
+  .loader {
+    animation: none;
+    border-top-color: rgba(255, 255, 255, 0.6);
+  }
 }
 
 /* Hide scrollbars on horizontal rails (the scroll-spy hub nav) */
