@@ -12,6 +12,11 @@ import {
   jurisdictionMonitoringMandate,
   type MonitoringAgentMandate,
 } from "@/agents/ai-regulation/monitoringAgentMandate";
+import {
+  getUsJurisdictionSourceMandate,
+  type UsAgentSourceMandate,
+  type UsJurisdictionSourceMandateKey,
+} from "@/agents/ai-regulation/usJurisdictionSourceMandates";
 import type { ScanTrigger } from "@/agents/ai-regulation/processors/pipeline";
 
 export type UsMonitoringAgentScope = "federal" | "state" | "district";
@@ -28,6 +33,7 @@ export interface UsMonitoringAgentDescriptor {
   jurisdiction: string;
   postalCode: string;
   mandate: MonitoringAgentMandate;
+  sourceMandate: UsAgentSourceMandate;
   runner: UsAgentRunner;
   definition: UsMonitoringAgentDefinition;
 }
@@ -35,6 +41,10 @@ export interface UsMonitoringAgentDescriptor {
 function toAgentId(definition: UsMonitoringAgentDefinition) {
   if (definition.jurisdictionLevel === "federal") return "us-federal";
   return `us-${definition.postalCode.toLowerCase()}`;
+}
+
+function sourceMandateFor(definition: UsMonitoringAgentDefinition) {
+  return getUsJurisdictionSourceMandate(toAgentId(definition) as UsJurisdictionSourceMandateKey);
 }
 
 function createUsMonitoringAgentDescriptor(
@@ -53,6 +63,7 @@ function createUsMonitoringAgentDescriptor(
     jurisdiction: definition.countryName,
     postalCode: definition.postalCode,
     mandate: jurisdictionMonitoringMandate,
+    sourceMandate: sourceMandateFor(definition),
     runner: agent.runLegalNewsAgentScan,
     definition,
   };
@@ -79,5 +90,6 @@ export function listUsMonitoringAgents() {
     jurisdiction: agent.jurisdiction,
     postalCode: agent.postalCode,
     mandate: agent.mandate,
+    sourceMandate: agent.sourceMandate,
   }));
 }

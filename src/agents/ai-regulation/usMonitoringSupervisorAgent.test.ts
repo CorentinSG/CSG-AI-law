@@ -69,4 +69,45 @@ describe("US monitoring supervisor agent", () => {
       );
     }
   });
+
+  it("assigns legal-news and official database source mandates to every US agent", () => {
+    for (const agent of listUsMonitoringAgents()) {
+      expect(agent.sourceMandate.legalNewsSources.length).toBeGreaterThanOrEqual(6);
+      expect(agent.sourceMandate.legalNewsSources).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            id: "news-iapp-us-ai-law",
+            use: "legal_news_monitoring",
+          }),
+          expect.objectContaining({
+            id: "news-law360-ai",
+            use: "legal_news_monitoring",
+          }),
+          expect.objectContaining({
+            id: "news-bloomberg-law-ai",
+            use: "legal_news_monitoring",
+          }),
+        ]),
+      );
+      expect(agent.sourceMandate.officialDatabaseSources).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            use: "legal_database_monitoring",
+            coverage: expect.arrayContaining(["hard_law"]),
+          }),
+          expect.objectContaining({
+            use: "legal_database_monitoring",
+            coverage: expect.arrayContaining(["soft_law"]),
+          }),
+          expect.objectContaining({
+            sourceType: "court_or_case_law",
+            coverage: expect.arrayContaining(["case_law_and_decisions"]),
+          }),
+        ]),
+      );
+      expect(
+        agent.sourceMandate.officialDatabaseSources.flatMap((source) => source.coverage),
+      ).toEqual(expect.arrayContaining(["hard_law", "soft_law", "case_law_and_decisions"]));
+    }
+  });
 });
