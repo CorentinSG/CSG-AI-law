@@ -103,7 +103,7 @@ export function FilterBar({
             <select
               name={filter.key}
               defaultValue={String(searchParams[filter.key] ?? "all")}
-              className="w-full rounded-xl border border-black/8 bg-white/70 px-3 py-2 text-sm text-zinc-900 backdrop-blur-sm"
+              className="w-full rounded-xl border border-black/8 bg-white/70 px-3 py-2 text-sm text-zinc-900 backdrop-blur-sm transition-colors duration-150 hover:border-black/16 focus:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900/20"
             >
               <option value="all">All</option>
               {(options[filter.key] ?? []).map((value) => (
@@ -117,13 +117,13 @@ export function FilterBar({
         <div className="flex items-end gap-3">
           <button
             type="submit"
-            className="rounded-xl bg-zinc-950 px-4 py-2 text-sm font-medium text-white"
+            className="rounded-xl bg-zinc-950 px-4 py-2 text-sm font-medium text-white transition-colors duration-150 hover:bg-zinc-800 active:scale-[0.98]"
           >
             Apply
           </button>
           <Link
             href={resetParams.size > 0 ? `${basePath}?${resetParams.toString()}` : basePath}
-            className="rounded-xl border border-black/8 px-4 py-2 text-sm text-zinc-800"
+            className="rounded-xl border border-black/8 px-4 py-2 text-sm text-zinc-800 transition-colors duration-150 hover:bg-zinc-50 active:scale-[0.98]"
           >
             Reset
           </Link>

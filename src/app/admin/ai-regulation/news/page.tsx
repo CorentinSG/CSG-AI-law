@@ -734,7 +734,7 @@ export default async function AdminAiLawNewsPage({
             {filteredLatestNews.map((item) => (
               <div
                 key={item.id}
-                className="rounded-2xl border border-white/10 bg-black/20 p-4"
+                className="rounded-2xl border border-white/10 bg-black/20 p-4 transition-colors duration-150 hover:bg-white/5"
               >
                 <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
                   <div>
@@ -755,7 +755,7 @@ export default async function AdminAiLawNewsPage({
                   {item.relatedMonitorItemId ? (
                     <Link
                       href={`/admin/ai-regulation/${item.relatedMonitorItemId}`}
-                      className="rounded-xl border border-white/10 px-3 py-2 text-sm text-zinc-100"
+                      className="shrink-0 rounded-xl border border-white/10 px-3 py-2 text-sm text-zinc-100 transition-colors duration-150 hover:border-white/20 hover:bg-white/8 active:scale-[0.98]"
                     >
                       Monitor item
                     </Link>
