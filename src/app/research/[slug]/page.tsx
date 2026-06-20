@@ -8,6 +8,8 @@ import {
   getRelatedResearchEntries,
 } from "@/content/research";
 import { BreadcrumbNav } from "@/components/site/breadcrumb-nav";
+import { MotionReveal } from "@/components/site/motion-reveal";
+import { MotionStagger } from "@/components/site/motion-stagger";
 import { ResearchCard } from "@/components/site/research-card";
 import { ResearchStatusBadge } from "@/components/site/research-status-badge";
 import { SiteShell } from "@/components/site/shell";
@@ -58,7 +60,7 @@ export default async function ResearchArticlePage({
 
   return (
     <SiteShell className="space-y-14 md:space-y-20">
-      <section className="space-y-6">
+      <MotionReveal className="space-y-6">
         <BreadcrumbNav
           items={[
             { label: "Home", href: "/" },
@@ -120,7 +122,7 @@ export default async function ResearchArticlePage({
             ) : null}
           </CardContent>
         </Card>
-      </section>
+      </MotionReveal>
 
       <section className="grid gap-10 xl:grid-cols-[minmax(0,1fr)_19rem]">
         <article className="space-y-10">
@@ -228,7 +230,7 @@ export default async function ResearchArticlePage({
             </p>
             <h2 className="font-serif text-3xl text-zinc-950">Continue reading</h2>
           </div>
-          <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+          <MotionStagger className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
             {relatedEntries.map((related) => (
               <ResearchCard
                 key={related.slug}
@@ -241,7 +243,7 @@ export default async function ResearchArticlePage({
                 tags={related.tags}
               />
             ))}
-          </div>
+          </MotionStagger>
         </section>
       ) : null}
     </SiteShell>

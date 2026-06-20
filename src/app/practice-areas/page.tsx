@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
 
+import { MotionReveal } from "@/components/site/motion-reveal";
+import { MotionStagger } from "@/components/site/motion-stagger";
 import { SectionHeading } from "@/components/site/section-heading";
 import { SiteShell } from "@/components/site/shell";
 import { Card, CardContent } from "@/components/ui/card";
@@ -39,7 +41,7 @@ export default function PracticeAreasPage() {
         />
       </section>
 
-      <section className="grid gap-5 lg:grid-cols-3">
+      <MotionStagger className="grid gap-5 lg:grid-cols-3" stagger={0.1}>
         {domains.map((domain) => {
           const card = (
             <Card className="h-full border-black/6 bg-white/70 transition-transform duration-300 hover:-translate-y-0.5">
@@ -82,8 +84,9 @@ export default function PracticeAreasPage() {
             </div>
           );
         })}
-      </section>
+      </MotionStagger>
 
+      <MotionReveal>
       <section className="rounded-[2rem] border border-black/5 bg-white/60 px-6 py-6 md:px-8">
         <p className="font-mono text-[10px] uppercase tracking-[0.24em] text-zinc-500">
           How sourcing works
@@ -92,6 +95,7 @@ export default function PracticeAreasPage() {
           {legalDomainSourcingPrinciple}
         </p>
       </section>
+      </MotionReveal>
     </SiteShell>
   );
 }

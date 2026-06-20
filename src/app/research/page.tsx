@@ -16,6 +16,8 @@ import {
   type ResearchCategory,
 } from "@/content/research";
 import { FeatureCard } from "@/components/site/feature-card";
+import { MotionReveal } from "@/components/site/motion-reveal";
+import { MotionStagger } from "@/components/site/motion-stagger";
 import { ResearchCard } from "@/components/site/research-card";
 import { ResearchStatusBadge } from "@/components/site/research-status-badge";
 import { SectionHeading } from "@/components/site/section-heading";
@@ -46,7 +48,7 @@ export default function ResearchPage() {
 
   return (
     <SiteShell className="space-y-20">
-      <section className="space-y-6">
+      <MotionReveal className="space-y-6">
         <p className="font-mono text-[11px] uppercase tracking-[0.35em] text-zinc-600">
           Notes &amp; Commentary
         </p>
@@ -56,9 +58,10 @@ export default function ResearchPage() {
         <p className="max-w-3xl text-lg leading-8 text-zinc-700">
           Notes and commentary on AI regulation, governance, and legal technology.
         </p>
-      </section>
+      </MotionReveal>
 
       {featuredEntry ? (
+        <MotionReveal>
         <Card className="glass-panel-soft rounded-[2.2rem] border-black/6 text-zinc-950">
           <CardContent className="grid gap-8 p-8 lg:grid-cols-[minmax(0,1fr)_18rem] lg:items-end">
             <div className="space-y-5">
@@ -102,6 +105,7 @@ export default function ResearchPage() {
             </div>
           </CardContent>
         </Card>
+        </MotionReveal>
       ) : null}
 
       <section className="space-y-8 border-t border-black/6 pt-16">
@@ -109,7 +113,7 @@ export default function ResearchPage() {
           eyebrow="Categories"
           title="An organized editorial structure"
         />
-        <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+        <MotionStagger className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
           {categoryCounts.map((item) => {
             const Icon = categoryIcons[item.category] ?? FileText;
             return (
@@ -121,7 +125,7 @@ export default function ResearchPage() {
               />
             );
           })}
-        </div>
+        </MotionStagger>
       </section>
 
       <section className="space-y-8 border-t border-black/6 pt-16">
@@ -129,7 +133,7 @@ export default function ResearchPage() {
           eyebrow="Published notes"
           title="Current public notes"
         />
-        <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+        <MotionStagger className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
           {publishedEntries.map((entry) => (
             <ResearchCard
               key={entry.slug}
@@ -142,7 +146,7 @@ export default function ResearchPage() {
               tags={entry.tags}
             />
           ))}
-        </div>
+        </MotionStagger>
       </section>
 
       <section className="space-y-8 border-t border-black/6 pt-16">
@@ -159,7 +163,7 @@ export default function ResearchPage() {
             </Link>
           }
         />
-        <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+        <MotionStagger className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
           {forthcomingEntries.map((entry) => (
             <ResearchCard
               key={entry.slug}
@@ -172,7 +176,7 @@ export default function ResearchPage() {
               tags={entry.tags}
             />
           ))}
-        </div>
+        </MotionStagger>
       </section>
     </SiteShell>
   );

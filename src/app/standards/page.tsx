@@ -3,6 +3,8 @@ import Link from "next/link";
 
 import { updateRepository } from "@/agents/ai-regulation/processors/updateRepository";
 import { getPublicResearchEntries } from "@/content/research";
+import { MotionReveal } from "@/components/site/motion-reveal";
+import { MotionStagger } from "@/components/site/motion-stagger";
 import { ResearchCard } from "@/components/site/research-card";
 import { SectionHeading } from "@/components/site/section-heading";
 import { SiteShell } from "@/components/site/shell";
@@ -71,7 +73,7 @@ export default async function StandardsPage() {
 
   return (
     <SiteShell className="space-y-20">
-      <section className="space-y-5">
+      <MotionReveal className="space-y-5">
         <p className="font-mono text-[11px] uppercase tracking-[0.35em] text-zinc-600">
           Soft law &amp; standards
         </p>
@@ -81,8 +83,9 @@ export default async function StandardsPage() {
         <p className="max-w-3xl text-lg leading-8 text-zinc-700">
           Authoritative governance frameworks and standards that shape compliance — even when not binding law.
         </p>
-      </section>
+      </MotionReveal>
 
+      <MotionReveal>
       <Card className="rounded-[2rem] border-black/6 bg-white text-zinc-950 shadow-[0_18px_50px_rgba(15,15,15,0.04)]">
         <CardContent className="grid gap-6 p-8 md:grid-cols-2">
           <div className="space-y-3">
@@ -106,6 +109,7 @@ export default async function StandardsPage() {
           </div>
         </CardContent>
       </Card>
+      </MotionReveal>
 
       <section className="space-y-8 border-t border-black/6 pt-16">
         <SectionHeading
@@ -113,11 +117,11 @@ export default async function StandardsPage() {
           title="Current soft-law and standards coverage"
           description="Frameworks and standards tracked alongside hard law."
         />
-        <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
+        <MotionStagger className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
           {frameworkCards.map((item) => (
             <ResearchCard key={item.title} {...item} />
           ))}
-        </div>
+        </MotionStagger>
       </section>
 
       <section className="space-y-8 border-t border-black/6 pt-16">
@@ -126,7 +130,7 @@ export default async function StandardsPage() {
           title="Research notes on soft law and standards"
           description="Why frameworks matter — without overstating their force."
         />
-        <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+        <MotionStagger className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
           {relatedResearch.map((entry) => (
             <ResearchCard
               key={entry.slug}
@@ -139,7 +143,7 @@ export default async function StandardsPage() {
               tags={entry.tags}
             />
           ))}
-        </div>
+        </MotionStagger>
       </section>
 
       <section className="space-y-8 border-t border-black/6 pt-16">
@@ -154,11 +158,11 @@ export default async function StandardsPage() {
           }
         />
         {standardsUpdates.length > 0 ? (
-          <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+          <MotionStagger className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
             {standardsUpdates.map((update) => (
               <UpdateCard key={update.id} update={update} href={`/ai-regulation/${update.id}`} />
             ))}
-          </div>
+          </MotionStagger>
         ) : (
           <Card className="rounded-[1.8rem] border-black/6 bg-white shadow-[0_16px_48px_rgba(15,15,15,0.04)]">
             <CardContent className="p-8 text-sm leading-7 text-zinc-700">

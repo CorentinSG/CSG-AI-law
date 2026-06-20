@@ -4,6 +4,8 @@ import { notFound } from "next/navigation";
 
 import { updateRepository } from "@/agents/ai-regulation/processors/updateRepository";
 import { BreadcrumbNav } from "@/components/site/breadcrumb-nav";
+import { MotionReveal } from "@/components/site/motion-reveal";
+import { MotionStagger } from "@/components/site/motion-stagger";
 import { SourceTypeBadge, VerificationBadge } from "@/components/site/legal-status-badge";
 import { SiteShell } from "@/components/site/shell";
 import { Card, CardContent } from "@/components/ui/card";
@@ -70,6 +72,7 @@ export default async function NewsDetailPage({
   return (
     <SiteShell className="space-y-8">
       {/* Breadcrumb */}
+      <MotionReveal>
       <BreadcrumbNav
         items={[
           { label: "AI Law Hub", href: "/ai-regulation" },
@@ -83,6 +86,7 @@ export default async function NewsDetailPage({
       <section className="space-y-5">
         <div className="flex flex-wrap gap-2">
           <VerificationBadge status={item.verificationStatus} />
+
           <SourceTypeBadge sourceType={item.sourceType} />
           <span className="inline-flex items-center rounded-full border border-black/6 bg-zinc-50 px-2.5 py-1 font-mono text-[9px] uppercase tracking-[0.22em] text-zinc-600">
             {item.region}
@@ -134,8 +138,10 @@ export default async function NewsDetailPage({
           )}
         </div>
       </section>
+      </MotionReveal>
 
       {/* Summary + metadata */}
+      <MotionReveal delay={0.1}>
       <div className="grid gap-6 lg:grid-cols-[1.3fr_0.7fr]">
         {/* Full summary */}
         <Card className="rounded-[2rem] border-black/6 bg-white/90 shadow-[0_18px_50px_rgba(15,15,15,0.04)]">
@@ -182,14 +188,16 @@ export default async function NewsDetailPage({
           </CardContent>
         </Card>
       </div>
+      </MotionReveal>
 
       {/* Source references */}
       {sourceReferences.length > 0 ? (
+        <MotionReveal delay={0.15}>
         <section className="space-y-4">
           <p className="font-mono text-[10px] uppercase tracking-[0.28em] text-zinc-500">
             Source references and verification trail
           </p>
-          <div className="grid gap-3 md:grid-cols-2">
+          <MotionStagger className="grid gap-3 md:grid-cols-2">
             {sourceReferences.map((reference) => (
               <div
                 key={`${reference.sourceRole}-${reference.url}`}
@@ -228,8 +236,9 @@ export default async function NewsDetailPage({
                 ) : null}
               </div>
             ))}
-          </div>
+          </MotionStagger>
         </section>
+        </MotionReveal>
       ) : null}
 
       {/* Link to monitor item */}
