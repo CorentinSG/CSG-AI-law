@@ -2,11 +2,14 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 import { updateRepository } from "@/agents/ai-regulation/processors/updateRepository";
+import { HubOrientation } from "@/components/site/hub-orientation";
+import { HubScrollNav } from "@/components/site/hub-scroll-nav";
 import { LiveLegalIntelligencePanel } from "@/components/site/live-legal-intelligence-panel";
+import { MotionStagger, MotionStaggerItem } from "@/components/site/motion-stagger";
 import { SectionHeading } from "@/components/site/section-heading";
 import { UsAiTimeline } from "@/components/site/us-ai-timeline";
 import { SiteShell } from "@/components/site/shell";
-import { UsImplementationMap } from "@/components/site/us-implementation-map";
+import { UsImplementationMap } from "@/components/site/us-implementation-map.lazy";
 import { UpdateCard } from "@/components/site/update-card";
 import { Card, CardContent } from "@/components/ui/card";
 import { getSourceVerificationRecordsForHub } from "@/content/ai-regulation/source-verification";
@@ -39,18 +42,9 @@ export const metadata: Metadata = {
 export const revalidate = 300;
 
 const unitedStatesFocusCards = [
-  {
-    title: "What changed federally",
-    body: "Start here for Federal Register, White House, EEOC, CFPB, NIST, and other official federal signals that can affect AI governance or legal obligations.",
-  },
-  {
-    title: "Which states are moving",
-    body: "State activity stays separated from the federal layer so enacted law, drafts, and regulator action are not blurred together.",
-  },
-  {
-    title: "What to watch next",
-    body: "Soft law, standards, and agency frameworks remain visible, but clearly labeled so they are not mistaken for binding law.",
-  },
+  { title: "Federal", body: "Official federal AI signals." },
+  { title: "States", body: "State activity, kept separate from federal." },
+  { title: "What to watch", body: "Soft law and standards, clearly labeled." },
 ];
 
 export default async function UnitedStatesAiRegulationPage() {
@@ -89,7 +83,7 @@ export default async function UnitedStatesAiRegulationPage() {
           <SectionHeading
             eyebrow="United States intelligence hub"
             title="United States"
-            description="What changed federally, which states are moving, what is official law versus governance posture."
+            description="What changed federally, which states are moving."
           />
           <Link
             href="/ai-regulation/europe"
@@ -100,33 +94,47 @@ export default async function UnitedStatesAiRegulationPage() {
         </div>
 
         {/* Compact focus cards */}
-        <div className="grid gap-3 sm:grid-cols-3">
+        <MotionStagger className="grid gap-3 sm:grid-cols-3" stagger={0.08}>
           {unitedStatesFocusCards.map((card) => (
-            <div
-              key={card.title}
-              className="rounded-[1.5rem] border border-black/6 bg-white/80 p-4 shadow-sm"
-            >
-              <p className="font-mono text-[9px] uppercase tracking-[0.24em] text-zinc-500">{card.title}</p>
-              <p className="mt-2 text-sm leading-6 text-zinc-700">{card.body}</p>
-            </div>
+            <MotionStaggerItem key={card.title}>
+              <div className="rounded-[1.5rem] border border-black/6 bg-white/80 p-4 shadow-sm transition duration-300 hover:-translate-y-0.5 hover:shadow-md">
+                <p className="font-mono text-[9px] uppercase tracking-[0.24em] text-zinc-500">{card.title}</p>
+                <p className="mt-2 text-sm leading-6 text-zinc-700">{card.body}</p>
+              </div>
+            </MotionStaggerItem>
           ))}
-        </div>
+        </MotionStagger>
       </section>
 
+      <HubScrollNav
+        sections={[
+          { id: "live", label: "Live" },
+          { id: "federal", label: "Federal" },
+          { id: "timeline", label: "Timeline" },
+          { id: "states", label: "States" },
+          { id: "profiles", label: "Profiles" },
+          { id: "governance", label: "Governance" },
+          { id: "sources", label: "Sources" },
+          { id: "published", label: "Published" },
+        ]}
+      />
+
+      <HubOrientation />
+
       {/* --- Section 1: Live intelligence FIRST --- */}
-      <section className="space-y-5">
+      <section id="live" className="scroll-mt-28 space-y-5">
         <div className="flex items-center gap-3">
           <span className="relative flex h-2.5 w-2.5">
-            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-red-400 opacity-60" />
-            <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-red-500" />
+            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-60" />
+            <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-emerald-500" />
           </span>
-          <p className="font-mono text-[10px] uppercase tracking-[0.28em] text-red-600">
+          <p className="font-mono text-[10px] uppercase tracking-[0.28em] text-emerald-600">
             Live U.S. monitoring
           </p>
         </div>
         <LiveLegalIntelligencePanel
           title="Latest U.S. AI law developments"
-          description="Federal and state-level AI law signals. Source, date, and verification posture stay visible immediately."
+          description="Federal and state-level AI law signals."
           regionLabel="United States"
           items={regionalLiveItems}
           lastCheckedAt={liveLastCheckedAt}
@@ -134,45 +142,44 @@ export default async function UnitedStatesAiRegulationPage() {
         />
       </section>
 
-      <section className="space-y-6">
+      <section id="federal" className="scroll-mt-28 space-y-6">
         <SectionHeading
           eyebrow="Federal baseline"
           title="Federal AI legal architecture"
-          description="A verified source baseline for federal rulemaking, agencies, standards, and congressional monitoring posture. Binding effect is not inferred unless item-level source review supports it."
+          description="Verified federal rulemaking, agency, and standards baseline."
         />
-        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+        <MotionStagger className="grid gap-4 md:grid-cols-2 xl:grid-cols-3" stagger={0.07}>
           {usFederalBaselineEntries.slice(0, 6).map((entry) => (
-            <Card
-              key={entry.id}
-              className="rounded-[1.8rem] border-black/6 bg-white shadow-[0_14px_40px_rgba(15,15,15,0.04)]"
-            >
-              <CardContent className="space-y-3 p-6">
-                <p className="font-display text-2xl font-medium uppercase tracking-[-0.05em] text-zinc-950">
-                  {entry.shortTitle}
-                </p>
-                <p className="font-mono text-[11px] uppercase tracking-[0.24em] text-zinc-500">
-                  {entry.authorityType.replaceAll("_", " ")} / {entry.bindingStatus.replaceAll("_", " ")}
-                </p>
-                <p className="text-sm leading-7 text-zinc-700">{entry.summary}</p>
-                <a
-                  href={entry.officialSourceUrl}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="text-sm uppercase tracking-[0.16em] text-zinc-900 underline decoration-black/15 underline-offset-4"
-                >
-                  Official source
-                </a>
-              </CardContent>
-            </Card>
+            <MotionStaggerItem key={entry.id}>
+              <Card className="rounded-[1.8rem] border-black/6 bg-white shadow-[0_14px_40px_rgba(15,15,15,0.04)] transition duration-300 hover:-translate-y-0.5 hover:shadow-[0_20px_50px_rgba(15,15,15,0.07)]">
+                <CardContent className="space-y-3 p-6">
+                  <p className="font-display text-2xl font-medium uppercase tracking-[-0.05em] text-zinc-950">
+                    {entry.shortTitle}
+                  </p>
+                  <p className="font-mono text-[11px] uppercase tracking-[0.24em] text-zinc-500">
+                    {entry.authorityType.replaceAll("_", " ")} / {entry.bindingStatus.replaceAll("_", " ")}
+                  </p>
+                  <p className="text-sm leading-7 text-zinc-700">{entry.summary}</p>
+                  <a
+                    href={entry.officialSourceUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="text-sm uppercase tracking-[0.16em] text-zinc-900 underline decoration-black/15 underline-offset-4"
+                  >
+                    Official source
+                  </a>
+                </CardContent>
+              </Card>
+            </MotionStaggerItem>
           ))}
-        </div>
+        </MotionStagger>
       </section>
 
-      <section className="space-y-6">
+      <section id="timeline" className="scroll-mt-28 space-y-6">
         <SectionHeading
           eyebrow="U.S. timeline"
           title="U.S. AI law source timeline"
-          description="Baseline milestones currently reflect verified official-source checkpoints rather than a complete history of U.S. AI law."
+          description="Verified official-source checkpoints, not a full history."
         />
         <Card className="rounded-[2rem] border-white/10 bg-[linear-gradient(180deg,rgba(12,18,28,0.96),rgba(17,24,39,0.9))] text-white shadow-[0_24px_70px_rgba(15,23,42,0.22)]">
           <CardContent className="p-6 md:p-8">
@@ -181,17 +188,17 @@ export default async function UnitedStatesAiRegulationPage() {
         </Card>
       </section>
 
-      <section className="space-y-6">
+      <section id="states" className="scroll-mt-28 space-y-6">
         <SectionHeading
           eyebrow="State-by-state baseline"
           title="U.S. state AI law map"
-          description="All 50 states plus D.C. are represented. States are not labeled as enacted unless official source review supports that status."
+          description="All 50 states plus D.C. — enacted only when officially verified."
         />
-        <Card className="rounded-[2rem] border-white/10 bg-[linear-gradient(180deg,rgba(10,16,28,0.94),rgba(17,24,39,0.88))] text-white shadow-[0_24px_70px_rgba(15,23,42,0.22)]">
+        <Card className="rounded-[2rem] border-black/6 bg-white/70 shadow-[0_18px_50px_rgba(15,15,15,0.05)]">
           <CardContent className="space-y-6 p-6 md:p-8">
             <UsImplementationMap states={usStateMapStatuses} />
             <div className="grid gap-3 md:grid-cols-3">
-              <div className="rounded-[1.3rem] border border-white/10 bg-white/[0.05] p-4 text-sm text-zinc-300">
+              <div className="rounded-[1.3rem] border border-black/6 bg-zinc-50 p-4 text-sm text-zinc-600">
                 <p className="font-mono text-[11px] uppercase tracking-[0.26em] text-zinc-500">
                   Needs review
                 </p>
@@ -199,7 +206,7 @@ export default async function UnitedStatesAiRegulationPage() {
                   No state-specific AI law status is asserted without official-source review.
                 </p>
               </div>
-              <div className="rounded-[1.3rem] border border-white/10 bg-white/[0.05] p-4 text-sm text-zinc-300">
+              <div className="rounded-[1.3rem] border border-black/6 bg-zinc-50 p-4 text-sm text-zinc-600">
                 <p className="font-mono text-[11px] uppercase tracking-[0.26em] text-zinc-500">
                   Official source required
                 </p>
@@ -207,7 +214,7 @@ export default async function UnitedStatesAiRegulationPage() {
                   Discovery trackers can generate leads, but official state sources control.
                 </p>
               </div>
-              <div className="rounded-[1.3rem] border border-white/10 bg-white/[0.05] p-4 text-sm text-zinc-300">
+              <div className="rounded-[1.3rem] border border-black/6 bg-zinc-50 p-4 text-sm text-zinc-600">
                 <p className="font-mono text-[11px] uppercase tracking-[0.26em] text-zinc-500">
                   Published-only monitor
                 </p>
@@ -220,44 +227,43 @@ export default async function UnitedStatesAiRegulationPage() {
         </Card>
       </section>
 
-      <section className="space-y-6">
+      <section id="profiles" className="scroll-mt-28 space-y-6">
         <SectionHeading
           eyebrow="Priority states"
           title="First-wave state profiles"
-          description="The first state-source pass focuses on California, Colorado, New York, Illinois, Texas, Connecticut, Utah, Virginia, Washington, and Maryland."
+          description="First pass: CA, CO, NY, IL, TX, CT, UT, VA, WA, MD."
         />
-        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+        <MotionStagger className="grid gap-4 md:grid-cols-2 xl:grid-cols-3" stagger={0.07}>
           {priorityStates.map((profile) => (
-            <Card
-              key={profile.slug}
-              className="rounded-[1.8rem] border-black/6 bg-white shadow-[0_14px_40px_rgba(15,15,15,0.04)]"
-            >
-              <CardContent className="space-y-3 p-6">
-                <p className="font-display text-2xl font-medium uppercase tracking-[-0.05em] text-zinc-950">
-                  {profile.stateName}
-                </p>
-                <p className="font-mono text-[11px] uppercase tracking-[0.24em] text-zinc-500">
-                  {profile.aiLawStatusLabel} / confidence {profile.confidenceLevel}
-                </p>
-                <p className="text-sm leading-7 text-zinc-700">{profile.publicSummary}</p>
-                <Link
-                  href={`/ai-regulation/united-states/${profile.slug}`}
-                  className="inline-block text-sm uppercase tracking-[0.16em] text-zinc-900 underline decoration-black/15 underline-offset-4"
-                >
-                  Open state profile
-                </Link>
-              </CardContent>
-            </Card>
+            <MotionStaggerItem key={profile.slug}>
+              <Card className="rounded-[1.8rem] border-black/6 bg-white shadow-[0_14px_40px_rgba(15,15,15,0.04)] transition duration-300 hover:-translate-y-0.5 hover:shadow-[0_20px_50px_rgba(15,15,15,0.07)]">
+                <CardContent className="space-y-3 p-6">
+                  <p className="font-display text-2xl font-medium uppercase tracking-[-0.05em] text-zinc-950">
+                    {profile.stateName}
+                  </p>
+                  <p className="font-mono text-[11px] uppercase tracking-[0.24em] text-zinc-500">
+                    {profile.aiLawStatusLabel} / confidence {profile.confidenceLevel}
+                  </p>
+                  <p className="text-sm leading-7 text-zinc-700">{profile.publicSummary}</p>
+                  <Link
+                    href={`/ai-regulation/united-states/${profile.slug}`}
+                    className="inline-block text-sm uppercase tracking-[0.16em] text-zinc-900 underline decoration-black/15 underline-offset-4"
+                  >
+                    Open state profile
+                  </Link>
+                </CardContent>
+              </Card>
+            </MotionStaggerItem>
           ))}
-        </div>
+        </MotionStagger>
       </section>
 
-      <section className="grid gap-6 lg:grid-cols-[1fr_1fr]">
+      <section id="governance" className="scroll-mt-28 grid gap-6 lg:grid-cols-[1fr_1fr]">
         <div className="space-y-6">
           <SectionHeading
             eyebrow="Case law architecture"
             title="U.S. case-law sources"
-            description="Case-law sources are prepared without inventing cases, holdings, procedural posture, or facts."
+            description="Court sources only — no invented cases or holdings."
           />
           <div className="space-y-4">
             {usAiCaseLawSources.map((source) => (
@@ -294,7 +300,7 @@ export default async function UnitedStatesAiRegulationPage() {
           <SectionHeading
             eyebrow="Soft law and standards"
             title="U.S. governance frameworks"
-            description="Soft law, technical standards, and agency guidance are classified separately from binding law."
+            description="Soft law and standards, classified separately from binding law."
           />
           <div className="space-y-4">
             {usAiSoftLawBaseline.slice(0, 5).map((entry) => (
@@ -317,11 +323,11 @@ export default async function UnitedStatesAiRegulationPage() {
         </div>
       </section>
 
-      <section className="space-y-6">
+      <section id="sources" className="scroll-mt-28 space-y-6">
         <SectionHeading
           eyebrow="Official source posture"
           title="U.S. monitoring sources"
-          description="This hub uses only official public sources that are reachable from the scan runtime. Runtime-blocked official endpoints are kept inactive rather than treated as healthy."
+          description="Only reachable official public sources; blocked ones stay inactive."
         />
         <div className="grid gap-4 lg:grid-cols-2">
           {verificationRecords.map((record) => (
@@ -356,11 +362,11 @@ export default async function UnitedStatesAiRegulationPage() {
         </div>
       </section>
 
-      <section className="space-y-6">
+      <section id="published" className="scroll-mt-28 space-y-6">
         <SectionHeading
           eyebrow="Published monitor items"
           title="Latest published U.S. entries"
-          description="Only human-reviewed and manually published items are shown. Accessibility problems at a source do not override the publication workflow."
+          description="Only human-reviewed, published items appear here."
         />
         <Card className="rounded-[2rem] border-black/6 bg-white/70 shadow-[0_18px_50px_rgba(15,15,15,0.04)]">
           <CardContent className="grid gap-6 p-6 md:grid-cols-2 xl:grid-cols-3">

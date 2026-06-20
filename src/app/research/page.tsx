@@ -16,6 +16,8 @@ import {
   type ResearchCategory,
 } from "@/content/research";
 import { FeatureCard } from "@/components/site/feature-card";
+import { MotionReveal } from "@/components/site/motion-reveal";
+import { MotionStagger } from "@/components/site/motion-stagger";
 import { ResearchCard } from "@/components/site/research-card";
 import { ResearchStatusBadge } from "@/components/site/research-status-badge";
 import { SectionHeading } from "@/components/site/section-heading";
@@ -46,7 +48,7 @@ export default function ResearchPage() {
 
   return (
     <SiteShell className="space-y-20">
-      <section className="space-y-6">
+      <MotionReveal className="space-y-6">
         <p className="font-mono text-[11px] uppercase tracking-[0.35em] text-zinc-600">
           Notes &amp; Commentary
         </p>
@@ -54,13 +56,12 @@ export default function ResearchPage() {
           Notes, commentary, and legal analysis on AI law
         </h1>
         <p className="max-w-3xl text-lg leading-8 text-zinc-700">
-          This section is a space for notes, reflections, short legal analysis,
-          and commentary on AI regulation, governance, legal technology, and
-          comparative developments alongside the monitoring system.
+          Notes and commentary on AI regulation, governance, and legal technology.
         </p>
-      </section>
+      </MotionReveal>
 
       {featuredEntry ? (
+        <MotionReveal>
         <Card className="glass-panel-soft rounded-[2.2rem] border-black/6 text-zinc-950">
           <CardContent className="grid gap-8 p-8 lg:grid-cols-[minmax(0,1fr)_18rem] lg:items-end">
             <div className="space-y-5">
@@ -104,38 +105,35 @@ export default function ResearchPage() {
             </div>
           </CardContent>
         </Card>
+        </MotionReveal>
       ) : null}
 
       <section className="space-y-8 border-t border-black/6 pt-16">
         <SectionHeading
           eyebrow="Categories"
           title="An organized editorial structure"
-          description="The section is organized around recurring lines of inquiry rather than a generic reverse-chronological feed."
         />
-        <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+        <MotionStagger className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
           {categoryCounts.map((item) => {
             const Icon = categoryIcons[item.category] ?? FileText;
             return (
               <FeatureCard
                 key={item.category}
                 icon={Icon}
-                eyebrow="Editorial category"
                 title={item.category}
-                description={`${item.count} public note${item.count > 1 ? "s" : ""} currently visible in this category.`}
-                cta="Editorial structure in progress"
+                description={`${item.count} note${item.count !== 1 ? "s" : ""}`}
               />
             );
           })}
-        </div>
+        </MotionStagger>
       </section>
 
       <section className="space-y-8 border-t border-black/6 pt-16">
         <SectionHeading
           eyebrow="Published notes"
           title="Current public notes"
-          description="These are public notes and commentary pieces already visible on the site. Forthcoming notes remain clearly marked as in development."
         />
-        <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+        <MotionStagger className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
           {publishedEntries.map((entry) => (
             <ResearchCard
               key={entry.slug}
@@ -148,14 +146,13 @@ export default function ResearchPage() {
               tags={entry.tags}
             />
           ))}
-        </div>
+        </MotionStagger>
       </section>
 
       <section className="space-y-8 border-t border-black/6 pt-16">
         <SectionHeading
           eyebrow="In development"
-          title="Forthcoming notes and commentary topics"
-          description="These previews are public on purpose. They show where the section is heading without pretending that unfinished notes are already complete."
+          title="Forthcoming notes"
           actions={
             <Link
               href="/ai-regulation"
@@ -166,7 +163,7 @@ export default function ResearchPage() {
             </Link>
           }
         />
-        <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+        <MotionStagger className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
           {forthcomingEntries.map((entry) => (
             <ResearchCard
               key={entry.slug}
@@ -179,7 +176,7 @@ export default function ResearchPage() {
               tags={entry.tags}
             />
           ))}
-        </div>
+        </MotionStagger>
       </section>
     </SiteShell>
   );

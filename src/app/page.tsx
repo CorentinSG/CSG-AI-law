@@ -1,14 +1,13 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowUpRight } from "lucide-react";
+import { ArrowUpRight, Database, FileText, Globe, Landmark, ShieldCheck } from "lucide-react";
 
 import { updateRepository } from "@/agents/ai-regulation/processors/updateRepository";
 import { getFeaturedResearchEntry, getPublicResearchEntries } from "@/content/research";
 import { HeroIntro } from "@/components/site/hero-intro";
-import { JarvisOrb } from "@/components/site/jarvis-orb";
+import { HeroSignalField } from "@/components/site/hero-signal-field";
 import { MotionReveal } from "@/components/site/motion-reveal";
 import { MotionStagger } from "@/components/site/motion-stagger";
-import { NewYorkSignals } from "@/components/site/new-york-signals";
 import { ProfilePortrait } from "@/components/site/profile-portrait";
 import { ResearchCard } from "@/components/site/research-card";
 import { SectionHeading } from "@/components/site/section-heading";
@@ -27,24 +26,9 @@ export const metadata: Metadata = {
 export const revalidate = 300;
 
 const entryPoints = [
-  {
-    eyebrow: "01",
-    title: "Notes",
-    description: "Writing and commentary.",
-    href: "/research",
-  },
-  {
-    eyebrow: "02",
-    title: "AI law hub",
-    description: "Live legal intelligence plus the reviewed legal database.",
-    href: "/ai-regulation",
-  },
-  {
-    eyebrow: "03",
-    title: "Standards",
-    description: "Frameworks and soft law.",
-    href: "/standards",
-  },
+  { title: "Notes", href: "/research", icon: FileText },
+  { title: "AI law hub", href: "/ai-regulation", icon: Database },
+  { title: "Standards", href: "/standards", icon: ShieldCheck },
 ];
 
 export default async function HomePage() {
@@ -59,16 +43,12 @@ export default async function HomePage() {
 
   return (
     <SiteShell className="space-y-14 md:space-y-20">
-      <section className="hero-grid new-york-wash glass-panel-strong noise-overlay relative isolate overflow-hidden rounded-[2.8rem] border border-white/40 px-6 py-8 md:px-10 md:py-12 lg:min-h-[84vh] lg:px-14 lg:py-16">
-        <div className="absolute inset-y-0 right-0 w-[74%] bg-[linear-gradient(270deg,rgba(255,255,255,0.28),rgba(255,255,255,0.08)_42%,rgba(255,255,255,0)_78%)]" />
-        <NewYorkSignals />
+      <section className="relative isolate overflow-hidden rounded-[2.8rem] border border-black/5 bg-[linear-gradient(180deg,rgba(255,255,255,0.9),rgba(248,248,245,0.72))] px-6 py-10 shadow-[0_30px_90px_rgba(15,15,15,0.05)] md:px-12 md:py-14 lg:min-h-[80vh] lg:px-16 lg:py-20">
+        <HeroSignalField className="absolute inset-0 z-0" />
         <div className="absolute inset-y-0 right-[-8rem] top-0 z-0 hidden w-[44rem] lg:block xl:right-[-10rem] xl:w-[52rem]">
           <ProfilePortrait priority large side ghost className="h-full" />
         </div>
-        <div className="absolute left-6 top-6 z-10">
-          <JarvisOrb className="hidden md:flex" label="Jarvis layer" />
-        </div>
-        <div className="relative z-10 max-w-[35rem] pt-8 lg:pt-14">
+        <div className="relative z-10 max-w-[35rem] pt-4 lg:pt-10">
           <HeroIntro />
         </div>
       </section>
@@ -76,15 +56,15 @@ export default async function HomePage() {
       {/* --- AI Law Hub: featured entry point + live news preview --- */}
       <section className="space-y-4">
         <SectionHeading
-          eyebrow="AI legal intelligence"
+          eyebrow="Regulatory intelligence"
           title="AI Law Hub"
-          description="Live legal news, verified database, Europe and United States coverage."
         />
 
         {/* Hub portal card with live news preview */}
+        <MotionReveal>
         <Link
           href="/ai-regulation"
-          className="group block rounded-[2.2rem] border border-black/6 bg-[radial-gradient(ellipse_at_top_left,rgba(99,102,241,0.06),transparent_45%),linear-gradient(180deg,rgba(255,255,255,0.97),rgba(248,248,252,0.97))] p-6 shadow-[0_20px_60px_rgba(15,15,15,0.05)] transition hover:-translate-y-0.5 hover:shadow-[0_28px_80px_rgba(15,15,15,0.08)] md:p-8"
+          className="premium-sheen group block rounded-[2.2rem] border border-black/6 bg-[radial-gradient(ellipse_at_top_left,rgba(30,41,59,0.05),transparent_45%),linear-gradient(180deg,rgba(255,255,255,0.97),rgba(248,248,252,0.97))] p-6 shadow-[0_20px_60px_rgba(15,15,15,0.05)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_28px_80px_rgba(15,15,15,0.08)] md:p-8"
         >
           <div className="flex items-start justify-between gap-4">
             <div className="flex items-center gap-2">
@@ -101,18 +81,18 @@ export default async function HomePage() {
             </span>
           </div>
 
-          <div className="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
-            <div className="rounded-[1.2rem] border border-black/5 bg-white/80 px-4 py-3">
-              <p className="font-mono text-[9px] uppercase tracking-[0.22em] text-zinc-400">Europe</p>
-              <p className="mt-1 text-sm font-medium text-zinc-900">EU AI Act · Member States · EDPB</p>
+          <div className="mt-4 grid gap-2 sm:grid-cols-3">
+            <div className="flex items-center gap-3 rounded-[1.2rem] border border-black/5 bg-white/80 px-4 py-3 transition group-hover:border-black/10">
+              <Globe className="size-5 text-indigo-500/80" />
+              <p className="text-sm font-medium text-zinc-900">Europe</p>
             </div>
-            <div className="rounded-[1.2rem] border border-black/5 bg-white/80 px-4 py-3">
-              <p className="font-mono text-[9px] uppercase tracking-[0.22em] text-zinc-400">United States</p>
-              <p className="mt-1 text-sm font-medium text-zinc-900">Federal · 50 states · Agencies</p>
+            <div className="flex items-center gap-3 rounded-[1.2rem] border border-black/5 bg-white/80 px-4 py-3 transition group-hover:border-black/10">
+              <Landmark className="size-5 text-indigo-500/80" />
+              <p className="text-sm font-medium text-zinc-900">United States</p>
             </div>
-            <div className="rounded-[1.2rem] border border-black/5 bg-white/80 px-4 py-3 sm:col-span-2 lg:col-span-1">
-              <p className="font-mono text-[9px] uppercase tracking-[0.22em] text-zinc-400">Database</p>
-              <p className="mt-1 text-sm font-medium text-zinc-900">Verified · Human-reviewed · Sourced</p>
+            <div className="flex items-center gap-3 rounded-[1.2rem] border border-black/5 bg-white/80 px-4 py-3 transition group-hover:border-black/10">
+              <Database className="size-5 text-indigo-500/80" />
+              <p className="text-sm font-medium text-zinc-900">Database</p>
             </div>
           </div>
 
@@ -144,12 +124,12 @@ export default async function HomePage() {
             </div>
           ) : null}
         </Link>
+        </MotionReveal>
       </section>
 
       {/* --- Secondary entry points: Notes + Standards --- */}
       <section className="space-y-4">
         <SectionHeading
-          eyebrow="Also on this site"
           title="Notes and standards"
         />
         <MotionStagger className="grid gap-4 lg:grid-cols-2">
@@ -157,17 +137,17 @@ export default async function HomePage() {
             <Link
               key={entry.title}
               href={entry.href}
-              className="glass-panel-soft noise-overlay block rounded-[2rem] p-6 transition-transform duration-300 hover:-translate-y-0.5"
+              className="glass-panel-soft premium-sheen group flex items-center justify-between gap-4 rounded-[2rem] p-6 transition-transform duration-300 hover:-translate-y-0.5"
             >
-              <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-zinc-500">
-                {entry.eyebrow}
-              </p>
-              <h3 className="mt-4 font-display text-[1.6rem] font-medium uppercase tracking-[-0.05em] text-zinc-950">
-                {entry.title}
-              </h3>
-              <p className="mt-3 max-w-sm text-sm leading-6 text-zinc-700">
-                {entry.description}
-              </p>
+              <div className="flex items-center gap-4">
+                <span className="flex size-11 items-center justify-center rounded-2xl bg-accent-soft text-accent-strong transition group-hover:scale-105">
+                  <entry.icon className="size-5" />
+                </span>
+                <h3 className="font-display text-[1.6rem] font-medium uppercase tracking-[-0.05em] text-zinc-950">
+                  {entry.title}
+                </h3>
+              </div>
+              <ArrowUpRight className="size-5 text-zinc-400 transition group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:text-zinc-900" />
             </Link>
           ))}
         </MotionStagger>
@@ -178,7 +158,6 @@ export default async function HomePage() {
           <SectionHeading
             eyebrow="Selected note"
             title="A quieter editorial layer"
-            description="Short notes and commentary on AI governance, legal practice, and legal intelligence."
             actions={
               <Link
                 href={`/research/${featuredResearch.slug}`}
@@ -210,12 +189,13 @@ export default async function HomePage() {
       {featuredUpdate ? (
         <MotionReveal className="glass-panel-soft noise-overlay rounded-[2rem] px-6 py-6 md:px-8">
           <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-            <div className="space-y-2">
+            <div className="flex items-center gap-3">
+              <span className="relative flex h-2.5 w-2.5">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-60" />
+                <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-emerald-500" />
+              </span>
               <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-zinc-600">
                 Live legal database
-              </p>
-              <p className="max-w-2xl text-sm leading-7 text-zinc-800">
-                The public legal database remains limited to reviewed and published items.
               </p>
             </div>
             <Link

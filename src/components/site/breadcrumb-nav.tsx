@@ -36,9 +36,13 @@ export function BreadcrumbNav({ items, className }: BreadcrumbNavProps) {
             ) : (
               <Link
                 href={item.href}
-                className="font-mono text-[10px] uppercase tracking-[0.18em] text-zinc-400 transition hover:text-zinc-700"
+                className="group relative font-mono text-[10px] uppercase tracking-[0.18em] text-zinc-400 transition-colors duration-200 hover:text-zinc-700"
               >
                 {item.label}
+                <span
+                  aria-hidden
+                  className="absolute inset-x-0 -bottom-px h-px origin-left scale-x-0 bg-zinc-400 transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-x-100"
+                />
               </Link>
             )}
           </span>

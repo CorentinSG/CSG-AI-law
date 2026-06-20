@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0">
+  <channel>
+    <title>IMY Nyheter</title>
+    <item>
+      <title>IMY publicerar vagledning om artificiell intelligens och dataskydd</title>
+      <link>https://www.imy.se/nyheter/ai-dataskydd-vagledning/</link>
+      <guid>imy-ai-dataskydd-2026</guid>
+      <pubDate>Thu, 18 Jun 2026 10:00:00 GMT</pubDate>
+      <description>Vagledningen beskriver personuppgifter, AI-system och tillsyn enligt dataskyddsregler.</description>
+      <category>Artificiell intelligens</category>
+      <category>Dataskydd</category>
+    </item>
+    <item>
+      <title>IMY informerar om kontorets oppettider</title>
+      <link>https://www.imy.se/nyheter/oppettider/</link>
+      <guid>imy-office-hours-2026</guid>
+      <pubDate>Wed, 17 Jun 2026 10:00:00 GMT</pubDate>
+      <description>Allman information utan AI-rattslig relevans.</description>
+      <category>Information</category>
+    </item>
+  </channel>
+</rss>

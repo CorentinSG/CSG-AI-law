@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 
+import { MotionReveal } from "@/components/site/motion-reveal";
 import { ProfilePortrait } from "@/components/site/profile-portrait";
 import { SectionHeading } from "@/components/site/section-heading";
 import { SiteShell } from "@/components/site/shell";
@@ -14,7 +15,7 @@ export const metadata: Metadata = {
 export default function ContactPage() {
   return (
     <SiteShell className="space-y-20">
-      <section className="space-y-5">
+      <MotionReveal className="space-y-5">
         <p className="font-mono text-[11px] uppercase tracking-[0.35em] text-zinc-600">
           Contact
         </p>
@@ -27,7 +28,7 @@ export default function ContactPage() {
           artificial intelligence, law, regulation, legal intelligence, and
           legal technology.
         </p>
-      </section>
+      </MotionReveal>
 
       <SectionHeading
         eyebrow="Professional inquiries"
@@ -35,6 +36,7 @@ export default function ContactPage() {
         description="A full contact workflow is not built yet, but the platform now offers a clearer professional point of contact for future editorial, research, and institutional conversations."
       />
 
+      <MotionReveal>
       <section className="grid gap-8 border-t border-black/6 pt-16 lg:grid-cols-[0.85fr_1.15fr] lg:items-center">
         <div className="mx-auto w-full max-w-sm lg:max-w-none">
           <ProfilePortrait className="max-w-[24rem]" />
@@ -74,6 +76,7 @@ export default function ContactPage() {
           </CardContent>
         </Card>
       </section>
+      </MotionReveal>
     </SiteShell>
   );
 }

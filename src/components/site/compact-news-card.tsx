@@ -87,7 +87,7 @@ export function CompactNewsCard({ item, horizontal = true }: CompactNewsCardProp
 
   // Compact vertical (for denser layouts)
   return (
-    <article className="rounded-[1.4rem] border border-black/6 bg-white/90 p-4 shadow-[0_6px_18px_rgba(15,15,15,0.04)]">
+    <article className="rounded-[1.4rem] border border-black/6 bg-white/90 p-4 shadow-[0_6px_18px_rgba(15,15,15,0.04)] transition duration-300 hover:-translate-y-0.5 hover:shadow-[0_12px_32px_rgba(15,15,15,0.07)]">
       <div className="flex items-center gap-2">
         <VerificationDot status={item.verificationStatus} />
         <p className="font-mono text-[9px] uppercase tracking-[0.2em] text-zinc-400">

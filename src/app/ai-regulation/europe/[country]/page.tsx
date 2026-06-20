@@ -31,6 +31,8 @@ import {
 import { BreadcrumbNav } from "@/components/site/breadcrumb-nav";
 import { ImplementationProgressBar } from "@/components/site/implementation-progress-bar";
 import { ConfidenceBadge, ImplementationBadge } from "@/components/site/legal-status-badge";
+import { MotionReveal } from "@/components/site/motion-reveal";
+import { MotionStagger, MotionStaggerItem } from "@/components/site/motion-stagger";
 import { SectionHeading } from "@/components/site/section-heading";
 import { SiteShell } from "@/components/site/shell";
 import { UpdateCard } from "@/components/site/update-card";
@@ -239,6 +241,7 @@ export default async function EuropeCountryPage({
   return (
     <SiteShell className="space-y-10">
       <section className="space-y-5">
+        <MotionReveal>
         <BreadcrumbNav
           items={[
             { label: "AI Law Hub", href: "/ai-regulation" },
@@ -281,8 +284,11 @@ export default async function EuropeCountryPage({
           </div>
         ) : null}
 
-        <div className="grid gap-4 md:grid-cols-3">
-          <Card className="rounded-[1.7rem] border-black/6 bg-white shadow-[0_14px_40px_rgba(15,15,15,0.04)]">
+        </MotionReveal>
+
+        <MotionStagger className="grid gap-4 md:grid-cols-3" stagger={0.09}>
+          <MotionStaggerItem>
+          <Card className="rounded-[1.7rem] border-black/6 bg-white shadow-[0_14px_40px_rgba(15,15,15,0.04)] transition duration-300 hover:-translate-y-0.5 hover:shadow-[0_20px_50px_rgba(15,15,15,0.07)]">
             <CardContent className="space-y-2 p-6">
               <p className="font-mono text-[11px] uppercase tracking-[0.28em] text-zinc-600">
                 Implementation status
@@ -295,7 +301,9 @@ export default async function EuropeCountryPage({
               </p>
             </CardContent>
           </Card>
-          <Card className="rounded-[1.7rem] border-black/6 bg-white shadow-[0_14px_40px_rgba(15,15,15,0.04)]">
+          </MotionStaggerItem>
+          <MotionStaggerItem>
+          <Card className="rounded-[1.7rem] border-black/6 bg-white shadow-[0_14px_40px_rgba(15,15,15,0.04)] transition duration-300 hover:-translate-y-0.5 hover:shadow-[0_20px_50px_rgba(15,15,15,0.07)]">
             <CardContent className="space-y-2 p-6">
               <p className="font-mono text-[11px] uppercase tracking-[0.28em] text-zinc-600">
                 Confidence
@@ -308,7 +316,9 @@ export default async function EuropeCountryPage({
               </p>
             </CardContent>
           </Card>
-          <Card className="rounded-[1.7rem] border-black/6 bg-white shadow-[0_14px_40px_rgba(15,15,15,0.04)]">
+          </MotionStaggerItem>
+          <MotionStaggerItem>
+          <Card className="rounded-[1.7rem] border-black/6 bg-white shadow-[0_14px_40px_rgba(15,15,15,0.04)] transition duration-300 hover:-translate-y-0.5 hover:shadow-[0_20px_50px_rgba(15,15,15,0.07)]">
             <CardContent className="space-y-2 p-6">
               <p className="font-mono text-[11px] uppercase tracking-[0.28em] text-zinc-600">
                 Last reviewed
@@ -324,7 +334,8 @@ export default async function EuropeCountryPage({
               </p>
             </CardContent>
           </Card>
-        </div>
+          </MotionStaggerItem>
+        </MotionStagger>
       </section>
 
       {profile.slug === "germany" && germanyLiveData ? (

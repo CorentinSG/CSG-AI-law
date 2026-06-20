@@ -1,3 +1,8 @@
+'use client';
+
+import { useRef } from "react";
+import { motion, useInView, useReducedMotion } from "framer-motion";
+
 import { cn } from "@/lib/utils";
 
 // Maps implementation status to a 0-100 progress value and visual tier.
@@ -45,6 +50,7 @@ interface ImplementationProgressBarProps {
  * Visual progress bar for AI Act / AI law implementation status.
  * Derived from official-source data only — never invented.
  * Confidence level affects opacity to signal reliability.
+ * Animates from 0 to target width on scroll-into-view.
  */
 export function ImplementationProgressBar({
   status,
@@ -56,6 +62,9 @@ export function ImplementationProgressBar({
   const { value, tier } = statusProgress[status] ?? { value: 0, tier: "none" as const };
   const barColor = tierColors[tier];
   const opacity = confidenceOpacity[confidence as keyof typeof confidenceOpacity] ?? "opacity-60";
+  const reduced = useReducedMotion();
+  const ref = useRef<HTMLDivElement>(null);
+  const inView = useInView(ref, { once: true, margin: "-50px" });
 
   return (
     <div className={cn("space-y-2", className)}>
@@ -69,10 +78,12 @@ export function ImplementationProgressBar({
           </p>
         </div>
       ) : null}
-      <div className="h-2 w-full overflow-hidden rounded-full bg-zinc-100">
-        <div
-          className={cn("h-full rounded-full transition-all duration-700", barColor, opacity)}
-          style={{ width: `${value}%` }}
+      <div ref={ref} className="h-2 w-full overflow-hidden rounded-full bg-zinc-100">
+        <motion.div
+          className={cn("h-full rounded-full", barColor, opacity)}
+          initial={{ width: reduced ? `${value}%` : "0%" }}
+          animate={{ width: inView || reduced ? `${value}%` : "0%" }}
+          transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1], delay: 0.2 }}
           role="progressbar"
           aria-valuenow={value}
           aria-valuemin={0}

@@ -1,3 +1,4 @@
+@import url("https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..700&family=Inter:wght@300;400;500;600;700&display=swap");
 @import "tailwindcss";
 
 :root {
@@ -8,11 +9,16 @@
   --border: rgba(17, 17, 17, 0.08);
   --paper: #f7f6f1;
   --paper-foreground: #111111;
+  /* Accent — legal "authority navy + trust gold" (UI/UX Pro Max: Legal Services) */
+  --accent: #9a6b1f;
+  --accent-strong: #7c5214;
+  --accent-soft: rgba(154, 107, 31, 0.12);
+  --navy: #1e293b;
   --font-sans:
-    -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text",
-    "Avenir Next", "Helvetica Neue", Arial, sans-serif;
+    "Inter", -apple-system, BlinkMacSystemFont, "SF Pro Text",
+    "Helvetica Neue", Arial, sans-serif;
   --font-display:
-    "Avenir Next", "SF Pro Display", "SF Pro Text", "Inter",
+    "Bricolage Grotesque", "Avenir Next", "SF Pro Display", "Inter",
     "Helvetica Neue", Arial, sans-serif;
   --font-serif:
     "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Georgia, serif;
@@ -22,6 +28,10 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-accent: var(--accent);
+  --color-accent-strong: var(--accent-strong);
+  --color-accent-soft: var(--accent-soft);
+  --color-navy: var(--navy);
   --font-sans: var(--font-sans);
   --font-display: var(--font-display);
   --font-serif: var(--font-serif);
@@ -61,8 +71,79 @@ a:hover {
 }
 
 ::selection {
-  background: rgba(28, 28, 30, 0.12);
-  color: #111111;
+  background: var(--accent-soft);
+  color: var(--accent-strong);
+}
+
+/* Accessible, on-brand focus ring (keyboard only) */
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Premium hover sheen — a soft light sweep across a surface on hover.
+   Add `premium-sheen` to a relatively-positioned, overflow-hidden card. */
+.premium-sheen {
+  position: relative;
+  overflow: hidden;
+}
+
+.premium-sheen::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -150%;
+  width: 75%;
+  height: 100%;
+  pointer-events: none;
+  background: linear-gradient(
+    100deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.55) 50%,
+    transparent 100%
+  );
+  transform: skewX(-18deg);
+  transition: left 0.85s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.premium-sheen:hover::after {
+  left: 160%;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .premium-sheen::after {
+    display: none;
+  }
+  .animate-spotlight {
+    animation: none;
+    opacity: 1;
+    transform: translate(-50%, -40%) scale(1);
+  }
+  .loader {
+    animation: none;
+    border-top-color: rgba(255, 255, 255, 0.6);
+  }
+}
+
+/* Hide scrollbars on horizontal rails (the scroll-spy hub nav) */
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Thin gradient accent rule for section dividers */
+.accent-rule {
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    var(--accent) 0%,
+    rgba(154, 107, 31, 0.25) 35%,
+    transparent 80%
+  );
 }
 
 .loader {
@@ -187,6 +268,18 @@ a:hover {
   opacity: 0.035;
   background-image: radial-gradient(rgba(17, 17, 17, 0.18) 0.6px, transparent 0.6px);
   background-size: 8px 8px;
+}
+
+/* Generous line-height on prose for reading comfort */
+.prose p,
+article p {
+  line-height: 1.8;
+}
+
+/* Button / interactive active press feedback */
+button:active,
+[role="button"]:active {
+  transform: scale(0.98);
 }
 
 .jarvis-ring {

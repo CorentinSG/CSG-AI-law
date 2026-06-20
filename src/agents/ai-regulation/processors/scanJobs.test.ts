@@ -56,6 +56,7 @@ const updateRepository = {
 
 const runAiRegulationScan = vi.fn();
 const runDataStewardSync = vi.fn();
+const alertOnDailyReviewBacklog = vi.fn();
 
 vi.mock("@/agents/ai-regulation/processors/updateRepository", () => ({
   updateRepository,
@@ -67,6 +68,10 @@ vi.mock("@/agents/ai-regulation/processors/pipeline", () => ({
 
 vi.mock("@/agents/ai-regulation/processors/dataStewardSync", () => ({
   runDataStewardSync,
+}));
+
+vi.mock("@/lib/alerting", () => ({
+  alertOnDailyReviewBacklog,
 }));
 
 function makeScanResult(overrides?: Partial<Record<string, unknown>>) {
@@ -104,6 +109,7 @@ describe("scanJobs durability helpers", () => {
         },
       },
     });
+    alertOnDailyReviewBacklog.mockResolvedValue(undefined);
   });
 
   it("marks stale running jobs as failed before they linger silently", async () => {

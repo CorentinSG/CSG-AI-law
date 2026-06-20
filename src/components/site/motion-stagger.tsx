@@ -1,7 +1,7 @@
 'use client';
 
 import type { ReactNode } from "react";
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 
 const ease: [number, number, number, number] = [0.16, 1, 0.3, 1];
 
@@ -9,18 +9,22 @@ export function MotionStagger({
   children,
   className,
   delay = 0,
+  stagger = 0.1,
 }: {
   children: ReactNode;
   className?: string;
   delay?: number;
+  stagger?: number;
 }) {
+  const reduced = useReducedMotion();
+
   return (
     <motion.div
       className={className}
-      initial="hidden"
-      whileInView="visible"
-      viewport={{ once: true, amount: 0.2 }}
-      transition={{ staggerChildren: 0.1, delayChildren: delay }}
+      initial={reduced ? false : "hidden"}
+      whileInView={reduced ? undefined : "visible"}
+      viewport={{ once: true, amount: 0.15 }}
+      transition={{ staggerChildren: reduced ? 0 : stagger, delayChildren: delay }}
       variants={{ hidden: {}, visible: {} }}
     >
       {children}
@@ -43,7 +47,7 @@ export function MotionStaggerItem({
         visible: {
           opacity: 1,
           y: 0,
-          transition: { duration: 0.8, ease },
+          transition: { duration: 0.75, ease },
         },
       }}
     >

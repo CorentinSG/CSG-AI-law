@@ -89,7 +89,7 @@ export function AdminFreshnessPanel({
           rollup.needsAttention.map((source) => (
             <div
               key={source.sourceId}
-              className="rounded-2xl border border-white/10 bg-black/20 p-4"
+              className="rounded-2xl border border-white/10 bg-black/20 p-4 transition-colors duration-200 hover:bg-white/5"
             >
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <div className="flex flex-wrap items-center gap-2">

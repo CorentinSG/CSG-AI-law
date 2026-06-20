@@ -105,7 +105,7 @@ export default async function AdminCountryProfilesPage() {
 
       <section className="grid gap-4">
         {sorted.map((country) => (
-          <Card key={country.id}>
+          <Card key={country.id} className="transition-colors duration-150 hover:bg-white/5">
             <CardHeader>
               <CardTitle className="flex flex-wrap items-center justify-between gap-3">
                 <span>
@@ -146,7 +146,7 @@ export default async function AdminCountryProfilesPage() {
                 </p>
                 <Link
                   href={`/admin/ai-regulation/countries/${country.slug}`}
-                  className="rounded-xl border border-white/10 px-3 py-2 text-sm text-zinc-100"
+                  className="rounded-xl border border-white/10 px-3 py-2 text-sm text-zinc-100 transition-colors duration-150 hover:border-white/20 hover:bg-white/8 active:scale-[0.98]"
                 >
                   Edit profile
                 </Link>

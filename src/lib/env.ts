@@ -8,6 +8,7 @@ const booleanString = z
 
 const rawEnvSchema = z.object({
   NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
+  VERCEL_ENV: z.enum(["development", "preview", "production"]).optional(),
   NEXT_PUBLIC_SITE_URL: z.string().url().default("http://localhost:3000"),
   NEXT_PUBLIC_SUPABASE_URL: z.string().url().optional(),
   NEXT_PUBLIC_SUPABASE_ANON_KEY: z.string().min(1).optional(),
@@ -36,6 +37,7 @@ const rawEnvSchema = z.object({
   ADMIN_USERNAME: z.string().min(1).default("admin"),
   ADMIN_PASSWORD: z.string().min(1).default("change-me"),
   CRON_SECRET: z.string().min(16).optional(),
+  ALERT_WEBHOOK_URL: z.string().url().optional(),
   // Upstash Redis — optional, enables distributed rate limiting (F6)
   // Install @upstash/redis and @upstash/ratelimit to activate.
   UPSTASH_REDIS_REST_URL: z.string().url().optional(),
@@ -54,6 +56,7 @@ export class EnvValidationError extends Error {}
 
 export interface AppEnv {
   NODE_ENV: "development" | "test" | "production";
+  VERCEL_ENV?: "development" | "preview" | "production";
   NEXT_PUBLIC_SITE_URL: string;
   NEXT_PUBLIC_SUPABASE_URL?: string;
   NEXT_PUBLIC_SUPABASE_ANON_KEY?: string;
@@ -82,6 +85,7 @@ export interface AppEnv {
   ADMIN_USERNAME: string;
   ADMIN_PASSWORD: string;
   CRON_SECRET?: string;
+  ALERT_WEBHOOK_URL?: string;
   /** Upstash Redis REST URL — enables distributed rate limiting when set (F6) */
   UPSTASH_REDIS_REST_URL?: string;
   /** Upstash Redis REST token — required alongside UPSTASH_REDIS_REST_URL (F6) */
@@ -99,6 +103,7 @@ export interface AppEnv {
 function buildEnv(): AppEnv {
   const parsed = rawEnvSchema.parse({
     NODE_ENV: process.env.NODE_ENV,
+    VERCEL_ENV: process.env.VERCEL_ENV,
     NEXT_PUBLIC_SITE_URL:
       process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000",
     NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL,
@@ -129,6 +134,7 @@ function buildEnv(): AppEnv {
     ADMIN_USERNAME: process.env.ADMIN_USERNAME ?? "admin",
     ADMIN_PASSWORD: process.env.ADMIN_PASSWORD ?? "change-me",
     CRON_SECRET: process.env.CRON_SECRET,
+    ALERT_WEBHOOK_URL: process.env.ALERT_WEBHOOK_URL,
     UPSTASH_REDIS_REST_URL: process.env.UPSTASH_REDIS_REST_URL,
     UPSTASH_REDIS_REST_TOKEN: process.env.UPSTASH_REDIS_REST_TOKEN,
     SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY,
@@ -141,6 +147,9 @@ function buildEnv(): AppEnv {
   });
 
   const isProduction = parsed.NODE_ENV === "production";
+  const isProductionDeployment =
+    parsed.VERCEL_ENV === "production" ||
+    (isProduction && process.env.VERCEL_ENV === undefined);
   const appDataMode = parsed.APP_DATA_MODE ?? (isProduction ? undefined : "memory");
 
   if (!appDataMode) {
@@ -162,6 +171,15 @@ function buildEnv(): AppEnv {
   if (!parsed.ADMIN_AUTH_SECRET) {
     throw new EnvValidationError(
       "ADMIN_AUTH_SECRET is required. Provide a strong secret with at least 24 characters for admin session signing.",
+    );
+  }
+
+  if (
+    isProductionDeployment &&
+    (parsed.ADMIN_USERNAME === "admin" || parsed.ADMIN_PASSWORD === "change-me")
+  ) {
+    throw new EnvValidationError(
+      "Production admin credentials must not use the default ADMIN_USERNAME=admin or ADMIN_PASSWORD=change-me values.",
     );
   }
 

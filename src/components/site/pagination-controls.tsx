@@ -30,7 +30,7 @@ export function PaginationControls({
         {prevPage ? (
           <Link
             href={buildPageHref(basePath, searchParams, prevPage, pageParamKey)}
-            className="rounded-xl border border-black/8 px-4 py-2 text-zinc-900"
+            className="rounded-xl border border-black/8 px-4 py-2 text-zinc-900 transition-colors duration-150 hover:bg-zinc-50 active:scale-[0.98]"
           >
             Previous
           </Link>
@@ -42,7 +42,7 @@ export function PaginationControls({
         {nextPage ? (
           <Link
             href={buildPageHref(basePath, searchParams, nextPage, pageParamKey)}
-            className="rounded-xl bg-zinc-950 px-4 py-2 text-white"
+            className="rounded-xl bg-zinc-950 px-4 py-2 text-white transition-colors duration-150 hover:bg-zinc-800 active:scale-[0.98]"
           >
             Next
           </Link>
@@ -94,7 +94,7 @@ export function CursorPaginationControls({
         {!isFirstPage ? (
           <Link
             href={firstPageHref}
-            className="rounded-xl border border-black/8 px-4 py-2 text-zinc-900"
+            className="rounded-xl border border-black/8 px-4 py-2 text-zinc-900 transition-colors duration-150 hover:bg-zinc-50 active:scale-[0.98]"
           >
             &larr; Back to start
           </Link>
@@ -106,7 +106,7 @@ export function CursorPaginationControls({
         {nextHref ? (
           <Link
             href={nextHref}
-            className="rounded-xl bg-zinc-950 px-4 py-2 text-white"
+            className="rounded-xl bg-zinc-950 px-4 py-2 text-white transition-colors duration-150 hover:bg-zinc-800 active:scale-[0.98]"
           >
             Next &rarr;
           </Link>

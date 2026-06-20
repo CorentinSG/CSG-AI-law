@@ -35,6 +35,7 @@ import {
 } from "@/agents/harness/failure";
 import { addStep, createTrace, finishTrace, type TraceStep } from "@/agents/harness/trace";
 import type { SourceExecutionDecision } from "@/agents/ai-regulation/sourceRuntimeHealth";
+import { alertOnSourceScanFinalized } from "@/lib/alerting";
 import type {
   RegulationScanLog,
   ReviewAssistMetadata,
@@ -180,6 +181,12 @@ function buildDiscoveryLeadCopy(input: {
     enforcementRisk:
       "No enforcement conclusion should be drawn from this lead alone. Treat it as an unverified pointer until an official source is confirmed.",
   };
+}
+
+function shouldAutoPublishLegalDatabaseItem(input: {
+  discoveryOnlySource: boolean;
+}) {
+  return !input.discoveryOnlySource;
 }
 
 // --- Types shared across pipeline stages ---
@@ -541,6 +548,12 @@ async function processAllCandidates(
 
     try {
       const discoveryOnlySource = isDiscoveryOnlySource(entry.source);
+      const autoPublishLegalDatabaseItem = shouldAutoPublishLegalDatabaseItem({
+        discoveryOnlySource,
+      });
+      const autoPublicationTimestamp = autoPublishLegalDatabaseItem
+        ? new Date().toISOString()
+        : null;
       const discoveryMetadata = discoveryOnlySource ? entry.candidate.metadata ?? {} : {};
       const summary = aiSummarizer.summarize({
         title: entry.candidate.title,
@@ -615,10 +628,10 @@ async function processAllCandidates(
               : []),
           ]),
         ),
-        status: "needs_review",
-        reviewedBy: null,
-        reviewedAt: null,
-        publishedAt: null,
+        status: autoPublishLegalDatabaseItem ? "published" : "needs_review",
+        reviewedBy: autoPublishLegalDatabaseItem ? "system:auto-official-source" : null,
+        reviewedAt: autoPublicationTimestamp,
+        publishedAt: autoPublicationTimestamp,
       });
       const updatedRawItem = await updateRepository.updateRawItemMetadata(
         entry.rawItem.id,
@@ -923,6 +936,15 @@ async function finalizeSourceScan(
       state.extractionErrors[0] ??
       state.parsingWarnings[0] ??
       "Stable on latest scan.",
+  });
+  await alertOnSourceScanFinalized({
+    sourceBeforeUpdate: source,
+    scanStatus: status,
+    trigger,
+    scanProfile: scanProfile ?? "default",
+    scanJobId,
+    responseStatus: state.responseStatus ?? null,
+    checkedAt: finishedAt,
   });
 
   return {

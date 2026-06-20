@@ -16,13 +16,13 @@ export function UsMapLegend({ states }: { states: UsStateMapStatus[] }) {
       {Object.entries(usMapStatusColors).map(([status, color]) => (
         <div
           key={status}
-          className="rounded-[1.25rem] border border-white/10 bg-white/[0.045] p-4"
+          className="rounded-[1.25rem] border border-black/6 bg-zinc-50 p-4"
         >
           <div className="flex items-center gap-3">
             <span className={cn("h-2.5 w-2.5 rounded-full", color.dotClassName)} />
-            <p className="text-sm font-medium text-zinc-100">{color.label}</p>
+            <p className="text-sm font-medium text-zinc-900">{color.label}</p>
           </div>
-          <p className="mt-2 text-xs leading-6 text-zinc-400">
+          <p className="mt-2 text-xs leading-6 text-zinc-600">
             {usStateAiLawStatusTaxonomy[status as keyof typeof usMapStatusColors].description}
           </p>
           <p className="mt-2 font-mono text-[10px] uppercase tracking-[0.22em] text-zinc-500">

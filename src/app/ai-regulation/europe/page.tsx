@@ -4,8 +4,11 @@ import Link from "next/link";
 import { getEuropeLiveLegalIntelligenceData } from "@/agents/ai-regulation/euLegalNewsAgent";
 import { updateRepository } from "@/agents/ai-regulation/processors/updateRepository";
 import { EuAiTimeline } from "@/components/site/eu-ai-timeline";
-import { EuropeImplementationMap } from "@/components/site/europe-implementation-map";
+import { EuropeImplementationMap } from "@/components/site/europe-implementation-map.lazy";
+import { HubOrientation } from "@/components/site/hub-orientation";
+import { HubScrollNav } from "@/components/site/hub-scroll-nav";
 import { LiveLegalIntelligencePanel } from "@/components/site/live-legal-intelligence-panel";
+import { MotionStagger, MotionStaggerItem } from "@/components/site/motion-stagger";
 import { SectionHeading } from "@/components/site/section-heading";
 import { SiteShell } from "@/components/site/shell";
 import { UpdateCard } from "@/components/site/update-card";
@@ -56,18 +59,9 @@ const softLawBindingLabel = {
 } as const;
 
 const europeFocusCards = [
-  {
-    title: "What changed at EU level",
-    body: "Start here for AI Act milestones, AI Office developments, Commission materials, and other Union-level signals that can move obligations or governance posture.",
-  },
-  {
-    title: "Which Member States are moving",
-    body: "Country-level status stays conservative. If implementation or designation is not yet verified from an official source, the hub says so directly instead of guessing.",
-  },
-  {
-    title: "What to watch next",
-    body: "Guidance, soft law, standards, and supervisory signals are tracked separately so readers can tell binding law from governance influence at a glance.",
-  },
+  { title: "EU level", body: "AI Act milestones and Union-level signals." },
+  { title: "Member States", body: "Status only when officially verified." },
+  { title: "What to watch", body: "Guidance, soft law, and standards, tracked separately." },
 ];
 
 export default async function EuropeAiRegulationPage() {
@@ -94,7 +88,7 @@ export default async function EuropeAiRegulationPage() {
           <SectionHeading
             eyebrow="European intelligence hub"
             title="Europe"
-            description="What changed, what is binding, which Member States are moving. Status labels remain intentionally conservative."
+            description="What changed, what is binding, who is moving."
           />
           <Link
             href="/ai-regulation/united-states"
@@ -105,33 +99,48 @@ export default async function EuropeAiRegulationPage() {
         </div>
 
         {/* Compact methodology note */}
-        <div className="grid gap-3 sm:grid-cols-3">
+        <MotionStagger className="grid gap-3 sm:grid-cols-3" stagger={0.08}>
           {europeFocusCards.map((card) => (
-            <div
-              key={card.title}
-              className="rounded-[1.5rem] border border-black/6 bg-white/80 p-4 shadow-sm"
-            >
-              <p className="font-mono text-[9px] uppercase tracking-[0.24em] text-zinc-500">{card.title}</p>
-              <p className="mt-2 text-sm leading-6 text-zinc-700">{card.body}</p>
-            </div>
+            <MotionStaggerItem key={card.title}>
+              <div className="rounded-[1.5rem] border border-black/6 bg-white/80 p-4 shadow-sm transition duration-300 hover:-translate-y-0.5 hover:shadow-md">
+                <p className="font-mono text-[9px] uppercase tracking-[0.24em] text-zinc-500">{card.title}</p>
+                <p className="mt-2 text-sm leading-6 text-zinc-700">{card.body}</p>
+              </div>
+            </MotionStaggerItem>
           ))}
-        </div>
+        </MotionStagger>
       </section>
 
+      <HubScrollNav
+        sections={[
+          { id: "live", label: "Live" },
+          { id: "ai-act", label: "AI Act" },
+          { id: "timeline", label: "Timeline" },
+          { id: "governance", label: "Governance" },
+          { id: "standards", label: "Standards" },
+          { id: "map", label: "Map" },
+          { id: "countries", label: "Countries" },
+          { id: "sources", label: "Sources" },
+          { id: "published", label: "Published" },
+        ]}
+      />
+
+      <HubOrientation />
+
       {/* --- Section 1: Live intelligence FIRST --- */}
-      <section className="space-y-5">
+      <section id="live" className="scroll-mt-28 space-y-5">
         <div className="flex items-center gap-3">
           <span className="relative flex h-2.5 w-2.5">
-            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-indigo-400 opacity-60" />
-            <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-indigo-500" />
+            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-60" />
+            <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-emerald-500" />
           </span>
-          <p className="font-mono text-[10px] uppercase tracking-[0.28em] text-indigo-600">
+          <p className="font-mono text-[10px] uppercase tracking-[0.28em] text-emerald-600">
             Live EU monitoring
           </p>
         </div>
         <LiveLegalIntelligencePanel
           title="Latest Europe AI law developments"
-          description="Ranked by EU legal relevance: official source status, hard-law weight, AI Act relevance, Member State implementation, and recency."
+          description="Ranked by EU legal relevance and recency."
           regionLabel="Europe"
           items={euLiveData.items.map((entry) => entry.item)}
           lastCheckedAt={euLiveData.lastCheckedAt}
@@ -139,11 +148,11 @@ export default async function EuropeAiRegulationPage() {
         />
       </section>
 
-      <section className="space-y-6">
+      <section id="ai-act" className="scroll-mt-28 space-y-6">
         <SectionHeading
           eyebrow="Verified legal baseline"
           title="EU AI Act baseline"
-          description="A conservative source-backed baseline for Regulation (EU) 2024/1689. Article, recital, chapter, and annex pinpoints are not invented; they remain under parser or manual review where not explicitly captured."
+          description="Source-backed baseline for Regulation (EU) 2024/1689."
         />
         <Card className="rounded-[2rem] border-black/6 bg-white shadow-[0_18px_50px_rgba(15,15,15,0.04)]">
           <CardContent className="grid gap-6 p-6 lg:grid-cols-[1.1fr_0.9fr]">
@@ -203,31 +212,30 @@ export default async function EuropeAiRegulationPage() {
                 Open official EUR-Lex text
               </a>
             </div>
-            <div className="space-y-3">
+            <MotionStagger className="space-y-3" stagger={0.1}>
               {europeAiActBaseline.phasedApplicationDates.map((milestone) => (
-                <div
-                  key={`${milestone.date}-${milestone.label}`}
-                  className="rounded-2xl border border-black/6 bg-zinc-50 p-4"
-                >
-                  <p className="font-mono text-[11px] uppercase tracking-[0.24em] text-zinc-500">
-                    {milestone.date} / confidence {milestone.confidence}
-                  </p>
-                  <p className="mt-2 font-medium text-zinc-950">{milestone.label}</p>
-                  <p className="mt-2 text-sm leading-7 text-zinc-700">
-                    {milestone.legalEffect}
-                  </p>
-                </div>
+                <MotionStaggerItem key={`${milestone.date}-${milestone.label}`}>
+                  <div className="rounded-2xl border border-black/6 bg-zinc-50 p-4 transition duration-200 hover:bg-white hover:shadow-sm">
+                    <p className="font-mono text-[11px] uppercase tracking-[0.24em] text-zinc-500">
+                      {milestone.date} / confidence {milestone.confidence}
+                    </p>
+                    <p className="mt-2 font-medium text-zinc-950">{milestone.label}</p>
+                    <p className="mt-2 text-sm leading-7 text-zinc-700">
+                      {milestone.legalEffect}
+                    </p>
+                  </div>
+                </MotionStaggerItem>
               ))}
-            </div>
+            </MotionStagger>
           </CardContent>
         </Card>
       </section>
 
-      <section className="space-y-6">
+      <section id="timeline" className="scroll-mt-28 space-y-6">
         <SectionHeading
           eyebrow="EU timeline"
           title="European Union AI regulatory timeline"
-          description="A verified chronological view of major EU AI Act milestones and implementation checkpoints. Each item links back to an official source."
+          description="Verified milestones, each linked to an official source."
         />
         <Card className="rounded-[2rem] border-white/10 bg-[linear-gradient(180deg,rgba(12,18,28,0.96),rgba(17,24,39,0.9))] text-white shadow-[0_24px_70px_rgba(15,23,42,0.22)]">
           <CardContent className="p-6 md:p-8">
@@ -236,45 +244,44 @@ export default async function EuropeAiRegulationPage() {
         </Card>
       </section>
 
-      <section className="grid gap-6 lg:grid-cols-[1fr_1fr]">
+      <section id="governance" className="scroll-mt-28 grid gap-6 lg:grid-cols-[1fr_1fr]">
         <div className="space-y-6">
           <SectionHeading
             eyebrow="Governance baseline"
             title="EU governance actors"
-            description="Governance actors are shown separately from binding law. These entries help explain institutions and implementation posture, but they are not automatically treated as standalone legal obligations."
+            description="Institutions and posture — shown separately from binding law."
           />
-          <div className="space-y-4">
+          <MotionStagger className="space-y-4" stagger={0.09}>
             {europeGovernanceActors.map((actor) => (
-              <Card
-                key={actor.id}
-                className="rounded-[1.8rem] border-black/6 bg-white shadow-[0_14px_40px_rgba(15,15,15,0.04)]"
-              >
-                <CardContent className="space-y-3 p-6">
-                  <p className="font-display text-2xl font-medium uppercase tracking-[-0.05em] text-zinc-950">
-                    {actor.name}
-                  </p>
-                  <div className="flex flex-wrap gap-2">
-                    <span className="rounded-full border border-cyan-200 bg-cyan-50 px-3 py-1 text-[11px] uppercase tracking-[0.24em] text-cyan-900">
-                      {authorityLayerLabel[actor.authorityLayer]}
-                    </span>
-                    <span className="rounded-full border border-zinc-200 bg-zinc-50 px-3 py-1 text-[11px] uppercase tracking-[0.24em] text-zinc-700">
-                      {governanceBindingLabel[actor.bindingStatusLabel]}
-                    </span>
-                  </div>
-                  <p className="text-sm leading-7 text-zinc-700">{actor.role}</p>
-                  <p className="text-xs uppercase tracking-[0.2em] text-zinc-500">
-                    citation {actor.citationQualityStatus} / confidence {actor.confidenceLevel}
-                  </p>
-                </CardContent>
-              </Card>
+              <MotionStaggerItem key={actor.id}>
+                <Card className="rounded-[1.8rem] border-black/6 bg-white shadow-[0_14px_40px_rgba(15,15,15,0.04)] transition duration-300 hover:-translate-y-0.5 hover:shadow-[0_20px_50px_rgba(15,15,15,0.07)]">
+                  <CardContent className="space-y-3 p-6">
+                    <p className="font-display text-2xl font-medium uppercase tracking-[-0.05em] text-zinc-950">
+                      {actor.name}
+                    </p>
+                    <div className="flex flex-wrap gap-2">
+                      <span className="rounded-full border border-cyan-200 bg-cyan-50 px-3 py-1 text-[11px] uppercase tracking-[0.24em] text-cyan-900">
+                        {authorityLayerLabel[actor.authorityLayer]}
+                      </span>
+                      <span className="rounded-full border border-zinc-200 bg-zinc-50 px-3 py-1 text-[11px] uppercase tracking-[0.24em] text-zinc-700">
+                        {governanceBindingLabel[actor.bindingStatusLabel]}
+                      </span>
+                    </div>
+                    <p className="text-sm leading-7 text-zinc-700">{actor.role}</p>
+                    <p className="text-xs uppercase tracking-[0.2em] text-zinc-500">
+                      citation {actor.citationQualityStatus} / confidence {actor.confidenceLevel}
+                    </p>
+                  </CardContent>
+                </Card>
+              </MotionStaggerItem>
             ))}
-          </div>
+          </MotionStagger>
         </div>
         <div className="space-y-6">
           <SectionHeading
             eyebrow="Case law architecture"
             title="European case-law sources"
-            description="The baseline prepares official court sources and now includes a first conservative wave of specifically verified CJEU entries. Case summaries remain narrow and source-backed."
+            description="Conservative, source-backed CJEU entries."
           />
           <div className="space-y-4">
             {europeAiCaseLawSources.map((source) => (
@@ -340,11 +347,11 @@ export default async function EuropeAiRegulationPage() {
         </div>
       </section>
 
-      <section className="space-y-6">
+      <section id="standards" className="scroll-mt-28 space-y-6">
         <SectionHeading
           eyebrow="Soft law and standards"
           title="European and international governance baseline"
-          description="Soft law, technical standards, and governance frameworks are labeled separately from binding law. They can influence compliance and governance posture without automatically creating binding legal duties."
+          description="Soft law and standards, labeled separately from binding law."
         />
         <div className="grid gap-3 md:grid-cols-3">
           <div className="rounded-[1.3rem] border border-black/6 bg-zinc-50 p-4 text-sm text-zinc-700">
@@ -372,62 +379,64 @@ export default async function EuropeAiRegulationPage() {
             </p>
           </div>
         </div>
-        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+        <MotionStagger className="grid gap-4 md:grid-cols-2 xl:grid-cols-3" stagger={0.07}>
           {europeAiSoftLawBaseline.map((entry) => (
-            <Card
-              key={entry.id}
-              className="rounded-[1.8rem] border-black/6 bg-white shadow-[0_14px_40px_rgba(15,15,15,0.04)]"
-            >
-              <CardContent className="space-y-3 p-6">
-                <p className="font-display text-2xl font-medium uppercase tracking-[-0.05em] text-zinc-950">
-                  {entry.title}
-                </p>
-                <p className="font-mono text-[11px] uppercase tracking-[0.24em] text-zinc-500">
-                  {entry.authorityType.replaceAll("_", " ")} / {softLawBindingLabel[entry.bindingStatus]}
-                </p>
-                <p className="text-sm leading-7 text-zinc-700">{entry.summary}</p>
-                <a
-                  href={entry.sourceUrl}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="text-sm uppercase tracking-[0.16em] text-zinc-900 underline decoration-black/15 underline-offset-4"
-                >
-                  Official source
-                </a>
-              </CardContent>
-            </Card>
+            <MotionStaggerItem key={entry.id}>
+              <Card className="h-full rounded-[1.8rem] border-black/6 bg-white shadow-[0_14px_40px_rgba(15,15,15,0.04)] transition duration-300 hover:-translate-y-0.5 hover:shadow-[0_20px_50px_rgba(15,15,15,0.07)]">
+                <CardContent className="space-y-3 p-6">
+                  <p className="font-display text-2xl font-medium uppercase tracking-[-0.05em] text-zinc-950">
+                    {entry.title}
+                  </p>
+                  <p className="font-mono text-[11px] uppercase tracking-[0.24em] text-zinc-500">
+                    {entry.authorityType.replaceAll("_", " ")} / {softLawBindingLabel[entry.bindingStatus]}
+                  </p>
+                  <p className="text-sm leading-7 text-zinc-700">{entry.summary}</p>
+                  <a
+                    href={entry.sourceUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="text-sm uppercase tracking-[0.16em] text-zinc-900 underline decoration-black/15 underline-offset-4"
+                  >
+                    Official source
+                  </a>
+                </CardContent>
+              </Card>
+            </MotionStaggerItem>
           ))}
-        </div>
+        </MotionStagger>
       </section>
 
-      <section className="space-y-6">
+      <section id="map" className="scroll-mt-28 space-y-6">
         <SectionHeading
           eyebrow="Member State implementation"
           title="Europe implementation map"
-          description="Country status is intentionally conservative. No Member State implementation claim is shown here unless it is backed by an official verified source."
+          description="Status shown only when backed by an official source."
         />
-        <Card className="rounded-[2rem] border-white/10 bg-[linear-gradient(180deg,rgba(10,16,28,0.94),rgba(17,24,39,0.88))] text-white shadow-[0_24px_70px_rgba(15,23,42,0.22)]">
+        <Card className="rounded-[2rem] border-black/6 bg-white/70 shadow-[0_18px_50px_rgba(15,15,15,0.05)]">
           <CardContent className="space-y-6 p-6 md:p-8">
             <EuropeImplementationMap countries={europeCountryStatuses} />
             <div className="grid gap-3 md:grid-cols-3">
-              <div className="rounded-[1.3rem] border border-white/10 bg-white/[0.05] p-4 text-sm text-zinc-300">
-                <p className="font-mono text-[11px] uppercase tracking-[0.26em] text-zinc-500">
+              <div className="rounded-[1.3rem] border border-black/6 bg-zinc-50 p-4 text-sm text-zinc-600">
+                <p className="flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.26em] text-zinc-500">
+                  <span className="inline-block size-2 rounded-full bg-sky-500" />
                   Implementation not yet verified
                 </p>
                 <p className="mt-2">
                   Official national implementation status has not yet been verified for publication.
                 </p>
               </div>
-              <div className="rounded-[1.3rem] border border-white/10 bg-white/[0.05] p-4 text-sm text-zinc-300">
-                <p className="font-mono text-[11px] uppercase tracking-[0.26em] text-zinc-500">
+              <div className="rounded-[1.3rem] border border-black/6 bg-zinc-50 p-4 text-sm text-zinc-600">
+                <p className="flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.26em] text-zinc-500">
+                  <span className="inline-block size-2 rounded-full bg-amber-500" />
                   Needs review
                 </p>
                 <p className="mt-2">
                   A country is in the review queue because the system still needs an official national source pass.
                 </p>
               </div>
-              <div className="rounded-[1.3rem] border border-white/10 bg-white/[0.05] p-4 text-sm text-zinc-300">
-                <p className="font-mono text-[11px] uppercase tracking-[0.26em] text-zinc-500">
+              <div className="rounded-[1.3rem] border border-black/6 bg-zinc-50 p-4 text-sm text-zinc-600">
+                <p className="flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.26em] text-zinc-500">
+                  <span className="inline-block size-2 rounded-full bg-zinc-400" />
                   No official source verified yet
                 </p>
                 <p className="mt-2">
@@ -439,11 +448,11 @@ export default async function EuropeAiRegulationPage() {
         </Card>
       </section>
 
-      <section className="space-y-6">
+      <section id="countries" className="scroll-mt-28 space-y-6">
         <SectionHeading
           eyebrow="Priority jurisdictions"
           title="First-wave country profiles"
-          description="The first country-profile wave focuses on five priority jurisdictions with verified official source baselines. Other Member States remain visible on the map, but not yet fully profiled."
+          description="Five priority jurisdictions with verified baselines."
         />
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           {countryProfiles.map((profile) => (
@@ -471,11 +480,11 @@ export default async function EuropeAiRegulationPage() {
         </div>
       </section>
 
-      <section className="space-y-6">
+      <section id="sources" className="scroll-mt-28 space-y-6">
         <SectionHeading
           eyebrow="Official sources"
           title="Europe monitoring sources"
-          description="Only official public sources are used. Inaccessible or unstable sources are kept inactive and labeled accordingly."
+          description="Only official public sources; unstable ones stay inactive."
         />
         <div className="grid gap-4 lg:grid-cols-2">
           {verificationRecords.map((record) => {
@@ -513,11 +522,11 @@ export default async function EuropeAiRegulationPage() {
         </div>
       </section>
 
-      <section className="space-y-6">
+      <section id="published" className="scroll-mt-28 space-y-6">
         <SectionHeading
           eyebrow="Published monitor items"
           title="Latest published Europe entries"
-          description="Only reviewed and manually published entries appear here. Drafts, raw captures, and unverified national implementation claims remain private."
+          description="Only human-reviewed, published entries appear here."
         />
         <Card className="rounded-[2rem] border-black/6 bg-white/70 shadow-[0_18px_50px_rgba(15,15,15,0.04)]">
           <CardContent className="grid gap-6 p-6 md:grid-cols-2 xl:grid-cols-3">

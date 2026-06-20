@@ -25,7 +25,15 @@ export function SectionHeading({
       )}
     >
       {eyebrow ? (
-        <p className="font-mono text-[11px] uppercase tracking-[0.35em] text-zinc-600">{eyebrow}</p>
+        <p
+          className={cn(
+            "flex items-center gap-2.5 font-mono text-[11px] uppercase tracking-[0.35em] text-accent-strong",
+            align === "center" && "justify-center",
+          )}
+        >
+          <span className="h-px w-6 bg-accent/60" aria-hidden />
+          {eyebrow}
+        </p>
       ) : null}
       <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
         <div className={cn("space-y-3", align === "center" ? "mx-auto max-w-3xl" : "max-w-3xl")}>

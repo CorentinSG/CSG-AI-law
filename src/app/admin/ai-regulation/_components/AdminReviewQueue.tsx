@@ -73,7 +73,7 @@ export function AdminReviewQueue({
               return (
                 <div
                   key={update.id}
-                  className="rounded-2xl border border-white/10 bg-black/20 p-4"
+                  className="rounded-2xl border border-white/10 bg-black/20 p-4 transition-colors duration-200 hover:bg-white/5"
                 >
                   <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
                     <div className="space-y-2">
@@ -131,10 +131,10 @@ export function AdminReviewQueue({
                               {c.developmentType} · {c.legalArea} · {c.jurisdiction} · importance{" "}
                               {c.importanceLevel} · confidence {c.confidenceLevel}
                             </p>
-                            <p className="mt-1 text-xs text-zinc-300">
+                            <p className="mt-1 text-xs text-violet-200">
                               {assist.suggestedSummary.oneSentenceSummary}
                             </p>
-                            <p className="mt-1 text-[10px] text-zinc-500">
+                            <p className="mt-1 text-[10px] text-violet-300/70">
                               Suggested by {assist.modelUsed}. Not applied to the record and never a
                               basis for publication.
                             </p>
@@ -165,7 +165,7 @@ export function AdminReviewQueue({
                         <form action={updateReviewStatus}>
                           <input type="hidden" name="updateId" value={update.id} />
                           <input type="hidden" name="status" value="published" />
-                          <button className="rounded-xl bg-emerald-300 px-3 py-2 text-sm text-zinc-950">
+                          <button className="rounded-xl bg-emerald-300 px-3 py-2 text-sm font-medium text-emerald-950">
                             Publish
                           </button>
                         </form>
@@ -174,7 +174,7 @@ export function AdminReviewQueue({
                         <form action={updateReviewStatus}>
                           <input type="hidden" name="updateId" value={update.id} />
                           <input type="hidden" name="status" value="archived" />
-                          <button className="rounded-xl border border-white/10 px-3 py-2 text-sm text-zinc-300">
+                          <button className="rounded-xl border border-white/15 px-3 py-2 text-sm text-zinc-200">
                             Archive
                           </button>
                         </form>

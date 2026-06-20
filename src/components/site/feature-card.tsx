@@ -1,7 +1,6 @@
 import Link from "next/link";
+import { ArrowUpRight } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
-
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export function FeatureCard({
   icon: Icon,
@@ -19,21 +18,26 @@ export function FeatureCard({
   cta?: string;
 }) {
   const content = (
-    <Card className="h-full rounded-[1.9rem] border-black/6 bg-white/80 shadow-[0_16px_48px_rgba(15,15,15,0.04)]">
-      <CardHeader className="space-y-4">
-        <div className="flex size-11 items-center justify-center rounded-2xl border border-black/6 bg-zinc-100">
-          <Icon className="size-5 text-zinc-800" />
+    <div className="glass-panel-soft premium-sheen group h-full rounded-[1.9rem] p-6 shadow-[0_16px_48px_rgba(15,15,15,0.04)] transition duration-300 hover:-translate-y-0.5 hover:shadow-[0_24px_60px_rgba(15,15,15,0.08)]">
+      <div className="flex items-start justify-between gap-3">
+        <div className="flex size-11 items-center justify-center rounded-2xl border border-accent/20 bg-accent-soft transition group-hover:border-accent/30 group-hover:bg-accent-soft">
+          <Icon className="size-5 text-accent-strong" />
         </div>
-        {eyebrow ? (
-          <p className="font-mono text-[11px] uppercase tracking-[0.28em] text-zinc-600">{eyebrow}</p>
+        {href ? (
+          <ArrowUpRight className="size-4 text-zinc-400 transition group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:text-zinc-900" />
         ) : null}
-        <CardTitle className="font-display text-xl font-medium uppercase tracking-[-0.04em] text-zinc-950">{title}</CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-4 text-sm leading-6 text-zinc-700">
-        <p>{description}</p>
-        {cta ? <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-zinc-600">{cta}</p> : null}
-      </CardContent>
-    </Card>
+      </div>
+      <div className="mt-4 space-y-3">
+        {eyebrow ? (
+          <p className="font-mono text-[11px] uppercase tracking-[0.28em] text-zinc-500">{eyebrow}</p>
+        ) : null}
+        <h3 className="font-display text-xl font-medium uppercase tracking-[-0.04em] text-zinc-950">{title}</h3>
+        <p className="text-sm leading-7 text-zinc-700">{description}</p>
+        {cta ? (
+          <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-accent-strong">{cta}</p>
+        ) : null}
+      </div>
+    </div>
   );
 
   if (!href) return content;

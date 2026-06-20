@@ -78,7 +78,7 @@ export function AdminCoveragePanel({
                 <p className="mt-2 text-sm text-zinc-100">{europeVerification.lowerConfidenceMilestoneCount}</p>
               </div>
             </div>
-            <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
+            <div className="rounded-2xl border border-white/10 bg-black/20 p-4 transition-colors duration-200 hover:bg-white/5">
               <p className="text-sm font-medium text-white">Member State implementation queue</p>
               <div className="mt-3 flex flex-wrap gap-2">
                 {europeVerification.pendingCountries.map((country) => (
@@ -106,7 +106,7 @@ export function AdminCoveragePanel({
               }))
               .filter(({ verification }) => verification.tone !== "success")
               .map(({ source, verification }) => (
-                <div key={source.id} className="rounded-2xl border border-white/10 bg-black/20 p-4">
+                <div key={source.id} className="rounded-2xl border border-white/10 bg-black/20 p-4 transition-colors duration-200 hover:bg-white/5">
                   <p className="font-medium text-white">{source.name}</p>
                   <p className="mt-1 text-sm text-zinc-400">
                     {verification.label} / {source.id}
@@ -141,7 +141,7 @@ export function AdminCoveragePanel({
               </p>
             ) : (
               discoveryLeads.map((lead) => (
-                <div key={lead.id} className="rounded-2xl border border-white/10 bg-black/20 p-4">
+                <div key={lead.id} className="rounded-2xl border border-white/10 bg-black/20 p-4 transition-colors duration-200 hover:bg-white/5">
                   <div className="flex flex-wrap items-start justify-between gap-3">
                     <p className="font-medium text-white">{lead.headline}</p>
                     <span className={`rounded-full border px-2.5 py-1 text-[10px] uppercase tracking-[0.18em] ${statusColors[lead.status] ?? "border-zinc-400/30 bg-zinc-500/10 text-zinc-300"}`}>
@@ -299,7 +299,7 @@ export function AdminCoveragePanel({
                 /not yet/i.test(profile.nationalCaseLawNotes);
 
               return (
-                <div key={profile.slug} className="rounded-2xl border border-white/10 bg-black/20 p-4">
+                <div key={profile.slug} className="rounded-2xl border border-white/10 bg-black/20 p-4 transition-colors duration-200 hover:bg-white/5">
                   <div className="flex items-start justify-between gap-3">
                     <div>
                       <p className="font-medium text-white">{profile.countryName}</p>
@@ -341,7 +341,7 @@ export function AdminCoveragePanel({
           </CardHeader>
           <CardContent className="space-y-3">
             {europeCountryProfiles.map((profile) => (
-              <div key={`${profile.slug}-notes`} className="rounded-2xl border border-white/10 bg-black/20 p-4">
+              <div key={`${profile.slug}-notes`} className="rounded-2xl border border-white/10 bg-black/20 p-4 transition-colors duration-200 hover:bg-white/5">
                 <p className="font-medium text-white">{profile.countryName}</p>
                 <p className="mt-2 text-sm text-zinc-300">
                   {profile.editorialNotes[0] ?? "No additional note."}
@@ -360,7 +360,7 @@ export function AdminCoveragePanel({
           </CardHeader>
           <CardContent className="space-y-3">
             {usStateBacklog.slice(0, 12).map((profile) => (
-              <div key={profile.slug} className="rounded-2xl border border-white/10 bg-black/20 p-4">
+              <div key={profile.slug} className="rounded-2xl border border-white/10 bg-black/20 p-4 transition-colors duration-200 hover:bg-white/5">
                 <div className="flex items-start justify-between gap-3">
                   <div>
                     <p className="font-medium text-white">{profile.stateName}</p>
@@ -399,7 +399,7 @@ export function AdminCoveragePanel({
           </CardHeader>
           <CardContent className="space-y-3">
             {usFederalSourceBacklog.map((entry) => (
-              <div key={entry.id} className="rounded-2xl border border-white/10 bg-black/20 p-4">
+              <div key={entry.id} className="rounded-2xl border border-white/10 bg-black/20 p-4 transition-colors duration-200 hover:bg-white/5">
                 <p className="font-medium text-white">{entry.shortTitle}</p>
                 <p className="mt-1 text-sm text-zinc-400">
                   {entry.sourceHealth.activeRecommendation} /{" "}

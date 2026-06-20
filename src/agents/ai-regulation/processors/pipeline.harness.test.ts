@@ -60,11 +60,16 @@ const mocks = vi.hoisted(() => ({
   deadlineExtractor: {
     extract: vi.fn(),
   },
+  alerting: {
+    alertOnSourceScanFinalized: vi.fn(),
+  },
 }));
 
 vi.mock("@/lib/env", () => ({
   env: mocks.env,
 }));
+
+vi.mock("@/lib/alerting", () => mocks.alerting);
 
 vi.mock("@/agents/ai-regulation/processors/sourceManager", () => ({
   sourceManager: mocks.sourceManager,

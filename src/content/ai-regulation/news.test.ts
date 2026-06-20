@@ -127,7 +127,7 @@ describe("AI Law News", () => {
 
   it("maps official published monitor items to public official news", () => {
     const item = buildNewsItemFromUpdate({
-      update: update(),
+      update: update({ status: "needs_review", reviewedBy: null, reviewedAt: null, publishedAt: null }),
       rawItem: rawItem(),
       source: officialSource(),
     });
@@ -141,6 +141,20 @@ describe("AI Law News", () => {
     expect(item).not.toHaveProperty("traceability");
     expect(JSON.stringify(item)).not.toContain("responseStatus");
     expect(JSON.stringify(item)).not.toContain("contentHash");
+  });
+
+  it("publishes legal news from serious sources without admin approval", () => {
+    const item = buildNewsItemFromUpdate({
+      update: update({ status: "needs_review", reviewedBy: null, reviewedAt: null, publishedAt: null }),
+      rawItem: rawItem(),
+      source: officialSource({
+        name: "IAPP",
+        sourceUrl: "https://iapp.org/news/",
+      }),
+    });
+
+    expect(item.publicVisibilityStatus).toBe("public");
+    expect(item.reviewerNotes).toContain("Automatically public");
   });
 
   it("flags missing publication dates as requiring verification", () => {
@@ -182,7 +196,7 @@ describe("AI Law News", () => {
     const baseReferences = rawItem().rawMetadata.sourceReferences;
     const primaryReference = Array.isArray(baseReferences) ? baseReferences[0] : null;
     const item = buildNewsItemFromUpdate({
-      update: update(),
+      update: update({ status: "needs_review", reviewedBy: null, reviewedAt: null, publishedAt: null }),
       rawItem: rawItem({
         rawMetadata: {
           sourceReferences: [
@@ -207,6 +221,8 @@ describe("AI Law News", () => {
     });
 
     expect(item.corroboratingSources).toHaveLength(1);
+    expect(item.publicVisibilityStatus).toBe("public");
+    expect(item.verificationStatus).toBe("corroborated");
   });
 
   it("keeps paywalled media sources manual or metadata-only", () => {

@@ -27,7 +27,7 @@ export function AuthorityBadge({
   return (
     <span
       className={cn(
-        "rounded-full border px-2.5 py-1 text-[11px] uppercase tracking-[0.2em]",
+        "inline-flex items-center rounded-full border px-2.5 py-1 font-mono text-[9px] uppercase tracking-[0.22em]",
         toneMap[authorityType],
         className,
       )}

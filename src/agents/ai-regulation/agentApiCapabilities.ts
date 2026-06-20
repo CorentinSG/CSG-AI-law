@@ -1,0 +1,139 @@
+export type AgentApiCapabilityStatus =
+  | "available"
+  | "missing_credentials"
+  | "needs_user_setup"
+  | "planned";
+
+export type AgentApiCapabilityUse =
+  | "official_legal_database"
+  | "legal_news_discovery"
+  | "case_law_discovery"
+  | "source_health";
+
+export interface AgentApiCapability {
+  id: string;
+  label: string;
+  status: AgentApiCapabilityStatus;
+  uses: AgentApiCapabilityUse[];
+  regions: Array<"Europe" | "United States" | "Global">;
+  envVars: string[];
+  implementedProvider?: string;
+  userAction?: string;
+  notes: string;
+}
+
+type AgentApiCapabilityEnv = Record<string, string | undefined>;
+
+function hasEnv(name: string, rawEnv: AgentApiCapabilityEnv = process.env) {
+  return typeof rawEnv[name] === "string" && rawEnv[name]!.trim().length > 0;
+}
+
+function hasAllEnv(names: string[], rawEnv: AgentApiCapabilityEnv = process.env) {
+  return names.every((name) => hasEnv(name, rawEnv));
+}
+
+export function listAgentApiCapabilities(
+  rawEnv: AgentApiCapabilityEnv = process.env,
+): AgentApiCapability[] {
+  const newsApiReady = hasEnv("NEWSAPI_API_KEY", rawEnv);
+  const judilibreReady = hasEnv("JUDILIBRE_API_KEYID", rawEnv);
+  const legifranceReady = hasAllEnv(
+    ["LEGIFRANCE_PISTE_CLIENT_ID", "LEGIFRANCE_PISTE_CLIENT_SECRET"],
+    rawEnv,
+  );
+
+  return [
+    {
+      id: "gdelt-doc-api",
+      label: "GDELT 2.1 Doc API",
+      status: "available",
+      uses: ["legal_news_discovery", "source_health"],
+      regions: ["Europe", "United States", "Global"],
+      envVars: [],
+      implementedProvider: "gdelt",
+      notes:
+        "No key required. Use as broad discovery only; legal database promotion still requires serious-source corroboration or official-source confirmation.",
+    },
+    {
+      id: "federal-register-api",
+      label: "Federal Register API",
+      status: "available",
+      uses: ["official_legal_database", "source_health"],
+      regions: ["United States"],
+      envVars: [],
+      implementedProvider: "federal_register",
+      notes:
+        "No key required. Official US federal rulemaking source suitable for automatic database publication when AI/legal relevance is verified.",
+    },
+    {
+      id: "newsapi",
+      label: "NewsAPI",
+      status: newsApiReady ? "available" : "missing_credentials",
+      uses: ["legal_news_discovery", "source_health"],
+      regions: ["Europe", "United States", "Global"],
+      envVars: ["NEWSAPI_API_KEY"],
+      implementedProvider: "newsapi",
+      userAction: newsApiReady
+        ? undefined
+        : "Create a NewsAPI key and set NEWSAPI_API_KEY in Vercel/local env if you want faster multi-source legal-news discovery.",
+      notes:
+        "Discovery-only provider. Items can publish as legal news only when the domain is serious/reputable or corroborated; it must not be treated as an official legal database source.",
+    },
+    {
+      id: "legifrance-piste",
+      label: "Legifrance DILA/PISTE API",
+      status: legifranceReady ? "available" : "needs_user_setup",
+      uses: ["official_legal_database", "case_law_discovery", "source_health"],
+      regions: ["Europe"],
+      envVars: ["LEGIFRANCE_PISTE_CLIENT_ID", "LEGIFRANCE_PISTE_CLIENT_SECRET"],
+      implementedProvider: "legifrance",
+      userAction: legifranceReady
+        ? undefined
+        : "Create free PISTE/DILA credentials and set LEGIFRANCE_PISTE_CLIENT_ID plus LEGIFRANCE_PISTE_CLIENT_SECRET.",
+      notes:
+        "Official France legal source. Once credentials are set, French official database monitoring can use the native API instead of degraded scraping.",
+    },
+    {
+      id: "judilibre-api",
+      label: "Judilibre API",
+      status: judilibreReady ? "available" : "needs_user_setup",
+      uses: ["case_law_discovery", "official_legal_database", "source_health"],
+      regions: ["Europe"],
+      envVars: ["JUDILIBRE_API_KEYID"],
+      implementedProvider: "judilibre",
+      userAction: judilibreReady
+        ? undefined
+        : "Request/configure a Judilibre API KeyId and set JUDILIBRE_API_KEYID to strengthen French case-law monitoring.",
+      notes:
+        "Official French case-law API. Use for decisions and jurisprudence; relevance and citation checks still apply.",
+    },
+    {
+      id: "courtlistener-recap",
+      label: "CourtListener / RECAP",
+      status: "planned",
+      uses: ["case_law_discovery", "official_legal_database"],
+      regions: ["United States"],
+      envVars: ["COURTLISTENER_API_KEY"],
+      userAction:
+        "Optional future setup: create a CourtListener token if we decide to add native US federal/state case-law ingestion.",
+      notes:
+        "Not wired in the connector yet. Recommended next API for US case-law speed and reliability.",
+    },
+  ];
+}
+
+export function listMissingAgentApiCapabilities(
+  rawEnv: AgentApiCapabilityEnv = process.env,
+) {
+  return listAgentApiCapabilities(rawEnv).filter(
+    (capability) =>
+      capability.status === "missing_credentials" ||
+      capability.status === "needs_user_setup",
+  );
+}
+
+export function listImplementedAgentApiProviders() {
+  return listAgentApiCapabilities()
+    .filter((capability) => capability.implementedProvider)
+    .map((capability) => capability.implementedProvider);
+}
