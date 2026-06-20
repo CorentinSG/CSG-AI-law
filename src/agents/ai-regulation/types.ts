@@ -167,6 +167,7 @@ export interface AiRegulatoryUpdate {
   country: string;
   developmentType: DevelopmentType;
   legalArea: LegalArea;
+  authorityType?: AuthorityType;
   publicationDate: string | null;
   detectedDate: string;
   oneSentenceSummary: string;

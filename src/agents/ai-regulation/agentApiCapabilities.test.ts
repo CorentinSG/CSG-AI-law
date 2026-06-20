@@ -45,16 +45,28 @@ describe("agent API capabilities", () => {
           status: "needs_user_setup",
           envVars: ["JUDILIBRE_API_KEYID"],
         }),
+        expect.objectContaining({
+          id: "legal-data-hunter",
+          status: "needs_user_setup",
+          envVars: ["LEGAL_DATA_HUNTER_MCP_URL", "LEGAL_DATA_HUNTER_API_KEY"],
+        }),
+        expect.objectContaining({
+          id: "courtlistener-recap",
+          status: "needs_user_setup",
+          envVars: ["COURTLISTENER_API_KEY"],
+        }),
       ]),
     );
   });
 
-  it("marks optional implemented APIs available when credentials are configured", () => {
+  it("marks optional APIs available when credentials or MCP endpoints are configured", () => {
     const capabilities = listAgentApiCapabilities({
       NEWSAPI_API_KEY: "news-key",
       LEGIFRANCE_PISTE_CLIENT_ID: "client-id",
       LEGIFRANCE_PISTE_CLIENT_SECRET: "client-secret",
       JUDILIBRE_API_KEYID: "judilibre-key",
+      LEGAL_DATA_HUNTER_MCP_URL: "https://legal-data-hunter.example/mcp",
+      COURTLISTENER_API_KEY: "courtlistener-key",
     });
 
     expect(capabilities.find((capability) => capability.id === "newsapi")?.status).toBe(
@@ -66,14 +78,28 @@ describe("agent API capabilities", () => {
     expect(capabilities.find((capability) => capability.id === "judilibre-api")?.status).toBe(
       "available",
     );
+    expect(capabilities.find((capability) => capability.id === "legal-data-hunter")?.status).toBe(
+      "available",
+    );
+    expect(capabilities.find((capability) => capability.id === "courtlistener-recap")?.status).toBe(
+      "available",
+    );
   });
 
-  it("keeps unimplemented future APIs clearly planned", () => {
+  it("documents legal research accelerators as preferred over generic scraping", () => {
     expect(listAgentApiCapabilities({})).toContainEqual(
       expect.objectContaining({
         id: "courtlistener-recap",
-        status: "planned",
+        status: "needs_user_setup",
         envVars: ["COURTLISTENER_API_KEY"],
+        notes: expect.stringContaining("Preferred over generic scraping"),
+      }),
+    );
+    expect(listAgentApiCapabilities({})).toContainEqual(
+      expect.objectContaining({
+        id: "legal-data-hunter",
+        status: "needs_user_setup",
+        notes: expect.stringContaining("Preferred over generic scraping"),
       }),
     );
   });

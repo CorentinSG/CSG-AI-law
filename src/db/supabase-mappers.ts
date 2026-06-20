@@ -20,6 +20,7 @@ import type {
   RegulationScanLog,
   RegulationSource,
 } from "@/agents/ai-regulation/types";
+import { deriveUpdateAuthorityType } from "@/agents/ai-regulation/utils/authority";
 
 type Row = Record<string, unknown>;
 
@@ -146,7 +147,7 @@ export function mapRawItemRow(row: Row): RawRegulatoryItem {
 }
 
 export function mapUpdateRow(row: Row): AiRegulatoryUpdate {
-  return {
+  const update: AiRegulatoryUpdate = {
     id: String(row.id),
     sourceId: String(row.source_id),
     rawItemId: String(row.raw_item_id),
@@ -158,6 +159,9 @@ export function mapUpdateRow(row: Row): AiRegulatoryUpdate {
     country: String(row.country),
     developmentType: row.development_type as AiRegulatoryUpdate["developmentType"],
     legalArea: row.legal_area as AiRegulatoryUpdate["legalArea"],
+    authorityType: row.authority_type
+      ? (String(row.authority_type) as AiRegulatoryUpdate["authorityType"])
+      : undefined,
     publicationDate: row.publication_date ? String(row.publication_date) : null,
     detectedDate: String(row.detected_date),
     oneSentenceSummary: String(row.one_sentence_summary),
@@ -184,6 +188,10 @@ export function mapUpdateRow(row: Row): AiRegulatoryUpdate {
     publishedAt: row.published_at ? String(row.published_at) : null,
     createdAt: String(row.created_at),
     updatedAt: String(row.updated_at),
+  };
+  return {
+    ...update,
+    authorityType: update.authorityType ?? deriveUpdateAuthorityType(update),
   };
 }
 
@@ -624,6 +632,7 @@ export function updateToInsert(update: Partial<AiRegulatoryUpdate>) {
     country: update.country,
     development_type: update.developmentType,
     legal_area: update.legalArea,
+    authority_type: update.authorityType,
     publication_date: update.publicationDate,
     detected_date: update.detectedDate,
     one_sentence_summary: update.oneSentenceSummary,

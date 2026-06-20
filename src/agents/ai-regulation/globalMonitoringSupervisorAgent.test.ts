@@ -100,7 +100,11 @@ describe("global monitoring supervisor agent", () => {
         }),
         expect.objectContaining({
           id: "courtlistener-recap",
-          status: "planned",
+          status: "needs_user_setup",
+        }),
+        expect.objectContaining({
+          id: "legal-data-hunter",
+          status: "needs_user_setup",
         }),
       ]),
     );

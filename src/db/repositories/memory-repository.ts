@@ -32,6 +32,7 @@ import type {
 } from "@/agents/ai-regulation/types";
 import type { IngestionLog, IngestionLogInput } from "@/agents/ingestion/types";
 import { getSourceReferencesFromRawItem } from "@/agents/ai-regulation/citations";
+import { deriveUpdateAuthorityType } from "@/agents/ai-regulation/utils/authority";
 import { evaluatePublicationEligibility } from "@/agents/ai-regulation/publicationEligibility";
 import { buildNewsItemFromUpdate } from "@/content/ai-regulation/news";
 import { isDiscoveryOnlySource } from "@/agents/ai-regulation/utils/discovery";
@@ -50,6 +51,7 @@ import type {
   RawRegulatoryItemInput,
   RegulationSourceInput,
   PagedResult,
+  RegulatoryUpdateFilterOptions,
   RegulatoryUpdateDraftInput,
   RegulatoryUpdateFilters,
   ScanLogInput,
@@ -71,6 +73,9 @@ function matchesFilter(
 
   return Object.entries(filters).every(([key, value]) => {
     if (!value || value === "all") return true;
+    if (key === "authorityType") {
+      return (update.authorityType ?? deriveUpdateAuthorityType(update)) === value;
+    }
     if (key === "tag") return update.tags.includes(value);
     const current = update[key as keyof AiRegulatoryUpdate];
     if (Array.isArray(current)) return current.includes(value);
@@ -261,6 +266,9 @@ export class MemoryAiRegulationRepository implements AiRegulationRepository {
       jurisdiction: distinct(updates.map((u) => u.jurisdiction)),
       region: distinct(updates.map((u) => u.region)),
       legalArea: distinct(updates.map((u) => u.legalArea)),
+      authorityType: distinct(
+        updates.map((u) => u.authorityType ?? deriveUpdateAuthorityType(u)),
+      ) as RegulatoryUpdateFilterOptions["authorityType"],
       developmentType: distinct(updates.map((u) => u.developmentType)),
       importanceLevel: distinct(updates.map((u) => u.importanceLevel)),
       publicationDate: distinct(updates.map((u) => u.publicationDate)),
@@ -347,6 +355,7 @@ export class MemoryAiRegulationRepository implements AiRegulationRepository {
     const now = nextTimestamp();
     const record: AiRegulatoryUpdate = {
       ...input,
+      authorityType: input.authorityType ?? deriveUpdateAuthorityType(input),
       id: `upd-${randomUUID()}`,
       createdAt: now,
       updatedAt: now,
@@ -371,6 +380,14 @@ export class MemoryAiRegulationRepository implements AiRegulationRepository {
     }
 
     Object.assign(update, patch, { updatedAt: nextTimestamp() });
+    if (
+      !patch.authorityType &&
+      (patch.developmentType || patch.title || patch.summary)
+    ) {
+      update.authorityType = deriveUpdateAuthorityType(update);
+    } else {
+      update.authorityType = update.authorityType ?? deriveUpdateAuthorityType(update);
+    }
     return update;
   }
 

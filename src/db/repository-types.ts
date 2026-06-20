@@ -30,7 +30,7 @@ import type {
   VerificationAttempt,
   VerificationAttemptInput,
 } from "@/agents/ai-regulation/governance";
-import type { ReviewStatus } from "@/db/schema";
+import type { AuthorityType, ReviewStatus } from "@/db/schema";
 import type { CursorPosition } from "@/lib/pagination";
 
 export type RepositoryMode = "memory" | "supabase";
@@ -81,6 +81,7 @@ export interface RegulatoryUpdateFilters {
   jurisdiction?: string;
   region?: string;
   legalArea?: string;
+  authorityType?: string;
   developmentType?: string;
   importanceLevel?: string;
   publicationDate?: string;
@@ -128,6 +129,7 @@ export type EditableRegulatoryUpdateFields = Partial<
     | "tags"
     | "developmentType"
     | "legalArea"
+    | "authorityType"
   >
 >;
 
@@ -150,6 +152,7 @@ export interface RegulatoryUpdateFilterOptions {
   jurisdiction: string[];
   region: string[];
   legalArea: string[];
+  authorityType: AuthorityType[];
   developmentType: string[];
   importanceLevel: string[];
   publicationDate: string[];

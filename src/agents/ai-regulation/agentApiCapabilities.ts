@@ -37,12 +37,28 @@ export function listAgentApiCapabilities(
 ): AgentApiCapability[] {
   const newsApiReady = hasEnv("NEWSAPI_API_KEY", rawEnv);
   const judilibreReady = hasEnv("JUDILIBRE_API_KEYID", rawEnv);
+  const courtListenerReady = hasEnv("COURTLISTENER_API_KEY", rawEnv);
+  const legalDataHunterReady =
+    hasEnv("LEGAL_DATA_HUNTER_MCP_URL", rawEnv) || hasEnv("LEGAL_RESEARCH_MCP_URL", rawEnv);
   const legifranceReady = hasAllEnv(
     ["LEGIFRANCE_PISTE_CLIENT_ID", "LEGIFRANCE_PISTE_CLIENT_SECRET"],
     rawEnv,
   );
 
   return [
+    {
+      id: "legal-data-hunter",
+      label: "Legal Data Hunter / legal-research",
+      status: legalDataHunterReady ? "available" : "needs_user_setup",
+      uses: ["official_legal_database", "case_law_discovery", "legal_news_discovery"],
+      regions: ["Europe", "United States", "Global"],
+      envVars: ["LEGAL_DATA_HUNTER_MCP_URL", "LEGAL_DATA_HUNTER_API_KEY"],
+      userAction: legalDataHunterReady
+        ? undefined
+        : "Expose the Legal Data Hunter MCP or legal-research skill to the runtime, then set LEGAL_DATA_HUNTER_MCP_URL and any required token/API key.",
+      notes:
+        "Preferred over generic scraping for multi-jurisdiction statutes, case law, doctrine, and source discovery when the MCP/skill is available to the agent runtime.",
+    },
     {
       id: "gdelt-doc-api",
       label: "GDELT 2.1 Doc API",
@@ -110,14 +126,16 @@ export function listAgentApiCapabilities(
     {
       id: "courtlistener-recap",
       label: "CourtListener / RECAP",
-      status: "planned",
+      status: courtListenerReady ? "available" : "needs_user_setup",
       uses: ["case_law_discovery", "official_legal_database"],
       regions: ["United States"],
       envVars: ["COURTLISTENER_API_KEY"],
       userAction:
-        "Optional future setup: create a CourtListener token if we decide to add native US federal/state case-law ingestion.",
+        courtListenerReady
+          ? undefined
+          : "Create a CourtListener token and set COURTLISTENER_API_KEY to enable faster US federal/state case-law and docket discovery.",
       notes:
-        "Not wired in the connector yet. Recommended next API for US case-law speed and reliability.",
+        "Preferred over generic scraping for US federal case law, RECAP docket metadata, and state/federal court monitoring when credentials are available.",
     },
   ];
 }

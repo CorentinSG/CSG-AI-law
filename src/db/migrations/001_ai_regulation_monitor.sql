@@ -60,6 +60,7 @@ create table if not exists ai_regulatory_updates (
   country text not null,
   development_type text not null,
   legal_area text not null,
+  authority_type text not null default 'Other',
   publication_date date,
   detected_date date not null,
   one_sentence_summary text not null,
@@ -88,6 +89,21 @@ create table if not exists ai_regulatory_updates (
   ),
   constraint ai_regulatory_updates_confidence_check check (
     confidence_level in ('high', 'medium', 'low')
+  ),
+  constraint ai_regulatory_updates_authority_type_check check (
+    authority_type in (
+      'Binding law',
+      'Proposed law',
+      'Regulation',
+      'Agency guidance',
+      'Enforcement action',
+      'Soft law',
+      'Technical standard',
+      'Governance framework',
+      'Policy report',
+      'Best practice',
+      'Other'
+    )
   )
 );
 
@@ -95,8 +111,12 @@ create index if not exists ai_regulatory_updates_status_idx
   on ai_regulatory_updates(status);
 create index if not exists ai_regulatory_updates_jurisdiction_idx
   on ai_regulatory_updates(jurisdiction);
+create index if not exists ai_regulatory_updates_region_idx
+  on ai_regulatory_updates(region);
 create index if not exists ai_regulatory_updates_legal_area_idx
   on ai_regulatory_updates(legal_area);
+create index if not exists ai_regulatory_updates_authority_type_idx
+  on ai_regulatory_updates(authority_type);
 create index if not exists ai_regulatory_updates_development_type_idx
   on ai_regulatory_updates(development_type);
 create index if not exists ai_regulatory_updates_importance_level_idx

@@ -23,6 +23,7 @@ import type { IngestionLog, IngestionLogInput } from "@/agents/ingestion/types";
 import { computeCountryNeedsReReview } from "@/agents/ai-regulation/country-review";
 import { getSourceReferencesFromRawItem } from "@/agents/ai-regulation/citations";
 import { evaluatePublicationEligibility } from "@/agents/ai-regulation/publicationEligibility";
+import { deriveUpdateAuthorityType } from "@/agents/ai-regulation/utils/authority";
 import { buildNewsItemFromUpdate } from "@/content/ai-regulation/news";
 import { isDiscoveryOnlySource } from "@/agents/ai-regulation/utils/discovery";
 import {
@@ -77,6 +78,7 @@ import type {
   ScanJobStartAttemptInput,
   RawRegulatoryItemInput,
   RegulationSourceInput,
+  RegulatoryUpdateFilterOptions,
   RegulatoryUpdateDraftInput,
   RegulatoryUpdateFilters,
   ScanLogInput,
@@ -161,6 +163,18 @@ function isSchemaCacheMismatchError(
   return error?.code === "PGRST204";
 }
 
+function isMissingAuthorityTypeColumnError(
+  error: {
+    code?: string;
+    message?: string;
+  } | null,
+) {
+  return (
+    (error?.code === "42703" || error?.code === "PGRST204") &&
+    /authority_type/i.test(error.message ?? "")
+  );
+}
+
 const legacyUnsupportedSourceColumns = new Set([
   "last_successful_scan_at",
   "last_failed_scan_at",
@@ -205,7 +219,9 @@ type QueryLike = {
 function applyUpdateFilters(
   query: QueryLike,
   filters?: RegulatoryUpdateFilters,
+  options: { includeAuthorityType?: boolean } = {},
 ) {
+  const includeAuthorityType = options.includeAuthorityType ?? true;
   if (!filters) return query;
   if (filters.status && filters.status !== "all") query.eq("status", filters.status);
   if (filters.jurisdiction && filters.jurisdiction !== "all")
@@ -213,6 +229,8 @@ function applyUpdateFilters(
   if (filters.region && filters.region !== "all") query.eq("region", filters.region);
   if (filters.legalArea && filters.legalArea !== "all")
     query.eq("legal_area", filters.legalArea);
+  if (includeAuthorityType && filters.authorityType && filters.authorityType !== "all")
+    query.eq("authority_type", filters.authorityType);
   if (filters.developmentType && filters.developmentType !== "all")
     query.eq("development_type", filters.developmentType);
   if (filters.importanceLevel && filters.importanceLevel !== "all")
@@ -237,6 +255,15 @@ function updatePatchToRow(patch: EditableRegulatoryUpdateFields) {
   return Object.fromEntries(
     Object.entries(row).filter(([, value]) => value !== undefined),
   );
+}
+
+function withAuthorityType(
+  update: RegulatoryUpdateDraftInput,
+): RegulatoryUpdateDraftInput {
+  return {
+    ...update,
+    authorityType: update.authorityType ?? deriveUpdateAuthorityType(update),
+  };
 }
 
 function scanJobPatchToRow(patch: Partial<ScanJob>) {
@@ -324,12 +351,35 @@ function isAfterCursor(
 const UPDATE_LIST_COLUMNS = [
   "id", "source_id", "raw_item_id", "title", "source_name", "source_url",
   "jurisdiction", "region", "country", "development_type", "legal_area",
-  "publication_date", "detected_date", "one_sentence_summary", "summary",
+  "authority_type", "publication_date", "detected_date", "one_sentence_summary", "summary",
   "what_happened", "why_it_matters", "practical_impact", "affected_parties",
   "key_obligations", "compliance_deadlines", "enforcement_risk",
   "importance_level", "confidence_level", "tags", "status",
   "reviewed_by", "reviewed_at", "published_at", "created_at", "updated_at",
 ].join(",");
+
+const LEGACY_UPDATE_LIST_COLUMNS = UPDATE_LIST_COLUMNS
+  .split(",")
+  .filter((column) => column !== "authority_type")
+  .join(",");
+
+function applyLegacyAuthorityTypeFilter(
+  updates: AiRegulatoryUpdate[],
+  filters?: RegulatoryUpdateFilters,
+) {
+  if (!filters?.authorityType || filters.authorityType === "all") {
+    return updates;
+  }
+  return updates.filter(
+    (update) => (update.authorityType ?? deriveUpdateAuthorityType(update)) === filters.authorityType,
+  );
+}
+
+function omitAuthorityTypeColumn(row: Record<string, unknown>) {
+  const copy = { ...row };
+  delete copy.authority_type;
+  return copy;
+}
 
 // raw_regulatory_items list view: excludes raw_text (can be KB-MB of page content)
 // raw_text is only needed for AI processing, not for admin list/planning views.
@@ -541,6 +591,23 @@ export class SupabaseAiRegulationRepository implements AiRegulationRepository {
 
     applyUpdateFilters(query, filters);
     const { data, error } = await query;
+    if (isMissingAuthorityTypeColumnError(error)) {
+      let legacyQuery = client
+        .from("ai_regulatory_updates")
+        .select(LEGACY_UPDATE_LIST_COLUMNS)
+        .order("publication_date", { ascending: false, nullsFirst: false })
+        .order("created_at", { ascending: false });
+      if (scope === "public") {
+        legacyQuery = legacyQuery.eq("status", "published");
+      }
+      applyUpdateFilters(legacyQuery, filters, { includeAuthorityType: false });
+      const legacyResult = await legacyQuery;
+      handleError("Failed to list regulatory updates", legacyResult.error);
+      return applyLegacyAuthorityTypeFilter(
+        ((legacyResult.data ?? []) as unknown as Row[]).map(mapUpdateRow),
+        filters,
+      );
+    }
     handleError("Failed to list regulatory updates", error);
     return ((data ?? []) as unknown as Row[]).map(mapUpdateRow);
   }
@@ -565,6 +632,31 @@ export class SupabaseAiRegulationRepository implements AiRegulationRepository {
 
     applyUpdateFilters(query, filters);
     const { data, error, count } = await query;
+    if (isMissingAuthorityTypeColumnError(error)) {
+      let legacyQuery = client
+        .from("ai_regulatory_updates")
+        .select(LEGACY_UPDATE_LIST_COLUMNS)
+        .order("publication_date", { ascending: false, nullsFirst: false })
+        .order("created_at", { ascending: false });
+      if (scope === "public") {
+        legacyQuery = legacyQuery.eq("status", "published");
+      }
+      applyUpdateFilters(legacyQuery, filters, { includeAuthorityType: false });
+      const legacyResult = await legacyQuery;
+      handleError("Failed to page regulatory updates", legacyResult.error);
+      const filtered = applyLegacyAuthorityTypeFilter(
+        ((legacyResult.data ?? []) as unknown as Row[]).map(mapUpdateRow),
+        filters,
+      );
+      const items = filtered.slice(offset, offset + limit);
+      return {
+        items,
+        total: filtered.length,
+        limit,
+        offset,
+        hasMore: offset + items.length < filtered.length,
+      };
+    }
     handleError("Failed to page regulatory updates", error);
     return {
       items: ((data ?? []) as unknown as Row[]).map(mapUpdateRow),
@@ -608,6 +700,31 @@ export class SupabaseAiRegulationRepository implements AiRegulationRepository {
 
     applyUpdateFilters(query, filters);
     const { data, error } = await query;
+    if (isMissingAuthorityTypeColumnError(error)) {
+      const all = await this.listRegulatoryUpdates(filters, scope);
+      const sorted = [...all].sort((a, b) =>
+        compareForCursorSort(
+          a.publicationDate ?? null,
+          a.createdAt,
+          b.publicationDate ?? null,
+          b.createdAt,
+        ),
+      );
+      const afterCursor = cursor
+        ? sorted.filter((update) =>
+            isAfterCursor(update.publicationDate ?? null, update.createdAt, cursor),
+          )
+        : sorted;
+      const fetched = afterCursor.slice(0, limit + 1);
+      const hasMore = fetched.length > limit;
+      const items = hasMore ? fetched.slice(0, limit) : fetched;
+      const lastItem = items[items.length - 1];
+      const nextCursor: CursorPosition | null =
+        hasMore && lastItem
+          ? { date: lastItem.publicationDate ?? "", tiebreaker: lastItem.createdAt }
+          : null;
+      return { items, limit, hasMore, nextCursor };
+    }
     handleError("Failed to cursor-page regulatory updates", error);
     const rows = ((data ?? []) as unknown as Row[]).map(mapUpdateRow);
     const hasMore = rows.length > limit;
@@ -628,12 +745,41 @@ export class SupabaseAiRegulationRepository implements AiRegulationRepository {
     let query = client
       .from("ai_regulatory_updates")
       .select(
-        "status,jurisdiction,region,development_type,legal_area,publication_date,importance_level,source_name,tags",
+        "status,jurisdiction,region,development_type,legal_area,authority_type,publication_date,importance_level,source_name,tags",
       );
     if (scope === "public") {
       query = query.eq("status", "published");
     }
     const { data, error } = await query;
+    if (isMissingAuthorityTypeColumnError(error)) {
+      let legacyQuery = client
+        .from("ai_regulatory_updates")
+        .select(
+          "status,jurisdiction,region,development_type,legal_area,publication_date,importance_level,source_name,tags",
+        );
+      if (scope === "public") {
+        legacyQuery = legacyQuery.eq("status", "published");
+      }
+      const legacyResult = await legacyQuery;
+      handleError("Failed to load filter values", legacyResult.error);
+      const legacyRows = ((legacyResult.data ?? []) as unknown as Row[]).map(mapUpdateRow);
+      const distinct = (arr: (string | null | undefined)[]) =>
+        [...new Set(arr.filter((v): v is string => typeof v === "string" && v.length > 0))].sort();
+      return {
+        status: distinct(legacyRows.map((r) => r.status)),
+        jurisdiction: distinct(legacyRows.map((r) => r.jurisdiction)),
+        region: distinct(legacyRows.map((r) => r.region)),
+        legalArea: distinct(legacyRows.map((r) => r.legalArea)),
+        authorityType: distinct(
+          legacyRows.map((r) => r.authorityType ?? deriveUpdateAuthorityType(r)),
+        ) as RegulatoryUpdateFilterOptions["authorityType"],
+        developmentType: distinct(legacyRows.map((r) => r.developmentType)),
+        importanceLevel: distinct(legacyRows.map((r) => r.importanceLevel)),
+        publicationDate: distinct(legacyRows.map((r) => r.publicationDate)),
+        tag: distinct(legacyRows.flatMap((r) => r.tags)),
+        sourceName: distinct(legacyRows.map((r) => r.sourceName)),
+      };
+    }
     handleError("Failed to load filter values", error);
     const rows = data ?? [];
 
@@ -645,6 +791,9 @@ export class SupabaseAiRegulationRepository implements AiRegulationRepository {
       jurisdiction: distinct(rows.map((r) => r.jurisdiction as string)),
       region: distinct(rows.map((r) => r.region as string)),
       legalArea: distinct(rows.map((r) => r.legal_area as string)),
+      authorityType: distinct(
+        rows.map((r) => r.authority_type as string),
+      ) as RegulatoryUpdateFilterOptions["authorityType"],
       developmentType: distinct(rows.map((r) => r.development_type as string)),
       importanceLevel: distinct(rows.map((r) => r.importance_level as string)),
       publicationDate: distinct(rows.map((r) => r.publication_date as string)),
@@ -771,7 +920,7 @@ export class SupabaseAiRegulationRepository implements AiRegulationRepository {
   async createAiRegulatoryUpdate(input: RegulatoryUpdateDraftInput) {
     const client = requireAdminClient();
     const row = updateToInsert({
-      ...input,
+      ...withAuthorityType(input),
       id: `upd-${randomUUID()}`,
     });
     const { data, error } = await client
@@ -779,6 +928,15 @@ export class SupabaseAiRegulationRepository implements AiRegulationRepository {
       .insert(row)
       .select("*")
       .single();
+    if (isMissingAuthorityTypeColumnError(error)) {
+      const legacyResult = await client
+        .from("ai_regulatory_updates")
+        .insert(omitAuthorityTypeColumn(row))
+        .select("*")
+        .single();
+      handleError("Failed to create AI regulatory update", legacyResult.error);
+      return mapUpdateRow(legacyResult.data);
+    }
     handleError("Failed to create AI regulatory update", error);
     const record = mapUpdateRow(data);
     const rawItem = await this.getRawRegulatoryItemById(record.rawItemId);
@@ -800,13 +958,36 @@ export class SupabaseAiRegulationRepository implements AiRegulationRepository {
     patch: EditableRegulatoryUpdateFields,
   ) {
     const client = requireAdminClient();
-    const row = updatePatchToRow(patch);
+    let patchWithAuthorityType = patch;
+    if (
+      !patch.authorityType &&
+      (patch.developmentType || patch.title || patch.summary)
+    ) {
+      const existing = await this.getRegulatoryUpdateById(id, "admin");
+      if (existing) {
+        patchWithAuthorityType = {
+          ...patch,
+          authorityType: deriveUpdateAuthorityType({ ...existing, ...patch }),
+        };
+      }
+    }
+    const row = updatePatchToRow(patchWithAuthorityType);
     const { data, error } = await client
       .from("ai_regulatory_updates")
       .update({ ...row, updated_at: new Date().toISOString() })
       .eq("id", id)
       .select("*")
       .single();
+    if (isMissingAuthorityTypeColumnError(error)) {
+      const legacyResult = await client
+        .from("ai_regulatory_updates")
+        .update({ ...omitAuthorityTypeColumn(row), updated_at: new Date().toISOString() })
+        .eq("id", id)
+        .select("*")
+        .single();
+      handleError("Failed to update AI regulatory update", legacyResult.error);
+      return mapUpdateRow(legacyResult.data);
+    }
     handleError("Failed to update AI regulatory update", error);
     return mapUpdateRow(data);
   }

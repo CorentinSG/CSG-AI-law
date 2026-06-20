@@ -258,10 +258,16 @@ describe("Supabase column constants", () => {
     expect(match).not.toBeNull();
     const cols = match![1];
     for (const col of ["id", "source_id", "title", "status", "jurisdiction",
-      "development_type", "legal_area", "publication_date",
+      "development_type", "legal_area", "authority_type", "publication_date",
       "importance_level", "source_name", "tags"]) {
       expect(cols).toContain(`"${col}"`);
     }
+  });
+
+  it("pushes authorityType filters and filter options to Supabase", () => {
+    expect(repoSrc).toContain('query.eq("authority_type", filters.authorityType)');
+    expect(repoSrc).toContain("authority_type,publication_date");
+    expect(repoSrc).toContain("rows.map((r) => r.authority_type as string)");
   });
 
   it("includes dedicated discovery_leads repository methods", () => {
@@ -329,7 +335,7 @@ describe("listDistinctFilterValues", () => {
     vi.stubEnv("ADMIN_AUTH_SECRET", "test-secret-at-least-24-chars-ok");
     const repo = new MemoryAiRegulationRepository();
     const opts = await repo.listDistinctFilterValues("admin");
-    for (const key of ["status", "jurisdiction", "region", "legalArea",
+    for (const key of ["status", "jurisdiction", "region", "legalArea", "authorityType",
       "developmentType", "importanceLevel", "publicationDate", "tag", "sourceName"]) {
       expect(opts).toHaveProperty(key);
       expect(Array.isArray((opts as Record<string, string[]>)[key])).toBe(true);

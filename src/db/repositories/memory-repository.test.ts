@@ -217,6 +217,60 @@ describe("MemoryAiRegulationRepository", () => {
     ).rejects.toBeInstanceOf(RepositoryOperationError);
   });
 
+  it("backfills and filters regulatory updates by first-class authority type", async () => {
+    const rawItem = await repository.createRawRegulatoryItem({
+      sourceId: "src-federal-register-ai",
+      rawTitle: "Authority type raw item",
+      rawUrl: "https://example.gov/authority-type",
+      rawText: "Authority type raw item",
+      rawMetadata: {},
+      detectedAt: "2026-06-20T00:00:00.000Z",
+      hash: "authority-type-filter-hash",
+      duplicateOf: null,
+      processingStatus: "processed",
+    });
+
+    const update = await repository.createAiRegulatoryUpdate({
+      sourceId: "src-federal-register-ai",
+      rawItemId: rawItem.id,
+      title: "Authority type test",
+      sourceName: "Federal Register",
+      sourceUrl: "https://example.gov/authority-type",
+      jurisdiction: "United States federal",
+      region: "North America",
+      country: "United States",
+      developmentType: "Policy report",
+      legalArea: "AI governance",
+      publicationDate: "2026-06-20",
+      detectedDate: "2026-06-20",
+      oneSentenceSummary: "Authority type test",
+      summary: "Authority type test",
+      whatHappened: "Authority type test",
+      whyItMatters: "Authority type test",
+      practicalImpact: "Authority type test",
+      affectedParties: [],
+      keyObligations: [],
+      complianceDeadlines: [],
+      enforcementRisk: "Authority type test",
+      importanceLevel: "medium",
+      confidenceLevel: "high",
+      tags: ["authority:binding-law"],
+      status: "needs_review",
+      reviewedBy: null,
+      reviewedAt: null,
+      publishedAt: null,
+    });
+
+    expect(update.authorityType).toBe("Binding law");
+    const filtered = await repository.listRegulatoryUpdates({
+      authorityType: "Binding law",
+    });
+    expect(filtered.map((item) => item.id)).toContain(update.id);
+
+    const options = await repository.listDistinctFilterValues();
+    expect(options.authorityType).toContain("Binding law");
+  });
+
   it("can filter scan logs and raw items by source", async () => {
     const sourceLogs = await repository.listScanLogs(10, "src-federal-register-ai");
     const sourceRawItems = await repository.listRawRegulatoryItems(
