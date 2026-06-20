@@ -270,6 +270,18 @@ a:hover {
   background-size: 8px 8px;
 }
 
+/* Generous line-height on prose for reading comfort */
+.prose p,
+article p {
+  line-height: 1.8;
+}
+
+/* Button / interactive active press feedback */
+button:active,
+[role="button"]:active {
+  transform: scale(0.98);
+}
+
 .jarvis-ring {
   position: relative;
   overflow: hidden;
