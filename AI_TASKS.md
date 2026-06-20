@@ -1,6 +1,93 @@
 # AI_TASKS.md
 
+> **How to use this file (read `AGENTS.md` → "Coordination protocol" for the full rules).**
+> This is the single source of truth for project progress. Two layers, never mixed: progress lives here; code structure lives in the Graphify graph / Obsidian vault (query it, do not restate it here).
+> Start every session with the **Sync ritual**; end every unit of work with a **Handoff entry**. Append-only, own-rows-only.
+
+## Status board (live — at-a-glance project state)
+
+Each agent edits only its own rows. Status vocabulary: `CLAIMED` · `WIP` · `BLOCKED` · `REVIEW` · `DONE-LOCAL` · `MERGED` · `HANDOFF→<agent>`.
+
+| Task ID | Owner | Status | Branch @ sha | Locked files | Graph anchor | Updated |
+|---|---|---|---|---|---|---|
+| TOOLING-GRAPH-PROTOCOL | Claude Code | REVIEW | `ops/t-ops9-ux` @ `30bc31c` | `AGENTS.md`, `AI_TASKS.md`, `.gitignore`, `.git/hooks/*` | n/a (tooling, no app code) | 2026-06-20 |
+| T-OPS9-UX | Claude Code | WIP | `ops/t-ops9-ux` @ `30bc31c` | `src/app/**`, shared UI components | community "UI Components and Utilities", "Intelligence Hub UI" | 2026-06-20 |
+| T-LEGALDB-UI | Claude Code | DONE-LOCAL | `ops/t-ops9-ux` (working tree) | `src/app/admin/ai-regulation/legal-database/**`, `src/app/admin/ai-regulation/page.tsx` | `deriveUpdateAuthorityType()`, `getAuthorityPriorityRank()`, `FilterBar`, community "News and Regulation Admin" | 2026-06-20 |
+| T-LEGALDB-DB | Codex | DONE-LOCAL | `ops/t-ops9-ux` @ `cbf3eed` | `src/db/migrations/**`, `src/db/repository-types.ts`, repositories, ingestion agents | `RegulatoryUpdateFilters`, `AiRegulatoryUpdate`, community "DB Repository Layer", "Scan Pipeline" | 2026-06-20 |
+| COWORK-A-F | Cowork (Claude) | DONE-LOCAL | working tree (uncommitted) | none | community "Scan Pipeline", "DB Repository Layer", "Intelligence Hub UI" | 2026-06-20 |
+
+- **Graph freshness:** built from `30bc31ca` — in sync with HEAD `30bc31c`. If these diverge, run `py -m graphify update .` before trusting the graph.
+- Move a task to `MERGED` only once it is in `main`; delete its row one entry after it merges (the log keeps the history).
+
+## Handoff entry format (copy this for every new log entry below)
+
+```
+YYYY-MM-DD · <Agent> · <TASK-ID> · <STATUS>
+- Intent:        one line — what and why
+- Files:         paths changed (or "none")
+- Graph anchors: exact node/community labels for `explain`/`affected`
+- Verification:  test / lint / typecheck / build (or why not run)
+- Branch/commit: <branch> @ <short-sha>
+- Next:          who owns the next step, or blockers
+```
+
 ## Current status
+
+2026-06-20 · Codex · T-LEGALDB-DB · DONE-LOCAL
+- Intent:        Promote the legal database 3-axis sort/filter backend by making `authorityType` a first-class indexed regulatory-update field, keeping `region`/`legal_area` cheap to filter, and documenting agent API/tool preferences over generic scraping.
+- Files:         `.env.example`, `src/agents/ai-regulation/agentApiCapabilities.ts`, `src/agents/ai-regulation/agentApiCapabilities.test.ts`, `src/agents/ai-regulation/globalMonitoringSupervisorAgent.test.ts`, `src/agents/ai-regulation/types.ts`, `src/db/migrations/001_ai_regulation_monitor.sql`, `src/db/migrations/012_regulatory_update_authority_type.sql`, `src/db/repositories/memory-repository.ts`, `src/db/repositories/memory-repository.test.ts`, `src/db/repositories/supabase-repository.ts`, `src/db/repositories/supabase-repository.test.ts`, `src/db/repository-types.ts`, `src/db/supabase-mappers.ts`.
+- Graph anchors: `RegulatoryUpdateFilters`, `AiRegulatoryUpdate`, `deriveUpdateAuthorityType()`, `mapUpdateRow()`, `SupabaseAiRegulationRepository`, `MemoryAiRegulationRepository`, community "DB Repository Layer", community "Data Repository and Pagination", community "Regulation and Governance Data".
+- Verification:  `npm test` PASS (95 files / 514 tests) · `npm run lint` PASS · `npm run typecheck` PASS · `VERCEL_ENV=preview ADMIN_USERNAME=admin ADMIN_PASSWORD=change-me npm run build` PASS. Build initially caught a missing-column Supabase preview state; repository now has a pre-migration fallback and migration 012 remains the durable fix.
+- Branch/commit: `ops/t-ops9-ux` @ `cbf3eed`
+- Next:          Claude Code — switch `/admin/ai-regulation/legal-database` and future public facets from derived in-memory `authorityType` filtering to indexed `RegulatoryUpdateFilters.authorityType`; operator must apply `src/db/migrations/012_regulatory_update_authority_type.sql` to Supabase and configure optional `NEWSAPI_API_KEY`, `LEGIFRANCE_PISTE_CLIENT_ID/SECRET`, `JUDILIBRE_API_KEYID`, `LEGAL_DATA_HUNTER_MCP_URL`/token, and `COURTLISTENER_API_KEY` when ready.
+
+2026-06-20 · Claude Code · T-OPS9-UX · WIP (+ BLOCKER flag for Codex)
+- Intent:        Declutter the densest public page. The Europe country page (`/ai-regulation/europe/[country]`, ~2950 lines) was a long undifferentiated scroll; added the existing sticky scroll-spy `HubScrollNav` + stable section anchors so a reader can jump between Overview / Intelligence / Implementation / Sources / References / Notes / Published. No content changed — pure navigation/legibility.
+- Files:         `src/app/ai-regulation/europe/[country]/page.tsx` (import HubScrollNav; `id`+`scroll-mt-28` on the 6 always-present sections; `id="intel"` jump anchor for the country-specific zone; nav rail after the header).
+- Graph anchors: `HubScrollNav`, community "UI Components and Visual Elements", "EU Member State Profiles".
+- Verification:  `tsc --noEmit` PASS · `eslint` (file) PASS · `next build` PASS. Browser: in `APP_DATA_MODE=memory` the page returns HTTP 200 and the SSR payload contains the nav sections + `scroll-mt-28` anchors (verified). ⚠️ In Supabase mode the page (and every updates-listing page incl. `/`, `/ai-regulation`) currently 500s — see blocker below.
+- Branch/commit: `ops/t-ops9-ux` (working tree, uncommitted).
+- ⚠️ BLOCKER → CODEX (T-LEGALDB-DB): the live/Supabase build is currently broken. `SupabaseAiRegulationRepository.listRegulatoryUpdates` already SELECTs `authority_type` but the column does not exist in the DB yet → Postgres error 42703 "column ai_regulatory_updates.authority_type does not exist", caught by the error boundary on `HomePage`, the hub, and country pages. The migration that adds/back-fills `authority_type` must be applied (or the SELECT guarded) to unbreak prod. This is unrelated to the UX change above.
+- Next:          Codex — apply the authority_type migration to unblock Supabase mode. Claude — optional parity: same scroll-spy on `/ai-regulation/united-states/[state]`.
+
+2026-06-20 · Claude Code → CODEX · T-LEGALDB · HANDOFF→Codex
+- Intent:        Make the legal database "extremely well sorted" on three axes — (1) nature of the source (authorityType: Binding law → … → Other), (2) region of application, (3) legal area (AI-law domain) — exposed as a filterable admin table and (next) public country-page facets + smart search. User directive 2026-06-20.
+- Files (Claude, DONE-LOCAL): `src/app/admin/ai-regulation/legal-database/page.tsx` (new — sortable/filterable table, 3-axis global sort, facet FilterBar + non-AI full-text search, slice pagination), `src/app/admin/ai-regulation/page.tsx` (added "Open legal database" link). `DECISIONS.md` (3-axis sort decision).
+- Graph anchors: `deriveUpdateAuthorityType()`, `getAuthorityPriorityRank()`, `buildAuthorityTag()`, `RegulatoryUpdateFilters`, `AiRegulatoryUpdate`, `FilterBar`; communities "News and Regulation Admin", "DB Repository Layer".
+- Verification:  `tsc --noEmit` PASS · `eslint` (touched files) PASS · `VERCEL_ENV=preview npm run build` PASS (route `/admin/ai-regulation/legal-database` registered ƒ dynamic). Browser check skipped: admin is basic-auth gated.
+- Branch/commit: `ops/t-ops9-ux` (working tree, uncommitted).
+- Next — CODEX (backend, your domain), task T-LEGALDB-DB:
+  1. **Promote authorityType to a first-class column.** Add `authority_type` to the regulatory-updates table (enum = `authorityTypes` in `src/db/schema.ts`), index it (it is the primary sort/filter axis), add `authorityType?: string` to `RegulatoryUpdateFilters` + repository `listRegulatoryUpdates`/`listDistinctFilterValues`, and **backfill** existing rows from the derived value (`deriveUpdateAuthorityType` / `parseAuthorityTag`). Once landed, tell Claude so the admin table + public facets switch from the in-memory derived filter to the indexed column (cleaner + paginates server-side).
+  2. **Region/legalArea indexing.** Ensure `region` and `legal_area` are indexed too so the 3-axis sort/filter is cheap at scale.
+  3. **State-agent tooling directive (user request).** Each jurisdiction/state ingestion agent must actively use the tools at its disposal for legal monitoring — the MCP connectors and skills already wired into this workspace: **Legal Data Hunter** (multi-jurisdiction statutes/case law/doctrine; skill `legal-research`) and **CourtListener / RECAP** (US federal case law & dockets) — plus existing native connectors (Legifrance/PISTE, Judilibre, Federal Register, GDELT, NewsAPI). Wire these into the per-state agent capability map (cf. `agentApiCapabilities` from your 2026-06-19 handoff) and prefer them over generic scraping where credentials/connectors exist. Document any missing credentials for the operator.
+- Next — CLAUDE (follow-up, T-LEGALDB-UI phase 2): public country pages (`src/app/ai-regulation/europe/[country]`, `.../united-states/[state]`) — add the same 3-axis FilterBar + full-text search bar over `countryUpdates` so a visitor clicking France can refine by nature/region/legal area and search. Deferred from this pass because the country page is a 2935-line bespoke file; do it as its own focused change.
+
+2026-06-20 · Cowork (Claude) · COWORK-A-F · DONE-LOCAL
+- Intent:        Full code-review + systematic hardening (Phases A–F): security headers, timingSafeEqual, error boundaries, rate-limiter docs, cron completions, perf selects, pipeline refactor, typed interfaces, 19 integration tests, editorial UX, DB migration schemas, Upstash rate limiter
+- Files:         next.config.ts · src/lib/admin-auth.ts · src/app/error.tsx · src/app/ai-regulation/error.tsx · src/app/admin/ai-regulation/error.tsx · src/lib/rate-limit.ts · vercel.json · src/db/repository-types.ts · src/db/repositories/memory-repository.ts · src/db/repositories/supabase-repository.ts · src/db/supabase-mappers.ts · src/agents/ai-regulation/processors/updateRepository.ts · src/agents/ai-regulation/processors/pipeline.ts · src/agents/ai-regulation/scanProfiles.ts · src/agents/ai-regulation/types.ts · src/agents/ai-regulation/governance.ts · src/app/admin/ai-regulation/page.tsx · src/app/ai-regulation/page.tsx · src/db/repositories/supabase-repository.test.ts (new) · src/components/site/intelligence-summary-band.tsx (new) · src/components/site/empty-filter-state.tsx (new) · src/lib/env.ts · src/lib/upstash-rate-limit.ts (new) · src/db/migrations/006_country_intelligence.sql (new) · src/db/migrations/007_discovery_leads.sql (new)
+- Graph anchors: community "Scan Pipeline", "DB Repository Layer", "Intelligence Hub UI"; nodes `SupabaseAiRegulationRepository`, `listDistinctFilterValues`, `finalizeSourceScan`, `TraceabilityMetadata`
+- Verification:  tsc --noEmit PASS · eslint PASS · vitest 19 new tests PASS
+- Branch/commit: working tree — Cowork session does not commit; Claude Code must commit before merging
+- Next:          Claude Code — commit COWORK-A-F changes + apply migrations 006+007 to Supabase prod + continue T-OPS9-UX
+
+2026-06-20 · Claude Code · TOOLING-GRAPH-PROTOCOL · REVIEW
+- Intent:        Make the Graphify graph + Obsidian vault the standard, unambiguous Claude<->Codex coordination layer and optimize token use (query the graph instead of grep).
+- Files:         `AGENTS.md` (new "Coordination protocol" section: sync ritual, fixed handoff format, closed status vocabulary, golden rules), `AI_TASKS.md` (this file: header usage note, live Status board, handoff template), `agent-sync.ps1` (new one-command start-of-session ritual: graph-freshness check + auto AST refresh + status board print), `.git/hooks/post-commit` (auto-regenerates the Obsidian vault). No app/runtime code touched.
+- Graph anchors: n/a (tooling + docs only; graph itself refreshed to HEAD).
+- Verification:  `agent-sync.ps1` runs and reports IN SYNC + prints the board; graph rebuilt via `graphify update .` (3270 nodes / 8562 edges / 192 communities) and Obsidian vault regenerated (3416 notes). Tests/lint/typecheck/build not run (no source code changed).
+- Branch/commit: `ops/t-ops9-ux` @ `30bc31c` (working tree; not yet committed).
+- Next:          Codex — adopt the protocol: run `agent-sync.ps1` at session start, use the handoff format for every entry, cite graph nodes. Operator — rotate the OpenAI key used earlier (it was passed at session time for the semantic build + community labeling). All 192 communities are now LLM-named; no further labeling needed.
+
+2026-06-20 - Claude Code, Graphify knowledge-graph tooling (dev aid, no app/runtime impact): built a queryable knowledge graph of the repo with Graphify (`pip install graphifyy`, v0.8.44, Python 3.14) to cut token cost on codebase exploration vs raw grep/glob. Outputs live in `graphify-out/` (gitignored): `graph.json` (3270 nodes / 8562 edges / 192 communities), `GRAPH_REPORT.md` (god nodes + named communities), `graph.html` (interactive viz). God nodes confirmed: `RegulationSource`, `getRepositoryMode()`, `SupabaseAiRegulationRepository`/`MemoryAiRegulationRepository`, `requireAdminClient()`, `handleError()`, `cn()`; no import cycles. Use instead of brute search: `graphify query "..."`, `graphify explain "X"`, `graphify path "A" "B"`, `graphify affected "X"` (impact analysis before refactor). Git post-commit/post-checkout hook installed to rebuild the graph automatically (AST-only, no API cost); only the initial semantic pass needs an LLM key. The build used a one-off `OPENAI_API_KEY` passed at session time (never written to repo); operator should rotate that key. `graphify.exe` is in `…\pythoncore-3.14-64\Scripts` (not on PATH). No source code or app behavior changed; this is purely an agent-side analysis tool.
+
+2026-06-20 - Claude Code -> CODEX, INSTRUCTIONS to connect to and use the Graphify graph + Obsidian vault (this machine only; user confirmed Codex never runs elsewhere). Read this before exploring code; query the graph instead of grep/glob to save tokens.
+  SETUP (one-time, already done on this machine): `graphify` is installed under the system Python at `C:\Users\coren\AppData\Local\Python\pythoncore-3.14-64`. The launcher `graphify.exe` lives in `…\pythoncore-3.14-64\Scripts` and is NOT on PATH. Invoke it either by adding that Scripts dir to PATH for the session, or via the module form `py -m graphify <cmd>` / `C:\Users\coren\AppData\Local\Python\pythoncore-3.14-64\python.exe -m graphify <cmd>`. If `import graphify` ever fails, reinstall with `py -m pip install graphifyy`.
+  GRAPH LOCATION: everything is in `graphify-out/` (gitignored, local to this checkout): `graph.json` (source of truth, 3270 nodes / 8562 edges / 192 communities), `GRAPH_REPORT.md` (read this FIRST — god nodes + named communities + import cycles), `graph.html` (open in a browser for interactive viz).
+  READ COMMANDS (free, no API key, read graph.json locally): `graphify query "<question>"` (BFS traversal, e.g. ingestion->publication flow), `graphify explain "<NodeLabel>"` (a node + all its edges), `graphify path "A" "B"` (shortest path between two symbols), `graphify affected "<NodeLabel>"` (reverse-impact set — run BEFORE any refactor to see what breaks). Node labels match symbol names (e.g. `RegulationSource`, `getRepositoryMode()`).
+  OBSIDIAN VAULT: `graphify-out/obsidian/` is a full Obsidian vault — one `.md` note per node with YAML frontmatter (`source_file`, `community`, `location`), `[[wikilinks]]` for every connection, `#community/...` tags, plus `.obsidian/graph.json` that colors the graph view by community, and a `graph.canvas`. To use: open `graphify-out/obsidian/` as a vault in Obsidian (Open folder as vault) -> Graph view gives a clickable map of the codebase; each note links to its neighbours. Regenerate manually with `py -m graphify export obsidian` (reads graph.json, no LLM).
+  AUTO-REFRESH: a git post-commit hook rebuilds `graph.json` (AST-only, async, no API cost) and a second appended hook section regenerates the Obsidian vault after each commit (the vault may trail structural changes by one commit — acceptable for navigation). The post-checkout hook also rebuilds. Community RENAMING needs an LLM (`graphify cluster-only . --backend openai`) and is NOT run by the hook, so cluster names can go stale after big refactors; rerun it manually if needed. Set `GRAPHIFY_SKIP_HOOK=1` to skip a rebuild for a given commit.
+  RULES FOR CODEX: do not commit `graphify-out/` (it is intentionally gitignored); do not add any API key to the repo; treat the graph as a read-only navigation aid (it never changes app code). If you rebuild the semantic graph, ask the operator for a transient LLM key — never hardcode one.
+  PROTOCOL: this is now the standard Claude<->Codex coordination/context layer, codified in `AGENTS.md` ("Shared knowledge-graph protocol"). Query the graph instead of grepping; in handoffs, reference graph nodes/communities (so the other agent can `explain`/`affected` them) instead of re-describing code in prose. Graph last refreshed to current state (commit 30bc31ca): 3270 nodes / 8562 edges / 192 communities; all 192 communities are LLM-named (0 placeholders) after a `graphify label . --backend openai` pass. Isolated/external nodes (≤1 connection) legitimately have no community ("Community None" in the vault) — that is expected, not a labeling gap.
 
 2026-06-19 - Codex, agent API capabilities handoff: added `agentApiCapabilities` and exposed it through the global monitoring supervisor. Current implemented/native API providers are GDELT Doc API (no key), Federal Register API (no key), NewsAPI (`NEWSAPI_API_KEY`), Legifrance DILA/PISTE (`LEGIFRANCE_PISTE_CLIENT_ID` + `LEGIFRANCE_PISTE_CLIENT_SECRET`), and Judilibre (`JUDILIBRE_API_KEYID`). Managers now explicitly require API-accelerated monitoring when credentials exist, with honest fallback to RSS/static/scraping when absent. CourtListener/RECAP is documented as a planned future US case-law connector, not active. Operator/user action still needed if we want maximum speed: set `NEWSAPI_API_KEY`; for France official law/case law, set PISTE and Judilibre credentials. Verification: targeted API/supervisor tests, typecheck, lint, and preview build pass.
 
