@@ -5,6 +5,7 @@ import { updateRepository } from "@/agents/ai-regulation/processors/updateReposi
 import { HubOrientation } from "@/components/site/hub-orientation";
 import { HubScrollNav } from "@/components/site/hub-scroll-nav";
 import { LiveLegalIntelligencePanel } from "@/components/site/live-legal-intelligence-panel";
+import { MotionStagger, MotionStaggerItem } from "@/components/site/motion-stagger";
 import { SectionHeading } from "@/components/site/section-heading";
 import { UsAiTimeline } from "@/components/site/us-ai-timeline";
 import { SiteShell } from "@/components/site/shell";
@@ -93,17 +94,16 @@ export default async function UnitedStatesAiRegulationPage() {
         </div>
 
         {/* Compact focus cards */}
-        <div className="grid gap-3 sm:grid-cols-3">
+        <MotionStagger className="grid gap-3 sm:grid-cols-3" stagger={0.08}>
           {unitedStatesFocusCards.map((card) => (
-            <div
-              key={card.title}
-              className="rounded-[1.5rem] border border-black/6 bg-white/80 p-4 shadow-sm"
-            >
-              <p className="font-mono text-[9px] uppercase tracking-[0.24em] text-zinc-500">{card.title}</p>
-              <p className="mt-2 text-sm leading-6 text-zinc-700">{card.body}</p>
-            </div>
+            <MotionStaggerItem key={card.title}>
+              <div className="rounded-[1.5rem] border border-black/6 bg-white/80 p-4 shadow-sm transition duration-300 hover:-translate-y-0.5 hover:shadow-md">
+                <p className="font-mono text-[9px] uppercase tracking-[0.24em] text-zinc-500">{card.title}</p>
+                <p className="mt-2 text-sm leading-6 text-zinc-700">{card.body}</p>
+              </div>
+            </MotionStaggerItem>
           ))}
-        </div>
+        </MotionStagger>
       </section>
 
       <HubScrollNav
@@ -148,32 +148,31 @@ export default async function UnitedStatesAiRegulationPage() {
           title="Federal AI legal architecture"
           description="Verified federal rulemaking, agency, and standards baseline."
         />
-        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+        <MotionStagger className="grid gap-4 md:grid-cols-2 xl:grid-cols-3" stagger={0.07}>
           {usFederalBaselineEntries.slice(0, 6).map((entry) => (
-            <Card
-              key={entry.id}
-              className="rounded-[1.8rem] border-black/6 bg-white shadow-[0_14px_40px_rgba(15,15,15,0.04)]"
-            >
-              <CardContent className="space-y-3 p-6">
-                <p className="font-display text-2xl font-medium uppercase tracking-[-0.05em] text-zinc-950">
-                  {entry.shortTitle}
-                </p>
-                <p className="font-mono text-[11px] uppercase tracking-[0.24em] text-zinc-500">
-                  {entry.authorityType.replaceAll("_", " ")} / {entry.bindingStatus.replaceAll("_", " ")}
-                </p>
-                <p className="text-sm leading-7 text-zinc-700">{entry.summary}</p>
-                <a
-                  href={entry.officialSourceUrl}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="text-sm uppercase tracking-[0.16em] text-zinc-900 underline decoration-black/15 underline-offset-4"
-                >
-                  Official source
-                </a>
-              </CardContent>
-            </Card>
+            <MotionStaggerItem key={entry.id}>
+              <Card className="rounded-[1.8rem] border-black/6 bg-white shadow-[0_14px_40px_rgba(15,15,15,0.04)] transition duration-300 hover:-translate-y-0.5 hover:shadow-[0_20px_50px_rgba(15,15,15,0.07)]">
+                <CardContent className="space-y-3 p-6">
+                  <p className="font-display text-2xl font-medium uppercase tracking-[-0.05em] text-zinc-950">
+                    {entry.shortTitle}
+                  </p>
+                  <p className="font-mono text-[11px] uppercase tracking-[0.24em] text-zinc-500">
+                    {entry.authorityType.replaceAll("_", " ")} / {entry.bindingStatus.replaceAll("_", " ")}
+                  </p>
+                  <p className="text-sm leading-7 text-zinc-700">{entry.summary}</p>
+                  <a
+                    href={entry.officialSourceUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="text-sm uppercase tracking-[0.16em] text-zinc-900 underline decoration-black/15 underline-offset-4"
+                  >
+                    Official source
+                  </a>
+                </CardContent>
+              </Card>
+            </MotionStaggerItem>
           ))}
-        </div>
+        </MotionStagger>
       </section>
 
       <section id="timeline" className="scroll-mt-28 space-y-6">
@@ -234,30 +233,29 @@ export default async function UnitedStatesAiRegulationPage() {
           title="First-wave state profiles"
           description="First pass: CA, CO, NY, IL, TX, CT, UT, VA, WA, MD."
         />
-        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+        <MotionStagger className="grid gap-4 md:grid-cols-2 xl:grid-cols-3" stagger={0.07}>
           {priorityStates.map((profile) => (
-            <Card
-              key={profile.slug}
-              className="rounded-[1.8rem] border-black/6 bg-white shadow-[0_14px_40px_rgba(15,15,15,0.04)]"
-            >
-              <CardContent className="space-y-3 p-6">
-                <p className="font-display text-2xl font-medium uppercase tracking-[-0.05em] text-zinc-950">
-                  {profile.stateName}
-                </p>
-                <p className="font-mono text-[11px] uppercase tracking-[0.24em] text-zinc-500">
-                  {profile.aiLawStatusLabel} / confidence {profile.confidenceLevel}
-                </p>
-                <p className="text-sm leading-7 text-zinc-700">{profile.publicSummary}</p>
-                <Link
-                  href={`/ai-regulation/united-states/${profile.slug}`}
-                  className="inline-block text-sm uppercase tracking-[0.16em] text-zinc-900 underline decoration-black/15 underline-offset-4"
-                >
-                  Open state profile
-                </Link>
-              </CardContent>
-            </Card>
+            <MotionStaggerItem key={profile.slug}>
+              <Card className="rounded-[1.8rem] border-black/6 bg-white shadow-[0_14px_40px_rgba(15,15,15,0.04)] transition duration-300 hover:-translate-y-0.5 hover:shadow-[0_20px_50px_rgba(15,15,15,0.07)]">
+                <CardContent className="space-y-3 p-6">
+                  <p className="font-display text-2xl font-medium uppercase tracking-[-0.05em] text-zinc-950">
+                    {profile.stateName}
+                  </p>
+                  <p className="font-mono text-[11px] uppercase tracking-[0.24em] text-zinc-500">
+                    {profile.aiLawStatusLabel} / confidence {profile.confidenceLevel}
+                  </p>
+                  <p className="text-sm leading-7 text-zinc-700">{profile.publicSummary}</p>
+                  <Link
+                    href={`/ai-regulation/united-states/${profile.slug}`}
+                    className="inline-block text-sm uppercase tracking-[0.16em] text-zinc-900 underline decoration-black/15 underline-offset-4"
+                  >
+                    Open state profile
+                  </Link>
+                </CardContent>
+              </Card>
+            </MotionStaggerItem>
           ))}
-        </div>
+        </MotionStagger>
       </section>
 
       <section id="governance" className="scroll-mt-28 grid gap-6 lg:grid-cols-[1fr_1fr]">
