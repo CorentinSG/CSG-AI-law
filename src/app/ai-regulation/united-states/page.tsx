@@ -30,6 +30,7 @@ import {
 import { normalizeNewsItemRecord } from "@/content/ai-regulation/news";
 import { usStateMapStatuses } from "@/content/ai-regulation/us-map";
 import { getPriorityUsStateProfiles } from "@/content/ai-regulation/us-state-ai-law-baseline";
+import { getUsGeoPaths } from "@/lib/geo-paths";
 
 export const metadata: Metadata = {
   title: "United States Hub",
@@ -196,7 +197,7 @@ export default async function UnitedStatesAiRegulationPage() {
         />
         <Card className="rounded-[2rem] border-black/6 bg-white/70 shadow-[0_18px_50px_rgba(15,15,15,0.05)]">
           <CardContent className="space-y-6 p-6 md:p-8">
-            <UsImplementationMap states={usStateMapStatuses} />
+            <UsImplementationMap states={usStateMapStatuses} paths={getUsGeoPaths()} />
             <div className="grid gap-3 md:grid-cols-3">
               <div className="rounded-[1.3rem] border border-black/6 bg-zinc-50 p-4 text-sm text-zinc-600">
                 <p className="font-mono text-[11px] uppercase tracking-[0.26em] text-zinc-500">

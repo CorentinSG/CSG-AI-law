@@ -26,6 +26,7 @@ import { getPriorityEuropeCountryProfiles } from "@/content/ai-regulation/europe
 import { euAiTimelineEntries } from "@/content/ai-regulation/eu-timeline";
 import { europeCountryStatuses } from "@/content/ai-regulation/europe-map";
 import { getSourceVerificationRecordsForHub } from "@/content/ai-regulation/source-verification";
+import { getEuropeGeoPaths } from "@/lib/geo-paths";
 
 export const metadata: Metadata = {
   title: "Europe Hub",
@@ -414,7 +415,7 @@ export default async function EuropeAiRegulationPage() {
         />
         <Card className="rounded-[2rem] border-black/6 bg-white/70 shadow-[0_18px_50px_rgba(15,15,15,0.05)]">
           <CardContent className="space-y-6 p-6 md:p-8">
-            <EuropeImplementationMap countries={europeCountryStatuses} />
+            <EuropeImplementationMap countries={europeCountryStatuses} paths={getEuropeGeoPaths()} />
             <div className="grid gap-3 md:grid-cols-3">
               <div className="rounded-[1.3rem] border border-black/6 bg-zinc-50 p-4 text-sm text-zinc-600">
                 <p className="flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.26em] text-zinc-500">
