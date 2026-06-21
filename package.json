@@ -63,9 +63,11 @@
   "dependencies": {
     "@mendable/firecrawl-js": "^4.25.2",
     "@supabase/supabase-js": "^2.106.1",
+    "@types/d3-geo": "^3.1.0",
     "@types/topojson-client": "^3.1.5",
     "cheerio": "^1.2.0",
     "clsx": "^2.1.1",
+    "d3-geo": "^3.1.1",
     "dotenv": "^17.4.2",
     "embla-carousel-react": "^8.6.0",
     "framer-motion": "^12.40.0",
