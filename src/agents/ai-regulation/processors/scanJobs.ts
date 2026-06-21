@@ -326,6 +326,7 @@ export async function queueScanJob(input: {
   trigger: ScanTrigger;
   requestedBy: string;
   scanProfile?: ScanProfileId;
+  resultSummary?: Record<string, unknown>;
 }) {
   return updateRepository.createScanJob({
     sourceId: input.sourceId ?? null,
@@ -334,7 +335,10 @@ export async function queueScanJob(input: {
     status: "queued",
     startedAt: null,
     finishedAt: null,
-    resultSummary: input.scanProfile ? { scanProfile: input.scanProfile } : {},
+    resultSummary: {
+      ...(input.resultSummary ?? {}),
+      ...(input.scanProfile ? { scanProfile: input.scanProfile } : {}),
+    },
     errorMessage: null,
   });
 }
