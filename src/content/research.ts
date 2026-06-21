@@ -38,6 +38,7 @@ export type ResearchEntry = {
   readingTime: string;
   summary: string;
   abstract: string;
+  image?: string;
   publishedAt?: string;
   updatedAt?: string;
   featured?: boolean;
@@ -46,9 +47,11 @@ export type ResearchEntry = {
   references?: ResearchReference[];
 };
 
-const author = "Corentin Saint-Girons";
+export const researchEntries: ResearchEntry[] = [];
 
-export const researchEntries: ResearchEntry[] = [
+// --- ARCHIVE : entrées retirées temporairement, à republier avec contenu rédigé ---
+const author = "Corentin Saint-Girons";
+const _archivedEntries: ResearchEntry[] = [
   {
     slug: "emerging-architecture-ai-regulation",
     title: "The Emerging Architecture of AI Regulation",
@@ -327,6 +330,8 @@ export const researchEntries: ResearchEntry[] = [
     ],
   },
 ];
+void _archivedEntries;
+// --- FIN ARCHIVE ---
 
 export const researchCategories: ResearchCategory[] = [
   "AI Regulation",
