@@ -7,6 +7,11 @@ import { z } from "zod";
 
 import { reviewWorkflow } from "@/agents/ai-regulation/processors/reviewWorkflow";
 import {
+  batchReviewTargetStatuses,
+  batchTransitionReviewStatus,
+  type BatchReviewTargetStatus,
+} from "@/lib/admin-review-batch";
+import {
   queueAndDrainScanJob,
   recoverStaleRunningScanJobs,
   processNextQueuedScanJob,
@@ -78,6 +83,33 @@ export async function updateReviewStatus(formData: FormData) {
   await reviewWorkflow.transition(updateId, status);
   revalidatePath("/admin/ai-regulation");
   revalidatePath(`/admin/ai-regulation/${updateId}`);
+  revalidatePath("/ai-regulation");
+}
+
+// Bulk review (P2): apply one transition to many selected updates in a single
+// submit, draining the needs_review backlog faster than one-by-one. Delegates
+// to Codex's canonical `batchTransitionReviewStatus` (dedup, 100 cap, reviewer
+// stamp, per-item error isolation) so prioritization/transition logic lives in
+// one place.
+export async function bulkUpdateReviewStatus(formData: FormData) {
+  await assertAdminServerActionAccess();
+  const status = String(formData.get("status") ?? "");
+  if (!batchReviewTargetStatuses.includes(status as BatchReviewTargetStatus)) {
+    return;
+  }
+  const ids = formData
+    .getAll("updateId")
+    .map((value) => String(value))
+    .filter((value) => value.length > 0);
+  if (ids.length === 0) return;
+
+  await batchTransitionReviewStatus({
+    ids,
+    targetStatus: status as BatchReviewTargetStatus,
+  });
+
+  revalidatePath("/admin/ai-regulation");
+  revalidatePath("/admin/ai-regulation/review");
   revalidatePath("/ai-regulation");
 }
 

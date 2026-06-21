@@ -177,8 +177,20 @@ export default async function AdminAiRegulationPage({
           as <strong>needs_review</strong> and cannot be published until approved.
         </p>
         <Link
-          href="/admin/ai-regulation/data-quality"
+          href="/admin"
           className="inline-flex rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-zinc-100 transition hover:bg-white/10"
+        >
+          ← Site dashboard
+        </Link>
+        <Link
+          href="/admin/ai-regulation/legal-database"
+          className="ml-3 inline-flex rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-zinc-100 transition hover:bg-white/10"
+        >
+          Open legal database
+        </Link>
+        <Link
+          href="/admin/ai-regulation/data-quality"
+          className="ml-3 inline-flex rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-zinc-100 transition hover:bg-white/10"
         >
           Open data governance dashboard
         </Link>

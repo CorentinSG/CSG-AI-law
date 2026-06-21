@@ -29,6 +29,7 @@ import {
   getEuropeCountryProfiles,
 } from "@/content/ai-regulation/europe-country-profiles";
 import { BreadcrumbNav } from "@/components/site/breadcrumb-nav";
+import { HubScrollNav } from "@/components/site/hub-scroll-nav";
 import { ImplementationProgressBar } from "@/components/site/implementation-progress-bar";
 import { ConfidenceBadge, ImplementationBadge } from "@/components/site/legal-status-badge";
 import { MotionReveal } from "@/components/site/motion-reveal";
@@ -240,7 +241,7 @@ export default async function EuropeCountryPage({
 
   return (
     <SiteShell className="space-y-10">
-      <section className="space-y-5">
+      <section id="overview" className="scroll-mt-28 space-y-5">
         <MotionReveal>
         <BreadcrumbNav
           items={[
@@ -337,6 +338,21 @@ export default async function EuropeCountryPage({
           </MotionStaggerItem>
         </MotionStagger>
       </section>
+
+      <HubScrollNav
+        sections={[
+          { id: "overview", label: "Overview" },
+          { id: "intel", label: "Intelligence" },
+          { id: "implementation", label: "Implementation" },
+          { id: "sources", label: "Sources" },
+          { id: "references", label: "References" },
+          { id: "notes", label: "Notes" },
+          { id: "published", label: "Published" },
+        ]}
+      />
+
+      {/* Jump target for the country-specific intelligence zone below. */}
+      <div id="intel" aria-hidden className="-mt-6 scroll-mt-28" />
 
       {profile.slug === "germany" && germanyLiveData ? (
         <section className="space-y-6">
@@ -2654,7 +2670,7 @@ export default async function EuropeCountryPage({
         </section>
       ) : null}
 
-      <section className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
+      <section id="implementation" className="scroll-mt-28 grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
         <Card className="rounded-[1.9rem] border-black/6 bg-white shadow-[0_18px_50px_rgba(15,15,15,0.04)]">
           <CardHeader>
             <CardTitle>AI Act implementation notes</CardTitle>
@@ -2750,7 +2766,7 @@ export default async function EuropeCountryPage({
         </Card>
       </section>
 
-      <section className="grid gap-6 lg:grid-cols-3">
+      <section id="sources" className="scroll-mt-28 grid gap-6 lg:grid-cols-3">
         <SourceList
           title="National AI regulation sources"
           items={nationalAIRegulationSources}
@@ -2768,7 +2784,7 @@ export default async function EuropeCountryPage({
         />
       </section>
 
-      <section className="space-y-6">
+      <section id="references" className="scroll-mt-28 space-y-6">
         <SectionHeading
           eyebrow="Precise citations"
           title="Official source references"
@@ -2844,7 +2860,7 @@ export default async function EuropeCountryPage({
         </Card>
       </section>
 
-      <section className="grid gap-6 lg:grid-cols-[1fr_1fr]">
+      <section id="notes" className="scroll-mt-28 grid gap-6 lg:grid-cols-[1fr_1fr]">
         <Card className="rounded-[1.9rem] border-black/6 bg-white shadow-[0_18px_50px_rgba(15,15,15,0.04)]">
           <CardHeader>
             <CardTitle>Country notes</CardTitle>
@@ -2906,7 +2922,7 @@ export default async function EuropeCountryPage({
         </Card>
       </section>
 
-      <section className="space-y-6">
+      <section id="published" className="scroll-mt-28 space-y-6">
         <SectionHeading
           eyebrow="Published monitor items"
           title={`Latest published entries for ${profile.countryName}`}
