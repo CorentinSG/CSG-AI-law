@@ -80,6 +80,17 @@ This section supersedes any older blanket "human review before publication" word
 - Never run destructive database, deployment, or filesystem commands without explicit user approval.
 - Never alter production configuration unless explicitly instructed.
 
+## Shared knowledge-graph protocol (Graphify + Obsidian)
+
+This is the default coordination and context layer between Claude Code and Codex. Its purpose is token economy: query the compressed graph instead of grepping raw files, and reference graph nodes in handoffs instead of re-describing code in prose. Local to this machine only (the graph is gitignored); both agents run on the same checkout.
+
+- **Read the graph before exploring code.** Start any non-trivial task by reading `graphify-out/GRAPH_REPORT.md` (god nodes, named communities, import cycles), then narrow with the read commands below. Do not grep/glob the whole repo when the graph can answer — reserve raw search for exact-pattern needs or files newer than the last graph build.
+- **Read commands (free, no API key):** `graphify query "<question>"`, `graphify explain "<Node>"`, `graphify path "A" "B"`, `graphify affected "<Node>"` (run before any refactor to see the blast radius). Invoke via `py -m graphify <cmd>` if `graphify` is not on PATH.
+- **Reference nodes, not prose.** In `AI_TASKS.md` handoffs and `DECISIONS.md` entries, name the graph nodes/communities you touched (e.g. `getRepositoryMode()`, community "Scan Job Management") so the other agent can `explain`/`affected` them instead of re-reading files. This keeps handoffs short and cheap to act on.
+- **Obsidian vault** (`graphify-out/obsidian/`) is the human/visual view of the same graph — one note per node with `[[wikilinks]]`, community tags, and a colored graph view. Open the folder as a vault in Obsidian to navigate visually. Regenerate with `py -m graphify export obsidian` (no LLM).
+- **Freshness is automatic.** A git post-commit hook rebuilds `graph.json` (AST-only, async, no cost) and regenerates the Obsidian vault; post-checkout rebuilds too. The vault may trail by one commit — acceptable. Community **renaming** needs an LLM (`graphify cluster-only . --backend openai`) and is NOT automatic; rerun it manually after large refactors if cluster names drift. `GRAPHIFY_SKIP_HOOK=1` skips a rebuild.
+- **Rules:** never commit `graphify-out/` (gitignored on purpose); never put an API key in the repo — a semantic rebuild uses a transient key supplied by the operator at run time; treat the graph as read-only navigation, it never changes app code.
+
 ## Claude Code + Codex collaboration rules
 
 - Claude Code generally owns: frontend structure, UX, high-level architecture, product flow, large refactors.
@@ -90,3 +101,39 @@ This section supersedes any older blanket "human review before publication" word
 - Prefer small, reviewable patches.
 - Record major architectural decisions in `DECISIONS.md` (max 8 lines each).
 - At the end of any work, summarize changed files, tests run, and remaining risks.
+
+## Coordination protocol (how the two agents stay in sync)
+
+Two separate layers — never mix them. **Code context** = the Graphify graph + Obsidian vault (read-only, navigation, token-cheap). **Project progress** = `AI_TASKS.md` (the single source of truth for who-does-what/status) + `DECISIONS.md` (standing decisions). Do not record progress inside the graph, and do not re-describe code structure in `AI_TASKS.md` when a graph node reference will do.
+
+### Sync ritual — run at the START of every session (≈30s, before touching anything)
+0. One-command version: run `pwsh -File agent-sync.ps1` (or `powershell -File agent-sync.ps1`) from the repo root — it does steps 1–2 for you (checks graph freshness, auto-refreshes the AST graph if stale, prints the Status board, and reminds you of the handoff format). Steps 1–2 below are the manual fallback.
+1. `git rev-parse --short HEAD` → compare to the "Built from commit" line in `graphify-out/GRAPH_REPORT.md`. If they differ, the graph is stale: run `py -m graphify update .` (free) before relying on it.
+2. Read the **Status board** at the top of `AI_TASKS.md` — see open tasks, their owner, and locked files. Do not start work that another agent has `CLAIMED`/`WIP` unless the user reassigns it.
+3. For the area you will touch, query the graph (`explain`/`affected`/`path`) instead of grepping.
+
+### Handoff — at the END of every unit of work (mandatory, no exceptions)
+1. Update **only your own row(s)** in the Status board (status + branch + date).
+2. Add ONE new entry at the top of the `## Current status` log, using the **Handoff entry format** below. Append-only: never edit or delete the other agent's entries.
+3. Run the verification sequence and record the result in the entry.
+
+### Handoff entry format (fixed fields, in this order)
+```
+YYYY-MM-DD · <Agent> · <TASK-ID> · <STATUS>
+- Intent: one line — what and why
+- Files: paths changed (or "none")
+- Graph anchors: exact node/community labels the other agent can `explain`/`affected`
+- Verification: test / lint / typecheck / build results (or why not run)
+- Branch/commit: <branch> @ <short-sha>
+- Next: who owns the next step, or blockers (be explicit)
+```
+
+### Status vocabulary (closed set — use these words exactly)
+`CLAIMED` (scope reserved, not started) · `WIP` (in progress, working tree) · `BLOCKED` (waiting on something — name it) · `REVIEW` (done locally, awaiting verification/PR) · `DONE-LOCAL` (committed to a branch, not merged) · `MERGED` (in main) · `HANDOFF→<agent>` (explicitly passing the baton).
+
+### Golden rules (these make communication unambiguous)
+- One source of truth per fact: progress lives in `AI_TASKS.md`, decisions in `DECISIONS.md`, code structure in the graph. Never duplicate a fact across them.
+- Append-only + own-rows-only: you may only change entries/rows you authored.
+- Always cite graph nodes by their exact label; if a node does not exist yet (brand-new code), say so and rebuild the graph.
+- If you could not run the graph or verification, state it explicitly — silence reads as "done".
+- `HANDOFF→` is the only way to pass work; an unstated assumption that the other agent will pick something up does not count.
