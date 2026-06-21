@@ -50,6 +50,7 @@
     "scan:verification": "tsx scripts/run-verification-scan.ts",
     "scan:drain-queue": "tsx scripts/run-scan-job-drain.ts",
     "scan:worker-local": "tsx scripts/run-scan-job-worker.ts",
+    "worker:scan": "tsx scripts/run-scan-job-worker.ts",
     "scan:worker-stop": "tsx scripts/run-scan-job-worker-stop.ts",
     "scan:scheduled-test": "tsx scripts/run-scheduled-scan-test.ts",
     "scan:sample:ai-test": "tsx scripts/run-ai-smoke-test.ts",
@@ -73,6 +74,7 @@
     "react-dom": "19.2.4",
     "rss-parser": "^3.13.0",
     "tailwind-merge": "^3.6.0",
+    "tsx": "^4.22.3",
     "zod": "^4.4.3"
   },
   "devDependencies": {
@@ -86,7 +88,6 @@
     "eslint": "^9",
     "eslint-config-next": "16.2.6",
     "tailwindcss": "^4",
-    "tsx": "^4.22.3",
     "typescript": "^5",
     "vite-tsconfig-paths": "^6.1.1",
     "vitest": "^4.1.7"

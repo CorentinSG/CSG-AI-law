@@ -21,6 +21,7 @@ Each agent edits only its own rows. Status vocabulary: `CLAIMED` · `WIP` · `BL
 | T-COURTLISTENER-CONNECTOR (P3a) | Codex | DONE-LOCAL | `ops/t-ops9-ux` @ `155bc08` | `src/agents/ai-regulation/connectors/api-connector.ts`, `src/lib/env.ts`, `src/agents/ai-regulation/agentApiCapabilities.ts`, tests | `ApiConnector`, `listAgentApiCapabilities()`, community "API Connectors and Legal Docs", community "Agent API Capabilities" | 2026-06-21 |
 | T-LEGAL-DATA-HUNTER-CONNECTOR (P3b) | Codex | DONE-LOCAL | `ops/t-ops9-ux` @ `f78c9e4` | `src/agents/ai-regulation/connectors/api-connector.ts`, `src/lib/env.ts`, `src/agents/ai-regulation/agentApiCapabilities.ts`, tests | `ApiConnector`, `listAgentApiCapabilities()`, community "API Connectors and Legal Docs", community "Agent API Capabilities" | 2026-06-21 |
 | T-CENTRAL-SCHEDULER (P4) | Codex | DONE-LOCAL | `ops/t-ops9-ux` @ `c8af9d4` | `src/agents/ai-regulation/scheduler/**`, `src/app/api/cron/ai-regulation-central-scheduler/**`, `src/agents/ai-regulation/processors/scanJobs.ts` | `buildCentralMonitoringSchedule()`, `enqueueCentralMonitoringSchedule()`, `queueScanJob()`, community "Scheduler Implementation", community "Scan Job Management" | 2026-06-21 |
+| T-WORKER-RAILWAY (P0) | Codex | BLOCKED | `ops/t-ops9-ux` @ working tree | `package.json`, `package-lock.json`, `railway.json` | `drainQueuedScanJobs()`, `createScanWorkerConfig()`, community "Scan Job Management" | 2026-06-21 |
 | T-BATCH-REVIEW-UI (P2b) | Claude Code | DONE-LOCAL | `ops/t-ops9-ux` @ `0f2809d` | `src/app/admin/ai-regulation/review/**`, `src/app/admin/ai-regulation/actions.ts`, `src/app/admin/page.tsx` | `listPrioritizedReviewQueue()`, `batchTransitionReviewStatus()`, `bulkUpdateReviewStatus`, community "Admin Review and Summaries" | 2026-06-21 |
 | T-BUILD-FIX | Claude Code | DONE-LOCAL | `ops/t-ops9-ux` @ `bf0d746` | `src/app/page.tsx`, `src/components/site/update-card.tsx` | `UpdateCard`, community "UI Components and Visual Elements" | 2026-06-21 |
 | T-E2E (P6) | Claude Code | DONE-LOCAL | `ops/t-ops9-ux` @ `aa0346c` | `playwright.config.ts`, `e2e/**`, `vitest.config.ts`, `package.json`, `.gitignore` | n/a (test harness) | 2026-06-21 |
@@ -42,6 +43,14 @@ YYYY-MM-DD · <Agent> · <TASK-ID> · <STATUS>
 ```
 
 ## Current status
+
+2026-06-21 · Codex · T-WORKER-RAILWAY (P0) · BLOCKED
+- Intent:        Prepare the permanent scan worker for Railway deployment and verify the live blockers before infra cutover.
+- Files:         `package.json`, `package-lock.json`, `railway.json`, `AI_TASKS.md`.
+- Graph anchors: `drainQueuedScanJobs()`, `createScanWorkerConfig()`, `buildHealthSnapshot()`, community "Scan Job Management", community "Source Runtime Health".
+- Verification:  `agent-sync.ps1` PASS · live Supabase check found `public.scan_jobs` missing (`Could not find the table 'public.scan_jobs' in the schema cache`) · `npm run typecheck` PASS · `npm test -- src/agents/ai-regulation/processors/scanJobs.test.ts src/lib/health.test.ts src/lib/admin-operations-summary.test.ts` PASS.
+- Branch/commit: `ops/t-ops9-ux` @ working tree
+- Next:          Operator/Codex must apply the operational jobs migration (`src/db/migrations/004_operational_jobs_and_news.sql`) to Supabase prod before a permanent worker can persist queue state. Operator must also authenticate/provision Railway or Fly; current machine has no `railway`, `fly`, or `supabase` CLI session. Once provisioned, Railway can start with `npm run worker:scan`, and Vercel must receive `SCAN_JOB_ROUTE_ENQUEUE_ONLY=true`.
 
 2026-06-21 · Codex → Claude Code · COORD-COMMIT · HANDOFF→Claude
 - Intent:        Coordination reply to Claude's `COORD-COMMIT` handoff: avoid stepping on shared docs/config while closing the branch cleanly.
