@@ -102,13 +102,39 @@ interface CourtListenerSearchResponse {
   results?: CourtListenerCluster[];
 }
 
+interface LegalDataHunterResult {
+  id?: string | number | null;
+  title?: string | null;
+  name?: string | null;
+  url?: string | null;
+  href?: string | null;
+  text?: string | null;
+  summary?: string | null;
+  excerpt?: string | null;
+  publicationDate?: string | null;
+  publication_date?: string | null;
+  date?: string | null;
+  jurisdiction?: string | null;
+  authorityType?: string | null;
+  authority_type?: string | null;
+  sourceType?: string | null;
+  source_type?: string | null;
+}
+
+interface LegalDataHunterResponse {
+  items?: LegalDataHunterResult[];
+  results?: LegalDataHunterResult[];
+  documents?: LegalDataHunterResult[];
+}
+
 type ApiProvider =
   | "federal_register"
   | "newsapi"
   | "gdelt"
   | "judilibre"
   | "legifrance"
-  | "courtlistener";
+  | "courtlistener"
+  | "legal_data_hunter";
 
 const PISTE_OAUTH_TOKEN_URL = "https://oauth.piste.gouv.fr/api/oauth/token";
 
@@ -173,7 +199,8 @@ function getApiProvider(source: RegulationSource): ApiProvider {
     configured === "gdelt" ||
     configured === "judilibre" ||
     configured === "legifrance" ||
-    configured === "courtlistener"
+    configured === "courtlistener" ||
+    configured === "legal_data_hunter"
   ) {
     return configured;
   }
@@ -860,6 +887,108 @@ async function scanCourtListener(source: RegulationSource): Promise<ConnectorSca
   };
 }
 
+function getLegalDataHunterEndpoint() {
+  return env.LEGAL_DATA_HUNTER_MCP_URL ?? env.LEGAL_RESEARCH_MCP_URL ?? null;
+}
+
+function getLegalDataHunterQuery(source: RegulationSource) {
+  const configured = source.config?.query ?? source.config?.searchText;
+  if (typeof configured === "string" && configured.trim().length > 0) {
+    return configured.trim();
+  }
+  return "artificial intelligence OR AI regulation OR automated decision-making";
+}
+
+async function scanLegalDataHunter(source: RegulationSource): Promise<ConnectorScanResult> {
+  const endpoint = getLegalDataHunterEndpoint();
+  if (!endpoint) {
+    return buildMissingCredentialResult(
+      "LEGAL_DATA_HUNTER_MCP_URL or LEGAL_RESEARCH_MCP_URL is not configured, so Legal Data Hunter / legal-research cannot be queried from this runtime.",
+    );
+  }
+
+  let response: Response;
+  let json: unknown;
+  try {
+    const headers: HeadersInit = {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    };
+    if (env.LEGAL_DATA_HUNTER_API_KEY) {
+      headers.Authorization = `Bearer ${env.LEGAL_DATA_HUNTER_API_KEY}`;
+    }
+
+    response = await fetch(endpoint, {
+      method: "POST",
+      headers,
+      body: JSON.stringify({
+        tool: "legal-research",
+        action: "search",
+        query: getLegalDataHunterQuery(source),
+        jurisdiction: source.jurisdiction,
+        region: source.region,
+        country: source.country,
+        maxItems: getMaxItems(source),
+        sourceId: source.id,
+      }),
+      next: { revalidate: 0 },
+    });
+
+    if (!response.ok) {
+      throw new Error(`Legal Data Hunter MCP request failed with ${response.status}`);
+    }
+    json = (await response.json()) as unknown;
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Legal Data Hunter MCP request failed";
+    return buildNonFatalApiConstraintResult(
+      `Legal Data Hunter / legal-research could not be queried safely in this run: ${message}`,
+    );
+  }
+
+  const payload = json as LegalDataHunterResponse;
+  const results = (payload.items ?? payload.results ?? payload.documents ?? []).slice(
+    0,
+    getMaxItems(source),
+  );
+  const items = results
+    .map((result) => {
+      const title = result.title ?? result.name;
+      const url = result.url ?? result.href;
+      if (!title || !url) return null;
+      return buildCandidate(source, {
+        title,
+        url,
+        text: [result.summary, result.excerpt, result.text, title].filter(Boolean).join(" "),
+        publicationDate: result.publicationDate ?? result.publication_date ?? result.date ?? null,
+        externalId: result.id ? String(result.id) : url,
+        metadata: {
+          provider: "legal_data_hunter",
+          upstreamJurisdiction: result.jurisdiction ?? null,
+          authorityType: result.authorityType ?? result.authority_type ?? null,
+          sourceType: result.sourceType ?? result.source_type ?? null,
+        },
+      });
+    })
+    .filter((item): item is ExtractedCandidateItem => item !== null);
+
+  return {
+    items,
+    errors: [],
+    warnings:
+      items.length === 0
+        ? ["Legal Data Hunter / legal-research responded successfully but returned zero usable legal results."]
+        : [
+            "Legal Data Hunter / legal-research results are accelerated legal discovery data; official-source and citation safeguards still apply before publication.",
+          ],
+    responseStatus: response.status,
+    itemsFetched: items.length,
+    zeroResultsReason:
+      items.length === 0
+        ? "The Legal Data Hunter / legal-research response returned zero usable legal results."
+        : null,
+  };
+}
+
 export class ApiConnector implements SourceConnector {
   async scan(source: RegulationSource): Promise<ConnectorScanResult> {
     const provider = getApiProvider(source);
@@ -875,6 +1004,8 @@ export class ApiConnector implements SourceConnector {
         return scanLegifrance(source);
       case "courtlistener":
         return scanCourtListener(source);
+      case "legal_data_hunter":
+        return scanLegalDataHunter(source);
       case "federal_register":
       default:
         return scanFederalRegister(source);

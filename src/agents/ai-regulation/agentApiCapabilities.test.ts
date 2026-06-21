@@ -48,7 +48,7 @@ describe("agent API capabilities", () => {
         expect.objectContaining({
           id: "legal-data-hunter",
           status: "needs_user_setup",
-          envVars: ["LEGAL_DATA_HUNTER_MCP_URL", "LEGAL_DATA_HUNTER_API_KEY"],
+          envVars: ["LEGAL_DATA_HUNTER_MCP_URL", "LEGAL_DATA_HUNTER_API_KEY", "LEGAL_RESEARCH_MCP_URL"],
         }),
         expect.objectContaining({
           id: "courtlistener-recap",

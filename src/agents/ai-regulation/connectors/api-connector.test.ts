@@ -31,6 +31,9 @@ afterEach(() => {
   delete process.env.NEWSAPI_API_KEY;
   delete process.env.JUDILIBRE_API_KEYID;
   delete process.env.COURTLISTENER_API_KEY;
+  delete process.env.LEGAL_DATA_HUNTER_MCP_URL;
+  delete process.env.LEGAL_DATA_HUNTER_API_KEY;
+  delete process.env.LEGAL_RESEARCH_MCP_URL;
   delete process.env.LEGIFRANCE_PISTE_CLIENT_ID;
   delete process.env.LEGIFRANCE_PISTE_CLIENT_SECRET;
   process.env.ADMIN_AUTH_SECRET = "test-admin-secret-1234567890";
@@ -414,5 +417,83 @@ describe("ApiConnector", () => {
     );
     expect(result.items[0]?.metadata?.provider).toBe("courtlistener");
     expect(result.items[0]?.metadata?.docketId).toBe(456);
+  });
+
+  it("degrades honestly when Legal Data Hunter MCP endpoint is missing", async () => {
+    const connector = new ApiConnector();
+    const result = await connector.scan(
+      makeSource({
+        id: "src-global-legal-data-hunter",
+        name: "Legal Data Hunter global search",
+        jurisdiction: "European Union",
+        region: "Global",
+        country: "European Union",
+        sourceUrl: "https://legal-data-hunter.example/mcp",
+        config: { apiProvider: "legal_data_hunter" },
+        sourceType: "API",
+      }),
+    );
+
+    expect(result.items).toHaveLength(0);
+    expect(result.errors).toHaveLength(0);
+    expect(result.zeroResultsReason).toContain("LEGAL_DATA_HUNTER_MCP_URL");
+  });
+
+  it("posts legal-research requests to Legal Data Hunter and maps results", async () => {
+    process.env.LEGAL_DATA_HUNTER_MCP_URL = "https://legal-data-hunter.example/mcp";
+    process.env.LEGAL_DATA_HUNTER_API_KEY = "hunter-token";
+    resetEnvForTests();
+    const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue(
+      new Response(
+        JSON.stringify({
+          results: [
+            {
+              id: "ldh-1",
+              title: "AI governance statute update",
+              url: "https://official.example/legal/ai-governance",
+              summary: "Official legal update about artificial intelligence governance.",
+              publicationDate: "2026-06-01",
+              jurisdiction: "European Union",
+              authorityType: "Binding law",
+              sourceType: "official_legal_database",
+            },
+          ],
+        }),
+        { status: 200, headers: { "Content-Type": "application/json" } },
+      ) as Response,
+    );
+
+    const connector = new ApiConnector();
+    const result = await connector.scan(
+      makeSource({
+        id: "src-global-legal-data-hunter",
+        name: "Legal Data Hunter global search",
+        jurisdiction: "European Union",
+        region: "Global",
+        country: "European Union",
+        sourceUrl: "https://legal-data-hunter.example/mcp",
+        config: {
+          apiProvider: "legal_data_hunter",
+          query: "AI governance statute",
+          maxItems: 5,
+        },
+        sourceType: "API",
+      }),
+    );
+
+    const [, requestInit] = fetchMock.mock.calls[0] ?? [];
+    expect(requestInit?.method).toBe("POST");
+    expect((requestInit?.headers as Record<string, string>).Authorization).toBe(
+      "Bearer hunter-token",
+    );
+    expect(JSON.parse(String(requestInit?.body))).toMatchObject({
+      tool: "legal-research",
+      action: "search",
+      query: "AI governance statute",
+      maxItems: 5,
+    });
+    expect(result.items).toHaveLength(1);
+    expect(result.items[0]?.metadata?.provider).toBe("legal_data_hunter");
+    expect(result.items[0]?.metadata?.authorityType).toBe("Binding law");
   });
 });

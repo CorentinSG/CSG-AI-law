@@ -52,7 +52,8 @@ export function listAgentApiCapabilities(
       status: legalDataHunterReady ? "available" : "needs_user_setup",
       uses: ["official_legal_database", "case_law_discovery", "legal_news_discovery"],
       regions: ["Europe", "United States", "Global"],
-      envVars: ["LEGAL_DATA_HUNTER_MCP_URL", "LEGAL_DATA_HUNTER_API_KEY"],
+      envVars: ["LEGAL_DATA_HUNTER_MCP_URL", "LEGAL_DATA_HUNTER_API_KEY", "LEGAL_RESEARCH_MCP_URL"],
+      implementedProvider: "legal_data_hunter",
       userAction: legalDataHunterReady
         ? undefined
         : "Expose the Legal Data Hunter MCP or legal-research skill to the runtime, then set LEGAL_DATA_HUNTER_MCP_URL and any required token/API key.",

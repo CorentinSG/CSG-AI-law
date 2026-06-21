@@ -18,6 +18,9 @@ const rawEnvSchema = z.object({
   NEWSAPI_API_KEY: z.string().min(1).optional(),
   JUDILIBRE_API_KEYID: z.string().min(1).optional(),
   COURTLISTENER_API_KEY: z.string().min(1).optional(),
+  LEGAL_DATA_HUNTER_MCP_URL: z.string().url().optional(),
+  LEGAL_DATA_HUNTER_API_KEY: z.string().min(1).optional(),
+  LEGAL_RESEARCH_MCP_URL: z.string().url().optional(),
   // Legifrance via official DILA/PISTE API (T-RT3B). OAuth2 client-credentials
   // pair from PISTE enrollment; when absent the connector degrades honestly.
   LEGIFRANCE_PISTE_CLIENT_ID: z.string().min(1).optional(),
@@ -67,6 +70,9 @@ export interface AppEnv {
   NEWSAPI_API_KEY?: string;
   JUDILIBRE_API_KEYID?: string;
   COURTLISTENER_API_KEY?: string;
+  LEGAL_DATA_HUNTER_MCP_URL?: string;
+  LEGAL_DATA_HUNTER_API_KEY?: string;
+  LEGAL_RESEARCH_MCP_URL?: string;
   /** Legifrance/PISTE OAuth2 client id — enables the official DILA API path (T-RT3B) */
   LEGIFRANCE_PISTE_CLIENT_ID?: string;
   /** Legifrance/PISTE OAuth2 client secret — required alongside the client id (T-RT3B) */
@@ -117,6 +123,9 @@ function buildEnv(): AppEnv {
     NEWSAPI_API_KEY: process.env.NEWSAPI_API_KEY,
     JUDILIBRE_API_KEYID: process.env.JUDILIBRE_API_KEYID,
     COURTLISTENER_API_KEY: process.env.COURTLISTENER_API_KEY,
+    LEGAL_DATA_HUNTER_MCP_URL: process.env.LEGAL_DATA_HUNTER_MCP_URL,
+    LEGAL_DATA_HUNTER_API_KEY: process.env.LEGAL_DATA_HUNTER_API_KEY,
+    LEGAL_RESEARCH_MCP_URL: process.env.LEGAL_RESEARCH_MCP_URL,
     LEGIFRANCE_PISTE_CLIENT_ID: process.env.LEGIFRANCE_PISTE_CLIENT_ID,
     LEGIFRANCE_PISTE_CLIENT_SECRET: process.env.LEGIFRANCE_PISTE_CLIENT_SECRET,
     OPENAI_MODEL: process.env.OPENAI_MODEL ?? "gpt-4.1-mini",
