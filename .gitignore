@@ -13,6 +13,12 @@
 # testing
 /coverage
 
+# playwright e2e
+/test-results
+/playwright-report
+/playwright/.cache
+/e2e/__screenshots__
+
 # next.js
 /.next/
 /out/
@@ -62,3 +68,7 @@ next-env.d.ts
 .agents/
 .github/skills/
 references/awesome-design-md/
+
+# Graphify knowledge graph (generated artifact)
+graphify-out/
+graphify-build.log

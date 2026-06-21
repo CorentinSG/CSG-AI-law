@@ -13,6 +13,7 @@
     "lint": "eslint .",
     "typecheck": "next typegen && tsc --noEmit",
     "test": "vitest run",
+    "test:e2e": "playwright test",
     "report:data-quality": "tsx scripts/report-data-quality.ts",
     "scan:france-official-legal": "tsx scripts/run-france-official-legal-scan.ts",
     "scan:france-legal-news": "tsx scripts/run-france-legal-news-scan.ts",
@@ -75,6 +76,7 @@
     "zod": "^4.4.3"
   },
   "devDependencies": {
+    "@playwright/test": "^1.61.0",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",
