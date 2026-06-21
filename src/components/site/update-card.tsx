@@ -91,7 +91,6 @@ export function UpdateCard({
                 target="_blank"
                 rel="noreferrer"
                 className="shrink-0 text-xs text-zinc-400 underline decoration-black/10 underline-offset-4 hover:text-zinc-700"
-                onClick={(e) => e.stopPropagation()}
               >
                 source ↗
               </a>

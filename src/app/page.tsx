@@ -106,7 +106,6 @@ export default async function HomePage() {
                 <div
                   key={item.id}
                   className="flex items-center gap-3 rounded-[1rem] border border-black/4 bg-white/60 px-4 py-2.5"
-                  onClick={(e) => e.stopPropagation()}
                 >
                   <span className={`h-1.5 w-1.5 shrink-0 rounded-full ${
                     item.verificationStatus === "official_verified" || item.verificationStatus === "corroborated"
