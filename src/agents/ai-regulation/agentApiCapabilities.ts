@@ -130,6 +130,7 @@ export function listAgentApiCapabilities(
       uses: ["case_law_discovery", "official_legal_database"],
       regions: ["United States"],
       envVars: ["COURTLISTENER_API_KEY"],
+      implementedProvider: "courtlistener",
       userAction:
         courtListenerReady
           ? undefined

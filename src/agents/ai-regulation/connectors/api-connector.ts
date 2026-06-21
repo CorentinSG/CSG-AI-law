@@ -85,12 +85,30 @@ interface LegifranceSearchResponse {
   totalResultNumber?: number;
 }
 
+interface CourtListenerCluster {
+  absolute_url?: string | null;
+  case_name?: string | null;
+  case_name_full?: string | null;
+  docket_id?: number | string | null;
+  id?: number | string | null;
+  date_filed?: string | null;
+  court?: string | null;
+  precedential_status?: string | null;
+  syllabus?: string | null;
+  summary?: string | null;
+}
+
+interface CourtListenerSearchResponse {
+  results?: CourtListenerCluster[];
+}
+
 type ApiProvider =
   | "federal_register"
   | "newsapi"
   | "gdelt"
   | "judilibre"
-  | "legifrance";
+  | "legifrance"
+  | "courtlistener";
 
 const PISTE_OAUTH_TOKEN_URL = "https://oauth.piste.gouv.fr/api/oauth/token";
 
@@ -154,7 +172,8 @@ function getApiProvider(source: RegulationSource): ApiProvider {
     configured === "newsapi" ||
     configured === "gdelt" ||
     configured === "judilibre" ||
-    configured === "legifrance"
+    configured === "legifrance" ||
+    configured === "courtlistener"
   ) {
     return configured;
   }
@@ -739,6 +758,108 @@ async function scanLegifrance(source: RegulationSource): Promise<ConnectorScanRe
   };
 }
 
+function buildCourtListenerUrl(result: CourtListenerCluster) {
+  if (result.absolute_url) {
+    return result.absolute_url.startsWith("http")
+      ? result.absolute_url
+      : `https://www.courtlistener.com${result.absolute_url}`;
+  }
+  if (result.id) return `https://www.courtlistener.com/opinion/${result.id}/`;
+  if (result.docket_id) return `https://www.courtlistener.com/docket/${result.docket_id}/`;
+  return null;
+}
+
+async function scanCourtListener(source: RegulationSource): Promise<ConnectorScanResult> {
+  if (!env.COURTLISTENER_API_KEY) {
+    return buildMissingCredentialResult(
+      "COURTLISTENER_API_KEY is not configured, so CourtListener/RECAP case-law discovery cannot be queried from this runtime.",
+    );
+  }
+
+  let response: Response;
+  let json: unknown;
+  try {
+    const result = await requestJson<CourtListenerSearchResponse>(source, {
+      Authorization: `Token ${env.COURTLISTENER_API_KEY}`,
+    });
+    if (result.notModified) {
+      return {
+        items: [],
+        errors: [],
+        warnings: ["CourtListener returned 304 Not Modified; parsing was skipped."],
+        responseStatus: result.response.status,
+        itemsFetched: 0,
+        zeroResultsReason: "The CourtListener API returned 304 Not Modified.",
+        fetchMetadata: result.fetchMetadata,
+      };
+    }
+    response = result.response;
+    json = result.json;
+    if (result.shortCircuitedByHash) {
+      return {
+        items: [],
+        errors: [],
+        warnings: ["CourtListener response body hash matched the previous successful fetch; parsing was skipped."],
+        responseStatus: result.response.status,
+        itemsFetched: 0,
+        zeroResultsReason:
+          "The CourtListener API response hash matched the previous successful fetch.",
+        fetchMetadata: result.fetchMetadata,
+      };
+    }
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "CourtListener request failed";
+    return buildNonFatalApiConstraintResult(
+      `CourtListener/RECAP case-law discovery could not be queried safely in this run: ${message}`,
+    );
+  }
+
+  const results = ((json as CourtListenerSearchResponse).results ?? []).slice(
+    0,
+    getMaxItems(source),
+  );
+  const items = results
+    .map((result) => {
+      const title = result.case_name_full ?? result.case_name;
+      const url = buildCourtListenerUrl(result);
+      if (!title || !url) return null;
+      return buildCandidate(source, {
+        title,
+        url,
+        text: [title, result.summary, result.syllabus, result.court, result.precedential_status]
+          .filter(Boolean)
+          .join(" "),
+        publicationDate: result.date_filed ?? null,
+        externalId: result.id ? String(result.id) : result.docket_id ? String(result.docket_id) : null,
+        metadata: {
+          provider: "courtlistener",
+          docketId: result.docket_id ?? null,
+          court: result.court ?? null,
+          precedentialStatus: result.precedential_status ?? null,
+          sourceCategory: "case_law_database",
+        },
+      });
+    })
+    .filter((item): item is ExtractedCandidateItem => item !== null);
+
+  return {
+    items,
+    errors: [],
+    warnings:
+      items.length === 0
+        ? ["CourtListener responded successfully but returned zero usable AI-related case-law results."]
+        : [
+            "CourtListener/RECAP results are case-law discovery data; legal significance still requires citation and review safeguards.",
+          ],
+    responseStatus: response.status,
+    itemsFetched: items.length,
+    zeroResultsReason:
+      items.length === 0
+        ? "The CourtListener API returned zero usable matching case-law results."
+        : null,
+  };
+}
+
 export class ApiConnector implements SourceConnector {
   async scan(source: RegulationSource): Promise<ConnectorScanResult> {
     const provider = getApiProvider(source);
@@ -752,6 +873,8 @@ export class ApiConnector implements SourceConnector {
         return scanJudilibre(source);
       case "legifrance":
         return scanLegifrance(source);
+      case "courtlistener":
+        return scanCourtListener(source);
       case "federal_register":
       default:
         return scanFederalRegister(source);

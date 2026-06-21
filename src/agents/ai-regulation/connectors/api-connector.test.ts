@@ -30,6 +30,7 @@ afterEach(() => {
   vi.restoreAllMocks();
   delete process.env.NEWSAPI_API_KEY;
   delete process.env.JUDILIBRE_API_KEYID;
+  delete process.env.COURTLISTENER_API_KEY;
   delete process.env.LEGIFRANCE_PISTE_CLIENT_ID;
   delete process.env.LEGIFRANCE_PISTE_CLIENT_SECRET;
   process.env.ADMIN_AUTH_SECRET = "test-admin-secret-1234567890";
@@ -341,5 +342,77 @@ describe("ApiConnector", () => {
     expect(result.warnings[0]).toContain(
       "Legifrance official DILA/PISTE API could not be queried safely",
     );
+  });
+
+  it("degrades honestly when CourtListener credentials are missing", async () => {
+    const connector = new ApiConnector();
+    const result = await connector.scan(
+      makeSource({
+        id: "src-us-courtlistener-ai",
+        name: "CourtListener AI case-law search",
+        jurisdiction: "United States federal",
+        region: "North America",
+        country: "United States",
+        sourceUrl: "https://www.courtlistener.com/api/rest/v4/search/?q=artificial%20intelligence&type=o",
+        config: { apiProvider: "courtlistener" },
+        sourceType: "court_database",
+      }),
+    );
+
+    expect(result.items).toHaveLength(0);
+    expect(result.errors).toHaveLength(0);
+    expect(result.zeroResultsReason).toContain("COURTLISTENER_API_KEY");
+  });
+
+  it("maps CourtListener case-law results when credentials are available", async () => {
+    process.env.COURTLISTENER_API_KEY = "test-courtlistener-key";
+    resetEnvForTests();
+    const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue(
+      new Response(
+        JSON.stringify({
+          results: [
+            {
+              id: 123,
+              docket_id: 456,
+              case_name: "Doe v. AI Platform",
+              case_name_full: "Doe v. AI Platform Inc.",
+              absolute_url: "/opinion/123/doe-v-ai-platform/",
+              date_filed: "2026-05-01",
+              court: "ca2",
+              precedential_status: "Published",
+              summary: "Decision discussing artificial intelligence and legal obligations.",
+            },
+          ],
+        }),
+        { status: 200, headers: { "Content-Type": "application/json" } },
+      ) as Response,
+    );
+
+    const connector = new ApiConnector();
+    const result = await connector.scan(
+      makeSource({
+        id: "src-us-courtlistener-ai",
+        name: "CourtListener AI case-law search",
+        jurisdiction: "United States federal",
+        region: "North America",
+        country: "United States",
+        sourceUrl: "https://www.courtlistener.com/api/rest/v4/search/?q=artificial%20intelligence&type=o",
+        config: { apiProvider: "courtlistener" },
+        sourceType: "court_database",
+      }),
+    );
+
+    const [, requestInit] = fetchMock.mock.calls[0] ?? [];
+    expect(requestInit?.headers).toBeInstanceOf(Headers);
+    expect((requestInit?.headers as Headers).get("authorization")).toBe(
+      "Token test-courtlistener-key",
+    );
+    expect(result.items).toHaveLength(1);
+    expect(result.items[0]?.title).toBe("Doe v. AI Platform Inc.");
+    expect(result.items[0]?.url).toBe(
+      "https://www.courtlistener.com/opinion/123/doe-v-ai-platform/",
+    );
+    expect(result.items[0]?.metadata?.provider).toBe("courtlistener");
+    expect(result.items[0]?.metadata?.docketId).toBe(456);
   });
 });

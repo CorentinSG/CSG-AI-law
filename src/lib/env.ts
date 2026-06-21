@@ -17,6 +17,7 @@ const rawEnvSchema = z.object({
   OPENAI_API_KEY: z.string().min(1).optional(),
   NEWSAPI_API_KEY: z.string().min(1).optional(),
   JUDILIBRE_API_KEYID: z.string().min(1).optional(),
+  COURTLISTENER_API_KEY: z.string().min(1).optional(),
   // Legifrance via official DILA/PISTE API (T-RT3B). OAuth2 client-credentials
   // pair from PISTE enrollment; when absent the connector degrades honestly.
   LEGIFRANCE_PISTE_CLIENT_ID: z.string().min(1).optional(),
@@ -65,6 +66,7 @@ export interface AppEnv {
   OPENAI_API_KEY?: string;
   NEWSAPI_API_KEY?: string;
   JUDILIBRE_API_KEYID?: string;
+  COURTLISTENER_API_KEY?: string;
   /** Legifrance/PISTE OAuth2 client id — enables the official DILA API path (T-RT3B) */
   LEGIFRANCE_PISTE_CLIENT_ID?: string;
   /** Legifrance/PISTE OAuth2 client secret — required alongside the client id (T-RT3B) */
@@ -114,6 +116,7 @@ function buildEnv(): AppEnv {
     OPENAI_API_KEY: process.env.OPENAI_API_KEY,
     NEWSAPI_API_KEY: process.env.NEWSAPI_API_KEY,
     JUDILIBRE_API_KEYID: process.env.JUDILIBRE_API_KEYID,
+    COURTLISTENER_API_KEY: process.env.COURTLISTENER_API_KEY,
     LEGIFRANCE_PISTE_CLIENT_ID: process.env.LEGIFRANCE_PISTE_CLIENT_ID,
     LEGIFRANCE_PISTE_CLIENT_SECRET: process.env.LEGIFRANCE_PISTE_CLIENT_SECRET,
     OPENAI_MODEL: process.env.OPENAI_MODEL ?? "gpt-4.1-mini",
