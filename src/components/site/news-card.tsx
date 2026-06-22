@@ -5,21 +5,38 @@ import {
   type AiLawNewsItem,
 } from "@/content/ai-regulation/news";
 import { MotionStaggerItem } from "@/components/site/motion-stagger";
+import { getNewsSourceSignal } from "@/lib/news-source-signal";
 import { formatDisplayDate } from "@/lib/utils";
 
+const signalClass: Record<string, string> = {
+  official: "border-emerald-300/60 bg-emerald-50 text-emerald-700",
+  press: "border-sky-300/60 bg-sky-50 text-sky-700",
+  discovery: "border-amber-300/70 bg-amber-50 text-amber-700",
+};
+
 export function NewsCard({ item }: { item: AiLawNewsItem }) {
+  const signal = getNewsSourceSignal(item);
   return (
     <MotionStaggerItem className="h-full">
       <article className="glass-panel-soft h-full rounded-[1.9rem] p-6 shadow-[0_18px_45px_rgba(15,15,15,0.05)] transition duration-300 hover:-translate-y-0.5 hover:shadow-[0_24px_60px_rgba(15,15,15,0.08)]">
-        <div className="flex flex-wrap gap-2 font-mono text-[11px] uppercase tracking-[0.2em] text-zinc-500">
+        <div className="flex flex-wrap items-center gap-2 font-mono text-[11px] uppercase tracking-[0.2em] text-zinc-500">
           <span>{item.region}</span>
-          <span>{item.sourceType.replaceAll("_", " ")}</span>
+          <span
+            className={`rounded-full border px-2 py-0.5 tracking-[0.16em] ${signalClass[signal.tone]}`}
+          >
+            {signal.label}
+          </span>
           <span>{item.verificationStatus.replaceAll("_", " ")}</span>
         </div>
         <h2 className="mt-4 font-display text-xl font-medium uppercase tracking-[-0.04em] text-zinc-950">
           <Link href={`/news/${item.slug}`}>{item.title}</Link>
         </h2>
         <p className="mt-3 text-sm leading-7 text-zinc-700">{item.shortSummary}</p>
+        {signal.caveat ? (
+          <p className="mt-2 rounded-lg border border-amber-200 bg-amber-50/70 px-3 py-1.5 text-xs leading-5 text-amber-800">
+            {signal.caveat}
+          </p>
+        ) : null}
         <div className="mt-5 grid gap-3 md:grid-cols-2">
           <div className="rounded-[1.4rem] border border-black/6 bg-white/60 p-4">
             <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-zinc-500">

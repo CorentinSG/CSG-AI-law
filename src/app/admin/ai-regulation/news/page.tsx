@@ -11,6 +11,7 @@ import { scanProfiles } from "@/agents/ai-regulation/scanProfiles";
 import { loadDiscoveryLeadRecordsPage } from "@/agents/ai-regulation/utils/discovery-lead-records";
 import { aiLawNewsSourceConfigs } from "@/content/ai-regulation/news-sources";
 import { normalizeNewsItemRecord } from "@/content/ai-regulation/news";
+import { getNewsSourceSignal } from "@/lib/news-source-signal";
 import { updateRepository } from "@/agents/ai-regulation/processors/updateRepository";
 import { isDiscoveryOnlySource } from "@/agents/ai-regulation/utils/discovery";
 import { buildDiscoveryLeadRecordSummary } from "@/app/admin/ai-regulation/diagnostics";
@@ -23,6 +24,12 @@ import { formatDisplayDate } from "@/lib/utils";
 export const dynamic = "force-dynamic";
 
 const pageSize = 24;
+
+const newsToneClass: Record<string, string> = {
+  official: "border-emerald-400/30 bg-emerald-500/10 text-emerald-200",
+  press: "border-sky-400/30 bg-sky-500/10 text-sky-200",
+  discovery: "border-amber-400/40 bg-amber-500/10 text-amber-200",
+};
 
 export default async function AdminAiLawNewsPage({
   searchParams,
@@ -738,12 +745,33 @@ export default async function AdminAiLawNewsPage({
               >
                 <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
                   <div>
-                    <p className="text-xs uppercase tracking-[0.22em] text-zinc-500">
-                      {item.sourceType.replaceAll("_", " ")} /{" "}
-                      {item.verificationStatus.replaceAll("_", " ")}
-                    </p>
-                    <p className="mt-2 font-medium text-white">{item.title}</p>
-                    <p className="mt-2 text-sm text-zinc-300">{item.shortSummary}</p>
+                    {(() => {
+                      const signal = getNewsSourceSignal(item);
+                      return (
+                        <>
+                          <div className="flex flex-wrap items-center gap-2">
+                            <span
+                              className={`rounded-full border px-2 py-0.5 text-[10px] uppercase tracking-[0.18em] ${newsToneClass[signal.tone]}`}
+                            >
+                              {signal.label}
+                            </span>
+                            {signal.adminOnly ? (
+                              <span className="rounded-full border border-red-400/30 bg-red-500/10 px-2 py-0.5 text-[10px] uppercase tracking-[0.18em] text-red-200">
+                                Admin-only
+                              </span>
+                            ) : null}
+                            <span className="text-[10px] uppercase tracking-[0.18em] text-zinc-600">
+                              {item.verificationStatus.replaceAll("_", " ")}
+                            </span>
+                          </div>
+                          <p className="mt-2 font-medium text-white">{item.title}</p>
+                          <p className="mt-2 text-sm text-zinc-300">{item.shortSummary}</p>
+                          {signal.caveat ? (
+                            <p className="mt-1 text-xs text-amber-200/80">{signal.caveat}</p>
+                          ) : null}
+                        </>
+                      );
+                    })()}
                     <p className="mt-2 text-xs text-zinc-500">
                       source {item.sourceName} / published{" "}
                       {formatDisplayDate(item.publicationDate)} / event{" "}
