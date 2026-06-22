@@ -8,6 +8,8 @@ import {
   type ArticleCarouselItem,
 } from "@/components/site/article-carousel";
 import { MotionReveal } from "@/components/site/motion-reveal";
+import { ResearchCard } from "@/components/site/research-card";
+import { MotionStagger } from "@/components/site/motion-stagger";
 import { SiteShell } from "@/components/site/shell";
 
 export const metadata: Metadata = {
@@ -17,9 +19,9 @@ export const metadata: Metadata = {
 };
 
 export default function ResearchPage() {
-  const published = getPublicResearchEntries().filter(
-    (e) => e.status === "published",
-  );
+  const publicEntries = getPublicResearchEntries();
+  const published = publicEntries.filter((e) => e.status === "published");
+  const forthcoming = publicEntries.filter((e) => e.status === "forthcoming");
 
   const carouselItems: ArticleCarouselItem[] = published.map((entry) => ({
     id: entry.slug,
@@ -47,7 +49,7 @@ export default function ResearchPage() {
         </p>
       </MotionReveal>
 
-      {/* ── Articles ─────────────────────────────────────────── */}
+      {/* ── Published articles ───────────────────────────────── */}
       {carouselItems.length > 0 ? (
         <section className="-mx-6 space-y-6 border-t border-black/6 pt-16 md:-mx-10 lg:-mx-16">
           <div className="px-6 md:px-10 lg:px-16">
@@ -57,7 +59,43 @@ export default function ResearchPage() {
           </div>
           <ArticleCarousel items={carouselItems} />
         </section>
-      ) : (
+      ) : null}
+
+      {/* ── Forthcoming notes — announced, not yet published ──── */}
+      {forthcoming.length > 0 ? (
+        <section className="space-y-6 border-t border-black/6 pt-16">
+          <div className="flex items-end justify-between gap-4">
+            <div className="space-y-2">
+              <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-amber-600">
+                À venir · Forthcoming
+              </p>
+              <h2 className="font-display text-2xl font-medium uppercase tracking-[-0.04em] text-zinc-900">
+                Notes en préparation
+              </h2>
+            </div>
+            <p className="hidden max-w-xs text-right text-xs leading-6 text-zinc-500 sm:block">
+              Annoncées et en cours de rédaction. Le texte complet n&rsquo;est pas
+              encore publié.
+            </p>
+          </div>
+          <MotionStagger className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+            {forthcoming.map((entry) => (
+              <ResearchCard
+                key={entry.slug}
+                category={entry.category}
+                title={entry.title}
+                description={entry.summary}
+                href={`/research/${entry.slug}`}
+                status="forthcoming"
+                meta={entry.readingTime}
+                tags={entry.tags}
+              />
+            ))}
+          </MotionStagger>
+        </section>
+      ) : null}
+
+      {carouselItems.length === 0 && forthcoming.length === 0 ? (
         <MotionReveal>
           <section className="border-t border-black/6 pt-16">
             <div className="flex flex-col items-center gap-8 rounded-[2.5rem] border border-black/6 bg-zinc-50/60 px-8 py-20 text-center">
@@ -86,7 +124,7 @@ export default function ResearchPage() {
             </div>
           </section>
         </MotionReveal>
-      )}
+      ) : null}
     </SiteShell>
   );
 }

@@ -2,6 +2,7 @@ import type { SourceRuntimeHealthSummary } from "@/agents/ai-regulation/sourceRu
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 import {
+  isInaccessible,
   runtimeHealthTone,
   summarizeRuntimeHealth,
 } from "@/app/admin/ai-regulation/freshness-summary";
@@ -52,6 +53,11 @@ export function AdminFreshnessPanel({
         <CardTitle className="flex flex-wrap items-center justify-between gap-3">
           <span>Source freshness (runtime SLO)</span>
           <span className="flex flex-wrap gap-2 text-[11px] uppercase tracking-[0.18em]">
+            {rollup.inaccessible > 0 ? (
+              <span className={`rounded-full border px-2.5 py-1 ${toneClass.danger}`}>
+                {rollup.inaccessible} inaccessible
+              </span>
+            ) : null}
             <span className={`rounded-full border px-2.5 py-1 ${toneClass.danger}`}>
               {rollup.stale} stale
             </span>
@@ -94,6 +100,11 @@ export function AdminFreshnessPanel({
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <div className="flex flex-wrap items-center gap-2">
                   <StateBadge state={source.state} />
+                  {isInaccessible(source) ? (
+                    <span className="rounded-full border border-red-400/40 bg-red-500/15 px-2 py-0.5 text-[10px] uppercase tracking-[0.18em] text-red-100">
+                      Inaccessible
+                    </span>
+                  ) : null}
                   <span className="font-medium text-white">{source.sourceName}</span>
                   {source.priorityBand === "high" ? (
                     <span className="rounded-full border border-white/10 px-2 py-0.5 text-[10px] uppercase tracking-[0.18em] text-zinc-400">

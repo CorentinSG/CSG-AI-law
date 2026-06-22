@@ -13,10 +13,17 @@ export interface RuntimeHealthRollup {
   degraded: number;
   healthy: number;
   inactive: number;
+  /** Subset reporting runtime inaccessibility (a stricter signal than "stale"). */
+  inaccessible: number;
   /** Sources needing attention (stale + degraded), preserving the contract's sort. */
   needsAttention: SourceRuntimeHealthSummary[];
   /** Active high-priority sources whose state is stale or degraded. */
   highPriorityAtRisk: number;
+}
+
+/** A source whose latest check reported it unreachable / recommended inactive. */
+export function isInaccessible(summary: SourceRuntimeHealthSummary): boolean {
+  return summary.freshnessStatus === "source_inaccessible";
 }
 
 export function summarizeRuntimeHealth(
@@ -41,12 +48,15 @@ export function summarizeRuntimeHealth(
     (summary) => summary.priorityBand === "high",
   ).length;
 
+  const inaccessible = summaries.filter(isInaccessible).length;
+
   return {
     total: summaries.length,
     stale: counts.stale,
     degraded: counts.degraded,
     healthy: counts.healthy,
     inactive: counts.inactive,
+    inaccessible,
     needsAttention,
     highPriorityAtRisk,
   };

@@ -3,6 +3,19 @@ import Link from "next/link";
 import { MotionStaggerItem } from "@/components/site/motion-stagger";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
+// Content-state styling so readers instantly tell what is live vs. announced.
+const statusStyles: Record<string, string> = {
+  published: "border-emerald-300/50 bg-emerald-50 text-emerald-700",
+  forthcoming: "border-amber-300/60 bg-amber-50 text-amber-700",
+  draft: "border-zinc-300 bg-zinc-100 text-zinc-500",
+};
+
+const statusLabels: Record<string, string> = {
+  published: "Published",
+  forthcoming: "Forthcoming",
+  draft: "Draft",
+};
+
 export function ResearchCard({
   category,
   title,
@@ -20,15 +33,27 @@ export function ResearchCard({
   meta?: string;
   tags?: string[];
 }) {
+  const isForthcoming = status === "forthcoming";
+  const statusKey = status?.toLowerCase() ?? "";
   const content = (
     <MotionStaggerItem className="h-full">
-      <Card className="glass-panel-soft premium-sheen h-full rounded-[1.9rem] text-zinc-900 transition duration-300 hover:-translate-y-0.5 hover:shadow-[0_24px_60px_rgba(15,15,15,0.08)]">
+      <Card
+        className={`glass-panel-soft premium-sheen h-full rounded-[1.9rem] text-zinc-900 transition duration-300 ${
+          isForthcoming
+            ? "border-dashed border-amber-300/50"
+            : "hover:-translate-y-0.5 hover:shadow-[0_24px_60px_rgba(15,15,15,0.08)]"
+        }`}
+      >
         <CardHeader className="space-y-3">
           <div className="flex items-center justify-between gap-3">
             <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-zinc-500">{category}</p>
             {status ? (
-              <span className="rounded-full border border-black/8 bg-zinc-50 px-3 py-1 font-mono text-[11px] uppercase tracking-[0.18em] text-zinc-600">
-                {status}
+              <span
+                className={`rounded-full border px-3 py-1 font-mono text-[11px] uppercase tracking-[0.18em] ${
+                  statusStyles[statusKey] ?? "border-black/8 bg-zinc-50 text-zinc-600"
+                }`}
+              >
+                {statusLabels[statusKey] ?? status}
               </span>
             ) : null}
           </div>
