@@ -61,9 +61,17 @@ export function SiteFooter() {
           <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-zinc-400">
             © {new Date().getFullYear()} C. Saint-Girons
           </p>
-          <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-zinc-400">
-            New York
-          </p>
+          <div className="flex items-center gap-4">
+            <Link
+              href="/admin"
+              className="font-mono text-[10px] uppercase tracking-[0.22em] text-zinc-300 transition-colors duration-200 hover:text-zinc-600"
+            >
+              Admin
+            </Link>
+            <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-zinc-400">
+              New York
+            </p>
+          </div>
         </div>
       </motion.div>
     </footer>
