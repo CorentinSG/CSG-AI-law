@@ -25,6 +25,19 @@ const OFFICIAL_AUTHORITY_TYPES = new Set([
   "Enforcement action",
 ]);
 
+const URGENT_LEGAL_AREAS = [
+  "ai governance",
+  "data protection",
+  "privacy",
+  "consumer protection",
+  "employment",
+  "health",
+  "financial services",
+  "cloud",
+  "copyright",
+  "competition",
+];
+
 function toTimestamp(value: string | null | undefined) {
   if (!value) return 0;
   const timestamp = Date.parse(value);
@@ -33,13 +46,49 @@ function toTimestamp(value: string | null | undefined) {
 
 function getPriorityScore(update: AiRegulatoryUpdate) {
   const authorityScore = update.authorityType && OFFICIAL_AUTHORITY_TYPES.has(update.authorityType) ? 25 : 0;
+  const officialSourceScore = /\.gov\b|\.gouv\b|\.europa\.eu\b|legifrance\.gouv\.fr\b|federalregister\.gov\b|courtlistener\.com\b/i
+    .test(update.sourceUrl)
+    ? 15
+    : 0;
+  const legalAreaScore = URGENT_LEGAL_AREAS.some((area) =>
+    update.legalArea.toLowerCase().includes(area),
+  )
+    ? 8
+    : 0;
+  const publicationDateScore = update.publicationDate ? 6 : 0;
   const recentSignal = Math.min(10, Math.floor(toTimestamp(update.detectedDate) / 86_400_000) % 10);
   return (
     IMPORTANCE_SCORE[update.importanceLevel] +
     CONFIDENCE_SCORE[update.confidenceLevel] +
     authorityScore +
+    officialSourceScore +
+    legalAreaScore +
+    publicationDateScore +
     recentSignal
   );
+}
+
+function getPriorityReasons(update: AiRegulatoryUpdate) {
+  const reasons: string[] = [];
+  if (OFFICIAL_AUTHORITY_TYPES.has(update.authorityType ?? "")) {
+    reasons.push("official_authority_type");
+  }
+  if (/\.gov\b|\.gouv\b|\.europa\.eu\b|legifrance\.gouv\.fr\b|federalregister\.gov\b|courtlistener\.com\b/i.test(update.sourceUrl)) {
+    reasons.push("official_or_court_domain");
+  }
+  if (URGENT_LEGAL_AREAS.some((area) => update.legalArea.toLowerCase().includes(area))) {
+    reasons.push("priority_legal_area");
+  }
+  if (update.importanceLevel === "critical" || update.importanceLevel === "high") {
+    reasons.push(`importance_${update.importanceLevel}`);
+  }
+  if (update.publicationDate) {
+    reasons.push("has_publication_date");
+  }
+  if (update.confidenceLevel === "high") {
+    reasons.push("high_confidence");
+  }
+  return reasons;
 }
 
 function toQueueItem(update: AiRegulatoryUpdate) {
@@ -58,6 +107,7 @@ function toQueueItem(update: AiRegulatoryUpdate) {
     detectedDate: update.detectedDate,
     status: update.status,
     priorityScore: getPriorityScore(update),
+    priorityReasons: getPriorityReasons(update),
   };
 }
 

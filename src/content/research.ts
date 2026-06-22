@@ -47,11 +47,11 @@ export type ResearchEntry = {
   references?: ResearchReference[];
 };
 
-export const researchEntries: ResearchEntry[] = [];
+// Public registry consumed by the research routes and tests.
 
 // --- ARCHIVE : entrées retirées temporairement, à republier avec contenu rédigé ---
 const author = "Corentin Saint-Girons";
-const _archivedEntries: ResearchEntry[] = [
+export const researchEntries: ResearchEntry[] = [
   {
     slug: "emerging-architecture-ai-regulation",
     title: "The Emerging Architecture of AI Regulation",
@@ -330,8 +330,6 @@ const _archivedEntries: ResearchEntry[] = [
     ],
   },
 ];
-void _archivedEntries;
-// --- FIN ARCHIVE ---
 
 export const researchCategories: ResearchCategory[] = [
   "AI Regulation",

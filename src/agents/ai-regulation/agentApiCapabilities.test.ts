@@ -34,6 +34,7 @@ describe("agent API capabilities", () => {
           id: "newsapi",
           status: "missing_credentials",
           envVars: ["NEWSAPI_API_KEY"],
+          missingEnvVars: ["NEWSAPI_API_KEY"],
         }),
         expect.objectContaining({
           id: "legifrance-piste",
@@ -54,6 +55,7 @@ describe("agent API capabilities", () => {
           id: "courtlistener-recap",
           status: "needs_user_setup",
           envVars: ["COURTLISTENER_API_KEY"],
+          missingEnvVars: ["COURTLISTENER_API_KEY"],
         }),
       ]),
     );
@@ -84,6 +86,10 @@ describe("agent API capabilities", () => {
     expect(capabilities.find((capability) => capability.id === "courtlistener-recap")?.status).toBe(
       "available",
     );
+    expect(
+      capabilities.find((capability) => capability.id === "courtlistener-recap")
+        ?.configuredEnvVars,
+    ).toEqual(["COURTLISTENER_API_KEY"]);
   });
 
   it("documents legal research accelerators as preferred over generic scraping", () => {

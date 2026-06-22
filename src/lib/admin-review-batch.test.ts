@@ -60,6 +60,9 @@ describe("admin review batch helpers", () => {
     expect(queue.total).toBe(3);
     expect(queue.items.map((item) => item.id)).toEqual(["official", "medium"]);
     expect(queue.items[0].priorityScore).toBeGreaterThan(queue.items[1].priorityScore);
+    expect(queue.items[0].priorityReasons).toEqual(
+      expect.arrayContaining(["official_authority_type", "high_confidence"]),
+    );
   });
 
   it("transitions unique ids and reports per-item failures", async () => {

@@ -17,6 +17,8 @@ export interface AgentApiCapability {
   uses: AgentApiCapabilityUse[];
   regions: Array<"Europe" | "United States" | "Global">;
   envVars: string[];
+  configuredEnvVars: string[];
+  missingEnvVars: string[];
   implementedProvider?: string;
   userAction?: string;
   notes: string;
@@ -45,8 +47,16 @@ export function listAgentApiCapabilities(
     rawEnv,
   );
 
+  const enrich = (
+    capability: Omit<AgentApiCapability, "configuredEnvVars" | "missingEnvVars">,
+  ): AgentApiCapability => ({
+    ...capability,
+    configuredEnvVars: capability.envVars.filter((name) => hasEnv(name, rawEnv)),
+    missingEnvVars: capability.envVars.filter((name) => !hasEnv(name, rawEnv)),
+  });
+
   return [
-    {
+    enrich({
       id: "legal-data-hunter",
       label: "Legal Data Hunter / legal-research",
       status: legalDataHunterReady ? "available" : "needs_user_setup",
@@ -59,8 +69,8 @@ export function listAgentApiCapabilities(
         : "Expose the Legal Data Hunter MCP or legal-research skill to the runtime, then set LEGAL_DATA_HUNTER_MCP_URL and any required token/API key.",
       notes:
         "Preferred over generic scraping for multi-jurisdiction statutes, case law, doctrine, and source discovery when the MCP/skill is available to the agent runtime.",
-    },
-    {
+    }),
+    enrich({
       id: "gdelt-doc-api",
       label: "GDELT 2.1 Doc API",
       status: "available",
@@ -70,8 +80,8 @@ export function listAgentApiCapabilities(
       implementedProvider: "gdelt",
       notes:
         "No key required. Use as broad discovery only; legal database promotion still requires serious-source corroboration or official-source confirmation.",
-    },
-    {
+    }),
+    enrich({
       id: "federal-register-api",
       label: "Federal Register API",
       status: "available",
@@ -81,8 +91,8 @@ export function listAgentApiCapabilities(
       implementedProvider: "federal_register",
       notes:
         "No key required. Official US federal rulemaking source suitable for automatic database publication when AI/legal relevance is verified.",
-    },
-    {
+    }),
+    enrich({
       id: "newsapi",
       label: "NewsAPI",
       status: newsApiReady ? "available" : "missing_credentials",
@@ -95,8 +105,8 @@ export function listAgentApiCapabilities(
         : "Create a NewsAPI key and set NEWSAPI_API_KEY in Vercel/local env if you want faster multi-source legal-news discovery.",
       notes:
         "Discovery-only provider. Items can publish as legal news only when the domain is serious/reputable or corroborated; it must not be treated as an official legal database source.",
-    },
-    {
+    }),
+    enrich({
       id: "legifrance-piste",
       label: "Legifrance DILA/PISTE API",
       status: legifranceReady ? "available" : "needs_user_setup",
@@ -109,8 +119,8 @@ export function listAgentApiCapabilities(
         : "Create free PISTE/DILA credentials and set LEGIFRANCE_PISTE_CLIENT_ID plus LEGIFRANCE_PISTE_CLIENT_SECRET.",
       notes:
         "Official France legal source. Once credentials are set, French official database monitoring can use the native API instead of degraded scraping.",
-    },
-    {
+    }),
+    enrich({
       id: "judilibre-api",
       label: "Judilibre API",
       status: judilibreReady ? "available" : "needs_user_setup",
@@ -123,8 +133,8 @@ export function listAgentApiCapabilities(
         : "Request/configure a Judilibre API KeyId and set JUDILIBRE_API_KEYID to strengthen French case-law monitoring.",
       notes:
         "Official French case-law API. Use for decisions and jurisprudence; relevance and citation checks still apply.",
-    },
-    {
+    }),
+    enrich({
       id: "courtlistener-recap",
       label: "CourtListener / RECAP",
       status: courtListenerReady ? "available" : "needs_user_setup",
@@ -138,7 +148,7 @@ export function listAgentApiCapabilities(
           : "Create a CourtListener token and set COURTLISTENER_API_KEY to enable faster US federal/state case-law and docket discovery.",
       notes:
         "Preferred over generic scraping for US federal case law, RECAP docket metadata, and state/federal court monitoring when credentials are available.",
-    },
+    }),
   ];
 }
 

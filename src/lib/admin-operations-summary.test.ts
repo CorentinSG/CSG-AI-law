@@ -44,7 +44,14 @@ describe("buildAdminOperationsSummary", () => {
     const now = new Date("2026-06-20T12:00:00.000Z");
     buildHealthSnapshot.mockResolvedValueOnce({
       ok: true,
-      worker: { heartbeatAgeMs: 1000, heartbeatAt: now.toISOString(), runningJobs: 1 },
+      worker: {
+        state: "active",
+        heartbeatAgeMs: 1000,
+        heartbeatAt: now.toISOString(),
+        lastActivityAgeMs: 1000,
+        lastActivityAt: now.toISOString(),
+        runningJobs: 1,
+      },
       scans: { newestSuccessfulScanAgeMs: 2000, newestSuccessfulScanAt: now.toISOString(), byProfile: {} },
     });
     updateRepository.listUpdatesPage
@@ -81,8 +88,16 @@ describe("buildAdminOperationsSummary", () => {
       { severity: "medium" },
     ]);
     listAgentApiCapabilities.mockReturnValue([
-      { id: "newsapi", label: "NewsAPI", status: "missing_credentials", envVars: ["NEWSAPI_API_KEY"], userAction: "Set key" },
-      { id: "gdelt", label: "GDELT", status: "available", envVars: [] },
+      {
+        id: "newsapi",
+        label: "NewsAPI",
+        status: "missing_credentials",
+        envVars: ["NEWSAPI_API_KEY"],
+        missingEnvVars: ["NEWSAPI_API_KEY"],
+        configuredEnvVars: [],
+        userAction: "Set key",
+      },
+      { id: "gdelt", label: "GDELT", status: "available", envVars: [], missingEnvVars: [], configuredEnvVars: [] },
     ]);
     listGlobalMonitoringAgents.mockReturnValue({
       regionalSupervisors: [
@@ -130,6 +145,8 @@ describe("buildAdminOperationsSummary", () => {
         label: "NewsAPI",
         status: "missing_credentials",
         envVars: ["NEWSAPI_API_KEY"],
+        missingEnvVars: ["NEWSAPI_API_KEY"],
+        configuredEnvVars: [],
         userAction: "Set key",
       },
     ]);

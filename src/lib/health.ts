@@ -25,8 +25,11 @@ export interface HealthSnapshot {
     >;
   };
   worker: {
+    state: "active" | "idle" | "unknown";
     heartbeatAgeMs: number | null;
     heartbeatAt: string | null;
+    lastActivityAgeMs: number | null;
+    lastActivityAt: string | null;
     runningJobs: number;
   };
   review: {
@@ -131,9 +134,27 @@ function buildScanSummary(sources: RegulationSource[], jobs: ScanJob[], now: num
 function buildWorkerSummary(jobs: ScanJob[], now: number) {
   const runningJobs = jobs.filter((job) => job.status === "running");
   const heartbeatAt = findNewestIso(runningJobs.map(getLeaseHeartbeatAt));
+  const lastActivityAt = findNewestIso(
+    jobs.flatMap((job) => [
+      getLeaseHeartbeatAt(job),
+      job.updatedAt,
+      job.finishedAt,
+      job.startedAt,
+      job.createdAt,
+    ]),
+  );
+  const state: HealthSnapshot["worker"]["state"] =
+    runningJobs.length > 0 && heartbeatAt
+      ? "active"
+      : lastActivityAt
+        ? "idle"
+        : "unknown";
   return {
+    state,
     heartbeatAgeMs: ageMs(heartbeatAt, now),
     heartbeatAt,
+    lastActivityAgeMs: ageMs(lastActivityAt, now),
+    lastActivityAt,
     runningJobs: runningJobs.length,
   };
 }
@@ -225,8 +246,11 @@ export async function buildHealthSnapshot(options?: {
         byProfile: {},
       },
       worker: {
+        state: "unknown",
         heartbeatAgeMs: null,
         heartbeatAt: null,
+        lastActivityAgeMs: null,
+        lastActivityAt: null,
         runningJobs: 0,
       },
       review: {

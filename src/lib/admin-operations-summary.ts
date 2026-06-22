@@ -143,6 +143,8 @@ export async function buildAdminOperationsSummary(options?: { now?: Date }) {
             label: capability.label,
             status: capability.status,
             envVars: capability.envVars,
+            missingEnvVars: capability.missingEnvVars,
+            configuredEnvVars: capability.configuredEnvVars,
             userAction: capability.userAction ?? null,
           })),
       },

@@ -151,7 +151,9 @@ describe("buildHealthSnapshot", () => {
         },
       },
       worker: {
+        state: "active",
         heartbeatAgeMs: 30_000,
+        lastActivityAgeMs: 30_000,
         runningJobs: 1,
       },
       review: {
@@ -176,6 +178,32 @@ describe("buildHealthSnapshot", () => {
       scanJobsChecked: 2,
       needsReviewSampleSize: 1,
       runningJobIds: ["job-running"],
+    });
+  });
+
+  it("reports an idle worker when recent job activity exists without a running lease", async () => {
+    mocks.updateRepository.getScanJobs.mockResolvedValueOnce([
+      makeJob({
+        id: "job-succeeded-recent",
+        status: "succeeded",
+        startedAt: "2026-06-18T10:03:00.000Z",
+        finishedAt: "2026-06-18T10:04:00.000Z",
+        updatedAt: "2026-06-18T10:04:00.000Z",
+      }),
+    ]);
+    const { buildHealthSnapshot } = await import("@/lib/health");
+
+    const snapshot = await buildHealthSnapshot({
+      access: "authenticated",
+      now: new Date("2026-06-18T10:05:00.000Z"),
+    });
+
+    expect(snapshot.worker).toMatchObject({
+      state: "idle",
+      heartbeatAt: null,
+      lastActivityAt: "2026-06-18T10:04:00.000Z",
+      lastActivityAgeMs: 60_000,
+      runningJobs: 0,
     });
   });
 
