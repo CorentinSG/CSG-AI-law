@@ -74,7 +74,7 @@ def extract_page(url: str, config: dict[str, Any]) -> dict[str, Any]:
       fallback_rules    — list of notes/fallback strategies
     """
     try:
-        from scrapling import Fetcher
+        from scrapling.fetchers import Fetcher
     except ImportError:
         return {
             "url": url,
@@ -83,15 +83,11 @@ def extract_page(url: str, config: dict[str, Any]) -> dict[str, Any]:
             "published_at": None,
             "canonical_url": None,
             "pdf_links": [],
-            "error": "Scrapling is not installed. Run: pip install scrapling",
+            "error": "Scrapling fetcher dependencies are not installed. Run: pip install 'scrapling[fetchers]'",
         }
 
     try:
-        fetcher = Fetcher(
-            auto_match=True,
-            user_agent=USER_AGENT,
-        )
-        page = fetcher.get(url)
+        page = Fetcher.get(url, headers={"User-Agent": USER_AGENT})
     except Exception as exc:  # noqa: BLE001
         return {
             "url": url,

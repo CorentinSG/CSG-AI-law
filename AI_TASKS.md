@@ -49,6 +49,14 @@ YYYY-MM-DD · <Agent> · <TASK-ID> · <STATUS>
 ## Current status
 
 2026-06-22 · Codex · T-INGESTION-RUNTIME · DONE-LOCAL
+- Intent:        Fix the Scrapling sidecar runtime so `/health` being green also means real extraction works with the current Scrapling fetcher API.
+- Files:         `scrapling_worker/worker.py`, `scrapling_worker/requirements.txt`.
+- Graph anchors: `scraplingExtract()`, community "Scrapling Extraction Service", community "Data Ingestion Pipeline".
+- Verification:  Local Python worker smoke PASS with `scrapling[fetchers]>=0.2.9` against `https://example.com` (title/body/canonical extracted) · real legal-source extraction PASS against European Parliament AI Act article (`body_len=1451`, `pdf_count=1`) · live Railway `/health` already returns `{"status":"ok","version":"1.0.0"}` before redeploy.
+- Branch/commit: `ops/t-ops9-ux` @ working tree
+- Next:          Push this fix and let Railway redeploy `scrapling-worker`, then re-run the live `/extract` and full `runSourceIngestion('ing-ep-ai')` checks against Supabase.
+
+2026-06-22 · Codex · T-INGESTION-RUNTIME · DONE-LOCAL
 - Intent:        Make Firecrawl/Scrapling operational instead of merely present by exposing capability state, fixing Scrapling source routing, and adding Railway-ready sidecar config.
 - Files:         `src/agents/ingestion/scraplingClient.ts`, `src/agents/ingestion/scraplingClient.test.ts`, `scrapling_worker/worker.py`, `scrapling_worker/railway.json`, `scrapling_worker/README.md`, `src/agents/ai-regulation/agentApiCapabilities.ts`, `src/agents/ai-regulation/agentApiCapabilities.test.ts`.
 - Graph anchors: `scraplingExtract()`, `firecrawlService.ts`, `listAgentApiCapabilities()`, community "Data Ingestion Pipeline", community "Scrapling Extraction Service", community "Agent API Capabilities".
