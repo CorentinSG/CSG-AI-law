@@ -27,13 +27,15 @@ worker processes, set `SCRAPLING_WORKER_URL=http://localhost:8765`.
 ## Railway deployment
 
 Create this as a separate Railway service with the service root set to
-`scrapling_worker`. The included `railway.json` starts the worker with:
+`scrapling_worker`. The included `railway.json` starts the worker with a
+production WSGI server:
 
 ```bash
-python worker.py
+gunicorn worker:app --bind 0.0.0.0:$PORT --workers 2 --threads 4 --timeout 120
 ```
 
-Railway provides `PORT`; the worker automatically binds to `0.0.0.0:$PORT`.
+Local development still uses Flask's built-in server via `python worker.py`.
+Railway provides `PORT`; gunicorn binds to `0.0.0.0:$PORT`.
 After deployment, set the main app/worker variable:
 
 ```bash

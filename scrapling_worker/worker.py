@@ -56,6 +56,11 @@ def load_extractor_configs() -> None:
                 print(f"[scrapling_worker] Failed to load {filename}: {exc}", file=sys.stderr)
 
 
+# Load extractor configs at import time so they are populated under any WSGI
+# server (e.g. gunicorn imports `worker:app` and never runs the __main__ block).
+load_extractor_configs()
+
+
 def extract_page(url: str, config: dict[str, Any]) -> dict[str, Any]:
     """
     Extract structured content from a URL using Scrapling.
@@ -196,6 +201,8 @@ def extract_batch():
 
 
 if __name__ == "__main__":
-    load_extractor_configs()
+    # Local dev: `python worker.py` runs Flask's built-in server. In production
+    # the service starts via gunicorn (see railway.json); configs are already
+    # loaded at import above, so both paths behave the same.
     print(f"[scrapling_worker] Starting on {HOST}:{PORT}")
     app.run(host=HOST, port=PORT, debug=False)
