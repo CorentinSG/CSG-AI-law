@@ -40,7 +40,7 @@ describe("review-traceability", () => {
     );
   });
 
-  it("keeps official auto-published production-safe items public", () => {
+  it("keeps official production-safe seed items in review", () => {
     const dataset = buildSeedDataset("production_safe");
     const update = dataset.updates.find((item) => item.id === "upd-026");
     const rawItem = dataset.rawItems.find((item) => item.id === "raw-028");
@@ -58,8 +58,8 @@ describe("review-traceability", () => {
       sourceReferences,
     });
 
-    expect(trace.reviewStatus).toBe("published");
-    expect(trace.publicationStatus).toBe("public");
-    expect(trace.reviewRequired).toBe(false);
+    expect(trace.reviewStatus).toBe("needs_review");
+    expect(trace.publicationStatus).toBe("hidden");
+    expect(trace.reviewRequired).toBe(true);
   });
 });

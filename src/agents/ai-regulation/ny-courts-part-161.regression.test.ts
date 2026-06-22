@@ -304,8 +304,8 @@ describe("NY Courts Part 161 regression harness", () => {
     expect(discoveryOnlyAssessment.warnings[0]).toContain("No official or authoritative source");
   });
 
-  it("publishes official Part 161 items without admin approval", () => {
-    const dataset = buildSeedDataset("production_safe");
+  it("publishes official Part 161 demo items without admin approval", () => {
+    const dataset = buildSeedDataset("demo");
     const update = dataset.updates.find((item) => item.id === "upd-026");
     const newsItem = dataset.newsItems.find((item) => item.regulatoryUpdateId === "upd-026");
 
@@ -314,6 +314,18 @@ describe("NY Courts Part 161 regression harness", () => {
     expect(update?.publishedAt).not.toBeNull();
     expect(newsItem?.publicVisibilityStatus).toBe("public");
     expect(newsItem?.relatedMonitorItemId).toBe("upd-026");
+  });
+
+  it("keeps official Part 161 production-safe seed items private", () => {
+    const dataset = buildSeedDataset("production_safe");
+    const update = dataset.updates.find((item) => item.id === "upd-026");
+    const newsItem = dataset.newsItems.find((item) => item.regulatoryUpdateId === "upd-026");
+
+    expect(update?.status).toBe("needs_review");
+    expect(update?.reviewedBy).toBeNull();
+    expect(update?.publishedAt).toBeNull();
+    expect(newsItem?.publicVisibilityStatus).toBe("admin_only");
+    expect(newsItem?.relatedMonitorItemId).toBeNull();
   });
 
   it("rejects common false positives that should not become regulatory items", () => {

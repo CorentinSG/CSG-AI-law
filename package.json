@@ -15,6 +15,7 @@
     "test": "vitest run",
     "test:e2e": "playwright test",
     "report:data-quality": "tsx scripts/report-data-quality.ts",
+    "backfill:news-items": "tsx scripts/backfill-news-items.ts",
     "scan:france-official-legal": "tsx scripts/run-france-official-legal-scan.ts",
     "scan:france-legal-news": "tsx scripts/run-france-legal-news-scan.ts",
     "scan:france-verification": "tsx scripts/run-france-verification-scan.ts",

@@ -57,10 +57,6 @@ function clone<T>(value: T): T {
 }
 
 function toProductionSafeUpdate(update: AiRegulatoryUpdate): AiRegulatoryUpdate {
-  if (update.status === "published" && update.reviewedBy === "system:auto-official-source") {
-    return update;
-  }
-
   return {
     ...update,
     status: "needs_review",
@@ -155,6 +151,7 @@ function buildNewsItems(
   sources: RegulationSource[],
   rawItems: RawRegulatoryItem[],
   updates: AiRegulatoryUpdate[],
+  profile: SeedProfile,
 ): NewsItemRecord[] {
   const rawItemById = new Map(rawItems.map((rawItem) => [rawItem.id, rawItem]));
   const sourceById = new Map(sources.map((source) => [source.id, source]));
@@ -166,13 +163,25 @@ function buildNewsItems(
       source: sourceById.get(update.sourceId) ?? null,
     });
 
-    return {
+    const record = {
       ...news,
       regulatoryUpdateId: update.id,
       rawItemId: update.rawItemId,
       createdAt: update.createdAt,
       updatedAt: update.updatedAt,
     };
+
+    if (profile === "production_safe") {
+      return {
+        ...record,
+        publicVisibilityStatus: "admin_only",
+        relatedMonitorItemId: null,
+        reviewerNotes:
+          "Production-safe seed news is private until a live review or runtime publication workflow publishes it.",
+      };
+    }
+
+    return record;
   });
 }
 
@@ -187,7 +196,7 @@ export function buildSeedDataset(profile: SeedProfile = "production_safe"): Seed
   const processingLogs = clone(aiProcessingLogsSeed);
   const sourceReferences = buildSourceReferences(sources, rawItems, updates);
   const verificationAttempts = buildVerificationAttempts(rawItems);
-  const newsItems = buildNewsItems(sources, rawItems, updates);
+  const newsItems = buildNewsItems(sources, rawItems, updates, profile);
   const countryIntelligence = buildCountryIntelligenceSeed();
   const countryIntelligenceSources = buildCountryIntelligenceSourcesSeed();
 

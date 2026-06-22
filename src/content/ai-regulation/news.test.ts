@@ -174,6 +174,10 @@ describe("AI Law News", () => {
         sourceId: "src-ai-weekly-news-today",
         sourceName: "AI Weekly / AI News Today",
         sourceUrl: "https://aiweekly.co/ai-news-today",
+        status: "needs_review",
+        reviewedBy: null,
+        reviewedAt: null,
+        publishedAt: null,
       }),
       rawItem: rawItem({ rawMetadata: {} }),
       source: officialSource({
@@ -188,8 +192,96 @@ describe("AI Law News", () => {
     expect(item.sourceType).toBe("informal_discovery_source");
     expect(item.sourceReliability).toBe("informal_discovery");
     expect(item.verificationStatus).toBe("discovery_only");
-    expect(item.publicVisibilityStatus).toBe("public");
+    expect(item.publicVisibilityStatus).toBe("admin_only");
     expect(getNewsVerificationLabel(item)).toBe("Discovery lead - requires verification");
+  });
+
+  it("keeps reputable secondary news admin-only when legal signals are weak", () => {
+    const item = buildNewsItemFromUpdate({
+      update: update({
+        status: "needs_review",
+        reviewedBy: null,
+        reviewedAt: null,
+        publishedAt: null,
+        legalArea: "AI governance",
+        developmentType: "Policy report",
+        importanceLevel: "low",
+        confidenceLevel: "low",
+        tags: ["product"],
+      }),
+      rawItem: rawItem({
+        rawMetadata: {
+          sourceReferences: [
+            {
+              sourceRole: "primary",
+              title: "Corporate AI strategy",
+              institution: "Reuters",
+              url: "https://www.reuters.com/example",
+              canonicalUrl: "https://www.reuters.com/example",
+              sourceType: "media",
+              authorityType: "Corporate update",
+              publicationDate: "2026-05-01",
+              retrievedAt: "2026-05-02T00:00:00.000Z",
+              lastVerifiedAt: "2026-05-02T00:00:00.000Z",
+              reliabilityLevel: "medium",
+              verificationStatus: "verified",
+            },
+          ],
+        },
+      }),
+      source: officialSource({
+        id: "news-reuters-legal",
+        name: "Reuters Legal / Technology / Regulation",
+        sourceUrl: "https://www.reuters.com/",
+      }),
+    });
+
+    expect(item.sourceReliability).toBe("reputable_secondary");
+    expect(item.publicVisibilityStatus).toBe("admin_only");
+  });
+
+  it("keeps discovery-only sources admin-only even if stored config is missing", () => {
+    const item = buildNewsItemFromUpdate({
+      update: update({
+        sourceId: "src-global-policy-watch-ai",
+        sourceName: "Global Policy Watch AI (Discovery Only)",
+        status: "needs_review",
+        reviewedBy: null,
+        reviewedAt: null,
+        publishedAt: null,
+      }),
+      rawItem: rawItem(),
+      source: officialSource({
+        id: "src-global-policy-watch-ai",
+        name: "Global Policy Watch AI (Discovery Only)",
+        sourceUrl: "https://www.globalpolicywatch.com/category/artificial-intelligence/",
+        config: {},
+        reliabilityLevel: "low",
+      }),
+    });
+
+    expect(item.sourceType).toBe("informal_discovery_source");
+    expect(item.publicVisibilityStatus).toBe("admin_only");
+    expect(item.relatedMonitorItemId).toBeNull();
+  });
+
+  it("keeps internal smoke-test updates admin-only", () => {
+    const item = buildNewsItemFromUpdate({
+      update: update({
+        id: "upd-smoke-001",
+        status: "needs_review",
+        tags: ["smoke-test", "internal-only", "ftc"],
+        title: "Internal Smoke Test Draft - FTC AI voice-cloning settlement",
+        reviewedBy: null,
+        reviewedAt: null,
+        publishedAt: null,
+      }),
+      rawItem: rawItem(),
+      source: officialSource(),
+    });
+
+    expect(item.publicVisibilityStatus).toBe("admin_only");
+    expect(item.relatedMonitorItemId).toBeNull();
   });
 
   it("exposes cross-source corroboration fields", () => {

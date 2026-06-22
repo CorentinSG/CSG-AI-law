@@ -81,6 +81,7 @@ Multi-agent project. Always update this file after meaningful changes. Include: 
 | 2026-06-10 | F8C-3c structural fields editable | Country `[slug]` admin editor edits the structural content (authorities, measures, ministries, 3 category notes); `saveCountryProfileEditorial` reads them from the form (blank → TS baseline). F8C effectively complete — only `latestRelevantUpdates` jsonb + derived status labels remain TS-authoritative. Build ✓ 414 tests |
 | 2026-06-11 | F6 activated | `.env.example` tracked + Upstash vars documented; user set `UPSTASH_REDIS_REST_URL`/`_TOKEN` in Vercel + redeployed. Scan route now distributed-rate-limited (5/60s per IP) via Upstash REST, in-memory fallback retained. Code was already wired; activation was config-only |
 | 2026-06-10 | T-RT1A runtime source health backend | Added `sourceRuntimeHealth.ts` backend summaries from `source_health_checks`, scan logs, scan jobs, and ingestion logs; cadence-aware thresholds from country registries with scan-frequency fallback; derived `healthy/degraded/stale/inactive` state and consecutive failure counts; 402 tests |
+| 2026-06-22 | Async scan infra live | Railway Node 22 worker, Supabase `scan_jobs`, Vercel enqueue-only cron routing, production alias promoted to `ops/t-ops9-ux`, manual queue-to-worker E2E proven |
 
 ---
 
@@ -117,6 +118,27 @@ src/agents/ai-regulation/sourceRuntimeHealth.ts
 src/agents/ai-regulation/sourceRuntimeHealth.test.ts
 src/agents/ai-regulation/processors/updateRepository.ts
 ```
+
+---
+
+## Phase: Async Scan Infra Live
+
+**Date**: 2026-06-22
+**Status**: Production operational
+
+### What changed
+
+- Railway worker now runs successfully as the detached queue drainer using Node 22 (`NIXPACKS_NODE_VERSION=22`).
+- Supabase migration `004_operational_jobs_and_news.sql` was confirmed live; `scan_jobs` exists with the expected queue fields.
+- Vercel cron routes are configured in enqueue-only mode with `SCAN_JOB_ROUTE_ENQUEUE_ONLY=true` on Production and Preview.
+- The production alias was moved onto branch `ops/t-ops9-ux` (latest validated app commit `ab63d39`) even though that branch is not yet merged into `main`.
+- A manual E2E probe inserted a synthetic queued job into `scan_jobs`; the Railway worker picked it up and processed it. The probe ended in `failed` only because it intentionally used `source_id: null`, which proves the queue/claim/drain path without representing a real source scan.
+
+### Operational notes
+
+- Worker runtime was unstable on Node 20 because Supabase Realtime needed native WebSocket support; Node 22 resolved that runtime issue.
+- The current public `/api/health` endpoint only reports worker heartbeat from actively running jobs, so an idle-but-healthy Railway worker can still look empty in the health snapshot.
+- The infrastructure is live, but a real cron-created job should still be observed to prove the full Vercel-cron-to-Railway loop on production traffic rather than only via manual DB insertion.
 
 ### Verification
 
@@ -907,3 +929,74 @@ npm run build     104+ routes compiled ✓
 1. Deploy Scrapling Python worker (VPS, Railway, Fly.io) and set `SCRAPLING_WORKER_URL` on Vercel
 2. Smoke-test `/api/ingestion/run` with a `firecrawl`-method source
 3. Monitor `ingestion_logs` table in Supabase for first run results
+
+## Phase: Audit hardening
+
+Date: 2026-06-22
+
+What changed
+- Restored the public research registry by reconnecting `researchEntries` in `src/content/research.ts`, which fixed the broken research-content contract and re-enabled static research pages.
+- Tightened AI-law news visibility rules in `src/content/ai-regulation/news.ts`: discovery-only items now stay admin-only, and reputable secondary sources need stronger legal signals plus non-low confidence/importance before going public automatically.
+- Extended `buildHealthSnapshot()` in `src/lib/health.ts` so worker status distinguishes `active`, `idle`, and `unknown`, with `lastActivityAt`/`lastActivityAgeMs` instead of treating every non-running worker as absent.
+- Enriched `listAgentApiCapabilities()` and `buildAdminOperationsSummary()` so backend outputs include `missingEnvVars` and `configuredEnvVars`, making operator setup gaps explicit for the admin UI.
+- Improved `listPrioritizedReviewQueue()` so review items now carry stronger scoring signals and `priorityReasons`, helping the admin surface the most consequential `needs_review` items first.
+
+Files changed
+- `src/content/research.ts`
+- `src/content/ai-regulation/news.ts`
+- `src/content/ai-regulation/news.test.ts`
+- `src/lib/health.ts`
+- `src/lib/health.test.ts`
+- `src/agents/ai-regulation/agentApiCapabilities.ts`
+- `src/agents/ai-regulation/agentApiCapabilities.test.ts`
+- `src/lib/admin-operations-summary.ts`
+- `src/lib/admin-operations-summary.test.ts`
+- `src/lib/admin-review-batch.ts`
+- `src/lib/admin-review-batch.test.ts`
+- `AI_TASKS.md`
+
+Commands run
+- `npm test -- src/content/research.test.ts`
+- `npm test -- src/content/ai-regulation/news.test.ts src/lib/health.test.ts src/agents/ai-regulation/agentApiCapabilities.test.ts src/lib/admin-review-batch.test.ts src/lib/admin-operations-summary.test.ts src/agents/ai-regulation/publicationEligibility.test.ts`
+- `npm test`
+- `npm run typecheck`
+- `VERCEL_ENV=preview ADMIN_USERNAME=csg-admin ADMIN_PASSWORD=<set> npm run build`
+
+Verification
+- Targeted research test PASS
+- Targeted backend hardening tests PASS
+- Full test suite PASS (`102` files / `539` tests)
+- Typecheck PASS
+- Production build PASS
+
+Limitations
+- This hardening pass does not yet remediate specific degraded/inaccessible sources; it improves visibility and prioritization around them.
+- News-quality tightening is heuristic and intentionally conservative; additional publication-integrity tuning may still be useful on live data.
+
+Next steps
+1. Let Claude surface `worker.state`, `lastActivityAt`, and capability env-var gaps in admin surfaces.
+2. Review a sample of currently published legal-news items to see whether the stricter gating should be tightened further.
+3. Use the new `priorityReasons` feed to reduce the `needs_review` backlog more deliberately.
+
+## Phase: News backfill and publication integrity
+
+Date: 2026-06-22
+
+What changed
+- Added a tested `backfillNewsItemsFromUpdates()` service plus `npm run backfill:news-items` so the live `news_items` table can be rebuilt from monitor updates without relying on legacy fallback behavior.
+- Ran the backfill against Supabase: `327` news items upserted, ending at `95` public and `232` admin-only.
+- Hardened news visibility so internal smoke-test updates and sources named `(Discovery Only)` stay admin-only even when legacy source config has been overwritten by runtime fetch metadata.
+- Tightened the production-safe seed profile so demo/seed updates never appear as pre-published monitor items.
+
+Verification
+- `npm test -- src/agents/ai-regulation/legalIntegrity.test.ts` PASS
+- `npm test -- src/lib/news-backfill.test.ts` PASS
+- `npm test -- src/content/ai-regulation/news.test.ts` PASS
+- `npm run backfill:news-items` dry-run PASS
+- `npm run backfill:news-items -- --write` PASS against Supabase
+- Live DB query confirms no public `news_items` matching smoke-test or Discovery Only sources
+- `npm run report:data-quality` PASS with integrity `high=0`, `medium=18`
+
+Remaining work
+- The 18 medium data-quality findings need source/citation research, not automatic publication changes.
+- Optional connector credentials are still missing for NewsAPI, Legifrance/PISTE, Judilibre, CourtListener/RECAP, and Legal Data Hunter.

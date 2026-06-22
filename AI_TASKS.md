@@ -21,7 +21,10 @@ Each agent edits only its own rows. Status vocabulary: `CLAIMED` · `WIP` · `BL
 | T-COURTLISTENER-CONNECTOR (P3a) | Codex | DONE-LOCAL | `ops/t-ops9-ux` @ `155bc08` | `src/agents/ai-regulation/connectors/api-connector.ts`, `src/lib/env.ts`, `src/agents/ai-regulation/agentApiCapabilities.ts`, tests | `ApiConnector`, `listAgentApiCapabilities()`, community "API Connectors and Legal Docs", community "Agent API Capabilities" | 2026-06-21 |
 | T-LEGAL-DATA-HUNTER-CONNECTOR (P3b) | Codex | DONE-LOCAL | `ops/t-ops9-ux` @ `f78c9e4` | `src/agents/ai-regulation/connectors/api-connector.ts`, `src/lib/env.ts`, `src/agents/ai-regulation/agentApiCapabilities.ts`, tests | `ApiConnector`, `listAgentApiCapabilities()`, community "API Connectors and Legal Docs", community "Agent API Capabilities" | 2026-06-21 |
 | T-CENTRAL-SCHEDULER (P4) | Codex | DONE-LOCAL | `ops/t-ops9-ux` @ `c8af9d4` | `src/agents/ai-regulation/scheduler/**`, `src/app/api/cron/ai-regulation-central-scheduler/**`, `src/agents/ai-regulation/processors/scanJobs.ts` | `buildCentralMonitoringSchedule()`, `enqueueCentralMonitoringSchedule()`, `queueScanJob()`, community "Scheduler Implementation", community "Scan Job Management" | 2026-06-21 |
-| T-WORKER-RAILWAY (P0) | Codex | BLOCKED | `ops/t-ops9-ux` @ working tree | `package.json`, `package-lock.json`, `railway.json` | `drainQueuedScanJobs()`, `createScanWorkerConfig()`, community "Scan Job Management" | 2026-06-21 |
+| T-WORKER-RAILWAY (P0) | Codex | DONE-LOCAL | `ops/t-ops9-ux` @ `ab63d39` | `package.json`, `package-lock.json`, `railway.json`, Railway/Vercel/Supabase runtime config | `drainQueuedScanJobs()`, `createScanWorkerConfig()`, community "Scan Job Management" | 2026-06-22 |
+| T-AUDIT-HARDENING | Codex | DONE-LOCAL | `ops/t-ops9-ux` @ `ab63d39` | `src/content/ai-regulation/news.ts`, `src/lib/health.ts`, `src/agents/ai-regulation/agentApiCapabilities.ts`, `src/lib/admin-review-batch.ts`, related tests | `buildNewsItemFromUpdate()`, `buildHealthSnapshot()`, `listAgentApiCapabilities()`, `listPrioritizedReviewQueue()`, community "Source Runtime Health", community "Admin Review and Summaries" | 2026-06-22 |
+| T-SITE-HEALTH-AUDIT | Codex | REVIEW | `ops/t-ops9-ux` @ `0ec9ac7` | none (audit-only) | `buildHealthSnapshot()`, `buildAdminOperationsSummary()`, `queueScanJob()`, community "Source Runtime Health", community "Scan Job Management" | 2026-06-22 |
+| T-NEWS-BACKFILL-INTEGRITY | Codex | DONE-LOCAL | `ops/t-ops9-ux` @ working tree | `src/content/ai-regulation/news.ts`, `src/lib/news-backfill.ts`, `scripts/backfill-news-items.ts`, `src/db/seed/seed-profiles.ts`, related tests | `buildNewsItemFromUpdate()`, `backfillNewsItemsFromUpdates()`, `buildLegalDatabaseIntegrityReport()`, community "News and Regulation Admin", community "DB Repository Layer" | 2026-06-22 |
 | T-BATCH-REVIEW-UI (P2b) | Claude Code | DONE-LOCAL | `ops/t-ops9-ux` @ `0f2809d` | `src/app/admin/ai-regulation/review/**`, `src/app/admin/ai-regulation/actions.ts`, `src/app/admin/page.tsx` | `listPrioritizedReviewQueue()`, `batchTransitionReviewStatus()`, `bulkUpdateReviewStatus`, community "Admin Review and Summaries" | 2026-06-21 |
 | T-BUILD-FIX | Claude Code | DONE-LOCAL | `ops/t-ops9-ux` @ `bf0d746` | `src/app/page.tsx`, `src/components/site/update-card.tsx` | `UpdateCard`, community "UI Components and Visual Elements" | 2026-06-21 |
 | T-E2E (P6) | Claude Code | DONE-LOCAL | `ops/t-ops9-ux` @ `aa0346c` | `playwright.config.ts`, `e2e/**`, `vitest.config.ts`, `package.json`, `.gitignore` | n/a (test harness) | 2026-06-21 |
@@ -43,6 +46,62 @@ YYYY-MM-DD · <Agent> · <TASK-ID> · <STATUS>
 ```
 
 ## Current status
+
+2026-06-22 · Codex → Claude Code · T-NEWS-BACKFILL-INTEGRITY · DONE-LOCAL
+- Intent:        Fill the live `news_items` table from existing monitor updates and harden visibility so internal smoke-test/discovery-only leads cannot appear as public legal news.
+- Files:         `src/content/ai-regulation/news.ts`, `src/content/ai-regulation/news.test.ts`, `src/lib/news-backfill.ts`, `src/lib/news-backfill.test.ts`, `scripts/backfill-news-items.ts`, `package.json`, `src/db/seed/seed-profiles.ts`, `src/agents/ai-regulation/legalIntegrity.test.ts`, `AI_TASKS.md`, `PROJECT_LOGBOOK.md`.
+- Graph anchors: `buildNewsItemFromUpdate()`, `backfillNewsItemsFromUpdates()`, `buildLegalDatabaseIntegrityReport()`, community "News and Regulation Admin", community "DB Repository Layer", community "API Connectors and Legal Docs".
+- Verification:  `npm test -- src/agents/ai-regulation/legalIntegrity.test.ts` PASS · `npm test -- src/lib/news-backfill.test.ts` PASS · `npm test -- src/content/ai-regulation/news.test.ts` PASS · `npm run backfill:news-items` dry-run PASS (`329` scanned, `327` would upsert) · `npm run backfill:news-items -- --write` PASS against Supabase (`327` upserted, final `95` public / `232` admin-only) · live DB query confirms `badPublic: []` for discovery-only/smoke-test public news · `npm run report:data-quality` PASS with integrity `high=0`, `medium=18`.
+- Branch/commit: `ops/t-ops9-ux` @ working tree
+- Next:          Codex should finish full verification/build and commit/push. Claude can treat `/news` as populated now; remaining content-quality work is citation research for the 18 medium findings and review-backlog reduction, not emergency infra.
+
+2026-06-22 · Codex → Claude Code · T-SITE-HEALTH-AUDIT · REVIEW
+- Intent:        Audit local and live site health after the worker/API/news/database hardening.
+- Files:         none (audit-only; no code edits).
+- Graph anchors: `buildHealthSnapshot()`, `buildAdminOperationsSummary()`, `queueScanJob()`, `listAgentApiCapabilities()`, community "Source Runtime Health", community "Scan Job Management", community "API Connectors and Legal Docs".
+- Verification:  `agent-sync.ps1` PASS · `npm test` PASS (102 files / 540 tests) · `npm run typecheck` PASS after transient admin-page mismatch resolved in working tree · `VERCEL_ENV=preview ADMIN_USERNAME=csg-admin ADMIN_PASSWORD=<set> npm run build` PASS · `npm run test:e2e` PASS (12/12) · live public routes `/`, `/api/health`, `/ai-regulation`, `/news`, `/research`, `/ai-regulation/europe/france`, `/ai-regulation/united-states/new-york` all HTTP 200 with redirects followed · admin operations summary HTTP 200 with Basic Auth · live DB shows recent Vercel cron jobs drained by Railway worker.
+- Branch/commit: `ops/t-ops9-ux` @ `0ec9ac7`
+- Next:          Codex should fix the remaining product/integration gaps: production is still serving commit `ab63d39` while local HEAD is `0ec9ac7`; `news_items` is empty; NewsAPI/Legifrance/Judilibre/CourtListener/Legal Data Hunter credentials are missing; `SCRAPLING_WORKER_URL`/Firecrawl are not configured locally; data-quality report still has 19 integrity findings, including `production-seed-not-private`.
+
+2026-06-22 · Codex → Claude Code · T-AUDIT-HARDENING · HANDOFF→Claude
+- Intent:        Tighten backend product quality after the audit: reduce false-positive public legal news, distinguish idle-vs-active worker health, expose exact missing connector env vars, and make the review backlog priority feed more actionable.
+- Files:         `src/content/ai-regulation/news.ts`, `src/content/ai-regulation/news.test.ts`, `src/lib/health.ts`, `src/lib/health.test.ts`, `src/agents/ai-regulation/agentApiCapabilities.ts`, `src/agents/ai-regulation/agentApiCapabilities.test.ts`, `src/lib/admin-operations-summary.ts`, `src/lib/admin-operations-summary.test.ts`, `src/lib/admin-review-batch.ts`, `src/lib/admin-review-batch.test.ts`, `src/content/research.ts`.
+- Graph anchors: `buildNewsItemFromUpdate()`, `buildHealthSnapshot()`, `listAgentApiCapabilities()`, `buildAdminOperationsSummary()`, `listPrioritizedReviewQueue()`, community "Source Runtime Health", community "Admin Review and Summaries", community "Intelligence Hub UI".
+- Verification:  `npm test -- src/content/research.test.ts` PASS · `npm test -- src/content/ai-regulation/news.test.ts src/lib/health.test.ts src/agents/ai-regulation/agentApiCapabilities.test.ts src/lib/admin-review-batch.test.ts src/lib/admin-operations-summary.test.ts src/agents/ai-regulation/publicationEligibility.test.ts` PASS · `npm test` PASS (102 files / 539 tests) · `npm run typecheck` PASS · `VERCEL_ENV=preview ADMIN_USERNAME=csg-admin ADMIN_PASSWORD=<set> npm run build` PASS.
+- Branch/commit: `ops/t-ops9-ux` @ working tree
+- Next:          Claude can now surface `worker.state`, `worker.lastActivityAt`, and capability `missingEnvVars/configuredEnvVars` in the admin UI. Public-news presentation should assume discovery-only items are admin-only unless officially confirmed/corroborated or strong legal secondary-source signals exist. Codex next candidate is deeper publication-integrity tuning or source-warning remediation.
+
+2026-06-22 · Codex → Claude Code · AUDIT-POST-P0 · HANDOFF→Claude
+- Intent:        Share the post-infrastructure audit so product work can split cleanly: infra is live, but content quality, observability, and review ergonomics are now the main priorities.
+- Files:         `AI_TASKS.md`.
+- Graph anchors: `buildHealthSnapshot()`, `drainQueuedScanJobs()`, `listAgentApiCapabilities()`, `buildAdminOperationsSummary()`, community "Source Runtime Health", community "Scan Job Management", community "Admin Review and Summaries", community "Intelligence Hub UI".
+- Verification:  `npm run typecheck` PASS · `npm run build` PASS with preview admin env · production alias currently serves `ops/t-ops9-ux` @ `ab63d39` and `/api/health` reports `ok: true`, `dataMode: "supabase"`, DB reachable · Supabase live data shows `scan_jobs` activity, `293` `needs_review`, `34` published updates, `70` sources (`66` active) · `npm test` still FAILS only on `src/content/research.test.ts` because `src/content/research.ts` is currently empty.
+- Branch/commit: `ops/t-ops9-ux` @ `ab63d39`
+- Next:          Claude owns UX/visibility surfaces: keep improving admin operations/readability, expose source-warning and worker-idle states more clearly, and tighten review ergonomics. Codex owns backend/product integrity: fix the failing research/content mismatch, improve worker heartbeat observability when idle, tighten legal-news publication relevance so general AI/company news stops slipping into published legal updates, and continue connector/official-source hardening where credentials or parsers are still missing.
+
+2026-06-22 · Codex · T-WORKER-RAILWAY (P0) · DONE-LOCAL
+- Intent:        Record that the async production scan architecture is now live end-to-end: Vercel enqueue-only cron routing, Supabase `scan_jobs`, and Railway worker drain loop are all operational.
+- Files:         `AI_TASKS.md` (runtime/deployment state only; infra changes were applied in Vercel, Railway, and Supabase).
+- Graph anchors: `drainQueuedScanJobs()`, `createScanWorkerConfig()`, `buildHealthSnapshot()`, community "Scan Job Management", community "Source Runtime Health".
+- Verification:  Railway worker moved to Node 22 via `NIXPACKS_NODE_VERSION=22` and runs successfully; Supabase migration `004_operational_jobs_and_news.sql` confirmed with live `scan_jobs` table; `SCAN_JOB_ROUTE_ENQUEUE_ONLY=true` confirmed on Vercel Production + Preview; `ops/t-ops9-ux` promoted to production alias; manual E2E test inserted a queued job into `scan_jobs` and Railway processed it successfully (expected failure only because `source_id: null` was used for the synthetic probe).
+- Branch/commit: `ops/t-ops9-ux` @ `ab63d39`
+- Next:          Remaining work is product-quality rather than infra bring-up: reconcile prod/main divergence, prove a real cron-created job, and tighten legal-news relevance/publication quality.
+
+2026-06-21 · Codex · T-WORKER-RAILWAY (P0) · DONE-LOCAL
+- Intent:        Fix the Railway/Railpack build failure by making the Next cleanup step preserve the mounted `.next/cache` BuildKit cache instead of deleting the whole `.next` directory.
+- Files:         `scripts/clean-next.mjs`, `AI_TASKS.md`.
+- Graph anchors: n/a (build tooling), community "Scan Job Management" remains the deployment target.
+- Verification:  `agent-sync.ps1` PASS · `node scripts/clean-next.mjs` smoke PASS with `.next/cache` preserved · `npx eslint scripts/clean-next.mjs` PASS · global `npm run lint -- scripts/clean-next.mjs` still FAILS on unrelated pre-existing `tools/llm-council/frontend/src/App.jsx` hook ordering errors.
+- Branch/commit: `ops/t-ops9-ux` @ working tree
+- Next:          Redeploy Railway from the latest `ops/t-ops9-ux` commit. If build reaches runtime, confirm worker logs show `[scan-worker] APP_DATA_MODE=supabase`.
+
+2026-06-21 · Claude Code · TOOLING-LLM-COUNCIL · DONE-LOCAL
+- Intent:        Install Karpathy's LLM Council (multi-model deliberation tool) as a standalone, gitignored local app — dev aid, not part of the site.
+- Files:         `tools/llm-council/` (cloned, gitignored), `.gitignore` (added `tools/llm-council/`), `tools/llm-council/.env` (placeholder key, gitignored), `tools/llm-council/start.ps1` (new Windows launcher). No site/app code touched.
+- Graph anchors: n/a (external tool, not part of the app graph).
+- Verification:  `uv sync` OK · frontend `npm install` OK · backend boots and returns HTTP 200 on `:8001/` and `/docs`. Council answers require a real OpenRouter key.
+- Branch/commit: working tree (gitignored — nothing to commit).
+- Next:          Operator — paste a real `OPENROUTER_API_KEY` (openrouter.ai, paid) into `tools/llm-council/.env`, then run `tools/llm-council/start.ps1` (backend :8001 + frontend :5173). Models: gpt-5.1, gemini-3-pro-preview, claude-sonnet-4.5, grok-4; chairman gemini-3-pro-preview.
 
 2026-06-21 · Codex · T-WORKER-RAILWAY (P0) · BLOCKED
 - Intent:        Prepare the permanent scan worker for Railway deployment and verify the live blockers before infra cutover.

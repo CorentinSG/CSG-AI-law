@@ -101,16 +101,25 @@ type NewsVerificationLabelInput = Pick<
 
 function sourceTypeFor(source: RegulationSource | null): AiLawNewsSourceType {
   if (!source) return "official_source";
-  if (isDiscoveryOnlySource(source)) return "informal_discovery_source";
+  if (isDiscoverySource(source)) return "informal_discovery_source";
   const configured = getAiLawNewsSourceConfigByName(source.name);
   return configured?.sourceType ?? "official_source";
 }
 
 function reliabilityFor(source: RegulationSource | null): AiLawNewsSourceReliability {
   if (!source) return "official_authority";
-  if (isDiscoveryOnlySource(source)) return "informal_discovery";
+  if (isDiscoverySource(source)) return "informal_discovery";
   const configured = getAiLawNewsSourceConfigByName(source.name);
   return configured?.reliabilityLevel ?? "official_authority";
+}
+
+function isDiscoverySource(source: RegulationSource | null) {
+  if (!source) return false;
+  return isDiscoveryOnlySource(source) || /\bdiscovery only\b/i.test(source.name);
+}
+
+function isInternalOnlyUpdate(update: AiRegulatoryUpdate) {
+  return update.tags.some((tag) => /^(internal-only|smoke-test)$/i.test(tag));
 }
 
 function verificationStatusFor(input: {
@@ -126,23 +135,79 @@ function verificationStatusFor(input: {
   if (input.corroboratingSources.length > 0) {
     return "corroborated";
   }
-  if (isDiscoveryOnlySource(input.source)) {
+  if (isDiscoverySource(input.source)) {
     return input.officialSourceFound ? "needs_review" : "discovery_only";
   }
   return input.officialSourceFound ? "official_verified" : "needs_review";
 }
 
+const LEGAL_NEWS_DEVELOPMENT_TYPES = new Set([
+  "Binding law",
+  "Regulation",
+  "Agency guidance",
+  "Enforcement action",
+  "Court decision",
+  "Case law",
+  "Legislative proposal",
+  "Consultation",
+  "Policy",
+]);
+
+function hasLegalNewsSignals(input: {
+  update: AiRegulatoryUpdate;
+  sourceType: AiLawNewsSourceType;
+}) {
+  const legalArea = input.update.legalArea.toLowerCase();
+  const developmentType = input.update.developmentType;
+  const tags = input.update.tags.map((tag) => tag.toLowerCase());
+
+  const legalAreaLooksLegal =
+    /(law|legal|regulat|compliance|privacy|data|cloud|court|case|litig|governance|consumer|employment|finance|copyright|competition)/i
+      .test(legalArea);
+  const legalTagPresent = tags.some((tag) =>
+    /(law|legal|regulat|privacy|data|cloud|court|case|litig|compliance|governance|enforcement)/i.test(
+      tag,
+    ),
+  );
+
+  if (input.sourceType === "official_source") return true;
+  if (LEGAL_NEWS_DEVELOPMENT_TYPES.has(developmentType)) return true;
+  return legalAreaLooksLegal || legalTagPresent;
+}
+
 function isNewsPublicBySourceQuality(input: {
   update: AiRegulatoryUpdate;
+  sourceType: AiLawNewsSourceType;
   sourceReliability: AiLawNewsSourceReliability;
   officialSourceFound: boolean;
   citationEligible: boolean;
   corroboratingSources: SourceReference[];
 }) {
+  const legalSignals = hasLegalNewsSignals({
+    update: input.update,
+    sourceType: input.sourceType,
+  });
+
+  if (isInternalOnlyUpdate(input.update)) return false;
+  if (input.sourceType === "informal_discovery_source") return false;
   if (input.update.status === "published") return true;
-  if (input.officialSourceFound && input.citationEligible) return true;
-  if (input.corroboratingSources.length > 0) return true;
-  return ["official_authority", "reputable_secondary"].includes(input.sourceReliability);
+  if (input.officialSourceFound && input.citationEligible && legalSignals) return true;
+  if (input.corroboratingSources.length > 0 && legalSignals) return true;
+
+  if (input.sourceReliability === "official_authority") {
+    return input.citationEligible && legalSignals;
+  }
+
+  if (input.sourceReliability === "reputable_secondary") {
+    return (
+      input.citationEligible &&
+      legalSignals &&
+      input.update.confidenceLevel !== "low" &&
+      input.update.importanceLevel !== "low"
+    );
+  }
+
+  return false;
 }
 
 function datePrecisionFor(item: AiRegulatoryUpdate): AiLawNewsDatePrecision {
@@ -175,11 +240,13 @@ export function buildNewsItemFromUpdate(input: {
   );
   const publicBySourceQuality = isNewsPublicBySourceQuality({
     update: input.update,
+    sourceType: sourceTypeFor(input.source),
     sourceReliability,
     officialSourceFound,
     citationEligible: citationAssessment.publicationEligible,
     corroboratingSources,
   });
+  const sourceType = sourceTypeFor(input.source);
 
   return {
     id: `news-${input.update.id}`,
@@ -196,7 +263,7 @@ export function buildNewsItemFromUpdate(input: {
       null,
     sourceName: input.update.sourceName,
     sourceUrl: input.update.sourceUrl,
-    sourceType: sourceTypeFor(input.source),
+    sourceType,
     sourceReliability,
     sourceJurisdiction: input.source?.jurisdiction ?? input.update.jurisdiction,
     jurisdiction: input.update.jurisdiction,

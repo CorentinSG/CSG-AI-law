@@ -40,4 +40,16 @@ describe("buildLegalDatabaseIntegrityReport", () => {
       ),
     ).toBe(true);
   });
+
+  it("keeps the production-safe seed private", () => {
+    const report = buildLegalDatabaseIntegrityReport(
+      new Date("2026-06-01T12:00:00.000Z"),
+    );
+
+    expect(
+      report.findings.some(
+        (finding) => finding.code === "production-seed-not-private",
+      ),
+    ).toBe(false);
+  });
 });
