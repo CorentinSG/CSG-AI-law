@@ -39,6 +39,7 @@ import { AdminAiPanel } from "./_components/AdminAiPanel";
 import { AdminFreshnessPanel } from "./_components/AdminFreshnessPanel";
 import { AdminSystemStatusBand } from "./_components/AdminSystemStatusBand";
 import { AdminIntegrationsPanel } from "./_components/AdminIntegrationsPanel";
+import { AdminHealthStrip } from "./_components/AdminHealthStrip";
 import { countQueuedJobs, countStaleRunningJobs } from "./system-status";
 import { summarizeRuntimeHealth } from "./freshness-summary";
 import { buildHealthSnapshot } from "@/lib/health";
@@ -245,6 +246,8 @@ export default async function AdminAiRegulationPage({
         sourcesInaccessible={runtimeRollup.inaccessible}
         reviewBacklog={reviewBacklog}
       />
+
+      <AdminHealthStrip health={health} />
 
       <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         <IntelligenceSignal
