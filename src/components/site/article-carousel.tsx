@@ -30,10 +30,15 @@ export function ArticleCarousel({ items }: { items: ArticleCarouselItem[] }) {
 
   useEffect(() => {
     if (!emblaApi) return;
-    updateState();
+    // Defer the initial sync so we don't call setState synchronously inside the
+    // effect (avoids cascading-render lint and is behaviourally identical).
+    queueMicrotask(updateState);
     emblaApi.on("select", updateState);
     emblaApi.on("reInit", updateState);
-    return () => { emblaApi.off("select", updateState); };
+    return () => {
+      emblaApi.off("select", updateState);
+      emblaApi.off("reInit", updateState);
+    };
   }, [emblaApi, updateState]);
 
   return (

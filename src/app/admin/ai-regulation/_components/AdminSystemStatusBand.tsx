@@ -1,4 +1,5 @@
-import type { WorkerStatusSummary } from "@/app/admin/ai-regulation/system-status";
+import type { HealthSnapshot } from "@/lib/health";
+import { workerDisplay } from "@/app/admin/ai-regulation/system-status";
 
 const tone: Record<string, { dot: string; chip: string; ring: string }> = {
   ok: { dot: "bg-emerald-400", chip: "text-emerald-200", ring: "border-emerald-400/30" },
@@ -11,6 +12,16 @@ function metricTone(value: number, warnAt: number, dangerAt: number): "ok" | "wa
   if (value >= dangerAt) return "danger";
   if (value >= warnAt) return "warning";
   return "ok";
+}
+
+function formatAge(ms: number | null): string {
+  if (ms === null) return "no activity yet";
+  const mins = Math.round(ms / 60_000);
+  if (mins < 1) return "just now";
+  if (mins < 60) return `${mins}m ago`;
+  const hours = Math.round(mins / 60);
+  if (hours < 48) return `${hours}h ago`;
+  return `${Math.round(hours / 24)}d ago`;
 }
 
 function Metric({
@@ -34,55 +45,56 @@ function Metric({
 }
 
 /**
- * At-a-glance operational health band for the top of the admin dashboard
- * (T-RT readability): worker state, queue depth, sources at risk, review
- * backlog — so the global state is legible without scrolling the page.
+ * At-a-glance operational health band for the top of the admin dashboard:
+ * worker state (from the canonical `health.worker` contract), queue depth,
+ * sources at risk, and review backlog — legible without scrolling.
  */
 export function AdminSystemStatusBand({
   worker,
+  staleRunningCount,
+  queuedCount,
   sourcesAtRisk,
   sourcesInaccessible,
   reviewBacklog,
-  queueDepth,
 }: {
-  worker: WorkerStatusSummary;
+  worker: HealthSnapshot["worker"];
+  staleRunningCount: number;
+  queuedCount: number;
   sourcesAtRisk: number;
   sourcesInaccessible: number;
   reviewBacklog: number;
-  queueDepth: number;
 }) {
-  const w = tone[worker.tone];
+  const display = workerDisplay(worker, staleRunningCount, queuedCount);
+  const w = tone[display.tone];
+  const queueDepth = worker.runningJobs + queuedCount;
   return (
     <section className="grid gap-4 lg:grid-cols-[1.4fr_1fr_1fr_1fr]">
       <div className={`rounded-2xl border bg-black/30 p-4 ${w.ring}`}>
         <div className="flex items-center justify-between">
-          <p className="text-[11px] uppercase tracking-[0.24em] text-zinc-500">Worker</p>
+          <p className="text-[11px] uppercase tracking-[0.24em] text-zinc-500">
+            Worker · <span className="text-zinc-400">{display.state}</span>
+          </p>
           <span className="flex items-center gap-2">
             <span
               className={`h-2.5 w-2.5 rounded-full ${w.dot} ${
-                worker.state === "active" ? "animate-pulse" : ""
+                display.tone === "ok" ? "animate-pulse" : ""
               }`}
             />
-            <span className={`text-xs uppercase tracking-[0.18em] ${w.chip}`}>{worker.label}</span>
+            <span className={`text-xs uppercase tracking-[0.18em] ${w.chip}`}>{display.label}</span>
           </span>
         </div>
-        <p className={`mt-2 text-2xl font-semibold ${w.chip}`}>
-          {worker.state === "idle"
-            ? "Idle"
-            : worker.state === "broken"
-              ? "Needs attention"
-              : worker.state === "backlog"
-                ? "Catching up"
-                : "Running"}
+        <p className={`mt-2 text-2xl font-semibold ${w.chip}`}>{display.label}</p>
+        <p className="mt-1 text-xs text-zinc-400">{display.detail}</p>
+        <p className="mt-2 text-[11px] uppercase tracking-[0.18em] text-zinc-500">
+          Last activity: {formatAge(worker.lastActivityAgeMs)}
         </p>
-        <p className="mt-1 text-xs text-zinc-400">{worker.detail}</p>
       </div>
 
       <Metric
         label="Queue depth"
         value={queueDepth}
-        hint={`${worker.runningCount} running · ${worker.queuedCount} queued`}
-        t={worker.staleRunningCount > 0 ? "danger" : queueDepth > 0 ? "warning" : "ok"}
+        hint={`${worker.runningJobs} running · ${queuedCount} queued`}
+        t={staleRunningCount > 0 ? "danger" : queueDepth > 0 ? "warning" : "ok"}
       />
       <Metric
         label="Sources at risk"

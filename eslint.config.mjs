@@ -17,6 +17,8 @@ const eslintConfig = defineConfig([
     ".agents/**",
     ".github/skills/**",
     ".impeccable/**",
+    // Standalone tool sub-projects ship their own lint config and tooling.
+    "tools/**",
   ]),
 ]);
 

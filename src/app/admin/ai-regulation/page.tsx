@@ -37,8 +37,9 @@ import { AdminCoveragePanel } from "./_components/AdminCoveragePanel";
 import { AdminAiPanel } from "./_components/AdminAiPanel";
 import { AdminFreshnessPanel } from "./_components/AdminFreshnessPanel";
 import { AdminSystemStatusBand } from "./_components/AdminSystemStatusBand";
-import { deriveWorkerStatus } from "./system-status";
+import { countQueuedJobs, countStaleRunningJobs } from "./system-status";
 import { summarizeRuntimeHealth } from "./freshness-summary";
+import { buildHealthSnapshot } from "@/lib/health";
 
 export const dynamic = "force-dynamic";
 const reviewQueuePageSize = 18;
@@ -78,7 +79,7 @@ export default async function AdminAiRegulationPage({
   const params = ((await searchParams) ?? {}) as Record<string, string>;
   const page = parsePageParam(params.page, 1);
   const leadsPage = parsePageParam(params.leadsPage, 1);
-  const [updatesPage, sources, scanLogs, processingLogs, rawItems, scanJobs, options, sourceHealthChecks, discoveryLeadsPage, runtimeHealth, needsReviewPage] = await Promise.all([
+  const [updatesPage, sources, scanLogs, processingLogs, rawItems, scanJobs, options, sourceHealthChecks, discoveryLeadsPage, runtimeHealth, health] = await Promise.all([
     updateRepository.listUpdatesPage(params, {
       limit: reviewQueuePageSize,
       offset: getOffsetFromPage(page, reviewQueuePageSize),
@@ -99,8 +100,8 @@ export default async function AdminAiRegulationPage({
       offset: getOffsetFromPage(leadsPage, discoveryLeadsPageSize),
     }),
     getSourceRuntimeHealthSummaries(),
-    // Accurate needs_review backlog count (limit 1 — we only need the total).
-    updateRepository.listUpdatesPage({ status: "needs_review" }, { limit: 1, offset: 0 }),
+    // Canonical health snapshot: worker state/lastActivity + needs_review backlog.
+    buildHealthSnapshot({ access: "authenticated" }),
   ]);
   const updates = updatesPage.items;
   // T-RT4B: within-page prioritization so reviewers see actionable, higher-authority
@@ -170,13 +171,13 @@ export default async function AdminAiRegulationPage({
     return summary.tone === "warning" || summary.tone === "danger";
   }).length;
 
-  // Operational glance (T-RT readability): worker state inferred from recent
-  // scan jobs, source-health rollup, and the accurate needs_review backlog.
-  const workerStatus = deriveWorkerStatus(scanJobs.items);
+  // Operational glance: canonical worker state from health.worker, enriched
+  // with a stuck signal from recent scan jobs; source-health rollup; backlog.
+  const staleRunningCount = countStaleRunningJobs(scanJobs.items);
+  const queuedJobCount = countQueuedJobs(scanJobs.items);
   const runtimeRollup = summarizeRuntimeHealth(runtimeHealth);
   const sourcesAtRisk = runtimeRollup.stale + runtimeRollup.degraded;
-  const reviewBacklog = needsReviewPage.total;
-  const queueDepth = workerStatus.runningCount + workerStatus.queuedCount;
+  const reviewBacklog = health.review.pendingNeedsReviewCount;
 
   return (
     <SiteShell className="space-y-8" variant="admin" showFooter={false}>
@@ -234,11 +235,12 @@ export default async function AdminAiRegulationPage({
       </section>
 
       <AdminSystemStatusBand
-        worker={workerStatus}
+        worker={health.worker}
+        staleRunningCount={staleRunningCount}
+        queuedCount={queuedJobCount}
         sourcesAtRisk={sourcesAtRisk}
         sourcesInaccessible={runtimeRollup.inaccessible}
         reviewBacklog={reviewBacklog}
-        queueDepth={queueDepth}
       />
 
       <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
