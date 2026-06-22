@@ -10,11 +10,24 @@ export interface BulkReviewItem {
   meta: string;
   authorityLabel: string;
   importance: string;
+  priorityReasons: string[];
 }
 
 function isHighPriority(importance: string) {
   return importance === "critical" || importance === "high";
 }
+
+// Humanize the raw priority-reason codes from the prioritized queue so a
+// reviewer can see at a glance why an item is ranked high.
+const reasonLabels: Record<string, string> = {
+  official_authority_type: "Official authority",
+  official_or_court_domain: "Official / court source",
+  priority_legal_area: "Priority legal area",
+  importance_critical: "Critical",
+  importance_high: "High importance",
+  has_publication_date: "Dated",
+  high_confidence: "High confidence",
+};
 
 /**
  * Batch review surface: select many needs_review items and apply one
@@ -154,6 +167,18 @@ export function BulkReviewForm({ items }: { items: BulkReviewItem[] }) {
                   {item.title}
                 </a>
                 <p className="mt-0.5 text-xs text-zinc-500">{item.meta}</p>
+                {item.priorityReasons.length > 0 ? (
+                  <div className="mt-1.5 flex flex-wrap gap-1">
+                    {item.priorityReasons.map((reason) => (
+                      <span
+                        key={reason}
+                        className="rounded border border-white/10 bg-white/5 px-1.5 py-0.5 text-[10px] uppercase tracking-[0.12em] text-zinc-400"
+                      >
+                        {reasonLabels[reason] ?? reason.replaceAll("_", " ")}
+                      </span>
+                    ))}
+                  </div>
+                ) : null}
               </div>
               <div className="flex shrink-0 flex-col items-end gap-1">
                 <span className="rounded border border-white/10 bg-white/5 px-1.5 py-0.5 text-[11px] text-zinc-300">

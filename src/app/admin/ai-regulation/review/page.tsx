@@ -26,6 +26,7 @@ export default async function BulkReviewPage() {
     meta: `${update.country} · ${update.legalArea} · ${update.sourceName}`,
     authorityLabel: update.authorityType ?? "—",
     importance: update.importanceLevel,
+    priorityReasons: update.priorityReasons,
   }));
 
   return (
