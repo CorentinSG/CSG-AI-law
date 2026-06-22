@@ -26,7 +26,11 @@ export async function scraplingExtract(
     res = await fetch(`${SCRAPLING_WORKER_URL}/extract`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ url: normalized, config: config ?? {} }),
+      body: JSON.stringify({
+        url: normalized,
+        source_id: sourceId,
+        config: config ?? {},
+      }),
       signal: AbortSignal.timeout(30_000),
     });
   } catch (err) {

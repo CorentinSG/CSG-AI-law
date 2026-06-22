@@ -11,23 +11,45 @@ The worker exposes a simple HTTP API that Next.js calls via fetch.
 
 ```bash
 cd scrapling_worker
-python -m venv .venv
+py -m venv .venv
 # Windows
 .venv\Scripts\activate
 # macOS/Linux
 source .venv/bin/activate
 
 pip install -r requirements.txt
+py worker.py
+```
+
+The worker starts on `http://0.0.0.0:8765` by default. For local Next.js or
+worker processes, set `SCRAPLING_WORKER_URL=http://localhost:8765`.
+
+## Railway deployment
+
+Create this as a separate Railway service with the service root set to
+`scrapling_worker`. The included `railway.json` starts the worker with:
+
+```bash
 python worker.py
 ```
 
-The worker starts on `http://127.0.0.1:8765` by default.
+Railway provides `PORT`; the worker automatically binds to `0.0.0.0:$PORT`.
+After deployment, set the main app/worker variable:
+
+```bash
+SCRAPLING_WORKER_URL=https://<your-scrapling-service>.up.railway.app
+```
+
+Prefer a Railway private-network URL if both services are in the same Railway
+project and private networking is enabled.
 
 ## Environment variables
 
 | Variable | Default | Description |
 |---|---|---|
+| `PORT` | unset | Railway-provided port; takes precedence over `SCRAPLING_WORKER_PORT` |
 | `SCRAPLING_WORKER_PORT` | `8765` | Port the worker listens on |
+| `SCRAPLING_WORKER_HOST` | `0.0.0.0` | Host/interface the worker binds to |
 | `SCRAPLING_WORKER_URL` | `http://localhost:8765` | URL used by Next.js to reach the worker |
 | `SCRAPING_USER_AGENT` | CSG-Law-AI-Intelligence/1.0 | HTTP user agent sent to target sites |
 | `SCRAPING_RATE_LIMIT_PER_DOMAIN` | `5` | Max requests per domain per run |

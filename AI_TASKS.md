@@ -25,6 +25,7 @@ Each agent edits only its own rows. Status vocabulary: `CLAIMED` · `WIP` · `BL
 | T-AUDIT-HARDENING | Codex | DONE-LOCAL | `ops/t-ops9-ux` @ `ab63d39` | `src/content/ai-regulation/news.ts`, `src/lib/health.ts`, `src/agents/ai-regulation/agentApiCapabilities.ts`, `src/lib/admin-review-batch.ts`, related tests | `buildNewsItemFromUpdate()`, `buildHealthSnapshot()`, `listAgentApiCapabilities()`, `listPrioritizedReviewQueue()`, community "Source Runtime Health", community "Admin Review and Summaries" | 2026-06-22 |
 | T-SITE-HEALTH-AUDIT | Codex | REVIEW | `ops/t-ops9-ux` @ `0ec9ac7` | none (audit-only) | `buildHealthSnapshot()`, `buildAdminOperationsSummary()`, `queueScanJob()`, community "Source Runtime Health", community "Scan Job Management" | 2026-06-22 |
 | T-NEWS-BACKFILL-INTEGRITY | Codex | DONE-LOCAL | `ops/t-ops9-ux` @ working tree | `src/content/ai-regulation/news.ts`, `src/lib/news-backfill.ts`, `scripts/backfill-news-items.ts`, `src/db/seed/seed-profiles.ts`, related tests | `buildNewsItemFromUpdate()`, `backfillNewsItemsFromUpdates()`, `buildLegalDatabaseIntegrityReport()`, community "News and Regulation Admin", community "DB Repository Layer" | 2026-06-22 |
+| T-INGESTION-RUNTIME | Codex | DONE-LOCAL | `ops/t-ops9-ux` @ working tree | `src/agents/ingestion/**`, `scrapling_worker/**`, `src/agents/ai-regulation/agentApiCapabilities.ts` | `scraplingExtract()`, `firecrawlService.ts`, `listAgentApiCapabilities()`, community "Data Ingestion Pipeline", community "Scrapling Extraction Service", community "Agent API Capabilities" | 2026-06-22 |
 | T-BATCH-REVIEW-UI (P2b) | Claude Code | DONE-LOCAL | `ops/t-ops9-ux` @ `0f2809d` | `src/app/admin/ai-regulation/review/**`, `src/app/admin/ai-regulation/actions.ts`, `src/app/admin/page.tsx` | `listPrioritizedReviewQueue()`, `batchTransitionReviewStatus()`, `bulkUpdateReviewStatus`, community "Admin Review and Summaries" | 2026-06-21 |
 | T-BUILD-FIX | Claude Code | DONE-LOCAL | `ops/t-ops9-ux` @ `bf0d746` | `src/app/page.tsx`, `src/components/site/update-card.tsx` | `UpdateCard`, community "UI Components and Visual Elements" | 2026-06-21 |
 | T-E2E (P6) | Claude Code | DONE-LOCAL | `ops/t-ops9-ux` @ `aa0346c` | `playwright.config.ts`, `e2e/**`, `vitest.config.ts`, `package.json`, `.gitignore` | n/a (test harness) | 2026-06-21 |
@@ -46,6 +47,14 @@ YYYY-MM-DD · <Agent> · <TASK-ID> · <STATUS>
 ```
 
 ## Current status
+
+2026-06-22 · Codex · T-INGESTION-RUNTIME · DONE-LOCAL
+- Intent:        Make Firecrawl/Scrapling operational instead of merely present by exposing capability state, fixing Scrapling source routing, and adding Railway-ready sidecar config.
+- Files:         `src/agents/ingestion/scraplingClient.ts`, `src/agents/ingestion/scraplingClient.test.ts`, `scrapling_worker/worker.py`, `scrapling_worker/railway.json`, `scrapling_worker/README.md`, `src/agents/ai-regulation/agentApiCapabilities.ts`, `src/agents/ai-regulation/agentApiCapabilities.test.ts`.
+- Graph anchors: `scraplingExtract()`, `firecrawlService.ts`, `listAgentApiCapabilities()`, community "Data Ingestion Pipeline", community "Scrapling Extraction Service", community "Agent API Capabilities".
+- Verification:  `npm test` PASS (105 files / 551 tests) · `npm run lint` PASS with one pre-existing warning in `article-carousel.tsx` · `npm run typecheck` PASS · preview-env `npm run build` PASS · Python compile PASS via `py -m compileall scrapling_worker` · Vercel env list confirms `FIRECRAWL_API_KEY` exists in Production/Preview and `SCRAPLING_WORKER_URL` is absent · Railway CLI available but not authenticated, so service creation is blocked until operator login.
+- Branch/commit: `ops/t-ops9-ux` @ working tree
+- Next:          Codex/operator deploys `scrapling_worker` as a Railway service after `railway login`, then sets `SCRAPLING_WORKER_URL`; Firecrawl is ready once this branch is deployed.
 
 2026-06-22 · Codex → Claude Code · T-NEWS-BACKFILL-INTEGRITY · DONE-LOCAL
 - Intent:        Fill the live `news_items` table from existing monitor updates and harden visibility so internal smoke-test/discovery-only leads cannot appear as public legal news.

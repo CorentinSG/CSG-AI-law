@@ -40,6 +40,8 @@ export function listAgentApiCapabilities(
   const newsApiReady = hasEnv("NEWSAPI_API_KEY", rawEnv);
   const judilibreReady = hasEnv("JUDILIBRE_API_KEYID", rawEnv);
   const courtListenerReady = hasEnv("COURTLISTENER_API_KEY", rawEnv);
+  const firecrawlReady = hasEnv("FIRECRAWL_API_KEY", rawEnv);
+  const scraplingReady = hasEnv("SCRAPLING_WORKER_URL", rawEnv);
   const legalDataHunterReady =
     hasEnv("LEGAL_DATA_HUNTER_MCP_URL", rawEnv) || hasEnv("LEGAL_RESEARCH_MCP_URL", rawEnv);
   const legifranceReady = hasAllEnv(
@@ -56,6 +58,34 @@ export function listAgentApiCapabilities(
   });
 
   return [
+    enrich({
+      id: "firecrawl",
+      label: "Firecrawl",
+      status: firecrawlReady ? "available" : "missing_credentials",
+      uses: ["legal_news_discovery", "official_legal_database", "source_health"],
+      regions: ["Europe", "United States", "Global"],
+      envVars: ["FIRECRAWL_API_KEY"],
+      implementedProvider: "firecrawl",
+      userAction: firecrawlReady
+        ? undefined
+        : "Set FIRECRAWL_API_KEY in Railway/Vercel for broad official-site crawling and hybrid discovery.",
+      notes:
+        "Broad crawl/map layer for official sites. Use with source-level publication rules; discovery-only results remain admin-only until verified.",
+    }),
+    enrich({
+      id: "scrapling-sidecar",
+      label: "Scrapling worker",
+      status: scraplingReady ? "available" : "needs_user_setup",
+      uses: ["official_legal_database", "case_law_discovery", "source_health"],
+      regions: ["Europe", "United States", "Global"],
+      envVars: ["SCRAPLING_WORKER_URL"],
+      implementedProvider: "scrapling",
+      userAction: scraplingReady
+        ? undefined
+        : "Deploy scrapling_worker as a Railway service and set SCRAPLING_WORKER_URL to its internal or public service URL.",
+      notes:
+        "Targeted extraction sidecar for high-value official legal pages. Preferred when a source has selectors or needs resilient HTML extraction.",
+    }),
     enrich({
       id: "legal-data-hunter",
       label: "Legal Data Hunter / legal-research",

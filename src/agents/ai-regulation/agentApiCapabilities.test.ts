@@ -37,6 +37,18 @@ describe("agent API capabilities", () => {
           missingEnvVars: ["NEWSAPI_API_KEY"],
         }),
         expect.objectContaining({
+          id: "firecrawl",
+          status: "missing_credentials",
+          envVars: ["FIRECRAWL_API_KEY"],
+          missingEnvVars: ["FIRECRAWL_API_KEY"],
+        }),
+        expect.objectContaining({
+          id: "scrapling-sidecar",
+          status: "needs_user_setup",
+          envVars: ["SCRAPLING_WORKER_URL"],
+          missingEnvVars: ["SCRAPLING_WORKER_URL"],
+        }),
+        expect.objectContaining({
           id: "legifrance-piste",
           status: "needs_user_setup",
           envVars: ["LEGIFRANCE_PISTE_CLIENT_ID", "LEGIFRANCE_PISTE_CLIENT_SECRET"],
@@ -69,6 +81,8 @@ describe("agent API capabilities", () => {
       JUDILIBRE_API_KEYID: "judilibre-key",
       LEGAL_DATA_HUNTER_MCP_URL: "https://legal-data-hunter.example/mcp",
       COURTLISTENER_API_KEY: "courtlistener-key",
+      FIRECRAWL_API_KEY: "firecrawl-key",
+      SCRAPLING_WORKER_URL: "https://scrapling-worker.example",
     });
 
     expect(capabilities.find((capability) => capability.id === "newsapi")?.status).toBe(
@@ -84,6 +98,12 @@ describe("agent API capabilities", () => {
       "available",
     );
     expect(capabilities.find((capability) => capability.id === "courtlistener-recap")?.status).toBe(
+      "available",
+    );
+    expect(capabilities.find((capability) => capability.id === "firecrawl")?.status).toBe(
+      "available",
+    );
+    expect(capabilities.find((capability) => capability.id === "scrapling-sidecar")?.status).toBe(
       "available",
     );
     expect(

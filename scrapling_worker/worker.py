@@ -27,7 +27,8 @@ load_dotenv()
 
 app = Flask(__name__)
 
-PORT = int(os.getenv("SCRAPLING_WORKER_PORT", "8765"))
+PORT = int(os.getenv("PORT", os.getenv("SCRAPLING_WORKER_PORT", "8765")))
+HOST = os.getenv("SCRAPLING_WORKER_HOST", "0.0.0.0")
 # Rate-limit: max requests per second per domain (enforced with a simple counter)
 RATE_LIMIT_PER_DOMAIN = int(os.getenv("SCRAPING_RATE_LIMIT_PER_DOMAIN", "5"))
 USER_AGENT = os.getenv(
@@ -196,5 +197,5 @@ def extract_batch():
 
 if __name__ == "__main__":
     load_extractor_configs()
-    print(f"[scrapling_worker] Starting on port {PORT}")
-    app.run(host="127.0.0.1", port=PORT, debug=False)
+    print(f"[scrapling_worker] Starting on {HOST}:{PORT}")
+    app.run(host=HOST, port=PORT, debug=False)
