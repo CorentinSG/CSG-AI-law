@@ -7,6 +7,7 @@ import {
   getAuthorityPriorityRank,
 } from "@/agents/ai-regulation/utils/authority";
 import { getSourceRuntimeHealthSummaries } from "@/agents/ai-regulation/sourceRuntimeHealth";
+import { listAgentApiCapabilities } from "@/agents/ai-regulation/agentApiCapabilities";
 import { summarizeAiPlanning } from "@/app/admin/ai-regulation/ai-planning";
 import {
   buildEuropeVerificationSummary,
@@ -37,6 +38,7 @@ import { AdminCoveragePanel } from "./_components/AdminCoveragePanel";
 import { AdminAiPanel } from "./_components/AdminAiPanel";
 import { AdminFreshnessPanel } from "./_components/AdminFreshnessPanel";
 import { AdminSystemStatusBand } from "./_components/AdminSystemStatusBand";
+import { AdminIntegrationsPanel } from "./_components/AdminIntegrationsPanel";
 import { countQueuedJobs, countStaleRunningJobs } from "./system-status";
 import { summarizeRuntimeHealth } from "./freshness-summary";
 import { buildHealthSnapshot } from "@/lib/health";
@@ -178,6 +180,7 @@ export default async function AdminAiRegulationPage({
   const runtimeRollup = summarizeRuntimeHealth(runtimeHealth);
   const sourcesAtRisk = runtimeRollup.stale + runtimeRollup.degraded;
   const reviewBacklog = health.review.pendingNeedsReviewCount;
+  const capabilities = listAgentApiCapabilities();
 
   return (
     <SiteShell className="space-y-8" variant="admin" showFooter={false}>
@@ -276,6 +279,10 @@ export default async function AdminAiRegulationPage({
 
       <section>
         <AdminFreshnessPanel summaries={runtimeHealth} />
+      </section>
+
+      <section>
+        <AdminIntegrationsPanel capabilities={capabilities} />
       </section>
 
       <section className="grid gap-6 lg:grid-cols-[1fr_1fr]">
