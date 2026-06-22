@@ -49,12 +49,12 @@ YYYY-MM-DD · <Agent> · <TASK-ID> · <STATUS>
 ## Current status
 
 2026-06-22 · Codex · T-INGESTION-RUNTIME · DONE-LOCAL
-- Intent:        Fix the Scrapling sidecar runtime so `/health` being green also means real extraction works with the current Scrapling fetcher API.
+- Intent:        Fix and verify the Scrapling sidecar runtime so `/health` being green also means real extraction and queued monitoring jobs work.
 - Files:         `scrapling_worker/worker.py`, `scrapling_worker/requirements.txt`.
-- Graph anchors: `scraplingExtract()`, community "Scrapling Extraction Service", community "Data Ingestion Pipeline".
-- Verification:  Local Python worker smoke PASS with `scrapling[fetchers]>=0.2.9` against `https://example.com` (title/body/canonical extracted) · real legal-source extraction PASS against European Parliament AI Act article (`body_len=1451`, `pdf_count=1`) · live Railway `/health` already returns `{"status":"ok","version":"1.0.0"}` before redeploy.
-- Branch/commit: `ops/t-ops9-ux` @ working tree
-- Next:          Push this fix and let Railway redeploy `scrapling-worker`, then re-run the live `/extract` and full `runSourceIngestion('ing-ep-ai')` checks against Supabase.
+- Graph anchors: `scraplingExtract()`, `queueScanJob()`, community "Scrapling Extraction Service", community "Data Ingestion Pipeline", community "Scan Job Management".
+- Verification:  Local Python worker smoke PASS with `scrapling[fetchers]>=0.2.9` against `https://example.com` (title/body/canonical extracted) · real legal-source extraction PASS against European Parliament AI Act article (`body_len=1451`, `pdf_count=1`) · live Railway `/extract` PASS after redeploy on the same European Parliament URL · direct `runSourceIngestion('ing-ep-ai')` PASS against Supabase (`status=success`, `items_ingested=1`) · queued live monitoring job `job-b14cca76-5a44-400b-981f-f9aec45ac500` drained by Railway worker and marked `succeeded` · production `/api/health` PASS (`ok=true`, DB reachable, newest successful scan `2026-06-22T22:49:28.097+00:00`, worker idle with no running jobs).
+- Branch/commit: `ops/t-ops9-ux` @ `8abee5d`
+- Next:          Claude/operator can treat Scrapling monitoring as live. Remaining caveat: production Vercel still reports app commit `b125828`; Firecrawl capability depends on `FIRECRAWL_API_KEY` in the target runtime and was not exercised in this Scrapling-focused E2E.
 
 2026-06-22 · Codex · T-INGESTION-RUNTIME · DONE-LOCAL
 - Intent:        Make Firecrawl/Scrapling operational instead of merely present by exposing capability state, fixing Scrapling source routing, and adding Railway-ready sidecar config.
