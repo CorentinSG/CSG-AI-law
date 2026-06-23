@@ -280,74 +280,12 @@ These are known and accepted — do not silently "fix" them without understandin
 
 ---
 
-## 8. Recent Critical Phases
+## 8. Recent Phases (compressed)
 
-### F8C-2: Admin source CRUD per country (Claude Code, 2026-06-10) — 397 tests
-Country profile editor (`/admin/ai-regulation/countries/[slug]`) gained an "Official sources" section: each stored source is an editable form (title, URL, institution, authority type, runtime accessible, response status, active, note) with Save + Remove buttons (two server actions on one form via `formAction`), plus an "Add a source" form. Three new actions in `countries/actions.ts`: `addCountrySource`, `updateCountrySource`, `removeCountrySource` — all admin-gated, all built on `replaceCountryIntelligenceSources` (load full set → apply single change → write back). New source ids = `country-source-<slug>-custom-<n>` (n = max existing trailing index + 1). authorityType decides the public list (case_law_source → case-law, guidance_source → soft-law, else → regulation). 5 new action tests. NOTE: `'use server'` files may only export async functions — a non-async `export const` there fails the build with "Failed to collect page data"; keep shared constants non-exported or in a separate module.
+Per-phase prose lives in `PROJECT_LOGBOOK.md` (one-liner Phase Index) and `git log`. This section is intentionally short to save tokens.
 
-### F8C-1: Source-family lists rendered from DB (Claude Code, 2026-06-09) — 392 tests
-Public country page now renders the three source families (national AI regulation, case-law, soft-law) from the normalized `country_intelligence_sources` table instead of the TS arrays, with per-family fallback to TS when the DB has no sources for that family. New helper `src/agents/ai-regulation/utils/country-intelligence-view.ts` (`groupCountryIntelligenceSourcesByFamily`, 4 tests): groups DB rows by `authorityType` (`case_law_source` → case-law, `guidance_source` → soft-law, else → regulation), sorts by the trailing index in the source id, strips the `family:` note prefix, normalizes nullable institution/runtimeAccessible/responseStatus. Page fetches `listCountryIntelligenceSources(\`country-${slug}\`)` in the existing Promise.all (deterministic id, no waterfall). DB rows were seeded from TS so display is identical until sources are edited. No schema change, no new migration. Source CRUD (F8C-2) and scalar structural fields (F8C-3) remain.
+**Latest milestone (2026-06-22):** async scan infra live (Railway Node-22 worker + Supabase `scan_jobs` + Vercel enqueue-only cron) and end-to-end monitoring proven — a real queued job was drained by the worker to `succeeded`; `/api/health` returns ok=true (DB reachable, worker idle, no stuck jobs). Scrapling extraction bug fixed (old import + missing fetchers extra). Firecrawl still needs an E2E run from the runtime that holds `FIRECRAWL_API_KEY` (not exercisable locally).
 
-### F8B: Country profile admin editor + public editorial override (Claude Code, 2026-06-09) — 388 tests
-Admin editor for `country_intelligence` editorial fields. New files: `src/app/admin/ai-regulation/countries/page.tsx` (index list of all profiles), `src/app/admin/ai-regulation/countries/[slug]/page.tsx` (per-country editor form), `src/app/admin/ai-regulation/countries/actions.ts` (`saveCountryProfileEditorial` server action, `assertAdminServerActionAccess`-gated, `upsertCountryIntelligence`), `actions.test.ts` (4 tests). Editable: publicSummary, implementationNotes, editorialNotes (one per line → `\n`-joined), missingSourceWarnings (one per line), reviewStatus, reviewedBy; `lastReviewedAt` refreshed on save. Structural fields (status/confidence/citation/authority maps) are NOT editable — preserved from existing row to prevent drift/content loss. Public page `src/app/ai-regulation/europe/[country]/page.tsx` now fetches `getCountryIntelligenceBySlug(profile.slug)` in the existing Promise.all and overrides publicSummary/editorialNotes/missingSourceWarnings with DB values when present (empty/null DB field → TS baseline). Discoverability link added to main admin page. `/admin/*` auth via `src/proxy.ts` middleware. Guardrails preserved: editorial text only, no auto-publish, no fabrication, structural legal content untouched.
+**Admin/UX hardening (2026-06-10→11):** dashboard system-status band reading the canonical `health.worker` (state/lastActivity) + stuck-job signal; integrations/env-vars panel from `listAgentApiCapabilities()`; batch-review queue with `priorityReasons` + shift-range/quick-select; news views signal discovery/admin-only sources; system-health strip. F8 complete (country content fully DB-backed + editable); F6 Upstash rate limiting active; P-RT0 done.
 
-### T-ING1: Firecrawl + Scrapling dual ingestion pipeline (Claude Code, 2026-06-08) — 384 tests
-New ingestion track distinct from the existing cron/scan pipeline. Sources with `ingestion_method = firecrawl | scrapling | hybrid | existing` are routed through a new orchestrator. Firecrawl (Node.js `@mendable/firecrawl-js`) handles broad discovery; Scrapling Python sidecar (`scrapling_worker/` Flask app on port 8765) handles targeted structured extraction from official pages. Hybrid mode: Firecrawl `mapUrl` discovers links, Scrapling extracts each. URL normalization + SHA-256 content hash deduplication before insert. All items land as `raw_regulatory_items` with `processingStatus: "new"` — never auto-published. `INGESTION_SECRET` bearer token protects `/api/ingestion/run`. New tables/columns via migration 009 (pending remote Supabase apply). 8 EU + US seed sources defined in `src/agents/ingestion/seedSources.ts`. Scrapling worker config in `scrapling_worker/extractors/*.json`.
-
-### T-SE1: Sweden live monitoring stack (Claude Code 1, 2026-06-06) — 348 tests
-Files: swedenNewsSources.ts, swedenLegalNewsAgent.ts, sweden-ai-intelligence.ts, cron route + test, 3 scripts, scanProfiles entries (sweden_official_legal_scan / sweden_live_news_scan / sweden_verification_scan), page sections.
-IMY = primary (high priority, 5-min cadence, candidate_for_monitoring; participated in EDPB ChatGPT investigation); DIGG + Regeringen = daily; swedenRegeringen added as third source; swedenImy upgraded from manual_reference to candidate_for_monitoring.
-DIGG role under AI Act = preparing_or_partial; do not claim market-surveillance authority without a verified binding instrument.
-
-### T-AT1: Austria live monitoring stack (Claude Code 1, 2026-06-06) — 343 tests
-Files: austriaNewsSources.ts, austriaLegalNewsAgent.ts, austria-ai-intelligence.ts, cron route + test, 3 scripts, scanProfiles entries (austria_official_legal_scan / austria_live_news_scan / austria_verification_scan), page sections.
-DSB = primary (high priority, 5-min cadence); RTR = needs_full_verification; DSB-NOYB documented not inferred.
-
-### T-BE1: Belgium live monitoring stack (Claude Code 1, 2026-06-06) — 336 tests
-Files: belgiumNewsSources.ts, belgiumLegalNewsAgent.ts, belgium-ai-intelligence.ts, cron route + test, 3 scripts, scanProfiles entries, page sections.
-APD/GBA = primary; federal structure complexity explicitly surfaced as a verification gap.
-
-### T-NL1: Netherlands live monitoring stack (Claude Code 1, 2026-06-06) — 331 tests
-Files: netherlandsNewsSources.ts, netherlandsLegalNewsAgent.ts, netherlands-ai-intelligence.ts, cron route + test, 3 scripts, scanProfiles entries, page sections.
-AP + RDI = primary; April 2026 consultation = only verified milestone; enacted designation instrument not verified.
-Note: assessSourceCurrentness called with null descriptor (not a typed Netherlands descriptor) to avoid expanding RegionalMonitoringSourceDescriptor union.
-
-### P-C3: Scan job durability (Codex 1, T-C3A–J, 2026-06-06)
-Added in sequence: stale-job recovery (recoverStaleRunningScanJobs), queue drain (drainQueuedScanJobs), queueAndDrainScanJob for all route/cron callers, tryStartScanJob optimistic claim with lease metadata, lease heartbeat (leaseHeartbeatAt/IntervalMs/TimeoutMs), blockedByRunningJobs cooperative serial guard, processScanJob safety entrypoint (rejects non-queued/already-running), scan:worker-local local worker, admin-trigger harmonization (triggerSourceScan → queueAndDrainScanJob).
-Result: cooperative serial execution model across all execution paths. Not yet a fully distributed lock.
-
-### T-C4A: Runtime blocker ownership traceability (Codex 1, 2026-06-06)
-Added structured `blockingRunningJobSummaries` to queue-drain/runtime results and propagated them through the manual scan route plus all cron routes.
-Purpose: explain who is blocking a drain attempt (`leaseOwner`, source/trigger/requestedBy) and how fresh that running lease is (`startedAt`, `heartbeatAt`, `runningForMs`, `heartbeatAgeMs`, `heartbeatTimeoutMs`) without changing lock semantics.
-
-### T-C4B: Local worker service hardening (Codex 1, 2026-06-08)
-Added `scanWorkerRuntime.ts` with single-worker lease acquisition, stale-takeover rules, persisted status/heartbeat files, stop-file requests, and release helpers.
-`scan:worker-local` now behaves more like a local service for the always-on machine, and `scan:worker-stop` can request a graceful stop without killing the process abruptly.
-
-### T-C4C: Cursor-pagination primitives on heavy backend surfaces (Codex 1, 2026-06-08)
-Added cursor-page repository/server contracts and implementations for `scan_jobs` and `discovery_leads`, plus narrow `updateRepository` wrappers for higher layers.
-Also aligned `/ai-regulation` database-view pagination to `CursorPaginationControls`, fixing the mixed old/new pagination state that had been breaking global typecheck/lint/build.
-Important boundary: this is only a partial `F1` advance; many admin/server surfaces still use offset/page-number pagination.
-
-### T-C4D: Normalized country_intelligence storage groundwork (Codex 1, 2026-06-08)
-Added repository contracts, memory/Supabase implementations, Supabase mappers, seed-backed fallback data, and `updateRepository` wrappers for `country_intelligence` + `country_intelligence_sources`.
-The normalized rows are derived from the existing Europe profile layer, so this is a first extraction/storage slice only; pages still read `europe-member-state-implementation.ts` directly.
-
-### T-C3B + F5 (Claude Code 1, 2026-06-06)
-Admin scan-job section: color-coded status badges + recoverStaleJobs + drainNextQueuedJob server actions wired to P-C3 backend helpers.
-F5: Poland (UODO + Ministry), Sweden (IMY + DIGG), Ireland (DPC + Dept Enterprise) added as first-wave profiles in europe-member-state-implementation.ts. getPriorityEuropeCountryProfiles() now includes PL, SE, IE.
-
-### P-C1/P-C2: Discovery leads adoption (Codex 1 + Claude Code 1, 2026-06-05–06)
-discovery_leads AiRegulationRepository: 5 methods (listDiscoveryLeads, listDiscoveryLeadsPage, getDiscoveryLeadById, createDiscoveryLead, updateDiscoveryLead). Admin diagnostics, steward, news, detail pages prefer dedicated table. Direct lookup by rawItemId (T-C2C). Lazy fallback on admin news (T-C2D). PaginationControls with pageParamKey on admin coverage panel (T-C2B). Legacy fallback preserved throughout.
-
----
-
-## 9. Compressed Older History
-
-**Two layers of detail exist across the documentation:**
-
-1. **Full detailed entry** — only T-AT1 in `PROJECT_LOGBOOK.md` (the most recently completed phase; retained for direct handoff context).
-2. **Brief summaries** — Section 8 above covers the 6 most recent phases (T-AT1, T-BE1, T-NL1, P-C3, T-C3B+F5, P-C1/P-C2, all from 2026-06-06 or spanning 2026-06-05/06). These brief summaries overlap intentionally with the Phase Index below; they are kept here for agent quick-start without reading the full logbook.
-3. **One-liner Phase Index** — `PROJECT_LOGBOOK.md` Phase Index contains one-liner summaries for every phase from Foundation Hardening (early 2025) through T-BE1 (2026-06-06), including T-NL1, P-C3, and T-C3B+F5.
-
-All phases before the Section 8 entries — everything prior to 2026-06-06 — are compressed into Phase Index one-liners in `PROJECT_LOGBOOK.md` and are not individually retained here.
+For anything older, read the Phase Index in `PROJECT_LOGBOOK.md`, not this file.
