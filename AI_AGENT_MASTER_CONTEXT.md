@@ -2,13 +2,19 @@
 
 Project: `c-saint-girons-ai-law-intelligence` — C. Saint-Girons, Esq | AI Law & Legal Intelligence
 Purpose: fast-start machine context for AI agents resuming work. Repository code is the final authority over this file.
-Last synchronized: 2026-06-10 (T-ING1 ingestion pipeline in production — migration 009 applied, 8 sources seeded, Vercel deployment live at csg-ai-law.vercel.app; production setup complete: GitHub CorentinSG/CSG-AI-law, Vercel csg-ai-law.vercel.app, Framework Preset corrected to Next.js, all env vars set; token-efficiency coordination protocol added to AGENT_COORDINATION.md; T-RT1A source runtime health backend completed)
+Last synchronized: 2026-06-20 (Cowork A–F hardening: HTTP security headers, timingSafeEqual admin auth, error.tsx boundaries, listDistinctFilterValues perf, explicit DB selects, pipeline refactor + finalizeSourceScan extraction, TraceabilityMetadata typed interface, 19 integration tests, IntelligenceSummaryBand, EmptyFilterState, migrations 006+007 authored, AI_PROCESSING_ENABLED deprecated, upstash-rate-limit.ts scaffolded; tsc+lint+tests all green; changes uncommitted in working tree — Claude Code must commit + apply migrations to Supabase)
 
 ---
 
 ## 1. Active Operating Context
 
-**Current state (2026-06-10):**
+**Current state (2026-06-20):**
+- Test suite: green (19 new integration tests added in Cowork A-F session); tsc + lint + vitest all PASS
+- **COWORK-A-F uncommitted**: all A-F changes live in the working tree but not committed — Claude Code must commit before merging (see AI_TASKS.md COWORK-A-F entry)
+- **Graphify graph**: 3270 nodes / 8562 edges / 192 LLM-named communities; auto-rebuild via git hooks (post-commit, post-checkout); query via `graphify`/`py -m graphify`; graph stored in `graphify-out/` (gitignored)
+- **T-OPS9-UX**: WIP on `ops/t-ops9-ux` — Spline dead-deps removal + not-found.tsx + loading.tsx skeletons pending
+
+**Previous state (2026-06-10, preserved for reference):**
 - Test suite: 402 tests | lint | typecheck | build — all green
 - **Production deployment**: site live at https://csg-ai-law.vercel.app — GitHub repo CorentinSG/CSG-AI-law (private); Vercel project csg-ai-law; Framework Preset: Next.js; env vars set: APP_DATA_MODE=supabase, NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY, SUPABASE_SERVICE_ROLE_KEY, ADMIN_AUTH_SECRET, CRON_SECRET, INGESTION_SECRET, FIRECRAWL_API_KEY, AI_ENABLE_PROCESSING=false; SCRAPLING_WORKER_URL not yet set
 - 9 EU countries with full live monitoring stack: FR, DE, ES, IT, NL, BE, AT, SE, IE
