@@ -32,6 +32,8 @@ export interface AlertPayload {
   responseStatus?: number | null;
   checkedAt?: string;
   needsReviewBacklogSize?: number;
+  failureReasons?: string[];
+  text?: string;
 }
 
 export async function postAlertPayload(
@@ -199,6 +201,33 @@ async function hasDigestMarker(dateIso: string) {
   return logs.some((log) => log.errors.includes(marker));
 }
 
+function getScanJobFailureReasons(job: ScanJob) {
+  const failureReasons = job.resultSummary?.failureReasons;
+  if (!Array.isArray(failureReasons)) {
+    return [];
+  }
+
+  return failureReasons.filter(
+    (reason): reason is string => typeof reason === "string" && reason.length > 0,
+  );
+}
+
+function buildReviewBacklogDigestText(input: {
+  job: ScanJob;
+  needsReviewBacklogSize: number;
+  failureReasons: string[];
+}) {
+  const backlogText = `Daily review backlog: ${input.needsReviewBacklogSize} item${input.needsReviewBacklogSize === 1 ? "" : "s"}.`;
+  const preferredFailureText =
+    input.failureReasons.length > 0
+      ? input.failureReasons.join("; ")
+      : input.job.errorMessage;
+
+  return preferredFailureText
+    ? `${backlogText} Latest scan job failure: ${preferredFailureText}.`
+    : backlogText;
+}
+
 export async function alertOnDailyReviewBacklog(input: {
   job: ScanJob;
   needsReviewBacklogSize: number;
@@ -212,6 +241,7 @@ export async function alertOnDailyReviewBacklog(input: {
     if (await hasDigestMarker(emittedAt)) {
       return;
     }
+    const failureReasons = getScanJobFailureReasons(input.job);
 
     void safePostAlert({
       kind: "review_backlog_digest",
@@ -223,6 +253,12 @@ export async function alertOnDailyReviewBacklog(input: {
           ? input.job.resultSummary.scanProfile
           : "default",
       needsReviewBacklogSize: input.needsReviewBacklogSize,
+      ...(failureReasons.length > 0 ? { failureReasons } : {}),
+      text: buildReviewBacklogDigestText({
+        job: input.job,
+        needsReviewBacklogSize: input.needsReviewBacklogSize,
+        failureReasons,
+      }),
     });
 
     await updateRepository.addScanLog({

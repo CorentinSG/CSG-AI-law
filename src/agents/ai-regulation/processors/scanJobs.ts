@@ -169,6 +169,18 @@ type ScanJobOutcome = {
   errorMessage: string | null;
 };
 
+function deriveFailureReasons(
+  result: Awaited<ReturnType<typeof runAiRegulationScan>>,
+) {
+  return result.flatMap((entry) =>
+    entry.status === "failed"
+      ? entry.errors.length > 0
+        ? entry.errors
+        : [`source_failed:${entry.sourceId}`]
+      : [],
+  );
+}
+
 function evaluateScanJobOutcome(
   result: Awaited<ReturnType<typeof runAiRegulationScan>>,
   requestedProfile?: ScanProfileId,
@@ -176,6 +188,7 @@ function evaluateScanJobOutcome(
   const summary = summarizeJobResult(result);
   const statuses = new Set(result.map((entry) => entry.status));
   const configurationWarnings: string[] = [];
+  const failureReasons = deriveFailureReasons(result);
 
   if (requestedProfile && result.length === 0) {
     configurationWarnings.push("scan_profile_resolved_zero_sources");
@@ -192,11 +205,12 @@ function evaluateScanJobOutcome(
 
   return {
     status,
-    summary: { ...summary, configurationWarnings },
+    summary: { ...summary, configurationWarnings, failureReasons },
     errorMessage:
-      configurationWarnings.length > 0
+      failureReasons[0] ??
+      (configurationWarnings.length > 0
         ? `Scan profile ${requestedProfile} resolved to zero active sources.`
-        : null,
+        : null),
   };
 }
 

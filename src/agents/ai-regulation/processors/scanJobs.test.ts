@@ -317,6 +317,32 @@ describe("scanJobs durability helpers", () => {
     expect(processed.job.status).toBe("partial_success");
   });
 
+  it("persists at least one failure reason whenever the final status is failed", async () => {
+    runAiRegulationScan.mockResolvedValue([
+      {
+        ...makeScanResult()[0],
+        status: "failed",
+        processingFailures: 0,
+        errors: ["HTTP 503"],
+      },
+    ]);
+
+    const { queueAndRunScanJob } = await import(
+      "@/agents/ai-regulation/processors/scanJobs"
+    );
+    const processed = await queueAndRunScanJob({
+      sourceId: "src-failed",
+      trigger: "manual",
+      requestedBy: "admin-api",
+    });
+
+    expect(processed.job.status).toBe("failed");
+    expect(processed.job.resultSummary).toMatchObject({
+      failureReasons: ["HTTP 503"],
+    });
+    expect(processed.job.errorMessage).toBe("HTTP 503");
+  });
+
   it("processes the oldest queued scan job when draining the queue", async () => {
     jobs.push(
       {

@@ -224,4 +224,32 @@ describe("alerting", () => {
     );
     vi.unstubAllGlobals();
   });
+
+  it("prefers persisted failure reasons when composing backlog digest alert text", async () => {
+    const fetchMock = vi.fn().mockResolvedValue({ ok: true, status: 200 });
+    vi.stubGlobal("fetch", fetchMock);
+    mocks.updateRepository.getScanLogsBySource.mockResolvedValue([]);
+    const { alertOnDailyReviewBacklog } = await import("@/lib/alerting");
+
+    await alertOnDailyReviewBacklog({
+      job: makeJob({
+        status: "failed",
+        errorMessage: "stale fallback",
+        resultSummary: {
+          scanProfile: "global",
+          failureReasons: ["HTTP 503", "source_failed:src-alert"],
+        },
+      }),
+      needsReviewBacklogSize: 4,
+    });
+
+    await vi.waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(1));
+    expect(JSON.parse(String(fetchMock.mock.calls[0]?.[1]?.body))).toMatchObject({
+      kind: "review_backlog_digest",
+      failureReasons: ["HTTP 503", "source_failed:src-alert"],
+      text: expect.stringContaining("HTTP 503"),
+    });
+    expect(String(fetchMock.mock.calls[0]?.[1]?.body)).not.toContain("stale fallback");
+    vi.unstubAllGlobals();
+  });
 });
