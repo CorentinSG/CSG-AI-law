@@ -6,7 +6,14 @@ import { buildHealthSnapshot } from "@/lib/health";
 
 const REVIEW_STATUSES = ["needs_review", "approved", "published", "rejected", "archived"] as const;
 const DATA_QUALITY_SEVERITIES = ["high", "medium", "low"] as const;
-const SCAN_JOB_STATUSES = ["queued", "running", "succeeded", "failed", "cancelled"] as const;
+const SCAN_JOB_STATUSES = [
+  "queued",
+  "running",
+  "succeeded",
+  "partial_success",
+  "failed",
+  "cancelled",
+] as const;
 
 function countBy<T extends string>(values: T[]) {
   return Object.fromEntries(values.map((value) => [value, 0])) as Record<T, number>;
@@ -110,6 +117,7 @@ export async function buildAdminOperationsSummary(options?: { now?: Date }) {
     },
     operations: {
       worker: health.worker,
+      coverage: health.coverage,
       scans: health.scans,
       scanJobs: {
         sampled: scanJobs.length,

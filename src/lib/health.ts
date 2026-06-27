@@ -26,11 +26,16 @@ export interface HealthSnapshot {
   };
   worker: {
     state: "active" | "idle" | "unknown";
+    alive: boolean;
     heartbeatAgeMs: number | null;
     heartbeatAt: string | null;
     lastActivityAgeMs: number | null;
     lastActivityAt: string | null;
     runningJobs: number;
+  };
+  coverage: {
+    state: "healthy" | "degraded";
+    zeroSourceProfiles: string[];
   };
   review: {
     pendingNeedsReviewCount: number;
@@ -50,6 +55,7 @@ export interface HealthSnapshot {
 const MAX_RECENT_SOURCES = 500;
 const MAX_RECENT_JOBS = 100;
 const MAX_REVIEW_ITEMS = 500;
+const RECENT_WORKER_ACTIVITY_MS = 15 * 60 * 1000;
 
 function toTimestamp(value: string | null | undefined) {
   if (!value) return null;
@@ -70,6 +76,26 @@ function getScanProfile(job: ScanJob) {
 function getLeaseHeartbeatAt(job: ScanJob) {
   const value = job.resultSummary?.leaseHeartbeatAt;
   return typeof value === "string" ? value : null;
+}
+
+function getJobRecencyAnchor(job: ScanJob) {
+  return job.finishedAt ?? job.updatedAt ?? job.createdAt ?? null;
+}
+
+function isZeroSourceProfileJob(job: ScanJob) {
+  const warnings = job.resultSummary?.configurationWarnings;
+  const hasZeroSourceWarning =
+    Array.isArray(warnings) &&
+    warnings.some(
+      (warning) =>
+        typeof warning === "string" && warning === "scan_profile_resolved_zero_sources",
+    );
+  if (hasZeroSourceWarning) {
+    return true;
+  }
+
+  const sourcesProcessed = job.resultSummary?.sourcesProcessed;
+  return typeof sourcesProcessed === "number" && sourcesProcessed === 0;
 }
 
 function findNewestIso(values: Array<string | null | undefined>) {
@@ -143,6 +169,7 @@ function buildWorkerSummary(jobs: ScanJob[], now: number) {
       job.createdAt,
     ]),
   );
+  const lastActivityAgeMs = ageMs(lastActivityAt, now);
   const state: HealthSnapshot["worker"]["state"] =
     runningJobs.length > 0 && heartbeatAt
       ? "active"
@@ -151,11 +178,45 @@ function buildWorkerSummary(jobs: ScanJob[], now: number) {
         : "unknown";
   return {
     state,
+    alive:
+      state === "active" ||
+      (lastActivityAgeMs !== null && lastActivityAgeMs <= RECENT_WORKER_ACTIVITY_MS),
     heartbeatAgeMs: ageMs(heartbeatAt, now),
     heartbeatAt,
-    lastActivityAgeMs: ageMs(lastActivityAt, now),
+    lastActivityAgeMs,
     lastActivityAt,
     runningJobs: runningJobs.length,
+  };
+}
+
+function buildCoverageSummary(jobs: ScanJob[]): HealthSnapshot["coverage"] {
+  const newestJobByProfile = new Map<string, ScanJob>();
+
+  for (const job of jobs) {
+    if (job.status !== "succeeded" && job.status !== "partial_success") {
+      continue;
+    }
+
+    const profile = getScanProfile(job);
+    const existing = newestJobByProfile.get(profile);
+    const currentTimestamp = toTimestamp(getJobRecencyAnchor(job)) ?? -Infinity;
+    const existingTimestamp = existing
+      ? (toTimestamp(getJobRecencyAnchor(existing)) ?? -Infinity)
+      : -Infinity;
+
+    if (!existing || currentTimestamp >= existingTimestamp) {
+      newestJobByProfile.set(profile, job);
+    }
+  }
+
+  const zeroSourceProfiles = Array.from(newestJobByProfile.entries())
+    .filter(([, job]) => isZeroSourceProfileJob(job))
+    .map(([profile]) => profile)
+    .sort();
+
+  return {
+    state: zeroSourceProfiles.length > 0 ? "degraded" : "healthy",
+    zeroSourceProfiles,
   };
 }
 
@@ -197,8 +258,10 @@ export async function buildHealthSnapshot(options?: {
       ),
     ]);
 
+    const worker = buildWorkerSummary(jobs, now);
+    const coverage = buildCoverageSummary(jobs);
     const snapshot: HealthSnapshot = {
-      ok: true,
+      ok: coverage.state === "healthy",
       checkedAt,
       dataMode,
       database: {
@@ -206,7 +269,8 @@ export async function buildHealthSnapshot(options?: {
         error: null,
       },
       scans: buildScanSummary(sources.slice(0, MAX_RECENT_SOURCES), jobs, now),
-      worker: buildWorkerSummary(jobs, now),
+      worker,
+      coverage,
       review: {
         pendingNeedsReviewCount:
           typeof needsReviewPage.total === "number"
@@ -247,11 +311,16 @@ export async function buildHealthSnapshot(options?: {
       },
       worker: {
         state: "unknown",
+        alive: false,
         heartbeatAgeMs: null,
         heartbeatAt: null,
         lastActivityAgeMs: null,
         lastActivityAt: null,
         runningJobs: 0,
+      },
+      coverage: {
+        state: "degraded",
+        zeroSourceProfiles: [],
       },
       review: {
         pendingNeedsReviewCount: 0,

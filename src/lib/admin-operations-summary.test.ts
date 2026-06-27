@@ -45,12 +45,17 @@ describe("buildAdminOperationsSummary", () => {
     buildHealthSnapshot.mockResolvedValueOnce({
       ok: true,
       worker: {
+        alive: true,
         state: "active",
         heartbeatAgeMs: 1000,
         heartbeatAt: now.toISOString(),
         lastActivityAgeMs: 1000,
         lastActivityAt: now.toISOString(),
         runningJobs: 1,
+      },
+      coverage: {
+        state: "healthy",
+        zeroSourceProfiles: [],
       },
       scans: { newestSuccessfulScanAgeMs: 2000, newestSuccessfulScanAt: now.toISOString(), byProfile: {} },
     });
@@ -133,6 +138,15 @@ describe("buildAdminOperationsSummary", () => {
       failed: 1,
       succeeded: 0,
       cancelled: 0,
+    });
+    expect(summary.operations).toMatchObject({
+      worker: {
+        alive: true,
+      },
+      coverage: {
+        state: "healthy",
+        zeroSourceProfiles: [],
+      },
     });
     expect(summary.agents).toMatchObject({
       regionalSupervisors: 2,

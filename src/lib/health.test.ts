@@ -181,6 +181,45 @@ describe("buildHealthSnapshot", () => {
     });
   });
 
+  it("does not report healthy coverage when the newest completed profile resolved zero sources", async () => {
+    mocks.updateRepository.getScanJobs.mockResolvedValueOnce([
+      makeJob({
+        id: "job-healthy-profile",
+        finishedAt: "2026-06-18T10:01:00.000Z",
+        updatedAt: "2026-06-18T10:01:00.000Z",
+        resultSummary: {
+          scanProfile: "official_legal_scan",
+          sourcesProcessed: 5,
+          configurationWarnings: [],
+        },
+      }),
+      makeJob({
+        id: "job-zero-source-profile",
+        status: "partial_success",
+        finishedAt: "2026-06-18T10:04:00.000Z",
+        updatedAt: "2026-06-18T10:04:00.000Z",
+        resultSummary: {
+          scanProfile: "live_news_discovery_scan",
+          sourcesProcessed: 0,
+          configurationWarnings: ["scan_profile_resolved_zero_sources"],
+          failureReasons: [],
+        },
+      }),
+    ]);
+    const { buildHealthSnapshot } = await import("@/lib/health");
+
+    const snapshot = await buildHealthSnapshot({
+      access: "authenticated",
+      now: new Date("2026-06-18T10:05:00.000Z"),
+    });
+
+    expect(snapshot.ok).toBe(false);
+    expect(snapshot.coverage).toEqual({
+      state: "degraded",
+      zeroSourceProfiles: ["live_news_discovery_scan"],
+    });
+  });
+
   it("reports an idle worker when recent job activity exists without a running lease", async () => {
     mocks.updateRepository.getScanJobs.mockResolvedValueOnce([
       makeJob({
@@ -199,6 +238,7 @@ describe("buildHealthSnapshot", () => {
     });
 
     expect(snapshot.worker).toMatchObject({
+      alive: true,
       state: "idle",
       heartbeatAt: null,
       lastActivityAt: "2026-06-18T10:04:00.000Z",
