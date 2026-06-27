@@ -79,7 +79,7 @@ function makeScanResult(overrides?: Partial<Record<string, unknown>>) {
     {
       sourceId: "src-1",
       sourceName: "Example Source",
-      status: "succeeded",
+      status: "success",
       trigger: "manual",
       scanProfile: "default",
       startedAt: "2026-06-06T10:00:00.000Z",

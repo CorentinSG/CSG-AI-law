@@ -184,7 +184,7 @@ function evaluateScanJobOutcome(
   const status =
     configurationWarnings.length > 0 ||
     statuses.has("partial_success") ||
-    (statuses.has("succeeded") && statuses.has("failed"))
+    (statuses.has("success") && statuses.has("failed"))
       ? "partial_success"
       : statuses.has("failed")
         ? "failed"
