@@ -181,6 +181,16 @@ function deriveFailureReasons(
   );
 }
 
+function withFailureReasons(
+  resultSummary: ScanJob["resultSummary"],
+  errorMessage: string,
+) {
+  return {
+    ...(resultSummary ?? {}),
+    failureReasons: [errorMessage],
+  };
+}
+
 function evaluateScanJobOutcome(
   result: Awaited<ReturnType<typeof runAiRegulationScan>>,
   requestedProfile?: ScanProfileId,
@@ -330,13 +340,13 @@ async function executeClaimedScanJob(processingJob: ScanJob) {
     };
   } catch (error) {
     const finishedAt = new Date().toISOString();
+    const errorMessage =
+      error instanceof Error ? error.message : "Unknown scan job error.";
     const updatedJob = await updateRepository.updateScanJob(processingJob.id, {
       status: "failed",
       finishedAt,
-      errorMessage: error instanceof Error ? error.message : "Unknown scan job error.",
-      resultSummary: {
-        ...processingJob.resultSummary,
-      },
+      errorMessage,
+      resultSummary: withFailureReasons(processingJob.resultSummary, errorMessage),
     });
 
     throw Object.assign(
@@ -410,7 +420,10 @@ export async function recoverStaleRunningScanJobs(options?: {
         errorMessage:
           "Marked failed after exceeding the running-job timeout without completion.",
         resultSummary: {
-          ...job.resultSummary,
+          ...withFailureReasons(
+            job.resultSummary,
+            "Marked failed after exceeding the running-job timeout without completion.",
+          ),
           recoveredAsStale: true,
         },
       }),

@@ -157,6 +157,9 @@ describe("scanJobs durability helpers", () => {
       errorMessage:
         "Marked failed after exceeding the running-job timeout without completion.",
       resultSummary: expect.objectContaining({
+        failureReasons: [
+          "Marked failed after exceeding the running-job timeout without completion.",
+        ],
         recoveredAsStale: true,
       }),
     });
@@ -341,6 +344,66 @@ describe("scanJobs durability helpers", () => {
       failureReasons: ["HTTP 503"],
     });
     expect(processed.job.errorMessage).toBe("HTTP 503");
+  });
+
+  it("falls back to source_failed when a failed source result has no explicit errors", async () => {
+    runAiRegulationScan.mockResolvedValue([
+      {
+        ...makeScanResult()[0],
+        sourceId: "src-fallback",
+        status: "failed",
+        processingFailures: 1,
+        errors: [],
+      },
+    ]);
+
+    const { queueAndRunScanJob } = await import(
+      "@/agents/ai-regulation/processors/scanJobs"
+    );
+    const processed = await queueAndRunScanJob({
+      sourceId: "src-fallback",
+      trigger: "manual",
+      requestedBy: "admin-api",
+    });
+
+    expect(processed.job.status).toBe("failed");
+    expect(processed.job.resultSummary).toMatchObject({
+      failureReasons: ["source_failed:src-fallback"],
+    });
+    expect(processed.job.errorMessage).toBe("source_failed:src-fallback");
+  });
+
+  it("persists failure reasons when the claimed scan job aborts in the outer catch path", async () => {
+    jobs.push({
+      id: "job-outer-failure",
+      sourceId: "src-broken",
+      trigger: "manual",
+      requestedBy: "admin-api",
+      status: "queued",
+      startedAt: null,
+      finishedAt: null,
+      resultSummary: {},
+      errorMessage: null,
+      createdAt: "2026-06-06T09:55:00.000Z",
+      updatedAt: "2026-06-06T09:55:00.000Z",
+    });
+    runAiRegulationScan.mockRejectedValue(new Error("Connector crashed"));
+
+    const { processNextQueuedScanJob } = await import(
+      "@/agents/ai-regulation/processors/scanJobs"
+    );
+
+    await expect(processNextQueuedScanJob()).rejects.toMatchObject({
+      message: "Connector crashed",
+      job: expect.objectContaining({
+        id: "job-outer-failure",
+        status: "failed",
+        errorMessage: "Connector crashed",
+        resultSummary: expect.objectContaining({
+          failureReasons: ["Connector crashed"],
+        }),
+      }),
+    });
   });
 
   it("processes the oldest queued scan job when draining the queue", async () => {
