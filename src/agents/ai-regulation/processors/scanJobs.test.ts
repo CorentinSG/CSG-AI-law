@@ -270,6 +270,53 @@ describe("scanJobs durability helpers", () => {
     expect(runAiRegulationScan).not.toHaveBeenCalled();
   });
 
+  it("marks a profiled scan with no source results as partial_success", async () => {
+    runAiRegulationScan.mockResolvedValue([]);
+
+    const { queueAndRunScanJob } = await import(
+      "@/agents/ai-regulation/processors/scanJobs"
+    );
+    const processed = await queueAndRunScanJob({
+      sourceId: "src-empty",
+      trigger: "manual",
+      requestedBy: "admin-api",
+      scanProfile: "official_baseline_scan",
+    });
+
+    expect(processed.job.status).toBe("partial_success");
+    expect(processed.job.resultSummary).toMatchObject({
+      sourcesProcessed: 0,
+      configurationWarnings: ["scan_profile_resolved_zero_sources"],
+    });
+    expect(processed.job.errorMessage).toBe(
+      "Scan profile official_baseline_scan resolved to zero active sources.",
+    );
+  });
+
+  it("uses partial_success when successful and failed source results are mixed", async () => {
+    const successfulResult = makeScanResult()[0];
+    runAiRegulationScan.mockResolvedValue([
+      successfulResult,
+      {
+        ...successfulResult,
+        sourceId: "src-failed",
+        status: "failed",
+      },
+    ]);
+
+    const { queueAndRunScanJob } = await import(
+      "@/agents/ai-regulation/processors/scanJobs"
+    );
+    const processed = await queueAndRunScanJob({
+      sourceId: "src-mixed",
+      trigger: "manual",
+      requestedBy: "admin-api",
+      scanProfile: "official_baseline_scan",
+    });
+
+    expect(processed.job.status).toBe("partial_success");
+  });
+
   it("processes the oldest queued scan job when draining the queue", async () => {
     jobs.push(
       {

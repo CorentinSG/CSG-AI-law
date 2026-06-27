@@ -163,13 +163,41 @@ function summarizeJobResult(
   };
 }
 
-function deriveJobStatus(
+type ScanJobOutcome = {
+  status: ScanJob["status"];
+  summary: Record<string, unknown>;
+  errorMessage: string | null;
+};
+
+function evaluateScanJobOutcome(
   result: Awaited<ReturnType<typeof runAiRegulationScan>>,
-): ScanJob["status"] {
+  requestedProfile?: ScanProfileId,
+): ScanJobOutcome {
+  const summary = summarizeJobResult(result);
   const statuses = new Set(result.map((entry) => entry.status));
-  if (statuses.has("failed")) return "failed";
-  if (statuses.has("partial_success")) return "partial_success";
-  return "succeeded";
+  const configurationWarnings: string[] = [];
+
+  if (requestedProfile && result.length === 0) {
+    configurationWarnings.push("scan_profile_resolved_zero_sources");
+  }
+
+  const status =
+    configurationWarnings.length > 0 ||
+    statuses.has("partial_success") ||
+    (statuses.has("succeeded") && statuses.has("failed"))
+      ? "partial_success"
+      : statuses.has("failed")
+        ? "failed"
+        : "succeeded";
+
+  return {
+    status,
+    summary: { ...summary, configurationWarnings },
+    errorMessage:
+      configurationWarnings.length > 0
+        ? `Scan profile ${requestedProfile} resolved to zero active sources.`
+        : null,
+  };
 }
 
 function toTimestamp(value: string | null | undefined): number | null {
@@ -249,25 +277,26 @@ async function executeClaimedScanJob(processingJob: ScanJob) {
   const stopHeartbeat = startScanJobHeartbeat(processingJob);
 
   try {
+    const requestedProfile =
+      typeof processingJob.resultSummary?.scanProfile === "string"
+        ? (processingJob.resultSummary.scanProfile as ScanProfileId)
+        : undefined;
     const result = await runAiRegulationScan(processingJob.sourceId ?? undefined, {
       trigger: processingJob.trigger as ScanTrigger,
       scanJobId: processingJob.id,
-      scanProfile:
-        typeof processingJob.resultSummary?.scanProfile === "string"
-          ? (processingJob.resultSummary.scanProfile as ScanProfileId)
-          : undefined,
+      scanProfile: requestedProfile,
     });
     const finishedAt = new Date().toISOString();
-    const status = deriveJobStatus(result);
-    const summary = summarizeJobResult(result);
+    const outcome = evaluateScanJobOutcome(result, requestedProfile);
     const stewardship = await runDataStewardSync();
 
     const updatedJob = await updateRepository.updateScanJob(processingJob.id, {
-      status,
+      status: outcome.status,
       finishedAt,
+      errorMessage: outcome.errorMessage,
       resultSummary: {
         ...processingJob.resultSummary,
-        ...summary,
+        ...outcome.summary,
         dataStewardFindingsSynced: stewardship.persisted.syncedCount,
         highPriorityReviewItems: stewardship.report.summary.highPriorityReviewItems,
       },
