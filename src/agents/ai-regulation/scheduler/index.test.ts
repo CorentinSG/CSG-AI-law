@@ -1,8 +1,15 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-const queueScanJob = vi.fn(async (input) => ({
-  id: `job-${input.scanProfile}`,
-  resultSummary: input.resultSummary,
+import {
+  buildCentralMonitoringSchedule,
+  enqueueCentralMonitoringSchedule,
+} from "@/agents/ai-regulation/scheduler";
+
+const { queueScanJob } = vi.hoisted(() => ({
+  queueScanJob: vi.fn(async (input) => ({
+    id: `job-${input.scanProfile}`,
+    resultSummary: input.resultSummary,
+  })),
 }));
 
 vi.mock("@/agents/ai-regulation/processors/scanJobs", () => ({
@@ -14,9 +21,7 @@ describe("central monitoring scheduler", () => {
     vi.clearAllMocks();
   });
 
-  it("builds a central plan covering every EU and US monitoring agent", async () => {
-    const { buildCentralMonitoringSchedule } = await import("@/agents/ai-regulation/scheduler");
-
+  it("builds a central plan covering every EU and US monitoring agent", () => {
     const plan = buildCentralMonitoringSchedule();
 
     expect(plan.euAgents).toBe(28);
@@ -29,8 +34,6 @@ describe("central monitoring scheduler", () => {
   });
 
   it("queues selected regional/cadence sweeps with agent coverage metadata", async () => {
-    const { enqueueCentralMonitoringSchedule } = await import("@/agents/ai-regulation/scheduler");
-
     const result = await enqueueCentralMonitoringSchedule({
       trigger: "scheduled",
       requestedBy: "test-scheduler",

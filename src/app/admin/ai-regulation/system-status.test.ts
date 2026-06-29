@@ -31,6 +31,7 @@ function job(overrides: Partial<ScanJob> & { id: string; status: ScanJob["status
 function worker(overrides: Partial<HealthSnapshot["worker"]>): HealthSnapshot["worker"] {
   return {
     state: "idle",
+    alive: false,
     heartbeatAgeMs: null,
     heartbeatAt: null,
     lastActivityAgeMs: null,

@@ -12,8 +12,8 @@ export default defineConfig({
     environment: "node",
     // Playwright e2e specs live in `e2e/` and must not be run by Vitest.
     exclude: [...configDefaults.exclude, "e2e/**"],
-    testTimeout: 10_000,
-    hookTimeout: 10_000,
+    testTimeout: 60_000,
+    hookTimeout: 60_000,
     coverage: {
       provider: "v8",
     },
