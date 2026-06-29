@@ -26,6 +26,14 @@ const JUDILIBRE_PROBE_URL =
 const MIN_FIRECRAWL_MARKDOWN_CHARS = 40;
 const MIN_FIRECRAWL_DISTINCT_CONTENT_CHARS = 20;
 
+function normalizeComparableText(value: string) {
+  return value
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
 function now() {
   return Date.now();
 }
@@ -82,10 +90,10 @@ export function isUsableFirecrawlDocument(document: {
     return true;
   }
 
-  const lowercaseTitle = normalizedTitle.toLowerCase();
-  const lowercaseMarkdown = normalizedMarkdown.toLowerCase();
-  const distinctContent = lowercaseMarkdown
-    .replaceAll(lowercaseTitle, " ")
+  const comparableTitle = normalizeComparableText(normalizedTitle);
+  const comparableMarkdown = normalizeComparableText(normalizedMarkdown);
+  const distinctContent = comparableMarkdown
+    .replaceAll(comparableTitle, " ")
     .replace(/\s+/g, " ")
     .trim();
 

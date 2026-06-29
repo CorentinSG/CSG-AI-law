@@ -87,3 +87,15 @@
 
 - Tightened the Firecrawl gate again so a document is only usable when it contains meaningful content distinct from the title, not merely the title itself or a trivially punctuated copy.
 - Expanded the regression test with the explicit title `Colorado Artificial Intelligence Act Guidance 2026` and both identical and quasi-identical markdown variants, which now fail as required.
+
+## Punctuation Follow-up RED
+
+- Review finding: Firecrawl could still pass if markdown was only a punctuation variant of the title, such as `Colorado Artificial-Intelligence Act Guidance 2026` or `Colorado: Artificial Intelligence Act Guidance 2026`.
+
+## Punctuation Follow-up GREEN
+
+- Normalized Firecrawl title/content comparison by removing punctuation and collapsing whitespace before subtracting title text from markdown.
+- Added regression cases for the hyphenated and colon title variants.
+- Verification:
+  - `npm test -- scripts/verify-ingestion-runtime.test.ts src/agents/ai-regulation/agentApiCapabilities.test.ts` -> 2 files passed, 7 tests passed
+  - `npm run verify:ingestion-runtime` -> exit 0 with redacted local `blocked_missing_credentials` statuses for Scrapling, Firecrawl, NewsAPI, and Judilibre
