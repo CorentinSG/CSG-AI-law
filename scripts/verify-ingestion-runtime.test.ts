@@ -21,6 +21,22 @@ describe("verify-ingestion-runtime Firecrawl probe", () => {
         },
       ]),
     ).toThrow("usable content");
+    expect(() =>
+      assertUsableFirecrawlDocuments([
+        {
+          title: "Colorado Artificial Intelligence Act Guidance 2026",
+          markdown: "Colorado Artificial Intelligence Act Guidance 2026",
+        },
+      ]),
+    ).toThrow("usable content");
+    expect(() =>
+      assertUsableFirecrawlDocuments([
+        {
+          title: "Colorado Artificial Intelligence Act Guidance 2026",
+          markdown: "Colorado Artificial Intelligence Act Guidance 2026.",
+        },
+      ]),
+    ).toThrow("usable content");
   });
 
   it("accepts at least one substantial Firecrawl document", () => {

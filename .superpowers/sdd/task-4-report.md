@@ -78,3 +78,12 @@
   - empty Firecrawl results => failure
   - title-only / too-short markdown => failure
   - substantial markdown => success
+
+## Final Follow-up RED
+
+- Review finding: Firecrawl could still pass if the markdown was just the title copied back, because the previous gate only checked total markdown length.
+
+## Final Follow-up GREEN
+
+- Tightened the Firecrawl gate again so a document is only usable when it contains meaningful content distinct from the title, not merely the title itself or a trivially punctuated copy.
+- Expanded the regression test with the explicit title `Colorado Artificial Intelligence Act Guidance 2026` and both identical and quasi-identical markdown variants, which now fail as required.

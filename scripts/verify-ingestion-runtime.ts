@@ -24,6 +24,7 @@ const NEWSAPI_PROBE_URL =
 const JUDILIBRE_PROBE_URL =
   "https://api.piste.gouv.fr/cassation/judilibre/v1.0/search?query=intelligence%20artificielle&page_size=1";
 const MIN_FIRECRAWL_MARKDOWN_CHARS = 40;
+const MIN_FIRECRAWL_DISTINCT_CONTENT_CHARS = 20;
 
 function now() {
   return Date.now();
@@ -69,9 +70,26 @@ export function isUsableFirecrawlDocument(document: {
   title?: string | null;
 }) {
   const markdown = typeof document.markdown === "string" ? document.markdown : "";
+  const title = typeof document.title === "string" ? document.title : "";
   const normalizedMarkdown = markdown.replace(/\s+/g, " ").trim();
+  const normalizedTitle = title.replace(/\s+/g, " ").trim();
 
-  return normalizedMarkdown.length >= MIN_FIRECRAWL_MARKDOWN_CHARS;
+  if (normalizedMarkdown.length < MIN_FIRECRAWL_MARKDOWN_CHARS) {
+    return false;
+  }
+
+  if (!normalizedTitle) {
+    return true;
+  }
+
+  const lowercaseTitle = normalizedTitle.toLowerCase();
+  const lowercaseMarkdown = normalizedMarkdown.toLowerCase();
+  const distinctContent = lowercaseMarkdown
+    .replaceAll(lowercaseTitle, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+
+  return distinctContent.length >= MIN_FIRECRAWL_DISTINCT_CONTENT_CHARS;
 }
 
 export function assertUsableFirecrawlDocuments(
