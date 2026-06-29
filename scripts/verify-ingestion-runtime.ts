@@ -1,4 +1,5 @@
 import { config } from "dotenv";
+import { pathToFileURL } from "node:url";
 
 config({ path: ".env.local", quiet: true });
 
@@ -22,6 +23,7 @@ const NEWSAPI_PROBE_URL =
   "https://newsapi.org/v2/everything?q=%22AI%20Act%22&language=en&pageSize=1&sortBy=publishedAt";
 const JUDILIBRE_PROBE_URL =
   "https://api.piste.gouv.fr/cassation/judilibre/v1.0/search?query=intelligence%20artificielle&page_size=1";
+const MIN_FIRECRAWL_MARKDOWN_CHARS = 40;
 
 function now() {
   return Date.now();
@@ -60,6 +62,30 @@ function classifyError(error: unknown): string {
   }
 
   return name.replace(/[^A-Za-z0-9]/g, "") || "UnknownError";
+}
+
+export function isUsableFirecrawlDocument(document: {
+  markdown?: string | null;
+  title?: string | null;
+}) {
+  const markdown = typeof document.markdown === "string" ? document.markdown : "";
+  const normalizedMarkdown = markdown.replace(/\s+/g, " ").trim();
+
+  return normalizedMarkdown.length >= MIN_FIRECRAWL_MARKDOWN_CHARS;
+}
+
+export function assertUsableFirecrawlDocuments(
+  documents: Array<{ markdown?: string | null; title?: string | null }>,
+) {
+  if (!Array.isArray(documents)) {
+    throw new Error("Firecrawl returned a non-array result");
+  }
+  if (documents.length === 0) {
+    throw new Error("Firecrawl returned an empty result set");
+  }
+  if (!documents.some((document) => isUsableFirecrawlDocument(document))) {
+    throw new Error("Firecrawl returned no document with usable content");
+  }
 }
 
 async function runConfiguredProbe(
@@ -114,12 +140,7 @@ async function verifyFirecrawl(): Promise<ProviderProbeResult> {
     const { crawlSource } = await import("@/agents/ingestion/firecrawlService");
 
     const documents = await crawlSource(FIRECRAWL_PROBE_SOURCE, { crawl_limit: 1 });
-    if (!Array.isArray(documents)) {
-      throw new Error("Firecrawl returned a non-array result");
-    }
-    if (documents.length === 0) {
-      throw new Error("Firecrawl returned an empty result set");
-    }
+    assertUsableFirecrawlDocuments(documents);
   });
 }
 
@@ -173,13 +194,20 @@ async function main() {
   }
 }
 
-main().catch((error) => {
-  const failure: ProviderProbeResult = {
-    provider: "runtime",
-    status: "failed",
-    latency: 0,
-    errorClass: classifyError(error),
-  };
-  process.stdout.write(`${JSON.stringify([failure], null, 2)}\n`);
-  process.exitCode = 1;
-});
+function isExecutedAsScript() {
+  const entrypoint = process.argv[1];
+  return Boolean(entrypoint) && import.meta.url === pathToFileURL(entrypoint).href;
+}
+
+if (isExecutedAsScript()) {
+  main().catch((error) => {
+    const failure: ProviderProbeResult = {
+      provider: "runtime",
+      status: "failed",
+      latency: 0,
+      errorClass: classifyError(error),
+    };
+    process.stdout.write(`${JSON.stringify([failure], null, 2)}\n`);
+    process.exitCode = 1;
+  });
+}

@@ -64,3 +64,17 @@
 
 - Tightened Firecrawl verification so a configured probe fails when the crawl result is empty.
 - Kept the output redacted while changing unexpected top-level failures to provider `runtime` instead of falsely blaming `scrapling`.
+
+## Second Follow-up RED
+
+- Review finding: Firecrawl could still be reported `live_verified` when `crawlSource()` returned a non-empty array containing title-only or otherwise unusable documents.
+- Gap: the runtime script had no regression test around “configured + useless Firecrawl result => failed”.
+
+## Second Follow-up GREEN
+
+- Added a pure Firecrawl result gate in `scripts/verify-ingestion-runtime.ts` that now requires at least one extracted document with meaningful markdown content above a minimum threshold.
+- Firecrawl configured probes now fail redacted when every returned document is empty, title-only, or too thin to be operationally useful.
+- Added `scripts/verify-ingestion-runtime.test.ts` as a regression covering:
+  - empty Firecrawl results => failure
+  - title-only / too-short markdown => failure
+  - substantial markdown => success
