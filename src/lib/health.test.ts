@@ -247,6 +247,120 @@ describe("buildHealthSnapshot", () => {
     });
   });
 
+  it("does not treat a stale running lease as active or alive", async () => {
+    mocks.updateRepository.getScanJobs.mockResolvedValueOnce([
+      makeJob({
+        id: "job-running-stale",
+        status: "running",
+        startedAt: "2026-06-18T10:03:00.000Z",
+        finishedAt: null,
+        updatedAt: "2026-06-18T10:03:30.000Z",
+        createdAt: "2026-06-18T10:03:00.000Z",
+        resultSummary: {
+          scanProfile: "live_news_discovery_scan",
+          leaseHeartbeatAt: "2026-06-18T10:03:45.000Z",
+          leaseHeartbeatTimeoutMs: 45_000,
+        },
+      }),
+      makeJob({
+        id: "job-queued-recent",
+        status: "queued",
+        startedAt: null,
+        finishedAt: null,
+        createdAt: "2026-06-18T10:04:50.000Z",
+        updatedAt: "2026-06-18T10:04:55.000Z",
+        resultSummary: {
+          scanProfile: "official_legal_scan",
+        },
+      }),
+    ]);
+    const { buildHealthSnapshot } = await import("@/lib/health");
+
+    const snapshot = await buildHealthSnapshot({
+      access: "authenticated",
+      now: new Date("2026-06-18T10:05:00.000Z"),
+    });
+
+    expect(snapshot.worker).toMatchObject({
+      state: "unknown",
+      alive: false,
+      heartbeatAt: "2026-06-18T10:03:45.000Z",
+      heartbeatAgeMs: 75_000,
+      lastActivityAt: null,
+      lastActivityAgeMs: null,
+      runningJobs: 1,
+    });
+  });
+
+  it("only degrades coverage for explicit zero-source profile warnings", async () => {
+    mocks.updateRepository.getScanJobs.mockResolvedValueOnce([
+      makeJob({
+        id: "job-no-profile-zero-sources",
+        status: "partial_success",
+        finishedAt: "2026-06-18T10:04:00.000Z",
+        updatedAt: "2026-06-18T10:04:00.000Z",
+        resultSummary: {
+          sourcesProcessed: 0,
+          configurationWarnings: [],
+          failureReasons: [],
+        },
+      }),
+    ]);
+    const { buildHealthSnapshot } = await import("@/lib/health");
+
+    const snapshot = await buildHealthSnapshot({
+      access: "authenticated",
+      now: new Date("2026-06-18T10:05:00.000Z"),
+    });
+
+    expect(snapshot.ok).toBe(true);
+    expect(snapshot.coverage).toEqual({
+      state: "healthy",
+      zeroSourceProfiles: [],
+    });
+  });
+
+  it("clears an older zero-source degradation when the latest completed profile run is healthy", async () => {
+    mocks.updateRepository.getScanJobs.mockResolvedValueOnce([
+      makeJob({
+        id: "job-zero-source-older",
+        status: "partial_success",
+        finishedAt: "2026-06-18T10:02:00.000Z",
+        updatedAt: "2026-06-18T10:02:00.000Z",
+        resultSummary: {
+          scanProfile: "live_news_discovery_scan",
+          sourcesProcessed: 0,
+          configurationWarnings: ["scan_profile_resolved_zero_sources"],
+          failureReasons: [],
+        },
+      }),
+      makeJob({
+        id: "job-healthy-newer",
+        status: "succeeded",
+        finishedAt: "2026-06-18T10:04:00.000Z",
+        updatedAt: "2026-06-18T10:04:00.000Z",
+        resultSummary: {
+          scanProfile: "live_news_discovery_scan",
+          sourcesProcessed: 4,
+          configurationWarnings: [],
+          failureReasons: [],
+        },
+      }),
+    ]);
+    const { buildHealthSnapshot } = await import("@/lib/health");
+
+    const snapshot = await buildHealthSnapshot({
+      access: "authenticated",
+      now: new Date("2026-06-18T10:05:00.000Z"),
+    });
+
+    expect(snapshot.ok).toBe(true);
+    expect(snapshot.coverage).toEqual({
+      state: "healthy",
+      zeroSourceProfiles: [],
+    });
+  });
+
   it("returns an unhealthy snapshot when repository reads fail", async () => {
     mocks.updateRepository.getSources.mockRejectedValueOnce(new Error("database unavailable"));
     const { buildHealthSnapshot } = await import("@/lib/health");

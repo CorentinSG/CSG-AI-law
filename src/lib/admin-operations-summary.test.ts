@@ -79,6 +79,7 @@ describe("buildAdminOperationsSummary", () => {
     updateRepository.getScanJobs.mockResolvedValueOnce([
       { status: "queued" },
       { status: "running" },
+      { status: "partial_success" },
       { status: "failed" },
     ]);
     updateRepository.listDiscoveryLeadsPage.mockResolvedValueOnce({ total: 5, items: [], limit: 1, offset: 0, hasMore: true });
@@ -135,6 +136,7 @@ describe("buildAdminOperationsSummary", () => {
     expect(summary.operations.scanJobs.byStatus).toMatchObject({
       queued: 1,
       running: 1,
+      partial_success: 1,
       failed: 1,
       succeeded: 0,
       cancelled: 0,

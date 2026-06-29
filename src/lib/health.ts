@@ -55,7 +55,8 @@ export interface HealthSnapshot {
 const MAX_RECENT_SOURCES = 500;
 const MAX_RECENT_JOBS = 100;
 const MAX_REVIEW_ITEMS = 500;
-const RECENT_WORKER_ACTIVITY_MS = 15 * 60 * 1000;
+const RECENT_IDLE_WORKER_ACTIVITY_MS = 15 * 60 * 1000;
+const DEFAULT_WORKER_HEARTBEAT_TIMEOUT_MS = 45_000;
 
 function toTimestamp(value: string | null | undefined) {
   if (!value) return null;
@@ -73,29 +74,52 @@ function getScanProfile(job: ScanJob) {
   return typeof value === "string" && value.length > 0 ? value : "default";
 }
 
+function getExplicitScanProfile(job: ScanJob) {
+  const value = job.resultSummary?.scanProfile;
+  return typeof value === "string" && value.length > 0 ? value : null;
+}
+
 function getLeaseHeartbeatAt(job: ScanJob) {
   const value = job.resultSummary?.leaseHeartbeatAt;
   return typeof value === "string" ? value : null;
+}
+
+function getLeaseHeartbeatTimeoutMs(job: ScanJob) {
+  const value = job.resultSummary?.leaseHeartbeatTimeoutMs;
+  return typeof value === "number" && Number.isFinite(value) && value > 0
+    ? value
+    : DEFAULT_WORKER_HEARTBEAT_TIMEOUT_MS;
 }
 
 function getJobRecencyAnchor(job: ScanJob) {
   return job.finishedAt ?? job.updatedAt ?? job.createdAt ?? null;
 }
 
+function hasSummaryFlag(value: unknown, expected: string) {
+  return Array.isArray(value) && value.some((entry) => typeof entry === "string" && entry === expected);
+}
+
 function isZeroSourceProfileJob(job: ScanJob) {
-  const warnings = job.resultSummary?.configurationWarnings;
-  const hasZeroSourceWarning =
-    Array.isArray(warnings) &&
-    warnings.some(
-      (warning) =>
-        typeof warning === "string" && warning === "scan_profile_resolved_zero_sources",
-    );
-  if (hasZeroSourceWarning) {
-    return true;
+  return (
+    hasSummaryFlag(job.resultSummary?.configurationWarnings, "scan_profile_resolved_zero_sources") ||
+    hasSummaryFlag(job.resultSummary?.failureReasons, "scan_profile_resolved_zero_sources")
+  );
+}
+
+function getRunningWorkerActivityAt(job: ScanJob, now: number) {
+  const heartbeatAt = getLeaseHeartbeatAt(job);
+  const heartbeatAgeMs = ageMs(heartbeatAt, now);
+  if (heartbeatAgeMs !== null && heartbeatAgeMs <= getLeaseHeartbeatTimeoutMs(job)) {
+    return heartbeatAt;
   }
 
-  const sourcesProcessed = job.resultSummary?.sourcesProcessed;
-  return typeof sourcesProcessed === "number" && sourcesProcessed === 0;
+  const startedAt = job.startedAt;
+  const startedAgeMs = ageMs(startedAt, now);
+  if (startedAgeMs !== null && startedAgeMs <= getLeaseHeartbeatTimeoutMs(job)) {
+    return startedAt;
+  }
+
+  return null;
 }
 
 function findNewestIso(values: Array<string | null | undefined>) {
@@ -160,18 +184,18 @@ function buildScanSummary(sources: RegulationSource[], jobs: ScanJob[], now: num
 function buildWorkerSummary(jobs: ScanJob[], now: number) {
   const runningJobs = jobs.filter((job) => job.status === "running");
   const heartbeatAt = findNewestIso(runningJobs.map(getLeaseHeartbeatAt));
-  const lastActivityAt = findNewestIso(
-    jobs.flatMap((job) => [
-      getLeaseHeartbeatAt(job),
-      job.updatedAt,
-      job.finishedAt,
-      job.startedAt,
-      job.createdAt,
-    ]),
+  const activeRunningActivityAt = findNewestIso(
+    runningJobs.map((job) => getRunningWorkerActivityAt(job, now)),
   );
+  const finishedActivityAt = findNewestIso(
+    jobs
+      .filter((job) => job.status !== "running")
+      .map((job) => job.finishedAt),
+  );
+  const lastActivityAt = findNewestIso([activeRunningActivityAt, finishedActivityAt]);
   const lastActivityAgeMs = ageMs(lastActivityAt, now);
   const state: HealthSnapshot["worker"]["state"] =
-    runningJobs.length > 0 && heartbeatAt
+    activeRunningActivityAt
       ? "active"
       : lastActivityAt
         ? "idle"
@@ -180,7 +204,9 @@ function buildWorkerSummary(jobs: ScanJob[], now: number) {
     state,
     alive:
       state === "active" ||
-      (lastActivityAgeMs !== null && lastActivityAgeMs <= RECENT_WORKER_ACTIVITY_MS),
+      (state === "idle" &&
+        lastActivityAgeMs !== null &&
+        lastActivityAgeMs <= RECENT_IDLE_WORKER_ACTIVITY_MS),
     heartbeatAgeMs: ageMs(heartbeatAt, now),
     heartbeatAt,
     lastActivityAgeMs,
@@ -197,7 +223,10 @@ function buildCoverageSummary(jobs: ScanJob[]): HealthSnapshot["coverage"] {
       continue;
     }
 
-    const profile = getScanProfile(job);
+    const profile = getExplicitScanProfile(job);
+    if (!profile) {
+      continue;
+    }
     const existing = newestJobByProfile.get(profile);
     const currentTimestamp = toTimestamp(getJobRecencyAnchor(job)) ?? -Infinity;
     const existingTimestamp = existing
