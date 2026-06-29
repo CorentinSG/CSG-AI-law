@@ -5,7 +5,7 @@ config({ path: ".env.local", quiet: true });
 type ProviderStatus = "live_verified" | "blocked_missing_credentials" | "failed";
 
 interface ProviderProbeResult {
-  provider: "scrapling" | "firecrawl" | "newsapi" | "judilibre";
+  provider: "scrapling" | "firecrawl" | "newsapi" | "judilibre" | "runtime";
   status: ProviderStatus;
   latency: number;
   errorClass?: string;
@@ -117,6 +117,9 @@ async function verifyFirecrawl(): Promise<ProviderProbeResult> {
     if (!Array.isArray(documents)) {
       throw new Error("Firecrawl returned a non-array result");
     }
+    if (documents.length === 0) {
+      throw new Error("Firecrawl returned an empty result set");
+    }
   });
 }
 
@@ -172,7 +175,7 @@ async function main() {
 
 main().catch((error) => {
   const failure: ProviderProbeResult = {
-    provider: "scrapling",
+    provider: "runtime",
     status: "failed",
     latency: 0,
     errorClass: classifyError(error),

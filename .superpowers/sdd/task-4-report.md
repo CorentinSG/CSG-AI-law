@@ -54,3 +54,13 @@
 - `package.json` already had unrelated dirty dependency changes (`three`, `@types/three`) before this task; they were left in place and not reverted.
 - `package-lock.json` was already dirty and was not modified for this task.
 - Local runtime verification could only prove the blocked-without-credentials path because the relevant provider env vars were not configured in `.env.local`.
+
+## Follow-up RED
+
+- Review finding: Firecrawl runtime verification was too permissive because a configured crawl returning `[]` could still be reported as `live_verified`.
+- Review finding: unexpected top-level failures were always attributed to `scrapling`, which made the redacted output misleading.
+
+## Follow-up GREEN
+
+- Tightened Firecrawl verification so a configured probe fails when the crawl result is empty.
+- Kept the output redacted while changing unexpected top-level failures to provider `runtime` instead of falsely blaming `scrapling`.
