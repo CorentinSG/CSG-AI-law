@@ -4,6 +4,11 @@ export type AgentApiCapabilityStatus =
   | "needs_user_setup"
   | "planned";
 
+export type AgentApiCapabilityVerificationState =
+  | "blocked"
+  | "configured_unverified"
+  | "live_verified";
+
 export type AgentApiCapabilityUse =
   | "official_legal_database"
   | "legal_news_discovery"
@@ -14,6 +19,7 @@ export interface AgentApiCapability {
   id: string;
   label: string;
   status: AgentApiCapabilityStatus;
+  verificationState: AgentApiCapabilityVerificationState;
   uses: AgentApiCapabilityUse[];
   regions: Array<"Europe" | "United States" | "Global">;
   envVars: string[];
@@ -50,12 +56,21 @@ export function listAgentApiCapabilities(
   );
 
   const enrich = (
-    capability: Omit<AgentApiCapability, "configuredEnvVars" | "missingEnvVars">,
-  ): AgentApiCapability => ({
-    ...capability,
-    configuredEnvVars: capability.envVars.filter((name) => hasEnv(name, rawEnv)),
-    missingEnvVars: capability.envVars.filter((name) => !hasEnv(name, rawEnv)),
-  });
+    capability: Omit<
+      AgentApiCapability,
+      "configuredEnvVars" | "missingEnvVars" | "verificationState"
+    >,
+  ): AgentApiCapability => {
+    const configuredEnvVars = capability.envVars.filter((name) => hasEnv(name, rawEnv));
+    const missingEnvVars = capability.envVars.filter((name) => !hasEnv(name, rawEnv));
+
+    return {
+      ...capability,
+      verificationState: missingEnvVars.length > 0 ? "blocked" : "configured_unverified",
+      configuredEnvVars,
+      missingEnvVars,
+    };
+  };
 
   return [
     enrich({

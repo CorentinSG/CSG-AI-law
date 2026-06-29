@@ -112,6 +112,22 @@ describe("agent API capabilities", () => {
     ).toEqual(["COURTLISTENER_API_KEY"]);
   });
 
+  it("distinguishes blocked from configured_unverified connector state", () => {
+    const blockedFirecrawl = listAgentApiCapabilities({}).find(
+      (capability) => capability.id === "firecrawl",
+    );
+    const configuredFirecrawl = listAgentApiCapabilities({
+      FIRECRAWL_API_KEY: "firecrawl-key",
+    }).find((capability) => capability.id === "firecrawl");
+    const configuredScrapling = listAgentApiCapabilities({
+      SCRAPLING_WORKER_URL: "https://scrapling-worker.example",
+    }).find((capability) => capability.id === "scrapling-sidecar");
+
+    expect(blockedFirecrawl?.verificationState).toBe("blocked");
+    expect(configuredFirecrawl?.verificationState).toBe("configured_unverified");
+    expect(configuredScrapling?.verificationState).toBe("configured_unverified");
+  });
+
   it("documents legal research accelerators as preferred over generic scraping", () => {
     expect(listAgentApiCapabilities({})).toContainEqual(
       expect.objectContaining({
