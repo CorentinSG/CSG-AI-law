@@ -50,6 +50,8 @@
     "scan:live-news": "tsx scripts/run-live-news-scan.ts",
     "scan:verification": "tsx scripts/run-verification-scan.ts",
     "verify:ingestion-runtime": "tsx scripts/verify-ingestion-runtime.ts",
+    "backup:database": "powershell -File scripts/backup-supabase.ps1",
+    "verify:database-restore": "powershell -File scripts/verify-backup-restore.ps1",
     "scan:drain-queue": "tsx scripts/run-scan-job-drain.ts",
     "scan:worker-local": "tsx scripts/run-scan-job-worker.ts",
     "worker:scan": "tsx scripts/run-scan-job-worker.ts",
