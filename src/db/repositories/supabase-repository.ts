@@ -1739,6 +1739,41 @@ export class SupabaseAiRegulationRepository implements AiRegulationRepository {
     return mapScanJobRow(data);
   }
 
+  async completeScanJob(id: string, leaseToken: string, patch: Partial<ScanJob>) {
+    const client = requireAdminClient();
+    const { data, error } = await client.rpc("complete_scan_job", {
+      p_id: id,
+      p_lease_token: leaseToken,
+      p_status: patch.status,
+      p_finished_at: patch.finishedAt,
+      p_result_summary: patch.resultSummary,
+      p_error_message: patch.errorMessage,
+    });
+    if (isMissingRelationError(error)) {
+      const existing = this.legacyScanJobs.get(id);
+      if (
+        !existing ||
+        existing.status !== "running" ||
+        existing.resultSummary?.leaseToken !== leaseToken
+      ) {
+        return null;
+      }
+      const updated: ScanJob = {
+        ...existing,
+        status: patch.status ?? existing.status,
+        finishedAt: patch.finishedAt ?? existing.finishedAt,
+        resultSummary: patch.resultSummary ?? existing.resultSummary,
+        errorMessage: patch.errorMessage ?? null,
+        updatedAt: new Date().toISOString(),
+      };
+      this.legacyScanJobs.set(id, updated);
+      return updated;
+    }
+    handleError("Failed to complete scan job", error);
+    const row = Array.isArray(data) ? data[0] : data;
+    return row ? mapScanJobRow(row) : null;
+  }
+
   async listDiscoveryLeads(limit = 50, status?: string) {
     const client = requireAdminClient();
     let query = client

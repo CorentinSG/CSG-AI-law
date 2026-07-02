@@ -467,6 +467,53 @@ describe("MemoryAiRegulationRepository", () => {
     expect(secondClaim).toBeNull();
   });
 
+  it("allows only the current lease token to persist one terminal outcome", async () => {
+    const job = await repository.createScanJob({
+      sourceId: "src-federal-register-ai",
+      trigger: "manual",
+      requestedBy: "test-suite",
+      status: "queued",
+      startedAt: null,
+      finishedAt: null,
+      resultSummary: {},
+      errorMessage: null,
+    });
+    await repository.tryStartScanJob(job.id, {
+      startedAt: "2026-06-06T13:10:00.000Z",
+      leaseOwner: "worker-new",
+      leaseToken: "lease-new",
+    });
+
+    const stale = await repository.completeScanJob(job.id, "lease-old", {
+      status: "failed",
+      finishedAt: "2026-06-06T13:11:00.000Z",
+      errorMessage: "Stale worker failed",
+      resultSummary: { leaseToken: "lease-old", stale: true },
+      sourceId: "src-overwrite-attempt",
+    });
+    const current = await repository.completeScanJob(job.id, "lease-new", {
+      status: "succeeded",
+      finishedAt: "2026-06-06T13:12:00.000Z",
+      errorMessage: null,
+      resultSummary: { leaseToken: "lease-new", authoritative: true },
+      sourceId: "src-overwrite-attempt",
+    });
+    const duplicate = await repository.completeScanJob(job.id, "lease-new", {
+      status: "failed",
+      finishedAt: "2026-06-06T13:13:00.000Z",
+      errorMessage: "Duplicate completion",
+    });
+
+    expect(stale).toBeNull();
+    expect(current).toMatchObject({
+      status: "succeeded",
+      sourceId: "src-federal-register-ai",
+      errorMessage: null,
+      resultSummary: { leaseToken: "lease-new", authoritative: true },
+    });
+    expect(duplicate).toBeNull();
+  });
+
   it("persists news items and source health snapshots", async () => {
     const seedNews = await repository.listNewsItems(20, "admin");
     expect(seedNews.length).toBeGreaterThan(0);

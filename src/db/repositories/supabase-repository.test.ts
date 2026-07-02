@@ -465,6 +465,30 @@ describe("Supabase column constants", () => {
     expect(repoSrc).toContain('.is("started_at", null)');
     expect(repoSrc).toContain('.is("finished_at", null)');
   });
+
+  it("completes scan jobs through the lease-token RPC", () => {
+    const migrationSrc = readFileSync(
+      join(
+        dirname(fileURLToPath(import.meta.url)),
+        "../migrations/014_scan_job_lease_completion.sql",
+      ),
+      "utf8",
+    );
+
+    expect(repoSrc).toContain("async completeScanJob(");
+    expect(repoSrc).toContain('client.rpc("complete_scan_job"');
+    expect(migrationSrc).toContain("create or replace function complete_scan_job");
+    expect(migrationSrc).toContain("status = 'running'");
+    expect(migrationSrc).toContain(
+      "p_status in ('succeeded', 'partial_success', 'failed')",
+    );
+    expect(migrationSrc).toContain("result_summary->>'leaseToken' = p_lease_token");
+    expect(migrationSrc).toContain("to service_role");
+    expect(migrationSrc).not.toMatch(/\bstarted_at\s*=/);
+    expect(migrationSrc).not.toMatch(/\bsource_id\s*=/);
+    expect(migrationSrc).not.toMatch(/\brequested_by\s*=/);
+    expect(migrationSrc).not.toMatch(/\btrigger\s*=/);
+  });
 });
 
 // ---------------------------------------------------------------------------

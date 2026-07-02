@@ -9,6 +9,7 @@ import {
   type ScanTrigger,
 } from "@/agents/ai-regulation/processors/pipeline";
 import { updateRepository } from "@/agents/ai-regulation/processors/updateRepository";
+import { getAiRegulationRepository } from "@/db/repository";
 
 const DEFAULT_STALE_SCAN_JOB_AFTER_MS = 15 * 60 * 1000;
 const DEFAULT_SCAN_JOB_FETCH_LIMIT = 100;
@@ -299,6 +300,10 @@ function startScanJobHeartbeat(job: ScanJob) {
 
 async function executeClaimedScanJob(processingJob: ScanJob) {
   const stopHeartbeat = startScanJobHeartbeat(processingJob);
+  const leaseToken =
+    typeof processingJob.resultSummary?.leaseToken === "string"
+      ? processingJob.resultSummary.leaseToken
+      : "";
 
   try {
     const requestedProfile =
@@ -314,7 +319,7 @@ async function executeClaimedScanJob(processingJob: ScanJob) {
     const outcome = evaluateScanJobOutcome(result, requestedProfile);
     const stewardship = await runDataStewardSync();
 
-    const updatedJob = await updateRepository.updateScanJob(processingJob.id, {
+    const updatedJob = await getAiRegulationRepository().completeScanJob(processingJob.id, leaseToken, {
       status: outcome.status,
       finishedAt,
       errorMessage: outcome.errorMessage,
@@ -325,6 +330,12 @@ async function executeClaimedScanJob(processingJob: ScanJob) {
         highPriorityReviewItems: stewardship.report.summary.highPriorityReviewItems,
       },
     });
+    if (!updatedJob) {
+      throw Object.assign(
+        new Error(`Scan job ${processingJob.id} completion was rejected because its lease is no longer current.`),
+        { code: "scan_job_completion_rejected" as const, job: null },
+      );
+    }
     await alertOnDailyReviewBacklog({
       job: updatedJob,
       needsReviewBacklogSize: stewardship.report.summary.highPriorityReviewItems,
@@ -339,15 +350,28 @@ async function executeClaimedScanJob(processingJob: ScanJob) {
       },
     };
   } catch (error) {
+    if (
+      error instanceof Error &&
+      "code" in error &&
+      (error as { code?: string }).code === "scan_job_completion_rejected"
+    ) {
+      throw error;
+    }
     const finishedAt = new Date().toISOString();
     const errorMessage =
       error instanceof Error ? error.message : "Unknown scan job error.";
-    const updatedJob = await updateRepository.updateScanJob(processingJob.id, {
+    const updatedJob = await getAiRegulationRepository().completeScanJob(processingJob.id, leaseToken, {
       status: "failed",
       finishedAt,
       errorMessage,
       resultSummary: withFailureReasons(processingJob.resultSummary, errorMessage),
     });
+    if (!updatedJob) {
+      throw Object.assign(
+        new Error(`Scan job ${processingJob.id} failure completion was rejected because its lease is no longer current.`),
+        { code: "scan_job_completion_rejected" as const, job: null },
+      );
+    }
 
     throw Object.assign(
       new Error(updatedJob.errorMessage ?? "Scan job failed."),

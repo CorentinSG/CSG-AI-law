@@ -252,6 +252,11 @@ export interface AiRegulationRepository {
   getScanJobById(id: string): Promise<ScanJob | null>;
   createScanJob(input: ScanJobInput): Promise<ScanJob>;
   tryStartScanJob(id: string, input: ScanJobStartAttemptInput): Promise<ScanJob | null>;
+  completeScanJob(
+    id: string,
+    leaseToken: string,
+    patch: Partial<ScanJob>,
+  ): Promise<ScanJob | null>;
   updateScanJob(id: string, patch: Partial<ScanJob>): Promise<ScanJob>;
   listDiscoveryLeads(limit?: number, status?: string): Promise<DiscoveryLead[]>;
   listDiscoveryLeadsPage(

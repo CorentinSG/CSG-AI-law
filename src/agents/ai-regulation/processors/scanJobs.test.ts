@@ -28,6 +28,20 @@ const updateRepository = {
     Object.assign(job, patch, { updatedAt: "2026-06-06T10:00:01.000Z" });
     return job;
   }),
+  completeScanJob: vi.fn(
+    async (jobId: string, leaseToken: string, patch: Partial<ScanJob>) => {
+      const job = jobs.find((entry) => entry.id === jobId);
+      if (
+        !job ||
+        job.status !== "running" ||
+        job.resultSummary?.leaseToken !== leaseToken
+      ) {
+        return null;
+      }
+      Object.assign(job, patch, { updatedAt: "2026-06-06T10:00:01.000Z" });
+      return job;
+    },
+  ),
   tryStartScanJob: vi.fn(async (jobId: string, input) => {
     const job = jobs.find((entry) => entry.id === jobId);
     if (!job) {
@@ -60,6 +74,10 @@ const alertOnDailyReviewBacklog = vi.fn();
 
 vi.mock("@/agents/ai-regulation/processors/updateRepository", () => ({
   updateRepository,
+}));
+
+vi.mock("@/db/repository", () => ({
+  getAiRegulationRepository: () => updateRepository,
 }));
 
 vi.mock("@/agents/ai-regulation/processors/pipeline", () => ({
@@ -403,6 +421,45 @@ describe("scanJobs durability helpers", () => {
           failureReasons: ["Connector crashed"],
         }),
       }),
+    });
+  });
+
+  it("does not alert or report a stale worker completion as authoritative", async () => {
+    jobs.push({
+      id: "job-reclaimed",
+      sourceId: "src-1",
+      trigger: "manual",
+      requestedBy: "admin-api",
+      status: "queued",
+      startedAt: null,
+      finishedAt: null,
+      resultSummary: {},
+      errorMessage: null,
+      createdAt: "2026-06-06T09:55:00.000Z",
+      updatedAt: "2026-06-06T09:55:00.000Z",
+    });
+    runAiRegulationScan.mockImplementation(async () => {
+      const job = jobs[0];
+      job.resultSummary = {
+        ...job.resultSummary,
+        leaseToken: "replacement-lease",
+      };
+      return makeScanResult();
+    });
+
+    const { processNextQueuedScanJob } = await import(
+      "@/agents/ai-regulation/processors/scanJobs"
+    );
+
+    await expect(processNextQueuedScanJob()).rejects.toMatchObject({
+      code: "scan_job_completion_rejected",
+      job: null,
+    });
+    expect(updateRepository.completeScanJob).toHaveBeenCalledTimes(1);
+    expect(alertOnDailyReviewBacklog).not.toHaveBeenCalled();
+    expect(jobs[0]).toMatchObject({
+      status: "running",
+      resultSummary: { leaseToken: "replacement-lease" },
     });
   });
 

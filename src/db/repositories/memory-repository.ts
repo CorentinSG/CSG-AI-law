@@ -742,6 +742,36 @@ export class MemoryAiRegulationRepository implements AiRegulationRepository {
     return job;
   }
 
+  async completeScanJob(id: string, leaseToken: string, patch: Partial<ScanJob>) {
+    const job = await this.getScanJobById(id);
+    const terminalStatuses: ScanJob["status"][] = [
+      "succeeded",
+      "partial_success",
+      "failed",
+    ];
+    if (
+      !job ||
+      job.status !== "running" ||
+      job.resultSummary?.leaseToken !== leaseToken ||
+      !patch.status ||
+      !terminalStatuses.includes(patch.status)
+    ) {
+      return null;
+    }
+
+    Object.assign(
+      job,
+      {
+        status: patch.status,
+        finishedAt: patch.finishedAt,
+        resultSummary: patch.resultSummary,
+        errorMessage: patch.errorMessage,
+      },
+      { updatedAt: nextTimestamp() },
+    );
+    return job;
+  }
+
   async listDiscoveryLeads(limit?: number, status?: string) {
     const leads = status
       ? getMockStore().discoveryLeads.filter((lead) => lead.status === status)
