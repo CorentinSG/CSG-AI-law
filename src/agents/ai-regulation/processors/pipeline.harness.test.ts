@@ -37,6 +37,9 @@ const mocks = vi.hoisted(() => ({
     upsertNewsItem: vi.fn(),
     saveUpdateEdits: vi.fn(),
   },
+  repository: {
+    upsertRawItem: vi.fn(),
+  },
   relevanceFilter: {
     evaluate: vi.fn(),
   },
@@ -89,6 +92,10 @@ vi.mock("@/agents/ai-regulation/processors/deduplicator", () => ({
 
 vi.mock("@/agents/ai-regulation/processors/updateRepository", () => ({
   updateRepository: mocks.updateRepository,
+}));
+
+vi.mock("@/db/repository", () => ({
+  getAiRegulationRepository: vi.fn(() => mocks.repository),
 }));
 
 vi.mock("@/agents/ai-regulation/processors/relevanceFilter", () => ({
@@ -207,6 +214,10 @@ beforeEach(() => {
   mocks.deduplicator.findDuplicate.mockResolvedValue(null);
   mocks.updateRepository.getProcessingLogs.mockResolvedValue([]);
   mocks.updateRepository.createRawItem.mockResolvedValue({ ...rawItem });
+  mocks.repository.upsertRawItem.mockResolvedValue({
+    item: { ...rawItem },
+    inserted: true,
+  });
   mocks.updateRepository.updateRawItemMetadata.mockImplementation(
     async (id: string, metadata: Record<string, unknown>) => ({
       ...rawItem,
@@ -263,6 +274,41 @@ beforeEach(() => {
 });
 
 describe("runAiRegulationScan harness wiring", () => {
+  it("uses atomic raw-item upsert and treats a concurrent conflict as a duplicate", async () => {
+    mocks.sourceScanner.scanSource.mockResolvedValue({
+      items: [{ id: "item-1" }],
+      itemsFetched: 1,
+      warnings: [],
+      errors: [],
+      responseStatus: 200,
+      zeroResultsReason: null,
+    });
+    mocks.itemExtractor.extract.mockReturnValue([
+      {
+        title: "AI courts rule",
+        url: "https://example.eu/item-1",
+        text: "AI rule text",
+        metadata: {},
+        publicationDate: "2026-06-11",
+      },
+    ]);
+    mocks.repository.upsertRawItem.mockResolvedValue({
+      item: { ...rawItem },
+      inserted: false,
+    });
+
+    const { runAiRegulationScan } = await import(
+      "@/agents/ai-regulation/processors/pipeline"
+    );
+    const [result] = await runAiRegulationScan(source.id);
+
+    expect(mocks.repository.upsertRawItem).toHaveBeenCalledOnce();
+    expect(mocks.updateRepository.createRawItem).not.toHaveBeenCalled();
+    expect(result.duplicatesDetected).toBe(1);
+    expect(result.newItemsDetected).toBe(0);
+    expect(mocks.updateRepository.createUpdate).not.toHaveBeenCalled();
+  });
+
   it("stores a structured failure report in scan logs when source retrieval fails", async () => {
     mocks.sourceScanner.scanSource.mockRejectedValue(new Error("403 Forbidden"));
     const { runAiRegulationScan } = await import(

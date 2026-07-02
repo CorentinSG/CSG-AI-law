@@ -841,6 +841,44 @@ export class SupabaseAiRegulationRepository implements AiRegulationRepository {
     return record;
   }
 
+  async upsertRawItem(input: RawRegulatoryItemInput) {
+    const client = requireAdminClient();
+    const row = rawItemToInsert({
+      ...input,
+      id: `raw-${randomUUID()}`,
+    });
+    const { data, error } = await client
+      .from("raw_regulatory_items")
+      .upsert(row, { onConflict: "hash", ignoreDuplicates: true })
+      .select("*")
+      .maybeSingle();
+    handleError("Failed to upsert raw regulatory item", error);
+
+    const inserted = data != null;
+    const item = inserted
+      ? mapRawItemRow(data)
+      : await this.findRawRegulatoryItemByHash(input.hash);
+    if (!item) {
+      throw new RepositoryOperationError(
+        `Raw item conflict did not return canonical row for hash=${input.hash}.`,
+      );
+    }
+
+    if (inserted) {
+      const sourceReferences = getSourceReferencesFromRawItem(item).map(
+        (reference) => ({
+          ...reference,
+          rawItemId: item.id,
+          regulatoryUpdateId: null,
+        }),
+      );
+      if (sourceReferences.length > 0) {
+        await this.replaceSourceReferencesForRawItem(item.id, sourceReferences);
+      }
+    }
+    return { item, inserted };
+  }
+
   async findRawRegulatoryItemByHash(hash: string) {
     const client = requireAdminClient();
     const { data, error } = await client

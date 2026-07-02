@@ -180,6 +180,9 @@ export interface AiRegulationRepository {
     scope?: VisibilityScope,
   ): Promise<AiRegulatoryUpdate | null>;
   createRawRegulatoryItem(input: RawRegulatoryItemInput): Promise<RawRegulatoryItem>;
+  upsertRawItem(
+    item: RawRegulatoryItemInput,
+  ): Promise<{ item: RawRegulatoryItem; inserted: boolean }>;
   findRawRegulatoryItemByHash(hash: string): Promise<RawRegulatoryItem | null>;
   getRawRegulatoryItemById(id: string): Promise<RawRegulatoryItem | null>;
   getRawRegulatoryItemsByIds(ids: string[]): Promise<RawRegulatoryItem[]>;

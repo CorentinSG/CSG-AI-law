@@ -11,6 +11,33 @@ describe("MemoryAiRegulationRepository", () => {
     resetMockStore();
   });
 
+  it("atomically upserts concurrent raw items by hash", async () => {
+    const input = {
+      sourceId: "src-test",
+      rawTitle: "Concurrent item",
+      rawUrl: "https://example.com/concurrent",
+      rawText: "Same durable content",
+      rawMetadata: {},
+      detectedAt: "2026-07-01T00:00:00.000Z",
+      hash: "concurrent-hash",
+      duplicateOf: null,
+      processingStatus: "new" as const,
+    };
+
+    const results = await Promise.all([
+      repository.upsertRawItem(input),
+      repository.upsertRawItem(input),
+    ]);
+
+    expect(results.filter((result) => result.inserted)).toHaveLength(1);
+    expect(new Set(results.map((result) => result.item.id)).size).toBe(1);
+    expect(
+      (await repository.listRawRegulatoryItems()).filter(
+        (item) => item.hash === input.hash,
+      ),
+    ).toHaveLength(1);
+  });
+
   it("only returns published items in public scope", async () => {
     const updates = await repository.listRegulatoryUpdates({}, "public");
     expect(updates.length).toBeGreaterThan(0);

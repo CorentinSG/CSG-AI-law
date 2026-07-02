@@ -27,6 +27,7 @@ import { runRecurringVerification } from "@/agents/ai-regulation/processors/recu
 import { sourceManager } from "@/agents/ai-regulation/processors/sourceManager";
 import { sourceScanner } from "@/agents/ai-regulation/processors/sourceScanner";
 import { updateRepository } from "@/agents/ai-regulation/processors/updateRepository";
+import { getAiRegulationRepository } from "@/db/repository";
 import { buildNewsItemFromUpdate } from "@/content/ai-regulation/news";
 import type { ConnectorFetchMetadata } from "@/agents/ai-regulation/connectors/types";
 import {
@@ -292,8 +293,6 @@ async function scanSourcesForCandidates(
           stableId: candidate.stableId,
           text: candidate.text,
         });
-        const duplicate = await deduplicator.findDuplicate(hash);
-
         // Build verification metadata using candidate + source data.
         // This is computed before createRawItem so it can be included in the
         // initial write, eliminating the separate updateRawItemMetadata call
@@ -309,7 +308,7 @@ async function scanSourcesForCandidates(
           },
         });
 
-        const rawItem = await updateRepository.createRawItem({
+        const rawItemResult = await getAiRegulationRepository().upsertRawItem({
           sourceId: source.id,
           rawTitle: candidate.title,
           rawUrl: candidate.url,
@@ -343,8 +342,8 @@ async function scanSourcesForCandidates(
               scanJobId,
               httpStatus: scanResult.responseStatus ?? null,
               contentHash: hash,
-              duplicateStatus: duplicate ? "duplicate" : "unique",
-              duplicateOfRawItemId: duplicate?.id ?? null,
+              duplicateStatus: "unique",
+              duplicateOfRawItemId: null,
               rawUrlScanned: candidate.url,
               extraction: {
                 stableId: candidate.stableId ?? null,
@@ -369,11 +368,12 @@ async function scanSourcesForCandidates(
           },
           detectedAt,
           hash,
-          duplicateOf: duplicate?.id ?? null,
-          processingStatus: duplicate ? "duplicate" : "new",
+          duplicateOf: null,
+          processingStatus: "new",
         });
+        const rawItem = rawItemResult.item;
 
-        if (duplicate) {
+        if (!rawItemResult.inserted) {
           state.duplicatesDetected += 1;
           await updateRepository.addProcessingLog({
             rawItemId: rawItem.id,

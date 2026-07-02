@@ -307,6 +307,16 @@ export class MemoryAiRegulationRepository implements AiRegulationRepository {
     return record;
   }
 
+  async upsertRawItem(input: RawRegulatoryItemInput) {
+    const existing = getMockStore().rawItems.find(
+      (item) => item.hash === input.hash,
+    );
+    if (existing) return { item: existing, inserted: false };
+
+    const item = await this.createRawRegulatoryItem(input);
+    return { item, inserted: true };
+  }
+
   async findRawRegulatoryItemByHash(hash: string) {
     return getMockStore().rawItems.find((item) => item.hash === hash) ?? null;
   }

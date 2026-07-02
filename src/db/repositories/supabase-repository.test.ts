@@ -69,6 +69,38 @@ const repoSrc = readFileSync(
   join(dirname(fileURLToPath(import.meta.url)), "supabase-repository.ts"),
   "utf8",
 );
+const migrationSrc = readFileSync(
+  join(
+    dirname(fileURLToPath(import.meta.url)),
+    "..",
+    "migrations",
+    "013_raw_item_idempotency.sql",
+  ),
+  "utf8",
+);
+
+describe("Supabase raw-item idempotency", () => {
+  it("uses one conflict-safe insert and returns the canonical row", () => {
+    const method = repoSrc.match(
+      /async upsertRawItem\([\s\S]*?\n  async findRawRegulatoryItemByHash/,
+    )?.[0];
+    expect(method).toBeDefined();
+    expect(method).toContain('onConflict: "hash"');
+    expect(method).toContain("ignoreDuplicates: true");
+    expect(method?.indexOf(".upsert(")).toBeLessThan(
+      method?.indexOf("findRawRegulatoryItemByHash") ?? -1,
+    );
+  });
+
+  it("guards legacy duplicates before adding an idempotent unique index", () => {
+    expect(migrationSrc).toMatch(/group by hash[\s\S]*having count\(\*\) > 1/i);
+    expect(migrationSrc).toMatch(/raise exception/i);
+    expect(migrationSrc).toMatch(
+      /create unique index if not exists[\s\S]*raw_regulatory_items[\s\S]*\(hash\)/i,
+    );
+    expect(migrationSrc).not.toMatch(/\b(delete|update)\s+raw_regulatory_items\b/i);
+  });
+});
 
 // ---------------------------------------------------------------------------
 // 0. Memory repository — transitionReviewStatus enforcement
