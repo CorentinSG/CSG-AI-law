@@ -40,32 +40,35 @@ function completeSnapshot(): SchemaSnapshot {
       columnNames.map((columnName) => ({ tableName, columnName })),
     ),
     indexes: [
-      { tableName: "raw_regulatory_items", indexName: "raw_regulatory_items_hash_unique_idx", indexDefinition: "CREATE UNIQUE INDEX raw_regulatory_items_hash_unique_idx ON public.raw_regulatory_items USING btree (hash)" },
-      { tableName: "raw_regulatory_items", indexName: "raw_regulatory_items_source_id_idx", indexDefinition: "CREATE INDEX raw_regulatory_items_source_id_idx ON public.raw_regulatory_items USING btree (source_id)" },
-      { tableName: "ai_regulatory_updates", indexName: "ai_regulatory_updates_status_idx", indexDefinition: "CREATE INDEX ai_regulatory_updates_status_idx ON public.ai_regulatory_updates USING btree (status)" },
-      { tableName: "ai_regulatory_updates", indexName: "ai_regulatory_updates_source_id_idx", indexDefinition: "CREATE INDEX ai_regulatory_updates_source_id_idx ON public.ai_regulatory_updates USING btree (source_id)" },
-      { tableName: "ai_regulatory_updates", indexName: "ai_regulatory_updates_publication_date_idx", indexDefinition: "CREATE INDEX ai_regulatory_updates_publication_date_idx ON public.ai_regulatory_updates USING btree (publication_date DESC)" },
-      { tableName: "scan_jobs", indexName: "scan_jobs_created_at_idx", indexDefinition: "CREATE INDEX scan_jobs_created_at_idx ON public.scan_jobs USING btree (created_at DESC)" },
-      { tableName: "scan_jobs", indexName: "scan_jobs_status_idx", indexDefinition: "CREATE INDEX scan_jobs_status_idx ON public.scan_jobs USING btree (status, created_at DESC)" },
-      { tableName: "news_items", indexName: "news_items_slug_key", indexDefinition: "CREATE UNIQUE INDEX news_items_slug_key ON public.news_items USING btree (slug)" },
-      { tableName: "news_items", indexName: "news_items_visibility_idx", indexDefinition: "CREATE INDEX news_items_visibility_idx ON public.news_items USING btree (public_visibility_status, publication_date DESC, detected_at DESC)" },
-      { tableName: "news_items", indexName: "news_items_raw_item_idx", indexDefinition: "CREATE INDEX news_items_raw_item_idx ON public.news_items USING btree (raw_item_id)" },
-    ],
+      { tableName: "raw_regulatory_items", indexName: "raw_regulatory_items_hash_unique_idx", columnNames: ["hash"], isUnique: true, isValid: true, predicate: null },
+      { tableName: "raw_regulatory_items", indexName: "raw_regulatory_items_source_id_idx", columnNames: ["source_id"], isUnique: false, isValid: true, predicate: null },
+      { tableName: "ai_regulatory_updates", indexName: "ai_regulatory_updates_status_idx", columnNames: ["status"], isUnique: false, isValid: true, predicate: null },
+      { tableName: "ai_regulatory_updates", indexName: "ai_regulatory_updates_source_id_idx", columnNames: ["source_id"], isUnique: false, isValid: true, predicate: null },
+      { tableName: "ai_regulatory_updates", indexName: "ai_regulatory_updates_publication_date_idx", columnNames: ["publication_date"], isUnique: false, isValid: true, predicate: null },
+      { tableName: "scan_jobs", indexName: "scan_jobs_created_at_idx", columnNames: ["created_at"], isUnique: false, isValid: true, predicate: null },
+      { tableName: "scan_jobs", indexName: "scan_jobs_status_idx", columnNames: ["status", "created_at"], isUnique: false, isValid: true, predicate: null },
+      { tableName: "news_items", indexName: "news_items_slug_key", columnNames: ["slug"], isUnique: true, isValid: true, predicate: null },
+      { tableName: "news_items", indexName: "news_items_visibility_idx", columnNames: ["public_visibility_status", "publication_date", "detected_at"], isUnique: false, isValid: true, predicate: null },
+      { tableName: "news_items", indexName: "news_items_raw_item_idx", columnNames: ["raw_item_id"], isUnique: false, isValid: true, predicate: null },
+    ].map((index) => ({
+      ...index,
+      indexDefinition: `CREATE ${index.isUnique ? "UNIQUE " : ""}INDEX ${index.indexName} ON public.${index.tableName} (${index.columnNames.join(", ")})`,
+    })),
     constraints: [
-      { tableName: "regulation_sources", constraintName: "regulation_sources_source_type_check", constraintType: "CHECK", constraintDefinition: "CHECK ((source_type = ANY (ARRAY['RSS'::text, 'API'::text])))" },
-      { tableName: "regulation_sources", constraintName: "regulation_sources_reliability_check", constraintType: "CHECK", constraintDefinition: "CHECK ((reliability_level = ANY (ARRAY['high'::text, 'medium'::text, 'low'::text])))" },
-      { tableName: "raw_regulatory_items", constraintName: "raw_regulatory_items_processing_status_check", constraintType: "CHECK", constraintDefinition: "CHECK ((processing_status = ANY (ARRAY['new'::text, 'duplicate'::text, 'processed'::text, 'failed'::text])))" },
-      { tableName: "ai_regulatory_updates", constraintName: "ai_regulatory_updates_status_check", constraintType: "CHECK", constraintDefinition: "CHECK ((status = ANY (ARRAY['needs_review'::text, 'approved'::text, 'rejected'::text, 'published'::text, 'archived'::text])))" },
-      { tableName: "scan_jobs", constraintName: "scan_jobs_status_check", constraintType: "CHECK", constraintDefinition: "CHECK ((status = ANY (ARRAY['queued'::text, 'running'::text, 'succeeded'::text, 'partial_success'::text, 'failed'::text])))" },
-      { tableName: "news_items", constraintName: "news_items_visibility_check", constraintType: "CHECK", constraintDefinition: "CHECK ((public_visibility_status = ANY (ARRAY['public'::text, 'admin_only'::text])))" },
+      { tableName: "regulation_sources", constraintName: "regulation_sources_source_type_check", constraintType: "CHECK", columnNames: ["source_type"], isValidated: true, constraintDefinition: "CHECK ((source_type = ANY (ARRAY['RSS'::text, 'API'::text, 'static_page'::text, 'dynamic_page'::text, 'PDF_repository'::text, 'legislative_database'::text, 'regulator_page'::text, 'court_database'::text, 'standards_body'::text, 'tracker_source'::text, 'discovery_source'::text, 'media_source'::text])))" },
+      { tableName: "regulation_sources", constraintName: "regulation_sources_reliability_check", constraintType: "CHECK", columnNames: ["reliability_level"], isValidated: true, constraintDefinition: "CHECK ((reliability_level = ANY (ARRAY['high'::text, 'medium'::text, 'low'::text])))" },
+      { tableName: "raw_regulatory_items", constraintName: "raw_regulatory_items_processing_status_check", constraintType: "CHECK", columnNames: ["processing_status"], isValidated: true, constraintDefinition: "CHECK ((processing_status = ANY (ARRAY['new'::text, 'duplicate'::text, 'processed'::text, 'failed'::text, 'classified'::text])))" },
+      { tableName: "ai_regulatory_updates", constraintName: "ai_regulatory_updates_status_check", constraintType: "CHECK", columnNames: ["status"], isValidated: true, constraintDefinition: "CHECK ((status = ANY (ARRAY['needs_review'::text, 'approved'::text, 'rejected'::text, 'published'::text, 'archived'::text])))" },
+      { tableName: "scan_jobs", constraintName: "scan_jobs_status_check", constraintType: "CHECK", columnNames: ["status"], isValidated: true, constraintDefinition: "CHECK ((status = ANY (ARRAY['queued'::text, 'running'::text, 'succeeded'::text, 'partial_success'::text, 'failed'::text])))" },
+      { tableName: "news_items", constraintName: "news_items_visibility_check", constraintType: "CHECK", columnNames: ["public_visibility_status"], isValidated: true, constraintDefinition: "CHECK ((public_visibility_status = ANY (ARRAY['public'::text, 'admin_only'::text])))" },
     ],
     tables: Object.keys(columnsByTable).map((tableName) => ({ tableName, rlsEnabled: true })),
     policies: [
-      { tableName: "regulation_sources", policyName: "service_role_all_regulation_sources" },
-      { tableName: "raw_regulatory_items", policyName: "service_role_all_raw_regulatory_items" },
-      { tableName: "ai_regulatory_updates", policyName: "public_published_updates_select" },
-      { tableName: "scan_jobs", policyName: "service_role_all_scan_jobs" },
-      { tableName: "news_items", policyName: "Public can read visible news items" },
+      { tableName: "regulation_sources", policyName: "service_role_all_regulation_sources", command: "ALL", roles: ["service_role"], usingExpression: "(auth.role() = 'service_role'::text)", checkExpression: "(auth.role() = 'service_role'::text)" },
+      { tableName: "raw_regulatory_items", policyName: "service_role_all_raw_regulatory_items", command: "ALL", roles: ["service_role"], usingExpression: "(auth.role() = 'service_role'::text)", checkExpression: "(auth.role() = 'service_role'::text)" },
+      { tableName: "ai_regulatory_updates", policyName: "public_published_updates_select", command: "SELECT", roles: ["anon", "authenticated"], usingExpression: "(status = 'published'::text)", checkExpression: null },
+      { tableName: "scan_jobs", policyName: "service_role_all_scan_jobs", command: "ALL", roles: ["service_role"], usingExpression: "(auth.role() = 'service_role'::text)", checkExpression: "(auth.role() = 'service_role'::text)" },
+      { tableName: "news_items", policyName: "Public can read visible news items", command: "SELECT", roles: ["anon", "authenticated"], usingExpression: "(public_visibility_status = 'public'::text)", checkExpression: null },
     ],
   };
 }
@@ -76,6 +79,19 @@ describe("evaluateSchemaIntegrity", () => {
     snapshot.indexes = snapshot.indexes.filter(
       (index) => index.indexName !== "raw_regulatory_items_hash_unique_idx",
     );
+
+    expect(evaluateSchemaIntegrity(snapshot).findings).toContainEqual({
+      objectName: "raw_regulatory_items.raw_regulatory_items_hash_unique_idx",
+      invariantClass: "unique_index",
+    });
+  });
+
+  it("does not infer uniqueness from an index name", () => {
+    const snapshot = completeSnapshot();
+    const index = snapshot.indexes.find(
+      (row) => row.indexName === "raw_regulatory_items_hash_unique_idx",
+    )!;
+    index.isUnique = false;
 
     expect(evaluateSchemaIntegrity(snapshot).findings).toContainEqual({
       objectName: "raw_regulatory_items.raw_regulatory_items_hash_unique_idx",
@@ -119,6 +135,24 @@ describe("evaluateSchemaIntegrity", () => {
     });
   });
 
+  it.each([
+    ["command", { command: "SELECT" }],
+    ["roles", { roles: ["authenticated"] }],
+    ["using expression", { usingExpression: "true" }],
+    ["check expression", { checkExpression: "true" }],
+  ])("rejects a service policy with the wrong %s", (_label, patch) => {
+    const snapshot = completeSnapshot();
+    const policy = snapshot.policies.find(
+      (row) => row.policyName === "service_role_all_scan_jobs",
+    )!;
+    Object.assign(policy, patch);
+
+    expect(evaluateSchemaIntegrity(snapshot).findings).toContainEqual({
+      objectName: "scan_jobs",
+      invariantClass: "rls_policy",
+    });
+  });
+
   it("rejects a same-named scan_jobs status check with a weaker domain", () => {
     const snapshot = completeSnapshot();
     const constraint = snapshot.constraints.find(
@@ -138,12 +172,33 @@ describe("evaluateSchemaIntegrity", () => {
     const index = snapshot.indexes.find(
       (row) => row.indexName === "scan_jobs_created_at_idx",
     )!;
-    index.indexDefinition =
-      "CREATE INDEX scan_jobs_created_at_idx ON public.scan_jobs USING btree (created_at_extra DESC)";
+    index.columnNames = ["created_at_extra"];
 
     expect(evaluateSchemaIntegrity(snapshot).findings).toContainEqual({
       objectName: "scan_jobs.scan_jobs_created_at_idx",
       invariantClass: "index",
+    });
+  });
+
+  it.each([
+    ["regulation_sources_source_type_check", "regulation_sources.source_type"],
+    ["regulation_sources_reliability_check", "regulation_sources.reliability_level"],
+    ["raw_regulatory_items_processing_status_check", "raw_regulatory_items.processing_status"],
+    ["ai_regulatory_updates_status_check", "ai_regulatory_updates.status"],
+    ["news_items_visibility_check", "news_items.public_visibility_status"],
+  ])("rejects a weakened %s domain", (constraintName, objectName) => {
+    const snapshot = completeSnapshot();
+    const constraint = snapshot.constraints.find(
+      (row) => row.constraintName === constraintName,
+    )!;
+    constraint.constraintDefinition = constraint.constraintDefinition.replace(
+      /,\s*'[^']+'::text(?=\]\)\)\))?/,
+      "",
+    );
+
+    expect(evaluateSchemaIntegrity(snapshot).findings).toContainEqual({
+      objectName,
+      invariantClass: "check_constraint",
     });
   });
 
@@ -162,15 +217,28 @@ describe("mapCatalogQueryResults", () => {
     const indexes = [{
       tableName: "index_row",
       indexName: "index_name",
+      columnNames: ["id"],
+      isUnique: false,
+      isValid: true,
+      predicate: null,
       indexDefinition: "CREATE INDEX index_name ON index_row (id)",
     }];
     const constraints = [{
       tableName: "constraint_row",
       constraintName: "constraint_name",
       constraintType: "CHECK",
+      columnNames: ["enabled"],
+      isValidated: true,
       constraintDefinition: "CHECK (true)",
     }];
-    const policies = [{ tableName: "policy_row", policyName: "policy_name" }];
+    const policies = [{
+      tableName: "policy_row",
+      policyName: "policy_name",
+      command: "SELECT",
+      roles: ["anon"],
+      usingExpression: "true",
+      checkExpression: null,
+    }];
 
     expect(mapCatalogQueryResults([
       { rows: tables },

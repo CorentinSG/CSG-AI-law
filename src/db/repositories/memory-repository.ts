@@ -372,15 +372,26 @@ export class MemoryAiRegulationRepository implements AiRegulationRepository {
 
     item.rawMetadata = rawMetadata;
     item.updatedAt = nextTimestamp();
-    await this.replaceSourceReferencesForRawItem(
-      id,
-      getSourceReferencesFromRawItem(item).map((reference) => ({
-        ...reference,
-        rawItemId: id,
-        regulatoryUpdateId:
-          getMockStore().updates.find((update) => update.rawItemId === id)?.id ?? null,
-      })),
+    const existingKeys = new Set(
+      getMockStore().sourceReferences
+        .filter((reference) => reference.rawItemId === id)
+        .map((reference) => `${reference.url}\0${reference.sourceRole}`),
     );
+    const linkedUpdateId =
+      getMockStore().updates.find((update) => update.rawItemId === id)?.id ?? null;
+    const missingReferences = getSourceReferencesFromRawItem(item)
+      .filter(
+        (reference) =>
+          !existingKeys.has(`${reference.url}\0${reference.sourceRole}`),
+      )
+      .map((reference) =>
+        createSourceReferenceRecord({
+          ...reference,
+          rawItemId: id,
+          regulatoryUpdateId: linkedUpdateId,
+        }),
+      );
+    getMockStore().sourceReferences.unshift(...missingReferences);
     return item;
   }
 
@@ -769,6 +780,53 @@ export class MemoryAiRegulationRepository implements AiRegulationRepository {
       },
       { updatedAt: nextTimestamp() },
     );
+    return job;
+  }
+
+  async heartbeatScanJob(id: string, leaseToken: string, heartbeatAt: string) {
+    const job = await this.getScanJobById(id);
+    if (
+      !job ||
+      job.status !== "running" ||
+      job.resultSummary?.leaseToken !== leaseToken
+    ) {
+      return null;
+    }
+    job.resultSummary = {
+      ...job.resultSummary,
+      leaseHeartbeatAt: heartbeatAt,
+    };
+    job.updatedAt = nextTimestamp();
+    return job;
+  }
+
+  async recoverStaleScanJob(
+    id: string,
+    leaseToken: string,
+    expectedHeartbeatAt: string | null,
+    patch: Partial<ScanJob>,
+  ) {
+    const job = await this.getScanJobById(id);
+    const actualHeartbeatAt =
+      typeof job?.resultSummary?.leaseHeartbeatAt === "string"
+        ? job.resultSummary.leaseHeartbeatAt
+        : null;
+    if (
+      !job ||
+      job.status !== "running" ||
+      job.resultSummary?.leaseToken !== leaseToken ||
+      actualHeartbeatAt !== expectedHeartbeatAt ||
+      patch.status !== "failed"
+    ) {
+      return null;
+    }
+    Object.assign(job, {
+      status: "failed",
+      finishedAt: patch.finishedAt,
+      resultSummary: patch.resultSummary,
+      errorMessage: patch.errorMessage,
+      updatedAt: nextTimestamp(),
+    });
     return job;
   }
 

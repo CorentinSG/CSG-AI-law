@@ -28,6 +28,47 @@ const updateRepository = {
     Object.assign(job, patch, { updatedAt: "2026-06-06T10:00:01.000Z" });
     return job;
   }),
+  heartbeatScanJob: vi.fn(
+    async (jobId: string, leaseToken: string, heartbeatAt: string) => {
+      const job = jobs.find((entry) => entry.id === jobId);
+      if (
+        !job ||
+        job.status !== "running" ||
+        job.resultSummary?.leaseToken !== leaseToken
+      ) {
+        return null;
+      }
+      job.resultSummary = {
+        ...job.resultSummary,
+        leaseHeartbeatAt: heartbeatAt,
+      };
+      return job;
+    },
+  ),
+  recoverStaleScanJob: vi.fn(
+    async (
+      jobId: string,
+      leaseToken: string,
+      expectedHeartbeatAt: string | null,
+      patch: Partial<ScanJob>,
+    ) => {
+      const job = jobs.find((entry) => entry.id === jobId);
+      const actualHeartbeatAt =
+        typeof job?.resultSummary?.leaseHeartbeatAt === "string"
+          ? job.resultSummary.leaseHeartbeatAt
+          : null;
+      if (
+        !job ||
+        job.status !== "running" ||
+        job.resultSummary?.leaseToken !== leaseToken ||
+        actualHeartbeatAt !== expectedHeartbeatAt
+      ) {
+        return null;
+      }
+      Object.assign(job, patch);
+      return job;
+    },
+  ),
   completeScanJob: vi.fn(
     async (jobId: string, leaseToken: string, patch: Partial<ScanJob>) => {
       const job = jobs.find((entry) => entry.id === jobId);
@@ -140,7 +181,10 @@ describe("scanJobs durability helpers", () => {
         status: "running",
         startedAt: "2026-06-06T09:00:00.000Z",
         finishedAt: null,
-        resultSummary: { scanProfile: "default" },
+        resultSummary: {
+          scanProfile: "default",
+          leaseToken: "lease-stale",
+        },
         errorMessage: null,
         createdAt: "2026-06-06T08:59:00.000Z",
         updatedAt: "2026-06-06T09:00:00.000Z",
@@ -212,6 +256,55 @@ describe("scanJobs durability helpers", () => {
 
     expect(recovered).toHaveLength(0);
     expect(jobs.find((job) => job.id === "job-heartbeat-fresh")?.status).toBe("running");
+  });
+
+  it("does not overwrite a job that completes while stale recovery is racing", async () => {
+    jobs.push({
+      id: "job-recovery-race",
+      sourceId: "src-race",
+      trigger: "cron",
+      requestedBy: "scheduler",
+      status: "running",
+      startedAt: "2026-06-06T09:00:00.000Z",
+      finishedAt: null,
+      resultSummary: {
+        leaseToken: "lease-race",
+        leaseHeartbeatAt: "2026-06-06T09:01:00.000Z",
+      },
+      errorMessage: null,
+      createdAt: "2026-06-06T08:59:00.000Z",
+      updatedAt: "2026-06-06T09:01:00.000Z",
+    });
+    updateRepository.recoverStaleScanJob.mockImplementationOnce(async () => {
+      Object.assign(jobs[0], {
+        status: "succeeded",
+        finishedAt: "2026-06-06T10:29:59.000Z",
+        errorMessage: null,
+      });
+      return null;
+    });
+
+    const { recoverStaleRunningScanJobs } = await import(
+      "@/agents/ai-regulation/processors/scanJobs"
+    );
+    const recovered = await recoverStaleRunningScanJobs({
+      now: "2026-06-06T10:30:00.000Z",
+      staleAfterMs: 15 * 60 * 1000,
+    });
+
+    expect(recovered).toEqual([]);
+    expect(updateRepository.recoverStaleScanJob).toHaveBeenCalledWith(
+      "job-recovery-race",
+      "lease-race",
+      "2026-06-06T09:01:00.000Z",
+      expect.objectContaining({ status: "failed" }),
+    );
+    expect(updateRepository.updateScanJob).not.toHaveBeenCalled();
+    expect(jobs[0]).toMatchObject({
+      status: "succeeded",
+      finishedAt: "2026-06-06T10:29:59.000Z",
+      errorMessage: null,
+    });
   });
 
   it("rejects direct execution of a job that is already running", async () => {
@@ -606,7 +699,7 @@ describe("scanJobs durability helpers", () => {
       status: "running",
       startedAt: "2026-06-05T08:00:00.000Z",
       finishedAt: null,
-      resultSummary: {},
+      resultSummary: { leaseToken: "lease-stale" },
       errorMessage: null,
       createdAt: "2026-06-06T07:59:00.000Z",
       updatedAt: "2026-06-06T08:00:00.000Z",

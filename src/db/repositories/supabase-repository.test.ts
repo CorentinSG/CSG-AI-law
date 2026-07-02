@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from "vitest";
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { join, dirname } from "node:path";
 
@@ -81,6 +81,15 @@ const migrationSrc = readFileSync(
   ),
   "utf8",
 );
+const migration015Path = join(
+  dirname(fileURLToPath(import.meta.url)),
+  "..",
+  "migrations",
+  "015_durable_data_integrity.sql",
+);
+const migration015Src = existsSync(migration015Path)
+  ? readFileSync(migration015Path, "utf8")
+  : "";
 
 describe("Supabase raw-item idempotency", () => {
   it("delegates raw-item insertion to the transactional RPC", () => {
@@ -145,6 +154,26 @@ describe("Supabase raw-item idempotency", () => {
     expect(duplicate.item.rawTitle).toBe("canonical");
     expect(duplicate.item.rawMetadata).toMatchObject({ marker: "canonical" });
     expect(fake.sourceReferences).toHaveLength(1);
+  });
+
+  it("falls back to database-backed upsert when RPC 013 is unavailable", async () => {
+    const fake = createPreMigrationRawItemClient();
+    const input = rawItemInput("pre-migration-hash", "canonical", true);
+
+    const first = await upsertRawItemWithClient(fake.client, input);
+    const second = await upsertRawItemWithClient(fake.client, {
+      ...input,
+      rawTitle: "retry",
+    });
+
+    expect(first.inserted).toBe(true);
+    expect(second).toMatchObject({
+      inserted: false,
+      item: { id: first.item.id, rawTitle: "canonical" },
+    });
+    expect(fake.rawItems).toHaveLength(1);
+    expect(fake.sourceReferences).toHaveLength(1);
+    expect(fake.from).toHaveBeenCalledWith("raw_regulatory_items");
   });
 });
 
@@ -220,6 +249,211 @@ function createAtomicRawItemClient(options?: { failProvenanceOnce?: boolean }) {
   return { client: client as never, rawItems, sourceReferences };
 }
 
+function createPreMigrationRawItemClient() {
+  const rawItems: Record<string, unknown>[] = [];
+  const sourceReferences: Record<string, unknown>[] = [];
+  const rpc = vi.fn(async () => ({
+    data: null,
+    error: { code: "PGRST202", message: "function not found" },
+  }));
+  const from = vi.fn((table: string) => {
+    let action: "select" | "insert" = "select";
+    let payload: Record<string, unknown> | Record<string, unknown>[] | null = null;
+    const filters = new Map<string, unknown>();
+    const builder = {
+      select: () => builder,
+      eq: (column: string, value: unknown) => {
+        filters.set(column, value);
+        return builder;
+      },
+      order: () => builder,
+      limit: () => builder,
+      maybeSingle: async () => {
+        const data = rawItems.find((row) =>
+          [...filters].every(([column, value]) => row[column] === value)
+        ) ?? null;
+        return { data, error: null };
+      },
+      insert: (value: Record<string, unknown> | Record<string, unknown>[]) => {
+        action = "insert";
+        payload = value;
+        return builder;
+      },
+      upsert: (value: Record<string, unknown> | Record<string, unknown>[]) => {
+        action = "insert";
+        payload = value;
+        return builder;
+      },
+      single: async () => {
+        const row = {
+          ...(payload as Record<string, unknown>),
+          created_at: "2026-07-01T00:00:00.000Z",
+          updated_at: "2026-07-01T00:00:00.000Z",
+        };
+        rawItems.push(row);
+        return { data: row, error: null };
+      },
+      then: (
+        resolve: (value: { data: null; error: null }) => unknown,
+      ) => {
+        if (action === "insert" && table === "source_references") {
+          for (const row of payload as Record<string, unknown>[]) {
+            if (!sourceReferences.some((existing) =>
+              existing.raw_item_id === row.raw_item_id &&
+              existing.url === row.url &&
+              existing.source_role === row.source_role
+            )) {
+              sourceReferences.push(row);
+            }
+          }
+        }
+        return Promise.resolve(resolve({ data: null, error: null }));
+      },
+    };
+    return builder;
+  });
+
+  return {
+    client: { rpc, from } as never,
+    rpc,
+    from,
+    rawItems,
+    sourceReferences,
+  };
+}
+
+type UpdateRawMetadataWithClient = (
+  client: never,
+  id: string,
+  rawMetadata: Record<string, unknown>,
+) => Promise<unknown>;
+
+const updateRawRegulatoryItemMetadataWithClient = (
+  supabaseRepository as unknown as {
+    updateRawRegulatoryItemMetadataWithClient: UpdateRawMetadataWithClient;
+  }
+).updateRawRegulatoryItemMetadataWithClient;
+
+describe("Supabase raw-item metadata provenance", () => {
+  it("uses one transactional RPC and rolls metadata back when reference insertion fails", async () => {
+    const fake = createAtomicMetadataClient({ failReferenceOnce: true });
+
+    await expect(
+      updateRawRegulatoryItemMetadataWithClient(fake.client, "raw-1", {
+        marker: "changed",
+        sourceReferences: [officialReference("https://authority.example/new")],
+      }),
+    ).rejects.toThrow("reference insert failed");
+
+    expect(fake.rawItem.raw_metadata).toEqual({ marker: "original" });
+    expect(fake.sourceReferences).toEqual([
+      expect.objectContaining({ url: "https://authority.example/repaired" }),
+    ]);
+  });
+
+  it("retains repaired provenance while merging metadata references", async () => {
+    const fake = createAtomicMetadataClient();
+
+    await updateRawRegulatoryItemMetadataWithClient(fake.client, "raw-1", {
+      marker: "changed",
+      sourceReferences: [officialReference("https://authority.example/new")],
+    });
+
+    expect(fake.rawItem.raw_metadata).toMatchObject({ marker: "changed" });
+    expect(fake.sourceReferences.map((row) => row.url)).toEqual([
+      "https://authority.example/repaired",
+      "https://authority.example/new",
+    ]);
+  });
+
+  it("defines metadata, heartbeat, recovery, and least-privilege RLS in migration 015", () => {
+    expect(migration015Src).toContain(
+      "create or replace function public.update_raw_regulatory_item_metadata",
+    );
+    expect(migration015Src).toContain(
+      "create or replace function public.heartbeat_scan_job",
+    );
+    expect(migration015Src).toContain(
+      "create or replace function public.recover_stale_scan_job",
+    );
+    for (const table of [
+      "regulation_sources",
+      "raw_regulatory_items",
+      "scan_jobs",
+    ]) {
+      expect(migration015Src).toContain(
+        `alter table public.${table} enable row level security`,
+      );
+      expect(migration015Src).toContain(
+        `service_role_all_${table}`,
+      );
+    }
+  });
+});
+
+function officialReference(url: string) {
+  return {
+    sourceRole: "primary",
+    title: "Official source",
+    institution: "Authority",
+    url,
+    sourceType: "official",
+    reliabilityLevel: "high",
+    verificationStatus: "official_verified",
+  };
+}
+
+function createAtomicMetadataClient(options?: { failReferenceOnce?: boolean }) {
+  const rawItem: Record<string, unknown> = {
+    ...rawItemInput("metadata-hash", "canonical"),
+    id: "raw-1",
+    source_id: "src-test",
+    raw_title: "canonical",
+    raw_url: "https://example.com/metadata",
+    raw_text: "canonical text",
+    raw_metadata: { marker: "original" },
+    detected_at: "2026-07-01T00:00:00.000Z",
+    processing_status: "new",
+    created_at: "2026-07-01T00:00:00.000Z",
+    updated_at: "2026-07-01T00:00:00.000Z",
+  };
+  const sourceReferences: Record<string, unknown>[] = [{
+    raw_item_id: "raw-1",
+    url: "https://authority.example/repaired",
+    source_role: "primary",
+  }];
+  let failReference = options?.failReferenceOnce ?? false;
+  const client = {
+    rpc: vi.fn(async (_name: string, args: Record<string, unknown>) => {
+      const nextItem = {
+        ...rawItem,
+        raw_metadata: args.p_raw_metadata,
+      };
+      const nextReferences = [...sourceReferences];
+      for (const reference of args.p_source_references as Record<string, unknown>[]) {
+        if (failReference) {
+          failReference = false;
+          return {
+            data: null,
+            error: { code: "23514", message: "reference insert failed" },
+          };
+        }
+        if (!nextReferences.some((existing) =>
+          existing.raw_item_id === "raw-1" &&
+          existing.url === reference.url &&
+          existing.source_role === reference.source_role
+        )) {
+          nextReferences.push({ ...reference, raw_item_id: "raw-1" });
+        }
+      }
+      Object.assign(rawItem, nextItem);
+      sourceReferences.splice(0, sourceReferences.length, ...nextReferences);
+      return { data: [rawItem], error: null };
+    }),
+  };
+  return { client: client as never, rawItem, sourceReferences };
+}
+
 type CompleteScanJobWithClient = (
   client: never,
   legacyScanJobs: Map<string, ScanJob>,
@@ -233,6 +467,136 @@ const completeScanJobWithClient = (
     completeScanJobWithClient: CompleteScanJobWithClient;
   }
 ).completeScanJobWithClient;
+
+type HeartbeatScanJobWithClient = (
+  client: never,
+  id: string,
+  leaseToken: string,
+  heartbeatAt: string,
+) => Promise<ScanJob | null>;
+type RecoverStaleScanJobWithClient = (
+  client: never,
+  id: string,
+  leaseToken: string,
+  expectedHeartbeatAt: string | null,
+  patch: Partial<ScanJob>,
+) => Promise<ScanJob | null>;
+const heartbeatScanJobWithClient = (
+  supabaseRepository as unknown as {
+    heartbeatScanJobWithClient: HeartbeatScanJobWithClient;
+  }
+).heartbeatScanJobWithClient;
+const recoverStaleScanJobWithClient = (
+  supabaseRepository as unknown as {
+    recoverStaleScanJobWithClient: RecoverStaleScanJobWithClient;
+  }
+).recoverStaleScanJobWithClient;
+
+describe("Supabase scan-job lease CAS", () => {
+  it("rejects a heartbeat that arrives after completion", async () => {
+    const fake = createScanJobLeaseClient({ initialStatus: "succeeded" });
+
+    const result = await heartbeatScanJobWithClient(
+      fake.client,
+      "job-1",
+      "lease-current",
+      "2026-07-01T10:06:00.000Z",
+    );
+
+    expect(result).toBeNull();
+    expect(fake.row).toMatchObject({
+      status: "succeeded",
+      result_summary: {
+        leaseToken: "lease-current",
+        leaseHeartbeatAt: "2026-07-01T10:00:00.000Z",
+      },
+    });
+  });
+
+  it("rejects stale recovery when completion wins the database race", async () => {
+    const fake = createScanJobLeaseClient({ completeBeforeRecovery: true });
+
+    const result = await recoverStaleScanJobWithClient(
+      fake.client,
+      "job-1",
+      "lease-current",
+      "2026-07-01T10:00:00.000Z",
+      {
+        status: "failed",
+        finishedAt: "2026-07-01T10:06:00.000Z",
+        errorMessage: "stale",
+        resultSummary: {
+          leaseToken: "lease-current",
+          leaseHeartbeatAt: "2026-07-01T10:00:00.000Z",
+          recoveredAsStale: true,
+        },
+      },
+    );
+
+    expect(result).toBeNull();
+    expect(fake.row).toMatchObject({
+      status: "succeeded",
+      error_message: null,
+    });
+  });
+});
+
+function createScanJobLeaseClient(options?: {
+  initialStatus?: string;
+  completeBeforeRecovery?: boolean;
+}) {
+  let row: Record<string, unknown> = scanJobRow({
+    status: options?.initialStatus ?? "running",
+    result_summary: {
+      leaseToken: "lease-current",
+      leaseHeartbeatAt: "2026-07-01T10:00:00.000Z",
+    },
+  });
+  const client = {
+    rpc: vi.fn(async (name: string, args: Record<string, unknown>) => {
+      if (name === "recover_stale_scan_job" && options?.completeBeforeRecovery) {
+        row = {
+          ...row,
+          status: "succeeded",
+          finished_at: "2026-07-01T10:05:59.000Z",
+          error_message: null,
+        };
+      }
+      const summary = row.result_summary as Record<string, unknown>;
+      if (
+        row.status !== "running" ||
+        summary.leaseToken !== args.p_lease_token
+      ) {
+        return { data: [], error: null };
+      }
+      if (name === "heartbeat_scan_job") {
+        row = {
+          ...row,
+          result_summary: {
+            ...summary,
+            leaseHeartbeatAt: args.p_heartbeat_at,
+          },
+        };
+      } else if (
+        name === "recover_stale_scan_job" &&
+        (summary.leaseHeartbeatAt ?? null) ===
+          (args.p_expected_heartbeat_at ?? null)
+      ) {
+        row = {
+          ...row,
+          status: "failed",
+          finished_at: args.p_finished_at,
+          result_summary: args.p_result_summary,
+          error_message: args.p_error_message,
+        };
+      } else {
+        return { data: [], error: null };
+      }
+      return { data: [row], error: null };
+    }),
+  };
+  return { client: client as never, get row() { return row; } };
+}
 
 function scanJobRow(overrides?: Partial<Record<string, unknown>>) {
   return {
@@ -286,7 +650,53 @@ function createScanJobCompletionClient(options?: {
     };
     return { data: [row], error: null };
   });
-  return { client: { rpc } as never, rpc, get row() { return row; } };
+  const from = vi.fn(() => {
+    let action: "select" | "update" = "select";
+    let patch: Record<string, unknown> = {};
+    const filters = new Map<string, unknown>();
+    let summaryFilter: Record<string, unknown> | null = null;
+    const builder = {
+      select: () => builder,
+      eq: (column: string, value: unknown) => {
+        filters.set(column, value);
+        return builder;
+      },
+      contains: (_column: string, value: Record<string, unknown>) => {
+        summaryFilter = value;
+        return builder;
+      },
+      limit: () => builder,
+      update: (value: Record<string, unknown>) => {
+        action = "update";
+        patch = value;
+        return builder;
+      },
+      maybeSingle: async () => {
+        const matches =
+          row &&
+          [...filters].every(([column, value]) => row?.[column] === value) &&
+          (!summaryFilter ||
+            Object.entries(summaryFilter).every(
+              ([key, value]) =>
+                (row?.result_summary as Record<string, unknown>)?.[key] === value,
+            ));
+        if (!matches) {
+          return { data: null, error: null };
+        }
+        if (action === "update") {
+          row = { ...row, ...patch };
+        }
+        return { data: row, error: null };
+      },
+    };
+    return builder;
+  });
+  return {
+    client: { rpc, from } as never,
+    rpc,
+    from,
+    get row() { return row; },
+  };
 }
 
 // ---------------------------------------------------------------------------
@@ -722,25 +1132,12 @@ describe("Supabase column constants", () => {
 
   it("uses legacy fallback when PostgREST cannot find the completion RPC", async () => {
     const fake = createScanJobCompletionClient({ rpcErrorCode: "PGRST202" });
-    const legacyJob = {
-      id: "job-1",
-      sourceId: "src-1",
-      trigger: "manual",
-      requestedBy: "test",
-      status: "running",
-      startedAt: "2026-07-01T10:00:00.000Z",
-      finishedAt: null,
-      resultSummary: { leaseToken: "lease-current" },
-      errorMessage: null,
-      createdAt: "2026-07-01T09:59:00.000Z",
-      updatedAt: "2026-07-01T10:00:00.000Z",
-    } satisfies ScanJob;
 
     await expect(
       completeScanJobWithClient(
         fake.client,
-        new Map([[legacyJob.id, legacyJob]]),
-        legacyJob.id,
+        new Map(),
+        "job-1",
         "lease-current",
         {
           status: "succeeded",
@@ -750,6 +1147,8 @@ describe("Supabase column constants", () => {
         },
       ),
     ).resolves.toMatchObject({ status: "succeeded" });
+    expect(fake.from).toHaveBeenCalledWith("scan_jobs");
+    expect(fake.row).toMatchObject({ status: "succeeded" });
   });
 
   it("does not treat unrelated PostgREST RPC errors as missing", async () => {

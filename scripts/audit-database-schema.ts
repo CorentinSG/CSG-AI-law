@@ -33,8 +33,21 @@ async function loadSnapshot(client: Client): Promise<SchemaSnapshot> {
       [TABLES],
     ),
     client.query(
-      `select tablename as "tableName", indexname as "indexName", indexdef as "indexDefinition"
-       from pg_indexes where schemaname = 'public' and tablename = any($1::text[])`,
+      `select t.relname as "tableName", idx.relname as "indexName",
+              i.indisunique as "isUnique", i.indisvalid as "isValid",
+              pg_get_expr(i.indpred, i.indrelid) as predicate,
+              array(
+                select a.attname
+                from unnest(i.indkey::smallint[]) with ordinality as key(attnum, position)
+                join pg_attribute a on a.attrelid = t.oid and a.attnum = key.attnum
+                where key.position <= i.indnkeyatts
+                order by key.position
+              ) as "columnNames"
+       from pg_index i
+       join pg_class idx on idx.oid = i.indexrelid
+       join pg_class t on t.oid = i.indrelid
+       join pg_namespace n on n.oid = t.relnamespace
+       where n.nspname = 'public' and t.relname = any($1::text[])`,
       [TABLES],
     ),
     client.query(
@@ -42,6 +55,13 @@ async function loadSnapshot(client: Client): Promise<SchemaSnapshot> {
               case con.contype when 'c' then 'CHECK' when 'u' then 'UNIQUE'
                    when 'p' then 'PRIMARY KEY' when 'f' then 'FOREIGN KEY' else con.contype::text end
                 as "constraintType",
+              array(
+                select a.attname
+                from unnest(con.conkey) with ordinality as key(attnum, position)
+                join pg_attribute a on a.attrelid = c.oid and a.attnum = key.attnum
+                order by key.position
+              ) as "columnNames",
+              con.convalidated as "isValidated",
               pg_get_constraintdef(con.oid) as "constraintDefinition"
        from pg_constraint con
        join pg_class c on c.oid = con.conrelid
@@ -50,7 +70,9 @@ async function loadSnapshot(client: Client): Promise<SchemaSnapshot> {
       [TABLES],
     ),
     client.query(
-      `select tablename as "tableName", policyname as "policyName"
+      `select tablename as "tableName", policyname as "policyName",
+              cmd as command, roles, qual as "usingExpression",
+              with_check as "checkExpression"
        from pg_policies where schemaname = 'public' and tablename = any($1::text[])`,
       [TABLES],
     ),

@@ -257,6 +257,17 @@ export interface AiRegulationRepository {
     leaseToken: string,
     patch: Partial<ScanJob>,
   ): Promise<ScanJob | null>;
+  heartbeatScanJob(
+    id: string,
+    leaseToken: string,
+    heartbeatAt: string,
+  ): Promise<ScanJob | null>;
+  recoverStaleScanJob(
+    id: string,
+    leaseToken: string,
+    expectedHeartbeatAt: string | null,
+    patch: Partial<ScanJob>,
+  ): Promise<ScanJob | null>;
   updateScanJob(id: string, patch: Partial<ScanJob>): Promise<ScanJob>;
   listDiscoveryLeads(limit?: number, status?: string): Promise<DiscoveryLead[]>;
   listDiscoveryLeadsPage(

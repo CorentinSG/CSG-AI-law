@@ -165,6 +165,30 @@ export const updateRepository = {
   async updateScanJob(jobId: string, patch: Partial<ScanJob>) {
     return getAiRegulationRepository().updateScanJob(jobId, patch);
   },
+  async heartbeatScanJob(
+    jobId: string,
+    leaseToken: string,
+    heartbeatAt: string,
+  ) {
+    return getAiRegulationRepository().heartbeatScanJob(
+      jobId,
+      leaseToken,
+      heartbeatAt,
+    );
+  },
+  async recoverStaleScanJob(
+    jobId: string,
+    leaseToken: string,
+    expectedHeartbeatAt: string | null,
+    patch: Partial<ScanJob>,
+  ) {
+    return getAiRegulationRepository().recoverStaleScanJob(
+      jobId,
+      leaseToken,
+      expectedHeartbeatAt,
+      patch,
+    );
+  },
   async getNewsItems(limit?: number) {
     return getAiRegulationRepository().listNewsItems(limit, "admin");
   },

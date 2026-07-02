@@ -13,15 +13,31 @@ export interface SchemaFinding {
 
 export interface SchemaSnapshot {
   columns: Array<{ tableName: string; columnName: string }>;
-  indexes: Array<{ tableName: string; indexName: string; indexDefinition: string }>;
+  indexes: Array<{
+    tableName: string;
+    indexName: string;
+    columnNames: string[];
+    isUnique: boolean;
+    isValid: boolean;
+    predicate: string | null;
+  }>;
   constraints: Array<{
     tableName: string;
     constraintName: string;
     constraintType: string;
+    columnNames: string[];
+    isValidated: boolean;
     constraintDefinition: string;
   }>;
   tables: Array<{ tableName: string; rlsEnabled: boolean }>;
-  policies: Array<{ tableName: string; policyName: string }>;
+  policies: Array<{
+    tableName: string;
+    policyName: string;
+    command: string;
+    roles: string[];
+    usingExpression: string | null;
+    checkExpression: string | null;
+  }>;
 }
 
 type CatalogQueryResults = [
@@ -50,11 +66,17 @@ interface TableRequirement {
   constraints: Array<{
     name: string;
     type: string;
-    definition: string;
+    columns: string[];
     objectName: string;
-    requiredValues?: string[];
+    requiredValues: string[];
   }>;
-  policies: string[];
+  policies: Array<{
+    name: string;
+    command: string;
+    roles: string[];
+    usingExpression: string;
+    checkExpression: string | null;
+  }>;
 }
 
 export const REQUIRED_SCHEMA_INVARIANTS: Record<string, TableRequirement> = {
@@ -68,17 +90,29 @@ export const REQUIRED_SCHEMA_INVARIANTS: Record<string, TableRequirement> = {
       {
         name: "regulation_sources_source_type_check",
         type: "CHECK",
-        definition: "source_type",
+        columns: ["source_type"],
         objectName: "regulation_sources.source_type",
+        requiredValues: [
+          "RSS", "API", "static_page", "dynamic_page", "PDF_repository",
+          "legislative_database", "regulator_page", "court_database",
+          "standards_body", "tracker_source", "discovery_source", "media_source",
+        ],
       },
       {
         name: "regulation_sources_reliability_check",
         type: "CHECK",
-        definition: "reliability_level",
+        columns: ["reliability_level"],
         objectName: "regulation_sources.reliability_level",
+        requiredValues: ["high", "medium", "low"],
       },
     ],
-    policies: ["service_role_all_regulation_sources"],
+    policies: [{
+      name: "service_role_all_regulation_sources",
+      command: "ALL",
+      roles: ["service_role"],
+      usingExpression: "auth.role() = 'service_role'",
+      checkExpression: "auth.role() = 'service_role'",
+    }],
   },
   raw_regulatory_items: {
     columns: [
@@ -97,11 +131,18 @@ export const REQUIRED_SCHEMA_INVARIANTS: Record<string, TableRequirement> = {
       {
         name: "raw_regulatory_items_processing_status_check",
         type: "CHECK",
-        definition: "processing_status",
+        columns: ["processing_status"],
         objectName: "raw_regulatory_items.processing_status",
+        requiredValues: ["new", "duplicate", "processed", "failed", "classified"],
       },
     ],
-    policies: ["service_role_all_raw_regulatory_items"],
+    policies: [{
+      name: "service_role_all_raw_regulatory_items",
+      command: "ALL",
+      roles: ["service_role"],
+      usingExpression: "auth.role() = 'service_role'",
+      checkExpression: "auth.role() = 'service_role'",
+    }],
   },
   ai_regulatory_updates: {
     columns: [
@@ -119,11 +160,18 @@ export const REQUIRED_SCHEMA_INVARIANTS: Record<string, TableRequirement> = {
       {
         name: "ai_regulatory_updates_status_check",
         type: "CHECK",
-        definition: "status",
+        columns: ["status"],
         objectName: "ai_regulatory_updates.status",
+        requiredValues: ["needs_review", "approved", "rejected", "published", "archived"],
       },
     ],
-    policies: ["public_published_updates_select"],
+    policies: [{
+      name: "public_published_updates_select",
+      command: "SELECT",
+      roles: ["anon", "authenticated"],
+      usingExpression: "status = 'published'",
+      checkExpression: null,
+    }],
   },
   scan_jobs: {
     columns: [
@@ -138,12 +186,18 @@ export const REQUIRED_SCHEMA_INVARIANTS: Record<string, TableRequirement> = {
       {
         name: "scan_jobs_status_check",
         type: "CHECK",
-        definition: "status",
+        columns: ["status"],
         objectName: "scan_jobs.status",
         requiredValues: ["queued", "running", "succeeded", "partial_success", "failed"],
       },
     ],
-    policies: ["service_role_all_scan_jobs"],
+    policies: [{
+      name: "service_role_all_scan_jobs",
+      command: "ALL",
+      roles: ["service_role"],
+      usingExpression: "auth.role() = 'service_role'",
+      checkExpression: "auth.role() = 'service_role'",
+    }],
   },
   news_items: {
     columns: [
@@ -162,30 +216,26 @@ export const REQUIRED_SCHEMA_INVARIANTS: Record<string, TableRequirement> = {
       {
         name: "news_items_visibility_check",
         type: "CHECK",
-        definition: "public_visibility_status",
+        columns: ["public_visibility_status"],
         objectName: "news_items.public_visibility_status",
+        requiredValues: ["public", "admin_only"],
       },
     ],
-    policies: ["Public can read visible news items"],
+    policies: [{
+      name: "Public can read visible news items",
+      command: "SELECT",
+      roles: ["anon", "authenticated"],
+      usingExpression: "public_visibility_status = 'public'",
+      checkExpression: null,
+    }],
   },
 };
 
-function normalized(value: string) {
-  return value.toLowerCase().replace(/\s+/g, " ");
-}
-
-function indexColumns(indexDefinition: string): string[] {
-  const match = indexDefinition.match(/\(([^()]*)\)(?:\s+where\b.*)?$/i);
-  if (!match) {
-    return [];
-  }
-  return match[1].split(",").map((part) =>
-    part
-      .trim()
-      .replace(/\s+(asc|desc)(\s+nulls\s+(first|last))?$/i, "")
-      .replace(/^"|"$/g, "")
-      .toLowerCase(),
-  );
+function normalizedExpression(value: string | null) {
+  return value
+    ?.toLowerCase()
+    .replace(/::(?:text|name)/g, "")
+    .replace(/[\s()]+/g, "") ?? null;
 }
 
 function quotedValues(definition: string): string[] {
@@ -211,11 +261,12 @@ export function evaluateSchemaIntegrity(snapshot: SchemaSnapshot): {
       const actual = snapshot.indexes.find(
         (row) => row.tableName === tableName && row.indexName === index.name,
       );
-      const definitionMatches = actual &&
-        indexColumns(actual.indexDefinition).join(",") === index.columns.join(",");
-      const uniqueMatches = !index.unique ||
-        (actual && normalized(actual.indexDefinition).includes("unique"));
-      if (!definitionMatches || !uniqueMatches) {
+      const structurallyMatches =
+        actual?.isValid === true &&
+        actual.predicate === null &&
+        actual.columnNames.join(",") === index.columns.join(",") &&
+        (!index.unique || actual.isUnique);
+      if (!structurallyMatches) {
         findings.push({
           objectName: `${tableName}.${index.name}`,
           invariantClass: index.unique ? "unique_index" : "index",
@@ -229,10 +280,10 @@ export function evaluateSchemaIntegrity(snapshot: SchemaSnapshot): {
           row.tableName === tableName &&
           row.constraintName === constraint.name &&
           row.constraintType.toUpperCase() === constraint.type &&
-          normalized(row.constraintDefinition).includes(normalized(constraint.definition)) &&
-          (!constraint.requiredValues ||
-            quotedValues(row.constraintDefinition).join(",") ===
-              [...constraint.requiredValues].sort().join(",")),
+          row.isValidated &&
+          row.columnNames.join(",") === constraint.columns.join(",") &&
+          quotedValues(row.constraintDefinition).join(",") ===
+            constraint.requiredValues.map((value) => value.toLowerCase()).sort().join(","),
       );
       if (!actual) {
         findings.push({
@@ -242,9 +293,18 @@ export function evaluateSchemaIntegrity(snapshot: SchemaSnapshot): {
       }
     }
 
-    const hasRequiredPolicy = requirement.policies.some((policyName) =>
+    const hasRequiredPolicy = requirement.policies.some((requiredPolicy) =>
       snapshot.policies.some(
-        (row) => row.tableName === tableName && row.policyName === policyName,
+        (row) =>
+          row.tableName === tableName &&
+          row.policyName === requiredPolicy.name &&
+          row.command.toUpperCase() === requiredPolicy.command &&
+          [...row.roles].sort().join(",") ===
+            [...requiredPolicy.roles].sort().join(",") &&
+          normalizedExpression(row.usingExpression) ===
+            normalizedExpression(requiredPolicy.usingExpression) &&
+          normalizedExpression(row.checkExpression) ===
+            normalizedExpression(requiredPolicy.checkExpression),
       ),
     );
     const hasRlsEnabled = snapshot.tables.some(

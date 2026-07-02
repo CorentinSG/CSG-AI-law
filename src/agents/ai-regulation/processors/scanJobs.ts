@@ -262,10 +262,6 @@ function startScanJobHeartbeat(job: ScanJob) {
     typeof job.resultSummary?.leaseToken === "string"
       ? job.resultSummary.leaseToken
       : null;
-  const leaseOwner =
-    typeof job.resultSummary?.leaseOwner === "string"
-      ? job.resultSummary.leaseOwner
-      : DEFAULT_SCAN_JOB_LEASE_OWNER;
   if (!leaseToken) {
     return () => {};
   }
@@ -277,19 +273,7 @@ function startScanJobHeartbeat(job: ScanJob) {
   const timer = setInterval(() => {
     const heartbeatAt = new Date().toISOString();
     void updateRepository
-      .updateScanJob(job.id, {
-        resultSummary: {
-          ...job.resultSummary,
-          leaseOwner,
-          leaseToken,
-          leaseHeartbeatAt: heartbeatAt,
-          leaseHeartbeatIntervalMs: intervalMs,
-          leaseHeartbeatTimeoutMs: getLeaseHeartbeatTimeoutMs(
-            job,
-            DEFAULT_SCAN_JOB_HEARTBEAT_TIMEOUT_MS,
-          ),
-        },
-      })
+      .heartbeatScanJob(job.id, leaseToken, heartbeatAt)
       .catch(() => {
         // Heartbeat failures should not crash the in-flight worker loop.
       });
@@ -437,8 +421,22 @@ export async function recoverStaleRunningScanJobs(options?: {
       continue;
     }
 
-    recoveredJobs.push(
-      await updateRepository.updateScanJob(job.id, {
+    const leaseToken =
+      typeof job.resultSummary?.leaseToken === "string"
+        ? job.resultSummary.leaseToken
+        : null;
+    if (!leaseToken) {
+      continue;
+    }
+    const expectedHeartbeatAt =
+      typeof job.resultSummary?.leaseHeartbeatAt === "string"
+        ? job.resultSummary.leaseHeartbeatAt
+        : null;
+    const recovered = await updateRepository.recoverStaleScanJob(
+      job.id,
+      leaseToken,
+      expectedHeartbeatAt,
+      {
         status: "failed",
         finishedAt: new Date(nowTimestamp).toISOString(),
         errorMessage:
@@ -450,8 +448,11 @@ export async function recoverStaleRunningScanJobs(options?: {
           ),
           recoveredAsStale: true,
         },
-      }),
+      },
     );
+    if (recovered) {
+      recoveredJobs.push(recovered);
+    }
   }
 
   return recoveredJobs;

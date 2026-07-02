@@ -103,6 +103,51 @@ describe("MemoryAiRegulationRepository", () => {
     ).toHaveLength(1);
   });
 
+  it("retains repaired provenance when raw metadata adds a new reference", async () => {
+    const created = await repository.createRawRegulatoryItem({
+      sourceId: "src-test",
+      rawTitle: "Metadata repair",
+      rawUrl: "https://example.com/metadata-repair",
+      rawText: "Metadata repair text",
+      rawMetadata: {
+        sourceReferences: [{
+          sourceRole: "primary",
+          title: "Repaired source",
+          institution: "Authority",
+          url: "https://authority.example/repaired",
+          sourceType: "official",
+          reliabilityLevel: "high",
+          verificationStatus: "official_verified",
+        }],
+      },
+      detectedAt: "2026-07-01T00:00:00.000Z",
+      hash: "metadata-repair-hash",
+      duplicateOf: null,
+      processingStatus: "new",
+    });
+
+    await repository.updateRawRegulatoryItemMetadata(created.id, {
+      sourceReferences: [{
+        sourceRole: "primary",
+        title: "New source",
+        institution: "Authority",
+        url: "https://authority.example/new",
+        sourceType: "official",
+        reliabilityLevel: "high",
+        verificationStatus: "official_verified",
+      }],
+    });
+
+    expect(
+      (await repository.listSourceReferences(10, { rawItemId: created.id }))
+        .map((reference) => reference.url)
+        .sort(),
+    ).toEqual([
+      "https://authority.example/new",
+      "https://authority.example/repaired",
+    ]);
+  });
+
   it("only returns published items in public scope", async () => {
     const updates = await repository.listRegulatoryUpdates({}, "public");
     expect(updates.length).toBeGreaterThan(0);
@@ -512,6 +557,93 @@ describe("MemoryAiRegulationRepository", () => {
       resultSummary: { leaseToken: "lease-new", authoritative: true },
     });
     expect(duplicate).toBeNull();
+  });
+
+  it("rejects a heartbeat after the current lease has completed", async () => {
+    const job = await repository.createScanJob({
+      sourceId: "src-federal-register-ai",
+      trigger: "manual",
+      requestedBy: "test-suite",
+      status: "queued",
+      startedAt: null,
+      finishedAt: null,
+      resultSummary: {},
+      errorMessage: null,
+    });
+    await repository.tryStartScanJob(job.id, {
+      startedAt: "2026-06-06T13:10:00.000Z",
+      leaseOwner: "worker",
+      leaseToken: "lease-current",
+    });
+    await repository.completeScanJob(job.id, "lease-current", {
+      status: "succeeded",
+      finishedAt: "2026-06-06T13:12:00.000Z",
+      resultSummary: {
+        leaseToken: "lease-current",
+        leaseHeartbeatAt: "2026-06-06T13:11:00.000Z",
+      },
+      errorMessage: null,
+    });
+
+    const heartbeat = await repository.heartbeatScanJob(
+      job.id,
+      "lease-current",
+      "2026-06-06T13:13:00.000Z",
+    );
+
+    expect(heartbeat).toBeNull();
+    expect(await repository.getScanJobById(job.id)).toMatchObject({
+      status: "succeeded",
+      resultSummary: {
+        leaseToken: "lease-current",
+        leaseHeartbeatAt: "2026-06-06T13:11:00.000Z",
+      },
+    });
+  });
+
+  it("rejects stale recovery when completion wins the race", async () => {
+    const job = await repository.createScanJob({
+      sourceId: "src-federal-register-ai",
+      trigger: "cron",
+      requestedBy: "scheduler",
+      status: "queued",
+      startedAt: null,
+      finishedAt: null,
+      resultSummary: {},
+      errorMessage: null,
+    });
+    await repository.tryStartScanJob(job.id, {
+      startedAt: "2026-06-06T12:00:00.000Z",
+      leaseOwner: "worker",
+      leaseToken: "lease-current",
+      leaseHeartbeatAt: "2026-06-06T12:01:00.000Z",
+    });
+    await repository.completeScanJob(job.id, "lease-current", {
+      status: "succeeded",
+      finishedAt: "2026-06-06T13:00:00.000Z",
+      resultSummary: {
+        leaseToken: "lease-current",
+        leaseHeartbeatAt: "2026-06-06T12:01:00.000Z",
+      },
+      errorMessage: null,
+    });
+
+    const recovered = await repository.recoverStaleScanJob(
+      job.id,
+      "lease-current",
+      "2026-06-06T12:01:00.000Z",
+      {
+        status: "failed",
+        finishedAt: "2026-06-06T13:01:00.000Z",
+        errorMessage: "stale",
+      },
+    );
+
+    expect(recovered).toBeNull();
+    expect(await repository.getScanJobById(job.id)).toMatchObject({
+      status: "succeeded",
+      errorMessage: null,
+    });
   });
 
   it("persists news items and source health snapshots", async () => {

@@ -154,13 +154,12 @@ function isMissingRelationError(
   return error?.code === "PGRST205" || error?.code === "42P01";
 }
 
-function isMissingScanJobCompletionRpcError(
+function isMissingRpcError(
   error: {
     code?: string;
-    message?: string;
   } | null,
 ) {
-  return error?.code === "PGRST202" || isMissingRelationError(error);
+  return error?.code === "PGRST202";
 }
 
 function isSchemaCacheMismatchError(
@@ -385,7 +384,7 @@ function applyLegacyAuthorityTypeFilter(
 }
 
 export async function upsertRawItemWithClient(
-  client: Pick<SupabaseClient, "rpc">,
+  client: Pick<SupabaseClient, "rpc" | "from">,
   input: RawRegulatoryItemInput,
 ): Promise<{ item: ReturnType<typeof mapRawItemRow>; inserted: boolean }> {
   const candidateId = `raw-${randomUUID()}`;
@@ -408,6 +407,63 @@ export async function upsertRawItemWithClient(
     p_item: rawItemToInsert(candidate),
     p_source_references: sourceReferences,
   });
+  if (isMissingRpcError(error)) {
+    const { data: existing, error: lookupError } = await client
+      .from("raw_regulatory_items")
+      .select("*")
+      .eq("hash", input.hash)
+      .order("created_at", { ascending: true })
+      .limit(1)
+      .maybeSingle();
+    handleError("Failed to check legacy raw item hash", lookupError);
+
+    let canonical = existing as Row | null;
+    let inserted = false;
+    if (!canonical) {
+      const { data: created, error: insertError } = await client
+        .from("raw_regulatory_items")
+        .insert(rawItemToInsert(candidate))
+        .select("*")
+        .single();
+      if (insertError?.code === "23505") {
+        const { data: winner, error: winnerError } = await client
+          .from("raw_regulatory_items")
+          .select("*")
+          .eq("hash", input.hash)
+          .order("created_at", { ascending: true })
+          .limit(1)
+          .maybeSingle();
+        handleError("Failed to load canonical raw item after conflict", winnerError);
+        canonical = winner as Row | null;
+      } else {
+        handleError("Failed to insert legacy raw item", insertError);
+        canonical = created as Row;
+        inserted = true;
+      }
+    }
+    if (!canonical) {
+      throw new RepositoryOperationError(
+        `Raw item fallback did not return a canonical row for hash=${input.hash}.`,
+      );
+    }
+    if (sourceReferences.length > 0) {
+      const canonicalReferences = sourceReferences.map((reference) => ({
+        ...reference,
+        raw_item_id: canonical!.id,
+      }));
+      const { error: referenceError } = await client
+        .from("source_references")
+        .upsert(canonicalReferences, {
+          onConflict: "raw_item_id,url,source_role",
+          ignoreDuplicates: true,
+        });
+      handleError("Failed to repair legacy raw item provenance", referenceError);
+    }
+    return {
+      item: mapRawItemRow(canonical),
+      inserted,
+    };
+  }
   handleError("Failed to atomically upsert raw regulatory item", error);
   const result = (data as Array<{ item: Row; inserted: boolean }> | null)?.[0];
   if (!result?.item) {
@@ -421,8 +477,80 @@ export async function upsertRawItemWithClient(
   };
 }
 
-export async function completeScanJobWithClient(
+export async function updateRawRegulatoryItemMetadataWithClient(
   client: Pick<SupabaseClient, "rpc">,
+  id: string,
+  rawMetadata: Record<string, unknown>,
+) {
+  const sourceReferences = getSourceReferencesFromRawItem({ rawMetadata }).map(
+    (reference) =>
+      sourceReferenceToInsert(
+        sourceReferenceInputToRecord({
+          ...reference,
+          rawItemId: id,
+          regulatoryUpdateId: null,
+        }),
+      ),
+  );
+  const { data, error } = await client.rpc(
+    "update_raw_regulatory_item_metadata",
+    {
+      p_id: id,
+      p_raw_metadata: rawMetadata,
+      p_source_references: sourceReferences,
+    },
+  );
+  handleError("Failed to atomically update raw item metadata", error);
+  const row = Array.isArray(data) ? data[0] : data;
+  if (!row) {
+    throw new RepositoryOperationError(`Raw regulatory item ${id} not found.`);
+  }
+  return mapRawItemRow(row as Row);
+}
+
+async function completeScanJobWithoutRpc(
+  client: Pick<SupabaseClient, "from">,
+  id: string,
+  leaseToken: string,
+  patch: Partial<ScanJob>,
+) {
+  const { data: existing, error: lookupError } = await client
+    .from("scan_jobs")
+    .select("*")
+    .eq("id", id)
+    .limit(1)
+    .maybeSingle();
+  handleError("Failed to load scan job for completion fallback", lookupError);
+  const existingSummary = (existing as Row | null)?.result_summary as
+    | Record<string, unknown>
+    | undefined;
+  if (
+    !existing ||
+    existing.status !== "running" ||
+    existingSummary?.leaseToken !== leaseToken
+  ) {
+    return null;
+  }
+  const { data: updated, error: updateError } = await client
+    .from("scan_jobs")
+    .update({
+      status: patch.status,
+      finished_at: patch.finishedAt,
+      result_summary: patch.resultSummary,
+      error_message: patch.errorMessage,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", id)
+    .eq("status", "running")
+    .contains("result_summary", { leaseToken })
+    .select("*")
+    .maybeSingle();
+  handleError("Failed to complete scan job with compatibility fallback", updateError);
+  return updated ? mapScanJobRow(updated as Row) : null;
+}
+
+export async function completeScanJobWithClient(
+  client: Pick<SupabaseClient, "rpc" | "from">,
   legacyScanJobs: Map<string, ScanJob>,
   id: string,
   leaseToken: string,
@@ -443,7 +571,10 @@ export async function completeScanJobWithClient(
     p_result_summary: patch.resultSummary,
     p_error_message: patch.errorMessage,
   });
-  if (isMissingScanJobCompletionRpcError(error)) {
+  if (isMissingRpcError(error)) {
+    return completeScanJobWithoutRpc(client, id, leaseToken, patch);
+  }
+  if (isMissingRelationError(error)) {
     const existing = legacyScanJobs.get(id);
     if (
       !existing ||
@@ -464,6 +595,45 @@ export async function completeScanJobWithClient(
     return updated;
   }
   handleError("Failed to complete scan job", error);
+  const row = Array.isArray(data) ? data[0] : data;
+  return row ? mapScanJobRow(row as Row) : null;
+}
+
+export async function heartbeatScanJobWithClient(
+  client: Pick<SupabaseClient, "rpc">,
+  id: string,
+  leaseToken: string,
+  heartbeatAt: string,
+) {
+  const { data, error } = await client.rpc("heartbeat_scan_job", {
+    p_id: id,
+    p_lease_token: leaseToken,
+    p_heartbeat_at: heartbeatAt,
+  });
+  handleError("Failed to heartbeat scan job", error);
+  const row = Array.isArray(data) ? data[0] : data;
+  return row ? mapScanJobRow(row as Row) : null;
+}
+
+export async function recoverStaleScanJobWithClient(
+  client: Pick<SupabaseClient, "rpc">,
+  id: string,
+  leaseToken: string,
+  expectedHeartbeatAt: string | null,
+  patch: Partial<ScanJob>,
+) {
+  if (patch.status !== "failed") {
+    return null;
+  }
+  const { data, error } = await client.rpc("recover_stale_scan_job", {
+    p_id: id,
+    p_lease_token: leaseToken,
+    p_expected_heartbeat_at: expectedHeartbeatAt,
+    p_finished_at: patch.finishedAt,
+    p_result_summary: patch.resultSummary,
+    p_error_message: patch.errorMessage,
+  });
+  handleError("Failed to recover stale scan job", error);
   const row = Array.isArray(data) ? data[0] : data;
   return row ? mapScanJobRow(row as Row) : null;
 }
@@ -984,34 +1154,11 @@ export class SupabaseAiRegulationRepository implements AiRegulationRepository {
     id: string,
     rawMetadata: Record<string, unknown>,
   ) {
-    const client = requireAdminClient();
-    const { data, error } = await client
-      .from("raw_regulatory_items")
-      .update({
-        raw_metadata: rawMetadata,
-        updated_at: new Date().toISOString(),
-      })
-      .eq("id", id)
-      .select("*")
-      .single();
-    handleError("Failed to update raw regulatory item metadata", error);
-    const record = mapRawItemRow(data);
-    const { data: linkedUpdate, error: linkedUpdateError } = await client
-      .from("ai_regulatory_updates")
-      .select("id")
-      .eq("raw_item_id", id)
-      .limit(1)
-      .maybeSingle();
-    handleError("Failed to load linked regulatory update for source references", linkedUpdateError);
-    await this.replaceSourceReferencesForRawItem(
+    return updateRawRegulatoryItemMetadataWithClient(
+      requireAdminClient(),
       id,
-      getSourceReferencesFromRawItem(record).map((reference) => ({
-        ...reference,
-        rawItemId: id,
-        regulatoryUpdateId: linkedUpdate?.id ? String(linkedUpdate.id) : null,
-      })),
+      rawMetadata,
     );
-    return record;
   }
 
   async createAiRegulatoryUpdate(input: RegulatoryUpdateDraftInput) {
@@ -1801,6 +1948,30 @@ export class SupabaseAiRegulationRepository implements AiRegulationRepository {
       this.legacyScanJobs,
       id,
       leaseToken,
+      patch,
+    );
+  }
+
+  async heartbeatScanJob(id: string, leaseToken: string, heartbeatAt: string) {
+    return heartbeatScanJobWithClient(
+      requireAdminClient(),
+      id,
+      leaseToken,
+      heartbeatAt,
+    );
+  }
+
+  async recoverStaleScanJob(
+    id: string,
+    leaseToken: string,
+    expectedHeartbeatAt: string | null,
+    patch: Partial<ScanJob>,
+  ) {
+    return recoverStaleScanJobWithClient(
+      requireAdminClient(),
+      id,
+      leaseToken,
+      expectedHeartbeatAt,
       patch,
     );
   }
