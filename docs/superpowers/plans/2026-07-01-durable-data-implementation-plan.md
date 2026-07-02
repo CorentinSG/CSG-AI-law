@@ -8,6 +8,10 @@
 
 **Tech Stack:** TypeScript, Vitest, Supabase/Postgres SQL migrations, PowerShell, Railway worker.
 
+**Implementation range:** `7df6848..HEAD`, using Git's exclusive-base,
+inclusive-tip semantics. The range includes every durable-data implementation,
+review-fix, and documentation commit after the operational truth handoff.
+
 ## Global Constraints
 
 - Monthly infrastructure cost remains USD 0 where possible and USD 5 maximum.
@@ -236,10 +240,11 @@ git commit -m "feat(ops): add verified logical database backups"
 - Consumes: Tasks 1-4
 - Produces: verified migration/runtime evidence and Claude Code handoff
 
-- [ ] **Step 1: Run the complete local gate**
+- [x] **Step 1: Run the complete local gate**
 
-2026-07-02: `npm test`, `npm run typecheck`, preview `npm run build`, and both
-PowerShell self-tests pass. Global lint remains unchecked because it fails only
+2026-07-02 final review: `npm test` passes 107 files / 612 tests, backend-owned
+ESLint passes, `npm run typecheck` passes, preview `npm run build` generates 121
+pages, and both PowerShell self-tests pass. Global lint was run and fails only
 in Claude-owned UI files:
 `src/app/ai-regulation/europe/ai-act/page.tsx:113`,
 `src/app/ai-regulation/europe/governance/page.tsx:94`, and
@@ -259,12 +264,15 @@ Expected: backend checks pass. Report exact Claude-owned UI lint failures withou
 
 - [ ] **Step 2: Verify migrations against a disposable database**
 
-2026-07-02: operator-gated. No disposable database or `DATABASE_URL` was
-available, so migrations 001-014 were not applied and the runtime schema audit
-reported `blocked_missing_credentials`. Migrations 013 and 014 remain unapplied
-to production by this task.
+2026-07-02 final review: operator-gated. No disposable database or
+`DATABASE_URL` was available, so migrations 001-015 were not applied and the
+runtime schema audit reported `blocked_missing_credentials`. Migrations 013,
+014, and 015 remain unapplied to production by this task.
 
-Apply migrations 001-014 twice to prove idempotence, run `npm run audit:database-schema`, then exercise concurrent raw-item insertion and stale-token completion.
+Apply migrations 001-015 twice to prove idempotence, run
+`npm run audit:database-schema`, then exercise concurrent raw-item insertion,
+metadata-reference rollback/retention, heartbeat-after-completion rejection,
+and completion/recovery races.
 
 - [ ] **Step 3: Verify backup restoration**
 
@@ -278,7 +286,9 @@ Create one logical dump and restore it into the disposable target. Confirm criti
 2026-07-02: operator-gated. No production migrations, live restore, or
 post-migration production scan was performed.
 
-Push the backend commits, apply migrations 013-014 only after explicit operator approval, then queue one official-source scan and confirm one canonical raw row and a lease-consistent terminal job.
+Push the backend commits, apply migrations 013-015 only after explicit operator
+approval, then queue one official-source scan and confirm one canonical raw
+row, preserved provenance, and a lease-consistent terminal job.
 
 - [x] **Step 5: Handoff and commit**
 
@@ -291,3 +301,21 @@ Update only Codex-owned status rows and add one handoff citing `RawRegulatoryIte
 git add AI_TASKS.md
 git commit -m "docs(ops): hand off durable data phase"
 ```
+
+### Final Review Remediation
+
+- [x] Lease-token/status CAS operations protect heartbeat and stale recovery.
+- [x] Schema audit uses structural index fields and validates complete policy
+  and check-domain contracts with independent regression fixtures.
+- [x] Additive migration `015_durable_data_integrity.sql` supplies RLS and
+  transactional metadata/lease RPCs without applying them live.
+- [x] Metadata updates and provenance merge in one transaction and retain
+  repaired references.
+- [x] Raw upsert and scan completion have database-backed `PGRST202`
+  compatibility paths.
+- [x] Local tests, backend lint, typecheck, preview build, and backup/restore
+  self-tests pass.
+- [ ] Apply migrations 001-015 twice to a disposable database and run the live
+  catalog/concurrency/restore checks.
+- [ ] Apply migrations 013-015 to production only with explicit operator
+  approval, then run one controlled official-source scan.
