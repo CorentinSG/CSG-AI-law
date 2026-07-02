@@ -375,6 +375,43 @@ function applyLegacyAuthorityTypeFilter(
   );
 }
 
+export async function upsertRawItemWithClient(
+  client: Pick<SupabaseClient, "rpc">,
+  input: RawRegulatoryItemInput,
+): Promise<{ item: ReturnType<typeof mapRawItemRow>; inserted: boolean }> {
+  const candidateId = `raw-${randomUUID()}`;
+  const candidate = {
+    ...input,
+    id: candidateId,
+  };
+  const sourceReferences = getSourceReferencesFromRawItem({
+    rawMetadata: input.rawMetadata,
+  }).map((reference) =>
+    sourceReferenceToInsert(
+      sourceReferenceInputToRecord({
+        ...reference,
+        rawItemId: candidateId,
+        regulatoryUpdateId: null,
+      }),
+    ),
+  );
+  const { data, error } = await client.rpc("upsert_raw_regulatory_item", {
+    p_item: rawItemToInsert(candidate),
+    p_source_references: sourceReferences,
+  });
+  handleError("Failed to atomically upsert raw regulatory item", error);
+  const result = (data as Array<{ item: Row; inserted: boolean }> | null)?.[0];
+  if (!result?.item) {
+    throw new RepositoryOperationError(
+      `Raw item upsert did not return a canonical row for hash=${input.hash}.`,
+    );
+  }
+  return {
+    item: mapRawItemRow(result.item),
+    inserted: result.inserted,
+  };
+}
+
 function omitAuthorityTypeColumn(row: Record<string, unknown>) {
   const copy = { ...row };
   delete copy.authority_type;
@@ -842,41 +879,7 @@ export class SupabaseAiRegulationRepository implements AiRegulationRepository {
   }
 
   async upsertRawItem(input: RawRegulatoryItemInput) {
-    const client = requireAdminClient();
-    const row = rawItemToInsert({
-      ...input,
-      id: `raw-${randomUUID()}`,
-    });
-    const { data, error } = await client
-      .from("raw_regulatory_items")
-      .upsert(row, { onConflict: "hash", ignoreDuplicates: true })
-      .select("*")
-      .maybeSingle();
-    handleError("Failed to upsert raw regulatory item", error);
-
-    const inserted = data != null;
-    const item = inserted
-      ? mapRawItemRow(data)
-      : await this.findRawRegulatoryItemByHash(input.hash);
-    if (!item) {
-      throw new RepositoryOperationError(
-        `Raw item conflict did not return canonical row for hash=${input.hash}.`,
-      );
-    }
-
-    if (inserted) {
-      const sourceReferences = getSourceReferencesFromRawItem(item).map(
-        (reference) => ({
-          ...reference,
-          rawItemId: item.id,
-          regulatoryUpdateId: null,
-        }),
-      );
-      if (sourceReferences.length > 0) {
-        await this.replaceSourceReferencesForRawItem(item.id, sourceReferences);
-      }
-    }
-    return { item, inserted };
+    return upsertRawItemWithClient(requireAdminClient(), input);
   }
 
   async findRawRegulatoryItemByHash(hash: string) {

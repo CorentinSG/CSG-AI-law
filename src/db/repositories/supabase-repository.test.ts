@@ -8,6 +8,7 @@ import {
   RepositoryOperationError,
 } from "@/db/repository-types";
 import { MemoryAiRegulationRepository } from "@/db/repositories/memory-repository";
+import { upsertRawItemWithClient } from "@/db/repositories/supabase-repository";
 import { evaluatePublicationEligibility } from "@/agents/ai-regulation/publicationEligibility";
 
 // ---------------------------------------------------------------------------
@@ -80,27 +81,142 @@ const migrationSrc = readFileSync(
 );
 
 describe("Supabase raw-item idempotency", () => {
-  it("uses one conflict-safe insert and returns the canonical row", () => {
+  it("delegates raw-item insertion to the transactional RPC", () => {
     const method = repoSrc.match(
       /async upsertRawItem\([\s\S]*?\n  async findRawRegulatoryItemByHash/,
     )?.[0];
     expect(method).toBeDefined();
-    expect(method).toContain('onConflict: "hash"');
-    expect(method).toContain("ignoreDuplicates: true");
-    expect(method?.indexOf(".upsert(")).toBeLessThan(
-      method?.indexOf("findRawRegulatoryItemByHash") ?? -1,
-    );
+    expect(method).toContain("upsertRawItemWithClient");
+    expect(repoSrc).toContain('client.rpc("upsert_raw_regulatory_item"');
   });
 
   it("guards legacy duplicates before adding an idempotent unique index", () => {
     expect(migrationSrc).toMatch(/group by hash[\s\S]*having count\(\*\) > 1/i);
     expect(migrationSrc).toMatch(/raise exception/i);
     expect(migrationSrc).toMatch(
-      /create unique index if not exists[\s\S]*raw_regulatory_items[\s\S]*\(hash\)/i,
+      /create unique index[\s\S]*raw_regulatory_items[\s\S]*\(hash\)/i,
     );
     expect(migrationSrc).not.toMatch(/\b(delete|update)\s+raw_regulatory_items\b/i);
+    expect(migrationSrc).not.toMatch(/where\s+hash\s+is\s+not\s+null/i);
+    expect(migrationSrc).toMatch(/indisunique[\s\S]*from pg_index/i);
+    expect(migrationSrc).toMatch(/raise exception[\s\S]*incorrectly defined/i);
+  });
+
+  it("returns one canonical row and one inserted winner for concurrent RPC upserts", async () => {
+    const fake = createAtomicRawItemClient();
+    const input = rawItemInput("concurrent-rpc-hash", "canonical");
+    const results = await Promise.all([
+      upsertRawItemWithClient(fake.client, input),
+      upsertRawItemWithClient(fake.client, {
+        ...input,
+        rawTitle: "loser",
+        rawMetadata: { marker: "loser" },
+      }),
+    ]);
+
+    expect(fake.rawItems).toHaveLength(1);
+    expect(results.filter((result) => result.inserted)).toHaveLength(1);
+    expect(new Set(results.map((result) => result.item.id)).size).toBe(1);
+    expect(results.every((result) => result.item.rawTitle === "canonical")).toBe(true);
+  });
+
+  it("rolls back provenance failure and repairs provenance on retry", async () => {
+    const fake = createAtomicRawItemClient({ failProvenanceOnce: true });
+    const input = rawItemInput("retry-rpc-hash", "canonical", true);
+
+    await expect(upsertRawItemWithClient(fake.client, input)).rejects.toThrow(
+      "provenance failed",
+    );
+    expect(fake.rawItems).toHaveLength(0);
+
+    const result = await upsertRawItemWithClient(fake.client, input);
+    expect(result.inserted).toBe(true);
+    expect(fake.rawItems).toHaveLength(1);
+    expect(fake.sourceReferences).toHaveLength(1);
+
+    const duplicate = await upsertRawItemWithClient(fake.client, {
+      ...input,
+      rawTitle: "loser",
+      rawMetadata: { marker: "loser", sourceReferences: input.rawMetadata.sourceReferences },
+    });
+    expect(duplicate.inserted).toBe(false);
+    expect(duplicate.item.rawTitle).toBe("canonical");
+    expect(duplicate.item.rawMetadata).toMatchObject({ marker: "canonical" });
+    expect(fake.sourceReferences).toHaveLength(1);
   });
 });
+
+function rawItemInput(hash: string, title: string, withReference = false) {
+  return {
+    sourceId: "src-test",
+    rawTitle: title,
+    rawUrl: `https://example.com/${hash}`,
+    rawText: `${title} text`,
+    rawMetadata: {
+      marker: title,
+      sourceReferences: withReference
+        ? [{
+            sourceRole: "primary",
+            title: "Official source",
+            institution: "Authority",
+            url: "https://authority.example/item",
+            sourceType: "official",
+            reliabilityLevel: "high",
+            verificationStatus: "official_verified",
+          }]
+        : [],
+    },
+    detectedAt: "2026-07-01T00:00:00.000Z",
+    hash,
+    duplicateOf: null,
+    processingStatus: "new" as const,
+  };
+}
+
+function createAtomicRawItemClient(options?: { failProvenanceOnce?: boolean }) {
+  const rawItems: Record<string, unknown>[] = [];
+  const sourceReferences: Record<string, unknown>[] = [];
+  let failProvenance = options?.failProvenanceOnce ?? false;
+  let queue = Promise.resolve();
+  const client = {
+    rpc: (_name: string, args: Record<string, unknown>) => {
+      const operation = queue.then(async () => {
+        const item = args.p_item as Record<string, unknown>;
+        const references = args.p_source_references as Record<string, unknown>[];
+        const existing = rawItems.find((row) => row.hash === item.hash);
+        const inserted = !existing;
+        const canonical = existing ?? {
+          ...item,
+          created_at: "2026-07-01T00:00:00.000Z",
+          updated_at: "2026-07-01T00:00:00.000Z",
+        };
+        const nextRawItems = inserted ? [...rawItems, canonical] : [...rawItems];
+        const nextReferences = [...sourceReferences];
+        for (const reference of references) {
+          const repaired: Record<string, unknown> = {
+            ...reference,
+            raw_item_id: canonical.id,
+          };
+          if (!nextReferences.some((entry) =>
+            entry.raw_item_id === repaired.raw_item_id &&
+            entry.url === repaired.url &&
+            entry.source_role === repaired.source_role
+          )) nextReferences.push(repaired);
+        }
+        if (failProvenance && references.length > 0) {
+          failProvenance = false;
+          throw new Error("provenance failed");
+        }
+        rawItems.splice(0, rawItems.length, ...nextRawItems);
+        sourceReferences.splice(0, sourceReferences.length, ...nextReferences);
+        return { data: [{ item: canonical, inserted }], error: null };
+      });
+      queue = operation.then(() => undefined, () => undefined);
+      return operation;
+    },
+  };
+  return { client: client as never, rawItems, sourceReferences };
+}
 
 // ---------------------------------------------------------------------------
 // 0. Memory repository — transitionReviewStatus enforcement

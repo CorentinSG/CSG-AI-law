@@ -5,6 +5,8 @@ import type {
   RawRegulatoryItem,
   RegulationSource,
 } from "@/agents/ai-regulation/types";
+import { MemoryAiRegulationRepository } from "@/db/repositories/memory-repository";
+import { resetMockStore } from "@/db/mock-store";
 const mocks = vi.hoisted(() => ({
   env: {
     AI_ENABLE_PROCESSING: false,
@@ -134,6 +136,8 @@ vi.mock("@/agents/ai-regulation/utils/authority", () => ({
 
 vi.mock("@/agents/ai-regulation/citations", () => ({
   buildCandidateSourceReference: vi.fn(() => ({ sourceType: "official" })),
+  getSourceReferencesFromRawItem: vi.fn(() => []),
+  getCitationReferences: vi.fn(() => []),
 }));
 
 vi.mock("@/agents/ai-regulation/scanProfiles", () => ({
@@ -307,6 +311,45 @@ describe("runAiRegulationScan harness wiring", () => {
     expect(result.duplicatesDetected).toBe(1);
     expect(result.newItemsDetected).toBe(0);
     expect(mocks.updateRepository.createUpdate).not.toHaveBeenCalled();
+  });
+
+  it("serializes concurrent pipeline attempts into one raw row and one update", async () => {
+    resetMockStore();
+    const repository = new MemoryAiRegulationRepository();
+    mocks.repository.upsertRawItem.mockImplementation((input) =>
+      repository.upsertRawItem(input),
+    );
+    mocks.sourceScanner.scanSource.mockResolvedValue({
+      items: [{ id: "item-1" }],
+      itemsFetched: 1,
+      warnings: [],
+      errors: [],
+      responseStatus: 200,
+      zeroResultsReason: null,
+    });
+    mocks.itemExtractor.extract.mockReturnValue([{
+      title: "AI courts rule",
+      url: "https://example.eu/item-1",
+      text: "AI rule text",
+      metadata: {},
+      publicationDate: "2026-06-11",
+    }]);
+
+    const { runAiRegulationScan } = await import(
+      "@/agents/ai-regulation/processors/pipeline"
+    );
+    const results = await Promise.all([
+      runAiRegulationScan(source.id),
+      runAiRegulationScan(source.id),
+    ]);
+
+    const durable = (await repository.listRawRegulatoryItems()).filter(
+      (item) => item.hash === "hash-1",
+    );
+    expect(durable).toHaveLength(1);
+    expect(mocks.updateRepository.createUpdate).toHaveBeenCalledOnce();
+    expect(results.flat().map((result) => result.duplicatesDetected).sort()).toEqual([0, 1]);
+    expect(results.flat().map((result) => result.newItemsDetected).sort()).toEqual([0, 1]);
   });
 
   it("stores a structured failure report in scan logs when source retrieval fails", async () => {

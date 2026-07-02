@@ -38,6 +38,71 @@ describe("MemoryAiRegulationRepository", () => {
     ).toHaveLength(1);
   });
 
+  it("preserves canonical metadata and repairs missing provenance on retry", async () => {
+    const canonical = await repository.upsertRawItem({
+      sourceId: "src-test",
+      rawTitle: "Canonical",
+      rawUrl: "https://example.com/canonical",
+      rawText: "Canonical text",
+      rawMetadata: {
+        marker: "canonical",
+        sourceReferences: [],
+      },
+      detectedAt: "2026-07-01T00:00:00.000Z",
+      hash: "repair-hash",
+      duplicateOf: null,
+      processingStatus: "new",
+    });
+    const retry = await repository.upsertRawItem({
+      sourceId: "src-test",
+      rawTitle: "Loser",
+      rawUrl: "https://example.com/canonical",
+      rawText: "Loser text",
+      rawMetadata: {
+        marker: "loser",
+        sourceReferences: [
+          {
+            sourceRole: "primary",
+            title: "Official source",
+            institution: "Authority",
+            url: "https://authority.example/item",
+            canonicalUrl: null,
+            sourceType: "official",
+            authorityType: "legislation",
+            publicationDate: "2026-07-01",
+            detectedAt: "2026-07-01T00:00:00.000Z",
+            retrievedAt: "2026-07-01T00:00:00.000Z",
+            lastVerifiedAt: null,
+            jurisdiction: "European Union",
+            documentType: "regulation",
+            excerpt: null,
+            pinpoint: {},
+            reliabilityLevel: "high",
+            verificationStatus: "official_verified",
+            archivedUrl: null,
+            accessLimitations: null,
+            notes: null,
+          },
+        ],
+      },
+      detectedAt: "2026-07-01T00:00:01.000Z",
+      hash: "repair-hash",
+      duplicateOf: null,
+      processingStatus: "new",
+    });
+
+    expect(retry).toMatchObject({
+      inserted: false,
+      item: { id: canonical.item.id, rawTitle: "Canonical" },
+    });
+    expect(retry.item.rawMetadata).toMatchObject({ marker: "canonical" });
+    expect(
+      await repository.listSourceReferences(10, {
+        rawItemId: canonical.item.id,
+      }),
+    ).toHaveLength(1);
+  });
+
   it("only returns published items in public scope", async () => {
     const updates = await repository.listRegulatoryUpdates({}, "public");
     expect(updates.length).toBeGreaterThan(0);

@@ -311,7 +311,30 @@ export class MemoryAiRegulationRepository implements AiRegulationRepository {
     const existing = getMockStore().rawItems.find(
       (item) => item.hash === input.hash,
     );
-    if (existing) return { item: existing, inserted: false };
+    if (existing) {
+      const existingKeys = new Set(
+        getMockStore().sourceReferences
+          .filter((reference) => reference.rawItemId === existing.id)
+          .map((reference) => `${reference.url}\0${reference.sourceRole}`),
+      );
+      const missing = getSourceReferencesFromRawItem({
+        ...existing,
+        rawMetadata: input.rawMetadata,
+      })
+        .filter(
+          (reference) =>
+            !existingKeys.has(`${reference.url}\0${reference.sourceRole}`),
+        )
+        .map((reference) =>
+          createSourceReferenceRecord({
+            ...reference,
+            rawItemId: existing.id,
+            regulatoryUpdateId: null,
+          }),
+        );
+      getMockStore().sourceReferences.unshift(...missing);
+      return { item: existing, inserted: false };
+    }
 
     const item = await this.createRawRegulatoryItem(input);
     return { item, inserted: true };

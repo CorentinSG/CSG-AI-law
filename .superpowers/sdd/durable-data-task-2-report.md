@@ -86,3 +86,63 @@ Implementation commit: `5b2e27ca5b1145d311c687e7b3c8e02b32e7fb10`
 ## Concerns
 
 None.
+
+## CHANGES_REQUESTED Fix Report
+
+### RED Evidence
+
+The required targeted command exited 1 with five expected review-regression
+failures:
+
+```text
+Test Files  3 failed (3)
+Tests       5 failed | 66 passed (71)
+```
+
+- Memory retry left canonical provenance missing.
+- `upsertRawItemWithClient` did not exist.
+- Migration still defined a partial unique index.
+- Concurrent pipeline test could not demonstrate one durable winner.
+
+### Fixes
+
+- Migration 013 now verifies any same-name index through `pg_index` and raises
+  if it is non-unique, partial, multi-column, or not keyed by `hash`.
+- The invariant is a non-partial unique index compatible with
+  `ON CONFLICT (hash)`; existing duplicate rows still cause an actionable,
+  non-destructive exception.
+- `upsert_raw_regulatory_item(jsonb, jsonb)` performs raw insertion,
+  canonical-row lookup, and idempotent source-reference repair in one Postgres
+  transaction.
+- Supabase repository behavior is tested through a deterministic transactional
+  fake client with two concurrent calls, rollback on provenance failure, retry
+  repair, one canonical id, and exactly one insertion winner.
+- Memory retries add only missing provenance while preserving canonical raw
+  metadata.
+- Two concurrent pipeline runs now share a real memory repository and assert
+  one raw row, one update, and one duplicate loser.
+
+### GREEN Evidence
+
+Required targeted tests exited 0:
+
+```text
+Test Files  3 passed (3)
+Tests       71 passed (71)
+Duration    924ms
+```
+
+Required typecheck exited 0:
+
+```text
+> next typegen && tsc --noEmit
+Generating route types...
+Types generated successfully
+```
+
+`git diff --check` on owned paths exited 0; only Git's existing LF-to-CRLF
+checkout warnings were emitted.
+
+### Concerns
+
+None.
