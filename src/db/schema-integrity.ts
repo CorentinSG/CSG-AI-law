@@ -20,17 +20,19 @@ export interface SchemaSnapshot {
     constraintType: string;
     constraintDefinition: string;
   }>;
+  tables: Array<{ tableName: string; rlsEnabled: boolean }>;
   policies: Array<{ tableName: string; policyName: string }>;
 }
 
 interface TableRequirement {
   columns: string[];
-  indexes: Array<{ name: string; definition: string; unique?: boolean }>;
+  indexes: Array<{ name: string; columns: string[]; unique?: boolean }>;
   constraints: Array<{
     name: string;
     type: string;
     definition: string;
     objectName: string;
+    requiredValues?: string[];
   }>;
   policies: string[];
 }
@@ -66,10 +68,10 @@ export const REQUIRED_SCHEMA_INVARIANTS: Record<string, TableRequirement> = {
     indexes: [
       {
         name: "raw_regulatory_items_hash_unique_idx",
-        definition: "(hash)",
+        columns: ["hash"],
         unique: true,
       },
-      { name: "raw_regulatory_items_source_id_idx", definition: "(source_id)" },
+      { name: "raw_regulatory_items_source_id_idx", columns: ["source_id"] },
     ],
     constraints: [
       {
@@ -89,9 +91,9 @@ export const REQUIRED_SCHEMA_INVARIANTS: Record<string, TableRequirement> = {
       "status", "created_at", "updated_at",
     ],
     indexes: [
-      { name: "ai_regulatory_updates_status_idx", definition: "(status)" },
-      { name: "ai_regulatory_updates_source_id_idx", definition: "(source_id)" },
-      { name: "ai_regulatory_updates_publication_date_idx", definition: "(publication_date" },
+      { name: "ai_regulatory_updates_status_idx", columns: ["status"] },
+      { name: "ai_regulatory_updates_source_id_idx", columns: ["source_id"] },
+      { name: "ai_regulatory_updates_publication_date_idx", columns: ["publication_date"] },
     ],
     constraints: [
       {
@@ -109,8 +111,8 @@ export const REQUIRED_SCHEMA_INVARIANTS: Record<string, TableRequirement> = {
       "result_summary", "error_message", "created_at", "updated_at",
     ],
     indexes: [
-      { name: "scan_jobs_created_at_idx", definition: "(created_at" },
-      { name: "scan_jobs_status_idx", definition: "(status, created_at" },
+      { name: "scan_jobs_created_at_idx", columns: ["created_at"] },
+      { name: "scan_jobs_status_idx", columns: ["status", "created_at"] },
     ],
     constraints: [
       {
@@ -118,6 +120,7 @@ export const REQUIRED_SCHEMA_INVARIANTS: Record<string, TableRequirement> = {
         type: "CHECK",
         definition: "status",
         objectName: "scan_jobs.status",
+        requiredValues: ["queued", "running", "succeeded", "partial_success", "failed"],
       },
     ],
     policies: ["service_role_all_scan_jobs"],
@@ -131,9 +134,9 @@ export const REQUIRED_SCHEMA_INVARIANTS: Record<string, TableRequirement> = {
       "verification_status", "public_visibility_status", "created_at", "updated_at",
     ],
     indexes: [
-      { name: "news_items_slug_key", definition: "(slug)", unique: true },
-      { name: "news_items_visibility_idx", definition: "(public_visibility_status, publication_date" },
-      { name: "news_items_raw_item_idx", definition: "(raw_item_id)" },
+      { name: "news_items_slug_key", columns: ["slug"], unique: true },
+      { name: "news_items_visibility_idx", columns: ["public_visibility_status", "publication_date", "detected_at"] },
+      { name: "news_items_raw_item_idx", columns: ["raw_item_id"] },
     ],
     constraints: [
       {
@@ -149,6 +152,26 @@ export const REQUIRED_SCHEMA_INVARIANTS: Record<string, TableRequirement> = {
 
 function normalized(value: string) {
   return value.toLowerCase().replace(/\s+/g, " ");
+}
+
+function indexColumns(indexDefinition: string): string[] {
+  const match = indexDefinition.match(/\(([^()]*)\)(?:\s+where\b.*)?$/i);
+  if (!match) {
+    return [];
+  }
+  return match[1].split(",").map((part) =>
+    part
+      .trim()
+      .replace(/\s+(asc|desc)(\s+nulls\s+(first|last))?$/i, "")
+      .replace(/^"|"$/g, "")
+      .toLowerCase(),
+  );
+}
+
+function quotedValues(definition: string): string[] {
+  return [...definition.matchAll(/'([^']+)'/g)]
+    .map((match) => match[1].toLowerCase())
+    .sort();
 }
 
 export function evaluateSchemaIntegrity(snapshot: SchemaSnapshot): {
@@ -169,14 +192,12 @@ export function evaluateSchemaIntegrity(snapshot: SchemaSnapshot): {
         (row) => row.tableName === tableName && row.indexName === index.name,
       );
       const definitionMatches = actual &&
-        normalized(actual.indexDefinition).includes(normalized(index.definition));
+        indexColumns(actual.indexDefinition).join(",") === index.columns.join(",");
       const uniqueMatches = !index.unique ||
         (actual && normalized(actual.indexDefinition).includes("unique"));
       if (!definitionMatches || !uniqueMatches) {
         findings.push({
-          objectName: index.unique && tableName === "raw_regulatory_items"
-            ? "raw_regulatory_items.hash"
-            : `${tableName}.${index.name}`,
+          objectName: `${tableName}.${index.name}`,
           invariantClass: index.unique ? "unique_index" : "index",
         });
       }
@@ -188,7 +209,10 @@ export function evaluateSchemaIntegrity(snapshot: SchemaSnapshot): {
           row.tableName === tableName &&
           row.constraintName === constraint.name &&
           row.constraintType.toUpperCase() === constraint.type &&
-          normalized(row.constraintDefinition).includes(normalized(constraint.definition)),
+          normalized(row.constraintDefinition).includes(normalized(constraint.definition)) &&
+          (!constraint.requiredValues ||
+            quotedValues(row.constraintDefinition).join(",") ===
+              [...constraint.requiredValues].sort().join(",")),
       );
       if (!actual) {
         findings.push({
@@ -203,7 +227,10 @@ export function evaluateSchemaIntegrity(snapshot: SchemaSnapshot): {
         (row) => row.tableName === tableName && row.policyName === policyName,
       ),
     );
-    if (!hasRequiredPolicy) {
+    const hasRlsEnabled = snapshot.tables.some(
+      (row) => row.tableName === tableName && row.rlsEnabled,
+    );
+    if (!hasRlsEnabled || !hasRequiredPolicy) {
       findings.push({ objectName: tableName, invariantClass: "rls_policy" });
     }
   }

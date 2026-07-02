@@ -82,3 +82,44 @@ Commit message:
   environment issues described above.
 - `AI_TASKS.md` was not changed because the user explicitly limited file
   ownership; this overrides the general coordination handoff edit rule.
+
+## Review Fixes
+
+### RED Evidence
+
+After replacing the generated fixture with independent PostgreSQL catalog
+rows, `npm test -- src/db/schema-integrity.test.ts` failed 4 of 7 tests for
+the expected reasons:
+
+- unique-index findings used an inconsistent `raw_regulatory_items.hash`
+  object name;
+- policies with `relrowsecurity = false` were accepted;
+- a same-named `scan_jobs_status_check` containing only `queued` and
+  `running` was accepted;
+- `created_at_extra` passed as the `created_at` index column.
+
+### Changes
+
+- Added `pg_class.relrowsecurity` to the runtime snapshot and require both
+  enabled RLS and the expected policy.
+- Replaced the self-derived complete fixture with independent, realistic
+  `information_schema`, `pg_indexes`, `pg_constraint`, `pg_class`, and
+  `pg_policies` rows.
+- Validate the exact five-value `scan_jobs.status` domain.
+- Parse and compare complete ordered index column lists.
+- Standardized unique-index finding names as `<table>.<index>`.
+
+### Exact Verification
+
+- `npm test -- src/db/schema-integrity.test.ts`: PASS; 1 file, 7 tests.
+- `npx eslint src/db/schema-integrity.ts src/db/schema-integrity.test.ts scripts/audit-database-schema.ts`:
+  PASS; exit code 0, no findings.
+- `npm run typecheck`: PASS; Next route types generated and `tsc --noEmit`
+  exited 0.
+
+### Review Concerns
+
+- The existing Vitest configuration prints a Vite `vite-tsconfig-paths`
+  deprecation warning; it is unrelated and outside the owned files.
+- Live database verification remains dependent on a configured
+  `DATABASE_URL`.

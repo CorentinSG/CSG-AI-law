@@ -17,7 +17,14 @@ const TABLES = [
 ];
 
 async function loadSnapshot(client: Client): Promise<SchemaSnapshot> {
-  const [columns, indexes, constraints, policies] = await Promise.all([
+  const [columns, indexes, constraints, tables, policies] = await Promise.all([
+    client.query(
+      `select c.relname as "tableName", c.relrowsecurity as "rlsEnabled"
+       from pg_class c
+       join pg_namespace n on n.oid = c.relnamespace
+       where n.nspname = 'public' and c.relname = any($1::text[])`,
+      [TABLES],
+    ),
     client.query(
       `select table_name as "tableName", column_name as "columnName"
        from information_schema.columns
@@ -52,6 +59,7 @@ async function loadSnapshot(client: Client): Promise<SchemaSnapshot> {
     columns: columns.rows,
     indexes: indexes.rows,
     constraints: constraints.rows,
+    tables: tables.rows,
     policies: policies.rows,
   };
 }
