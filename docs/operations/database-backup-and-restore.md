@@ -59,6 +59,18 @@ identity, and count-only snapshots for critical tables. Its adjacent
 `.manifest.json.sha256` covers the complete manifest bytes, including the
 snapshot counts. Keep all three files together.
 
+The backup opens a read-only repeatable-read exporter transaction and obtains a
+PostgreSQL exported snapshot. `pg_dump` receives that snapshot through
+`--snapshot`, and every critical-table count query starts a read-only
+repeatable-read transaction that imports the same snapshot ID. The exporter is
+held until both dump and counts finish, then rolled back. Cleanup waits five
+seconds and kills an exporter that does not exit; initial snapshot acquisition
+times out after ten seconds. The manifest records the snapshot ID as audit
+evidence.
+
+If any backup stage fails, the script removes the dump, JSON manifest, and
+manifest checksum sidecar. Do not retain or restore a partial artifact set.
+
 ## Restoration proof
 
 1. Create or fully recreate a database intended only for this proof.
@@ -87,6 +99,13 @@ the manifest source identity, all artifact paths are bound, and both integrity
 checks pass. It restores only to the target and compares target counts with the
 backup-time snapshot. It never reconnects to the source or selects row content.
 
+The manifest must contain exactly these count keys:
+`regulation_sources`, `raw_regulatory_items`, `ai_regulatory_updates`,
+`news_items`, `scan_jobs`, and `country_intelligence`. Missing, additional,
+negative, nonnumeric, or malformed entries are rejected before restore/count
+SQL. SQL identifiers always come from this internal allowlist, never directly
+from manifest text.
+
 Expected output ends with `Restore verification passed against confirmed
 disposable target <identity>`.
 
@@ -101,7 +120,10 @@ never substitute production or an unconfirmed database.
 ## Failure recovery
 
 - Missing tool or failed backup: remove incomplete artifacts, correct the local
-  tool or connection issue, and create a fresh backup.
+  tool or connection issue, confirm all three artifact paths were removed, and
+  create a fresh backup.
+- Snapshot export timeout or exporter cleanup failure: treat the backup as
+  failed, confirm no exporter `psql` process remains, and create a fresh backup.
 - Manifest or dump checksum failure: do not restore; recover the matching
   artifact set or create a new backup.
 - Identity or confirmation refusal: stop and verify the target in the provider

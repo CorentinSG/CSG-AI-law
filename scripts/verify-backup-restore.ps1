@@ -9,6 +9,7 @@ param(
 )
 
 $ErrorActionPreference = "Stop"
+$CriticalTables = @("regulation_sources","raw_regulatory_items","ai_regulatory_updates","news_items","scan_jobs","country_intelligence")
 
 function ConvertFrom-PostgresUri([string]$Value) {
     try { $uri = [Uri]$Value } catch { throw "RESTORE_TEST_DATABASE_URL must be a valid PostgreSQL URI." }
@@ -31,7 +32,10 @@ function Assert-RestoreConfiguration([string]$TargetUrl, [switch]$ConfirmDisposa
     $target
 }
 function Get-PgRestoreArguments($Connection, [string]$DumpPath) { @("--exit-on-error","--clean","--if-exists","--no-owner","--no-acl","--host",$Connection.Host,"--port","$($Connection.Port)","--username",$Connection.User,"--dbname",$Connection.Database,$DumpPath) }
-function Get-CountArguments($Connection, [string]$Table) { @("--no-psqlrc","--tuples-only","--no-align","--host",$Connection.Host,"--port","$($Connection.Port)","--username",$Connection.User,"--dbname",$Connection.Database,"--command","select count(*) from public.$Table;") }
+function Get-CountArguments($Connection, [string]$Table) {
+    if ($Table -notin $CriticalTables) { throw "Count table is not in the fixed allowlist." }
+    @("--no-psqlrc","--tuples-only","--no-align","--host",$Connection.Host,"--port","$($Connection.Port)","--username",$Connection.User,"--dbname",$Connection.Database,"--command","select count(*) from public.$Table;")
+}
 function Assert-RequiredTools([string[]]$Names, [scriptblock]$CommandLookup = { param($name) Get-Command $name -ErrorAction SilentlyContinue }) { foreach ($name in $Names) { if (-not (& $CommandLookup $name)) { throw "$name was not found on PATH." } } }
 function Assert-CommandSucceeded([int]$ExitCode, [string]$Operation) { if ($ExitCode -ne 0) { throw "$Operation failed with exit code $ExitCode." } }
 function Assert-ManifestIntegrity([byte[]]$ManifestBytes, [string]$ExpectedHash) {
@@ -53,8 +57,20 @@ function Assert-ArtifactPathBinding([string]$DumpPath, [string]$ManifestPath, [s
     }
 }
 function Compare-SnapshotCounts($Expected, $Actual) {
-    foreach ($property in $Expected.PSObject.Properties) {
-        if ("$($property.Value)" -ne "$($Actual[$property.Name])") { throw "Count mismatch for $($property.Name): expected $($property.Value), got $($Actual[$property.Name])." }
+    Assert-ManifestCountKeys $Expected
+    foreach ($table in $CriticalTables) {
+        if ("$($Expected.$table)" -ne "$($Actual[$table])") { throw "Count mismatch for $table`: expected $($Expected.$table), got $($Actual[$table])." }
+    }
+}
+function Assert-ManifestCountKeys($Counts) {
+    if ($null -eq $Counts) { throw "Manifest counts must match the fixed critical-table allowlist." }
+    $keys = @($Counts.PSObject.Properties | ForEach-Object { $_.Name })
+    if ($keys.Count -ne $CriticalTables.Count) { throw "Manifest counts must match the fixed critical-table allowlist." }
+    foreach ($table in $CriticalTables) {
+        if ($table -notin $keys) { throw "Manifest counts must match the fixed critical-table allowlist." }
+        $value = "$($Counts.$table)"
+        $parsed = 0L
+        if (-not [long]::TryParse($value, [ref]$parsed) -or $parsed -lt 0) { throw "Manifest count for $table is malformed." }
     }
 }
 function ConvertTo-PgPassField([string]$Value) { $Value.Replace("\","\\").Replace(":","\:") }
@@ -82,10 +98,33 @@ if ($SelfTest) {
     Test-Case "dump checksum rejection occurs before restore" { Assert-Throws { Assert-DumpIntegrity ("a"*64) ("b"*64) } "*checksum*" }
     Test-Case "manifest rejects filename traversal" { Assert-Throws { Assert-ManifestDumpBinding "..\safe.dump" "C:\backups\safe.dump" } "*filename*" }
     Test-Case "artifact sidecars reject path substitution" { Assert-Throws { Assert-ArtifactPathBinding "C:\backups\safe.dump" "C:\other\safe.dump.manifest.json" "C:\other\safe.dump.manifest.json.sha256" } "*binding*" }
-    Test-Case "count mismatch is rejected" { Assert-Throws { Compare-SnapshotCounts ([pscustomobject]@{news_items=3}) @{news_items=2} } "*news_items*" }
+    Test-Case "count mismatch is rejected" {
+        $expected = [pscustomobject]@{ regulation_sources=1;raw_regulatory_items=2;ai_regulatory_updates=3;news_items=4;scan_jobs=5;country_intelligence=6 }
+        $actual = @{ regulation_sources=1;raw_regulatory_items=2;ai_regulatory_updates=3;news_items=99;scan_jobs=5;country_intelligence=6 }
+        Assert-Throws { Compare-SnapshotCounts $expected $actual } "*news_items*"
+    }
     Test-Case "missing tools fail through injected command lookup" { Assert-Throws { Assert-RequiredTools @("pg_restore","psql") {param($name)$null} } "*not found*" }
     Test-Case "external restore failure is rejected" { Assert-Throws { Assert-CommandSucceeded 1 "pg_restore" } "*pg_restore*" }
     Test-Case "PGPASSFILE is removed after failure" { $c=ConvertFrom-PostgresUri "postgresql://u:p@host/db";Assert-Throws { Invoke-WithPgPass $c {throw "probe"} } "*probe*";Assert-Equal $null $env:PGPASSFILE }
+    Test-Case "manifest counts require exact critical allowlist" {
+        $valid = [pscustomobject]@{ regulation_sources=1;raw_regulatory_items=2;ai_regulatory_updates=3;news_items=4;scan_jobs=5;country_intelligence=6 }
+        Assert-ManifestCountKeys $valid
+    }
+    Test-Case "manifest counts reject missing tables" {
+        Assert-Throws { Assert-ManifestCountKeys ([pscustomobject]@{ news_items=1 }) } "*allowlist*"
+    }
+    Test-Case "manifest counts reject extra tables" {
+        $extra = [pscustomobject]@{ regulation_sources=1;raw_regulatory_items=2;ai_regulatory_updates=3;news_items=4;scan_jobs=5;country_intelligence=6;users=7 }
+        Assert-Throws { Assert-ManifestCountKeys $extra } "*allowlist*"
+    }
+    Test-Case "manifest counts reject injection keys" {
+        $injected = [pscustomobject]@{ regulation_sources=1;raw_regulatory_items=2;ai_regulatory_updates=3;news_items=4;scan_jobs=5;country_intelligence=6;"news_items;drop table users"=7 }
+        Assert-Throws { Assert-ManifestCountKeys $injected } "*allowlist*"
+    }
+    Test-Case "count command builder rejects injected identifier" {
+        $c=ConvertFrom-PostgresUri "postgresql://u:p@target/db"
+        Assert-Throws { Get-CountArguments $c "news_items;drop table users" } "*allowlist*"
+    }
     if($failures){exit 1};Write-Host "Self-test passed: restore safety checks";exit 0
 }
 
@@ -97,6 +136,7 @@ $expectedManifestHash=(Get-Content -LiteralPath $ManifestChecksumPath -Raw).Trim
 Assert-ManifestIntegrity $manifestBytes $expectedManifestHash
 $manifest=$manifestText|ConvertFrom-Json
 Assert-ManifestDumpBinding $manifest.dumpFile $DumpPath
+Assert-ManifestCountKeys $manifest.counts
 $actualDumpHash=(Get-FileHash -Algorithm SHA256 -LiteralPath $DumpPath).Hash.ToLowerInvariant()
 Assert-DumpIntegrity $actualDumpHash "$($manifest.dumpSha256)"
 $target=Assert-RestoreConfiguration $env:RESTORE_TEST_DATABASE_URL -ConfirmDisposableTarget:$ConfirmDisposableTarget -ExpectedTargetIdentity $ExpectedTargetIdentity -SourceIdentity $manifest.sourceIdentity
@@ -105,7 +145,7 @@ Assert-RequiredTools @("pg_restore","psql")
 Invoke-WithPgPass $target {
     & pg_restore @(Get-PgRestoreArguments $target $DumpPath);Assert-CommandSucceeded $LASTEXITCODE "pg_restore"
     $actual=@{}
-    foreach($property in $manifest.counts.PSObject.Properties){$value=(& psql @(Get-CountArguments $target $property.Name)).Trim();Assert-CommandSucceeded $LASTEXITCODE "Count query for $($property.Name)";$actual[$property.Name]=$value}
+    foreach($table in $CriticalTables){$value=(& psql @(Get-CountArguments $target $table)).Trim();Assert-CommandSucceeded $LASTEXITCODE "Count query for $table";$actual[$table]=$value}
     Compare-SnapshotCounts $manifest.counts $actual
 }
 Write-Host "Restore verification passed against confirmed disposable target $($target.Identity)."

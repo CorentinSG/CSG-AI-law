@@ -38,11 +38,79 @@ function Resolve-BackupOutputPath([string]$Directory, [string]$FileName) {
     }
     $path
 }
-function Get-PgDumpArguments($Connection, [string]$OutputPath) {
-    @("--format=custom", "--no-owner", "--no-acl", "--host", $Connection.Host, "--port", "$($Connection.Port)", "--username", $Connection.User, "--dbname", $Connection.Database, "--file", $OutputPath)
+function Get-PgDumpArguments($Connection, [string]$OutputPath, [string]$SnapshotId) {
+    $arguments = @("--format=custom", "--no-owner", "--no-acl")
+    if (-not [string]::IsNullOrWhiteSpace($SnapshotId)) {
+        Assert-SnapshotId $SnapshotId
+        $arguments += "--snapshot=$SnapshotId"
+    }
+    $arguments + @("--host", $Connection.Host, "--port", "$($Connection.Port)", "--username", $Connection.User, "--dbname", $Connection.Database, "--file", $OutputPath)
 }
-function Get-CountArguments($Connection, [string]$Table) {
-    @("--no-psqlrc", "--tuples-only", "--no-align", "--host", $Connection.Host, "--port", "$($Connection.Port)", "--username", $Connection.User, "--dbname", $Connection.Database, "--command", "select count(*) from public.$Table;")
+function Assert-SnapshotId([string]$SnapshotId) {
+    if ($SnapshotId -notmatch "^[0-9A-Fa-f]+-[0-9A-Fa-f]+-[0-9A-Fa-f]+$") { throw "Invalid exported snapshot id." }
+}
+function Get-SnapshotCountArguments($Connection, [string]$Table, [string]$SnapshotId) {
+    if ($Table -notin $CriticalTables) { throw "Count table is not in the fixed allowlist." }
+    Assert-SnapshotId $SnapshotId
+    $sql = "BEGIN TRANSACTION ISOLATION LEVEL REPEATABLE READ READ ONLY; SET TRANSACTION SNAPSHOT '$SnapshotId'; SELECT count(*) FROM public.$Table; COMMIT;"
+    @("--no-psqlrc", "--tuples-only", "--no-align", "--set", "ON_ERROR_STOP=1", "--host", $Connection.Host, "--port", "$($Connection.Port)", "--username", $Connection.User, "--dbname", $Connection.Database, "--command", $sql)
+}
+function Start-SnapshotExporter($Connection, [int]$TimeoutMilliseconds = 10000) {
+    $startInfo = New-Object Diagnostics.ProcessStartInfo
+    $startInfo.FileName = "psql"
+    $startInfo.Arguments = "--no-psqlrc --quiet --tuples-only --no-align --set ON_ERROR_STOP=1"
+    $startInfo.UseShellExecute = $false
+    $startInfo.RedirectStandardInput = $true
+    $startInfo.RedirectStandardOutput = $true
+    $startInfo.RedirectStandardError = $true
+    $startInfo.CreateNoWindow = $true
+    $startInfo.EnvironmentVariables["PGHOST"] = $Connection.Host
+    $startInfo.EnvironmentVariables["PGPORT"] = "$($Connection.Port)"
+    $startInfo.EnvironmentVariables["PGUSER"] = $Connection.User
+    $startInfo.EnvironmentVariables["PGDATABASE"] = $Connection.Database
+    $process = New-Object Diagnostics.Process
+    $process.StartInfo = $startInfo
+    if (-not $process.Start()) { throw "Failed to start snapshot exporter." }
+    try {
+        $process.StandardInput.WriteLine("BEGIN TRANSACTION ISOLATION LEVEL REPEATABLE READ READ ONLY;")
+        $process.StandardInput.WriteLine("SELECT 'CSG_SNAPSHOT=' || pg_export_snapshot();")
+        $process.StandardInput.Flush()
+        $deadline = [DateTime]::UtcNow.AddMilliseconds($TimeoutMilliseconds)
+        while ([DateTime]::UtcNow -lt $deadline) {
+            $remaining = [Math]::Max(1, [int]($deadline - [DateTime]::UtcNow).TotalMilliseconds)
+            $readTask = $process.StandardOutput.ReadLineAsync()
+            if (-not $readTask.Wait($remaining)) { break }
+            $line = $readTask.Result
+            if ($null -eq $line) { break }
+            if ($line -match "^CSG_SNAPSHOT=(.+)$") {
+                Assert-SnapshotId $Matches[1]
+                return [pscustomobject]@{ Process = $process; SnapshotId = $Matches[1] }
+            }
+        }
+        throw "Snapshot exporter timed out before returning an id."
+    } catch {
+        if (-not $process.HasExited) { $process.Kill() }
+        $process.Dispose()
+        throw
+    }
+}
+function Close-SnapshotExporter($State, [scriptblock]$SendRollback = {
+    param($state)
+    $state.Process.StandardInput.WriteLine("ROLLBACK;")
+    $state.Process.StandardInput.WriteLine("\q")
+    $state.Process.StandardInput.Flush()
+    $state.Process.StandardInput.Close()
+}, [scriptblock]$WaitForExit = { param($state, $timeout) $state.Process.WaitForExit($timeout) }, [scriptblock]$Kill = { param($state) if (-not $state.Process.HasExited) { $state.Process.Kill() } }) {
+    if ($null -eq $State) { return }
+    try {
+        & $SendRollback $State
+        if (-not (& $WaitForExit $State 5000)) { & $Kill $State }
+    } finally {
+        if ($State.PSObject.Properties.Name -contains "Process") { $State.Process.Dispose() }
+    }
+}
+function Remove-BackupArtifacts([string]$DumpPath, [scriptblock]$RemovePath = { param($path) Remove-Item -LiteralPath $path -Force -ErrorAction SilentlyContinue }) {
+    foreach ($path in @($DumpPath, "$DumpPath.manifest.json", "$DumpPath.manifest.json.sha256")) { & $RemovePath $path }
 }
 function Assert-RequiredTools([string[]]$Names, [scriptblock]$CommandLookup = { param($name) Get-Command $name -ErrorAction SilentlyContinue }) {
     foreach ($name in $Names) { if (-not (& $CommandLookup $name)) { throw "$name was not found on PATH." } }
@@ -68,8 +136,8 @@ function Invoke-WithPgPass($Connection, [scriptblock]$Action) {
         Remove-Item -LiteralPath $path -Force -ErrorAction SilentlyContinue
     }
 }
-function New-BackupManifest([string]$DumpName, [string]$DumpHash, [string]$SourceIdentity, $Counts) {
-    [ordered]@{ version = 2; dumpFile = $DumpName; dumpSha256 = $DumpHash; sourceIdentity = $SourceIdentity; createdUtc = [DateTime]::UtcNow.ToString("o"); counts = $Counts }
+function New-BackupManifest([string]$DumpName, [string]$DumpHash, [string]$SourceIdentity, [string]$SnapshotId, $Counts) {
+    [ordered]@{ version = 2; dumpFile = $DumpName; dumpSha256 = $DumpHash; sourceIdentity = $SourceIdentity; snapshotId = $SnapshotId; createdUtc = [DateTime]::UtcNow.ToString("o"); counts = $Counts }
 }
 
 if ($SelfTest) {
@@ -79,12 +147,35 @@ if ($SelfTest) {
     function Assert-Equal($Expected, $Actual) { if ($Expected -ne $Actual) { throw "Expected '$Expected', got '$Actual'" } }
     Test-Case "missing DATABASE_URL fails before external execution" { Assert-Throws { Assert-BackupConfiguration $null } }
     Test-Case "output path remains inside explicit backup directory" { $root = Join-Path ([IO.Path]::GetTempPath()) "backup-self-test"; $path = Resolve-BackupOutputPath $root "..\escape.dump"; Assert-Equal $true ($path.StartsWith([IO.Path]::GetFullPath($root) + [IO.Path]::DirectorySeparatorChar)) }
-    Test-Case "pg_dump uses required flags and non-secret connection args" { $c = ConvertFrom-PostgresUri "postgresql://operator:secret@example.invalid:5433/app?sslmode=require"; Assert-Equal "--format=custom --no-owner --no-acl --host example.invalid --port 5433 --username operator --dbname app --file test.dump" ((Get-PgDumpArguments $c "test.dump") -join " ") }
-    Test-Case "native arguments contain no credentials" { $c = ConvertFrom-PostgresUri "postgresql://operator:secret@example.invalid/app"; $args = Get-CountArguments $c "news_items"; Assert-Equal $false (($args -join " ").Contains("secret")); Assert-Equal $false (($args -join " ").Contains("postgresql://")) }
+    Test-Case "pg_dump uses required flags and non-secret connection args" { $c = ConvertFrom-PostgresUri "postgresql://operator:secret@example.invalid:5433/app?sslmode=require"; Assert-Equal "--format=custom --no-owner --no-acl --host example.invalid --port 5433 --username operator --dbname app --file test.dump" ((Get-PgDumpArguments $c "test.dump" $null) -join " ") }
+    Test-Case "native arguments contain no credentials" { $c = ConvertFrom-PostgresUri "postgresql://operator:secret@example.invalid/app"; $args = Get-SnapshotCountArguments $c "news_items" "00000003-0000001B-1"; Assert-Equal $false (($args -join " ").Contains("secret")); Assert-Equal $false (($args -join " ").Contains("postgresql://")) }
     Test-Case "missing tools fail through injected command lookup" { Assert-Throws { Assert-RequiredTools @("pg_dump", "psql") { param($name) $null } } }
     Test-Case "external command failure is rejected" { Assert-Throws { Assert-CommandSucceeded 2 "pg_dump" } }
-    Test-Case "manifest binds dump name and snapshot counts" { $m = New-BackupManifest "safe.dump" ("a" * 64) "db.example:5432/app" @{ news_items = 7 }; Assert-Equal "safe.dump" $m.dumpFile; Assert-Equal 7 $m.counts.news_items }
+    Test-Case "manifest binds dump name and snapshot counts" { $m = New-BackupManifest "safe.dump" ("a" * 64) "db.example:5432/app" "00000003-0000001B-1" @{ news_items = 7 }; Assert-Equal "safe.dump" $m.dumpFile; Assert-Equal 7 $m.counts.news_items; Assert-Equal "00000003-0000001B-1" $m.snapshotId }
     Test-Case "PGPASSFILE is removed after failure" { $c = ConvertFrom-PostgresUri "postgresql://u:p@host/db"; Assert-Throws { Invoke-WithPgPass $c { throw "probe" } }; Assert-Equal $null $env:PGPASSFILE }
+    Test-Case "dump and counts use the same exported snapshot" {
+        $c = ConvertFrom-PostgresUri "postgresql://u:p@host/db"
+        $snapshot = "00000003-0000001B-1"
+        $dumpArgs = Get-PgDumpArguments $c "test.dump" $snapshot
+        $countArgs = Get-SnapshotCountArguments $c "news_items" $snapshot
+        Assert-Equal $true (($dumpArgs -join " ").Contains("--snapshot=$snapshot"))
+        Assert-Equal $true (($countArgs -join " ").Contains("SET TRANSACTION SNAPSHOT '$snapshot'"))
+    }
+    Test-Case "snapshot id rejects SQL metacharacters" {
+        Assert-Throws { Assert-SnapshotId "bad';drop table x;--" }
+    }
+    Test-Case "exporter cleanup rolls back and kills after timeout" {
+        $state = [pscustomobject]@{ RollbackSent = $false; Waited = $false; Killed = $false }
+        Close-SnapshotExporter -State $state -SendRollback { param($s) $s.RollbackSent = $true } -WaitForExit { param($s,$timeout) $s.Waited = $true; $false } -Kill { param($s) $s.Killed = $true }
+        Assert-Equal $true $state.RollbackSent
+        Assert-Equal $true $state.Waited
+        Assert-Equal $true $state.Killed
+    }
+    Test-Case "backup failure cleanup removes all artifacts" {
+        $removed = New-Object System.Collections.ArrayList
+        Remove-BackupArtifacts -DumpPath "a.dump" -RemovePath { param($path) $null = $removed.Add($path) }
+        Assert-Equal "a.dump|a.dump.manifest.json|a.dump.manifest.json.sha256" (($removed.ToArray()) -join "|")
+    }
     if ($failures) { exit 1 }; Write-Host "Self-test passed: backup safety checks"; exit 0
 }
 
@@ -95,28 +186,37 @@ Assert-RequiredTools @("pg_dump", "psql")
 $name = "supabase-{0}.dump" -f (Get-Date -Format "yyyyMMdd-HHmmss")
 $outputPath = Resolve-BackupOutputPath $BackupDirectory $name
 $null = New-Item -ItemType Directory -Path ([IO.Path]::GetDirectoryName($outputPath)) -Force
+$backupState = [pscustomobject]@{ SnapshotId = $null; Counts = [ordered]@{} }
 try {
     Invoke-WithPgPass $connection {
-        & pg_dump @(Get-PgDumpArguments $connection $outputPath)
-        Assert-CommandSucceeded $LASTEXITCODE "pg_dump"
-        $counts = [ordered]@{}
-        foreach ($table in $CriticalTables) {
-            $value = (& psql @(Get-CountArguments $connection $table)).Trim()
-            Assert-CommandSucceeded $LASTEXITCODE "Count query for $table"
-            $parsed = 0L
-            if (-not [long]::TryParse($value, [ref]$parsed)) { throw "Invalid count returned for $table." }
-            $counts[$table] = $parsed
+        $exporter = $null
+        try {
+            $exporter = Start-SnapshotExporter $connection
+            $backupState.SnapshotId = $exporter.SnapshotId
+            & pg_dump @(Get-PgDumpArguments $connection $outputPath $exporter.SnapshotId)
+            Assert-CommandSucceeded $LASTEXITCODE "pg_dump"
+            foreach ($table in $CriticalTables) {
+                $lines = & psql @(Get-SnapshotCountArguments $connection $table $exporter.SnapshotId)
+                Assert-CommandSucceeded $LASTEXITCODE "Snapshot count query for $table"
+                $value = @($lines | Where-Object { "$_".Trim() -match "^\d+$" } | Select-Object -Last 1)
+                if ($value.Count -ne 1) { throw "Invalid count returned for $table." }
+                $parsed = 0L
+                if (-not [long]::TryParse("$($value[0])".Trim(), [ref]$parsed)) { throw "Invalid count returned for $table." }
+                $backupState.Counts[$table] = $parsed
+            }
+        } finally {
+            Close-SnapshotExporter $exporter
         }
     }
     $dumpHash = (Get-FileHash -Algorithm SHA256 -LiteralPath $outputPath).Hash.ToLowerInvariant()
     $manifestPath = "$outputPath.manifest.json"
-    $manifest = New-BackupManifest ([IO.Path]::GetFileName($outputPath)) $dumpHash $connection.Identity $counts
+    $manifest = New-BackupManifest ([IO.Path]::GetFileName($outputPath)) $dumpHash $connection.Identity $backupState.SnapshotId $backupState.Counts
     $manifestJson = $manifest | ConvertTo-Json -Depth 4
     [IO.File]::WriteAllText($manifestPath, $manifestJson, [Text.UTF8Encoding]::new($false))
     $manifestHash = (Get-FileHash -Algorithm SHA256 -LiteralPath $manifestPath).Hash.ToLowerInvariant()
     Set-Content -LiteralPath "$manifestPath.sha256" -Encoding ASCII -Value $manifestHash
 } catch {
-    Remove-Item -LiteralPath $outputPath -Force -ErrorAction SilentlyContinue
+    Remove-BackupArtifacts $outputPath
     throw
 }
 Write-Host "Backup complete: $outputPath"

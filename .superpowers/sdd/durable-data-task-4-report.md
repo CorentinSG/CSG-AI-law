@@ -166,3 +166,47 @@ Endpoint identity cannot prove that different DNS names or provider proxies do
 not reach the same database; dashboard verification remains mandatory. SHA-256
 is not an authenticated signature against an attacker able to rewrite artifacts
 and checksums, so backup storage access controls remain part of the boundary.
+
+## Final Task 4 Fixes
+
+### RED
+
+Expanded self-tests initially failed with both scripts nonzero:
+
+```text
+FINAL RED exits: backup=1 restore=1
+```
+
+Missing behavior included shared snapshot command builders, exporter cleanup,
+three-artifact cleanup, exact manifest count allowlisting, and injection
+rejection. The first GREEN candidate exposed the old one-table mismatch fixture;
+it was replaced with the full valid allowlist and one mismatched count.
+
+### GREEN
+
+```text
+backup self-test: PASS (12 checks)
+restore self-test: PASS (18 checks)
+FINAL GREEN exits: backup=0 restore=0
+```
+
+Backup now holds a read-only repeatable-read exporter transaction while
+`pg_dump --snapshot=<id>` and all fixed count queries import the same validated
+snapshot ID. Export acquisition has a ten-second timeout; finalization sends
+rollback, waits five seconds, then kills a stuck exporter. The manifest records
+the snapshot ID.
+
+Restore validates exactly the six fixed critical count keys and nonnegative
+integer values before target configuration, restore, or count SQL. Both manifest
+validation and the count command builder reject arbitrary identifiers; an SQL
+injection key is covered by regression tests.
+
+Backup failure cleanup removes the dump, manifest, and checksum sidecar through
+one helper covered with an injected path-removal test.
+
+### Concerns
+
+No live database operation was run. The exporter protocol is covered through
+pure builders and state-injected cleanup tests on Windows PowerShell 5.1, but its
+first real monthly run should be observed for PostgreSQL client/version-specific
+stdout and shutdown behavior.
