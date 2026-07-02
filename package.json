@@ -60,7 +60,8 @@
     "seed:supabase": "tsx scripts/seed-supabase.ts",
     "seed:supabase:demo": "cross-env SEED_PROFILE=demo tsx scripts/seed-supabase.ts",
     "seed:country-intelligence": "tsx scripts/seed-country-intelligence.ts",
-    "seed:ingestion-sources": "tsx scripts/seed-ingestion-sources.ts"
+    "seed:ingestion-sources": "tsx scripts/seed-ingestion-sources.ts",
+    "audit:database-schema": "tsx scripts/audit-database-schema.ts"
   },
   "dependencies": {
     "@mendable/firecrawl-js": "^4.25.2",
@@ -82,7 +83,8 @@
     "tailwind-merge": "^3.6.0",
     "topojson-client": "^3.1.0",
     "tsx": "^4.22.3",
-    "zod": "^4.4.3"
+    "zod": "^4.4.3",
+    "pg": "^8.16.3"
   },
   "devDependencies": {
     "@playwright/test": "^1.61.0",
@@ -97,6 +99,7 @@
     "tailwindcss": "^4",
     "typescript": "^5",
     "vite-tsconfig-paths": "^6.1.1",
-    "vitest": "^4.1.7"
+    "vitest": "^4.1.7",
+    "@types/pg": "^8.15.5"
   }
 }
