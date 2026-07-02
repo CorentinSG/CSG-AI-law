@@ -138,3 +138,57 @@ Both commands exited 0. Vitest printed the existing
   fallback now accept only `succeeded`, `partial_success`, or `failed`.
 - Added a processor regression proving a reclaimed worker whose scan throws
   cannot persist failure state or emit a backlog alert.
+
+## Missing-RPC Review Follow-Up
+
+### RED Evidence
+
+Command:
+
+```powershell
+npm test -- src/db/repositories/supabase-repository.test.ts
+```
+
+Exact result:
+
+```text
+Test Files  1 failed (1)
+Tests       1 failed | 48 passed (49)
+Duration    1.03s
+```
+
+The `PGRST202` behavioral test rejected with `Failed to complete scan job`
+instead of executing the legacy fallback. The adjacent `PGRST204` test passed,
+proving unrelated PostgREST errors were still propagated.
+
+### GREEN Evidence
+
+Command:
+
+```powershell
+npm test -- src/db/repositories/memory-repository.test.ts src/db/repositories/supabase-repository.test.ts src/agents/ai-regulation/processors/scanJobs.test.ts
+npm run typecheck
+```
+
+Exact result:
+
+```text
+Test Files  3 passed (3)
+Tests       93 passed (93)
+Duration    970ms
+
+Generating route types...
+Types generated successfully
+```
+
+Both commands exited 0. Vitest printed the existing
+`vite-tsconfig-paths` deprecation warning.
+
+### Change
+
+- Added a completion-specific missing-RPC predicate that recognizes exactly
+  `PGRST202` in addition to existing missing-relation handling.
+- Preserved `isMissingRelationError` and all other repository fallback call
+  sites unchanged.
+- Added behavioral coverage proving `PGRST202` falls back and `PGRST204`
+  remains an error.

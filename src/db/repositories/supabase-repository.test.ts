@@ -251,9 +251,18 @@ function scanJobRow(overrides?: Partial<Record<string, unknown>>) {
   };
 }
 
-function createScanJobCompletionClient(options?: { missingRelation?: boolean }) {
+function createScanJobCompletionClient(options?: {
+  missingRelation?: boolean;
+  rpcErrorCode?: string;
+}) {
   let row: Record<string, unknown> | null = scanJobRow();
   const rpc = vi.fn(async (_name: string, args: Record<string, unknown>) => {
+    if (options?.rpcErrorCode) {
+      return {
+        data: null,
+        error: { code: options.rpcErrorCode, message: "RPC error" },
+      };
+    }
     if (options?.missingRelation) {
       return { data: null, error: { code: "42P01", message: "missing relation" } };
     }
@@ -709,6 +718,57 @@ describe("Supabase column constants", () => {
       startedAt: "2026-07-01T10:00:00.000Z",
     });
     expect(repeated).toBeNull();
+  });
+
+  it("uses legacy fallback when PostgREST cannot find the completion RPC", async () => {
+    const fake = createScanJobCompletionClient({ rpcErrorCode: "PGRST202" });
+    const legacyJob = {
+      id: "job-1",
+      sourceId: "src-1",
+      trigger: "manual",
+      requestedBy: "test",
+      status: "running",
+      startedAt: "2026-07-01T10:00:00.000Z",
+      finishedAt: null,
+      resultSummary: { leaseToken: "lease-current" },
+      errorMessage: null,
+      createdAt: "2026-07-01T09:59:00.000Z",
+      updatedAt: "2026-07-01T10:00:00.000Z",
+    } satisfies ScanJob;
+
+    await expect(
+      completeScanJobWithClient(
+        fake.client,
+        new Map([[legacyJob.id, legacyJob]]),
+        legacyJob.id,
+        "lease-current",
+        {
+          status: "succeeded",
+          finishedAt: "2026-07-01T10:05:00.000Z",
+          resultSummary: { leaseToken: "lease-current" },
+          errorMessage: null,
+        },
+      ),
+    ).resolves.toMatchObject({ status: "succeeded" });
+  });
+
+  it("does not treat unrelated PostgREST RPC errors as missing", async () => {
+    const fake = createScanJobCompletionClient({ rpcErrorCode: "PGRST204" });
+
+    await expect(
+      completeScanJobWithClient(
+        fake.client,
+        new Map(),
+        "job-1",
+        "lease-current",
+        {
+          status: "succeeded",
+          finishedAt: "2026-07-01T10:05:00.000Z",
+          resultSummary: { leaseToken: "lease-current" },
+          errorMessage: null,
+        },
+      ),
+    ).rejects.toThrow("Failed to complete scan job");
   });
 });
 

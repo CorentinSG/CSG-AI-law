@@ -154,6 +154,15 @@ function isMissingRelationError(
   return error?.code === "PGRST205" || error?.code === "42P01";
 }
 
+function isMissingScanJobCompletionRpcError(
+  error: {
+    code?: string;
+    message?: string;
+  } | null,
+) {
+  return error?.code === "PGRST202" || isMissingRelationError(error);
+}
+
 function isSchemaCacheMismatchError(
   error: {
     code?: string;
@@ -434,7 +443,7 @@ export async function completeScanJobWithClient(
     p_result_summary: patch.resultSummary,
     p_error_message: patch.errorMessage,
   });
-  if (isMissingRelationError(error)) {
+  if (isMissingScanJobCompletionRpcError(error)) {
     const existing = legacyScanJobs.get(id);
     if (
       !existing ||
