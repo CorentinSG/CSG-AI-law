@@ -3,6 +3,7 @@ import { Client } from "pg";
 
 import {
   evaluateSchemaIntegrity,
+  mapCatalogQueryResults,
   type SchemaSnapshot,
 } from "../src/db/schema-integrity";
 
@@ -17,7 +18,7 @@ const TABLES = [
 ];
 
 async function loadSnapshot(client: Client): Promise<SchemaSnapshot> {
-  const [columns, indexes, constraints, tables, policies] = await Promise.all([
+  const results = await Promise.all([
     client.query(
       `select c.relname as "tableName", c.relrowsecurity as "rlsEnabled"
        from pg_class c
@@ -55,13 +56,7 @@ async function loadSnapshot(client: Client): Promise<SchemaSnapshot> {
     ),
   ]);
 
-  return {
-    columns: columns.rows,
-    indexes: indexes.rows,
-    constraints: constraints.rows,
-    tables: tables.rows,
-    policies: policies.rows,
-  };
+  return mapCatalogQueryResults(results);
 }
 
 async function main() {

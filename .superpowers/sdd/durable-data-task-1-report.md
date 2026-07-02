@@ -123,3 +123,35 @@ the expected reasons:
   deprecation warning; it is unrelated and outside the owned files.
 - Live database verification remains dependent on a configured
   `DATABASE_URL`.
+
+## Critical Runtime Mapping Fix
+
+### RED
+
+Added a pure runtime mapping regression with uniquely tagged table, column,
+index, constraint, and policy rows.
+
+`npm test -- src/db/schema-integrity.test.ts` exited 1: 1 of 8 tests failed
+with `TypeError: mapCatalogQueryResults is not a function`; the prior 7 tests
+passed.
+
+### Fix
+
+- Added and exported `mapCatalogQueryResults`.
+- Defined its input as the exact query-result tuple order: tables, columns,
+  indexes, constraints, policies.
+- Passed the CLI's complete `Promise.all` result directly through the mapper,
+  removing the incorrect shifted destructuring.
+
+### GREEN
+
+- `npm test -- src/db/schema-integrity.test.ts`: PASS; 1 file, 8 tests.
+- `npx eslint src/db/schema-integrity.ts src/db/schema-integrity.test.ts scripts/audit-database-schema.ts`:
+  PASS; exit code 0, no findings.
+- `npm run typecheck`: PASS; Next route types generated and `tsc --noEmit`
+  exited 0.
+
+### Remaining Concern
+
+Vitest still prints the existing unrelated `vite-tsconfig-paths` deprecation
+warning.

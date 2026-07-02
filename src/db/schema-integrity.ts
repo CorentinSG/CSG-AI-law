@@ -24,6 +24,26 @@ export interface SchemaSnapshot {
   policies: Array<{ tableName: string; policyName: string }>;
 }
 
+type CatalogQueryResults = [
+  { rows: SchemaSnapshot["tables"] },
+  { rows: SchemaSnapshot["columns"] },
+  { rows: SchemaSnapshot["indexes"] },
+  { rows: SchemaSnapshot["constraints"] },
+  { rows: SchemaSnapshot["policies"] },
+];
+
+export function mapCatalogQueryResults(
+  [tables, columns, indexes, constraints, policies]: CatalogQueryResults,
+): SchemaSnapshot {
+  return {
+    tables: tables.rows,
+    columns: columns.rows,
+    indexes: indexes.rows,
+    constraints: constraints.rows,
+    policies: policies.rows,
+  };
+}
+
 interface TableRequirement {
   columns: string[];
   indexes: Array<{ name: string; columns: string[]; unique?: boolean }>;

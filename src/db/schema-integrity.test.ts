@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   evaluateSchemaIntegrity,
+  mapCatalogQueryResults,
   type SchemaSnapshot,
 } from "./schema-integrity";
 
@@ -151,5 +152,32 @@ describe("evaluateSchemaIntegrity", () => {
       ok: true,
       findings: [],
     });
+  });
+});
+
+describe("mapCatalogQueryResults", () => {
+  it("maps runtime query results to the matching snapshot collections", () => {
+    const tables = [{ tableName: "table_row", rlsEnabled: true }];
+    const columns = [{ tableName: "column_row", columnName: "id" }];
+    const indexes = [{
+      tableName: "index_row",
+      indexName: "index_name",
+      indexDefinition: "CREATE INDEX index_name ON index_row (id)",
+    }];
+    const constraints = [{
+      tableName: "constraint_row",
+      constraintName: "constraint_name",
+      constraintType: "CHECK",
+      constraintDefinition: "CHECK (true)",
+    }];
+    const policies = [{ tableName: "policy_row", policyName: "policy_name" }];
+
+    expect(mapCatalogQueryResults([
+      { rows: tables },
+      { rows: columns },
+      { rows: indexes },
+      { rows: constraints },
+      { rows: policies },
+    ])).toEqual({ tables, columns, indexes, constraints, policies });
   });
 });
