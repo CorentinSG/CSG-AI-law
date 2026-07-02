@@ -72,3 +72,69 @@ SHA: the commit containing this report; run `git rev-parse HEAD`.
 - The migration was verified statically and was not applied to a live Supabase
   database in this task.
 - Existing unrelated UI and package changes remain untouched and uncommitted.
+
+## Review Findings Follow-Up
+
+### RED Evidence
+
+Command:
+
+```powershell
+npm test -- src/db/repositories/supabase-repository.test.ts src/agents/ai-regulation/processors/scanJobs.test.ts
+```
+
+Exact result:
+
+```text
+Test Files  1 failed | 1 passed (2)
+Tests       5 failed | 60 passed (65)
+Duration    8.26s
+```
+
+All five Supabase behavioral tests failed because
+`completeScanJobWithClient` did not exist. The processor failure-race
+regression passed against the existing lease-rejection path.
+
+An intermediate full targeted run produced 91/91 passing tests and the
+following expected typecheck failure before the legacy result fields were
+normalized:
+
+```text
+src/db/repositories/supabase-repository.ts(449,7): error TS2322
+src/db/repositories/supabase-repository.ts(450,7): error TS2322
+src/db/repositories/supabase-repository.ts(451,7): error TS2322
+```
+
+### GREEN Evidence
+
+Command:
+
+```powershell
+npm test -- src/db/repositories/memory-repository.test.ts src/db/repositories/supabase-repository.test.ts src/agents/ai-regulation/processors/scanJobs.test.ts
+npm run typecheck
+```
+
+Exact final result:
+
+```text
+Test Files  3 passed (3)
+Tests       91 passed (91)
+Duration    9.36s
+
+Generating route types...
+Types generated successfully
+```
+
+Both commands exited 0. Vitest printed the existing
+`vite-tsconfig-paths` deprecation warning.
+
+### Follow-Up Changes
+
+- Added behavioral fake-client coverage for RPC payload/result mapping, stale
+  token rejection, exactly-once completion, and restricted fields.
+- Added behavioral legacy-fallback coverage for valid exactly-once completion
+  and rejection of omitted, queued, and running statuses.
+- Centralized Supabase completion in `completeScanJobWithClient`; both RPC and
+  fallback now accept only `succeeded`, `partial_success`, or `failed`.
+- Added a processor regression proving a reclaimed worker whose scan throws
+  cannot persist failure state or emit a backlog alert.

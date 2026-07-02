@@ -8,7 +8,9 @@ import {
   RepositoryOperationError,
 } from "@/db/repository-types";
 import { MemoryAiRegulationRepository } from "@/db/repositories/memory-repository";
+import * as supabaseRepository from "@/db/repositories/supabase-repository";
 import { upsertRawItemWithClient } from "@/db/repositories/supabase-repository";
+import type { ScanJob } from "@/agents/ai-regulation/governance";
 import { evaluatePublicationEligibility } from "@/agents/ai-regulation/publicationEligibility";
 
 // ---------------------------------------------------------------------------
@@ -216,6 +218,66 @@ function createAtomicRawItemClient(options?: { failProvenanceOnce?: boolean }) {
     },
   };
   return { client: client as never, rawItems, sourceReferences };
+}
+
+type CompleteScanJobWithClient = (
+  client: never,
+  legacyScanJobs: Map<string, ScanJob>,
+  id: string,
+  leaseToken: string,
+  patch: Partial<ScanJob>,
+) => Promise<ScanJob | null>;
+
+const completeScanJobWithClient = (
+  supabaseRepository as unknown as {
+    completeScanJobWithClient: CompleteScanJobWithClient;
+  }
+).completeScanJobWithClient;
+
+function scanJobRow(overrides?: Partial<Record<string, unknown>>) {
+  return {
+    id: "job-1",
+    source_id: "src-1",
+    trigger: "manual",
+    requested_by: "test",
+    status: "running",
+    started_at: "2026-07-01T10:00:00.000Z",
+    finished_at: null,
+    result_summary: { leaseToken: "lease-current" },
+    error_message: null,
+    created_at: "2026-07-01T09:59:00.000Z",
+    updated_at: "2026-07-01T10:00:00.000Z",
+    ...overrides,
+  };
+}
+
+function createScanJobCompletionClient(options?: { missingRelation?: boolean }) {
+  let row: Record<string, unknown> | null = scanJobRow();
+  const rpc = vi.fn(async (_name: string, args: Record<string, unknown>) => {
+    if (options?.missingRelation) {
+      return { data: null, error: { code: "42P01", message: "missing relation" } };
+    }
+    if (
+      row?.status !== "running" ||
+      (row.result_summary as Record<string, unknown>)?.leaseToken !==
+        args.p_lease_token ||
+      !["succeeded", "partial_success", "failed"].includes(
+        args.p_status as string,
+      )
+    ) {
+      return { data: [], error: null };
+    }
+    row = {
+      ...row,
+      status: args.p_status,
+      finished_at: args.p_finished_at,
+      result_summary: args.p_result_summary,
+      error_message: args.p_error_message,
+      updated_at: "2026-07-01T10:05:00.000Z",
+    };
+    return { data: [row], error: null };
+  });
+  return { client: { rpc } as never, rpc, get row() { return row; } };
 }
 
 // ---------------------------------------------------------------------------
@@ -488,6 +550,165 @@ describe("Supabase column constants", () => {
     expect(migrationSrc).not.toMatch(/\bsource_id\s*=/);
     expect(migrationSrc).not.toMatch(/\brequested_by\s*=/);
     expect(migrationSrc).not.toMatch(/\btrigger\s*=/);
+  });
+
+  it("sends only restricted terminal fields and maps the RPC result", async () => {
+    const fake = createScanJobCompletionClient();
+    const completed = await completeScanJobWithClient(
+      fake.client,
+      new Map(),
+      "job-1",
+      "lease-current",
+      {
+        status: "succeeded",
+        finishedAt: "2026-07-01T10:05:00.000Z",
+        resultSummary: { leaseToken: "lease-current", totalFound: 3 },
+        errorMessage: null,
+        sourceId: "src-overwrite",
+        requestedBy: "attacker",
+      },
+    );
+
+    expect(fake.rpc).toHaveBeenCalledWith("complete_scan_job", {
+      p_id: "job-1",
+      p_lease_token: "lease-current",
+      p_status: "succeeded",
+      p_finished_at: "2026-07-01T10:05:00.000Z",
+      p_result_summary: { leaseToken: "lease-current", totalFound: 3 },
+      p_error_message: null,
+    });
+    expect(completed).toMatchObject({
+      id: "job-1",
+      sourceId: "src-1",
+      requestedBy: "test",
+      status: "succeeded",
+    });
+  });
+
+  it("returns null for stale and repeated RPC completion", async () => {
+    const fake = createScanJobCompletionClient();
+    const patch: Partial<ScanJob> = {
+      status: "failed",
+      finishedAt: "2026-07-01T10:05:00.000Z",
+      resultSummary: { leaseToken: "lease-current" },
+      errorMessage: "failed",
+    };
+
+    await expect(
+      completeScanJobWithClient(
+        fake.client,
+        new Map(),
+        "job-1",
+        "lease-stale",
+        patch,
+      ),
+    ).resolves.toBeNull();
+    await expect(
+      completeScanJobWithClient(
+        fake.client,
+        new Map(),
+        "job-1",
+        "lease-current",
+        patch,
+      ),
+    ).resolves.toMatchObject({ status: "failed" });
+    await expect(
+      completeScanJobWithClient(
+        fake.client,
+        new Map(),
+        "job-1",
+        "lease-current",
+        patch,
+      ),
+    ).resolves.toBeNull();
+  });
+
+  it.each([undefined, "queued", "running"] as const)(
+    "legacy fallback rejects %s completion status",
+    async (status) => {
+      const fake = createScanJobCompletionClient({ missingRelation: true });
+      const legacyJob = {
+        id: "job-1",
+        sourceId: "src-1",
+        trigger: "manual",
+        requestedBy: "test",
+        status: "running",
+        startedAt: "2026-07-01T10:00:00.000Z",
+        finishedAt: null,
+        resultSummary: { leaseToken: "lease-current" },
+        errorMessage: null,
+        createdAt: "2026-07-01T09:59:00.000Z",
+        updatedAt: "2026-07-01T10:00:00.000Z",
+      } satisfies ScanJob;
+      const legacy = new Map([[legacyJob.id, legacyJob]]);
+
+      const completed = await completeScanJobWithClient(
+        fake.client,
+        legacy,
+        legacyJob.id,
+        "lease-current",
+        {
+          status,
+          finishedAt: "2026-07-01T10:05:00.000Z",
+          resultSummary: { leaseToken: "lease-current" },
+          errorMessage: null,
+        },
+      );
+
+      expect(completed).toBeNull();
+      expect(legacy.get(legacyJob.id)).toEqual(legacyJob);
+      expect(fake.rpc).not.toHaveBeenCalled();
+    },
+  );
+
+  it("legacy fallback completes once and preserves restricted fields", async () => {
+    const fake = createScanJobCompletionClient({ missingRelation: true });
+    const legacyJob = {
+      id: "job-1",
+      sourceId: "src-1",
+      trigger: "manual",
+      requestedBy: "test",
+      status: "running",
+      startedAt: "2026-07-01T10:00:00.000Z",
+      finishedAt: null,
+      resultSummary: { leaseToken: "lease-current" },
+      errorMessage: null,
+      createdAt: "2026-07-01T09:59:00.000Z",
+      updatedAt: "2026-07-01T10:00:00.000Z",
+    } satisfies ScanJob;
+    const legacy = new Map([[legacyJob.id, legacyJob]]);
+    const patch: Partial<ScanJob> = {
+      status: "partial_success",
+      finishedAt: "2026-07-01T10:05:00.000Z",
+      resultSummary: { leaseToken: "lease-current", totalFound: 2 },
+      errorMessage: "one source failed",
+      sourceId: "src-overwrite",
+      requestedBy: "attacker",
+    };
+
+    const completed = await completeScanJobWithClient(
+      fake.client,
+      legacy,
+      legacyJob.id,
+      "lease-current",
+      patch,
+    );
+    const repeated = await completeScanJobWithClient(
+      fake.client,
+      legacy,
+      legacyJob.id,
+      "lease-current",
+      patch,
+    );
+
+    expect(completed).toMatchObject({
+      status: "partial_success",
+      sourceId: "src-1",
+      requestedBy: "test",
+      trigger: "manual",
+      startedAt: "2026-07-01T10:00:00.000Z",
+    });
+    expect(repeated).toBeNull();
   });
 });
 

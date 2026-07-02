@@ -463,6 +463,46 @@ describe("scanJobs durability helpers", () => {
     });
   });
 
+  it("cannot persist failure or alert when a stale worker scan throws", async () => {
+    jobs.push({
+      id: "job-reclaimed-failure",
+      sourceId: "src-1",
+      trigger: "manual",
+      requestedBy: "admin-api",
+      status: "queued",
+      startedAt: null,
+      finishedAt: null,
+      resultSummary: {},
+      errorMessage: null,
+      createdAt: "2026-06-06T09:55:00.000Z",
+      updatedAt: "2026-06-06T09:55:00.000Z",
+    });
+    runAiRegulationScan.mockImplementation(async () => {
+      jobs[0].resultSummary = {
+        ...jobs[0].resultSummary,
+        leaseToken: "replacement-lease",
+      };
+      throw new Error("Stale worker connector failure");
+    });
+
+    const { processNextQueuedScanJob } = await import(
+      "@/agents/ai-regulation/processors/scanJobs"
+    );
+
+    await expect(processNextQueuedScanJob()).rejects.toMatchObject({
+      code: "scan_job_completion_rejected",
+      job: null,
+    });
+    expect(updateRepository.completeScanJob).toHaveBeenCalledTimes(1);
+    expect(alertOnDailyReviewBacklog).not.toHaveBeenCalled();
+    expect(jobs[0]).toMatchObject({
+      status: "running",
+      finishedAt: null,
+      errorMessage: null,
+      resultSummary: { leaseToken: "replacement-lease" },
+    });
+  });
+
   it("processes the oldest queued scan job when draining the queue", async () => {
     jobs.push(
       {
