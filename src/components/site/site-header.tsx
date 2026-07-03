@@ -22,6 +22,8 @@ import { AnimatePresence, motion, useScroll, useSpring } from "framer-motion";
 
 import { SiteSearch } from "@/components/site/site-search";
 import { cn } from "@/lib/utils";
+import { LOCALES } from "@/lib/i18n/config";
+import { getLocaleFromPathname, localeHref, stripLocaleFromPathname } from "@/lib/i18n/href";
 
 type NavLeaf = { href: string; label: string; icon: LucideIcon; hint?: string };
 type NavGroup = { label: string; icon: LucideIcon; match: string; children: NavLeaf[] };
@@ -64,9 +66,14 @@ export function SiteHeader({
 }: {
   variant?: "public" | "admin";
 }) {
-  const pathname = usePathname();
+  const rawPathname = usePathname();
+  const lang = getLocaleFromPathname(rawPathname);
+  // Admin paths are unprefixed already; stripping is a no-op there, so this
+  // is safe for both variants.
+  const pathname = stripLocaleFromPathname(rawPathname);
   const nav = variant === "admin" ? adminNav : publicNav;
   const isAdmin = variant === "admin";
+  const href = (path: string) => (isAdmin ? path : localeHref(lang, path));
 
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -89,22 +96,16 @@ export function SiteHeader({
         ? pathname === "/"
         : pathname === node.href || pathname?.startsWith(`${node.href}/`);
 
+  // Both public and admin use dark styles — only progress bar differs
   const linkTone = (active: boolean) =>
     active
-      ? isAdmin
-        ? "text-white"
-        : "text-zinc-950"
-      : isAdmin
-        ? "text-zinc-400 hover:text-white"
-        : "text-zinc-500 hover:text-zinc-950";
+      ? "text-white"
+      : "text-zinc-400 hover:text-white";
 
   const activePill = (
     <motion.span
       layoutId={`nav-pill-${variant}`}
-      className={cn(
-        "absolute inset-0 -z-10 rounded-full",
-        isAdmin ? "bg-white/12" : "bg-black/[0.06] shadow-[inset_0_1px_0_rgba(255,255,255,0.6)]",
-      )}
+      className="absolute inset-0 -z-10 rounded-full bg-white/12"
       transition={{ type: "spring", stiffness: 380, damping: 32 }}
     />
   );
@@ -117,9 +118,7 @@ export function SiteHeader({
       className={cn(
         "sticky top-0 z-50 transition-[background,border,box-shadow] duration-500",
         scrolled
-          ? isAdmin
-            ? "border-b border-white/10 bg-[rgba(6,7,11,0.82)] shadow-[0_10px_40px_rgba(0,0,0,0.35)] backdrop-blur-2xl"
-            : "border-b border-black/5 bg-[rgba(247,246,241,0.72)] shadow-[0_10px_40px_rgba(15,15,15,0.06)] backdrop-blur-2xl"
+          ? "border-b border-white/10 bg-[rgba(6,7,11,0.82)] shadow-[0_10px_40px_rgba(0,0,0,0.35)] backdrop-blur-2xl"
           : "border-b border-transparent bg-transparent backdrop-blur-0",
       )}
     >
@@ -131,12 +130,11 @@ export function SiteHeader({
         )}
       >
         {/* Brand */}
-        <Link href="/" className="group flex flex-col">
+        <Link href={href("/")} className="group flex flex-col">
           <span
             className={cn(
-              "font-display font-medium uppercase tracking-[-0.05em] transition-[font-size] duration-500",
+              "font-display font-medium uppercase tracking-[-0.05em] text-white transition-[font-size] duration-500",
               scrolled ? "text-[1rem]" : "text-[1.15rem]",
-              isAdmin ? "text-white" : "text-zinc-950",
             )}
           >
             C. Saint-Girons, Esq
@@ -148,10 +146,7 @@ export function SiteHeader({
                 animate={{ opacity: 1, height: "auto" }}
                 exit={{ opacity: 0, height: 0 }}
                 transition={{ duration: 0.4, ease }}
-                className={cn(
-                  "overflow-hidden text-[11px] uppercase tracking-[0.28em]",
-                  isAdmin ? "text-zinc-500" : "text-zinc-500/90",
-                )}
+                className="overflow-hidden text-[11px] uppercase tracking-[0.28em] text-zinc-500"
               >
                 AI Law &amp; Legal Intelligence
               </motion.span>
@@ -165,9 +160,7 @@ export function SiteHeader({
             "hidden items-center gap-1 rounded-full px-1.5 py-1.5 lg:flex",
             scrolled
               ? "border border-transparent bg-transparent"
-              : isAdmin
-                ? "border border-white/10 bg-white/5"
-                : "border border-black/5 bg-white/40 backdrop-blur-md",
+              : "border border-white/10 bg-white/5",
           )}
         >
           {nav.map((node) => {
@@ -176,7 +169,7 @@ export function SiteHeader({
               return (
                 <Link
                   key={node.href}
-                  href={node.href}
+                  href={href(node.href)}
                   scroll={false}
                   className={cn(
                     "relative flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[12px] tracking-[0.02em] transition-colors",
@@ -223,12 +216,7 @@ export function SiteHeader({
                         animate={{ opacity: 1, y: 0, scale: 1 }}
                         exit={{ opacity: 0, y: -8, scale: 0.98 }}
                         transition={{ duration: 0.22, ease }}
-                        className={cn(
-                          "absolute left-0 top-[calc(100%+0.5rem)] z-[55] w-64 origin-top-left overflow-hidden rounded-2xl border p-1.5 shadow-[0_24px_60px_rgba(15,15,15,0.14)]",
-                          isAdmin
-                            ? "border-white/10 bg-[rgba(10,12,18,0.96)] backdrop-blur-2xl"
-                            : "border-black/8 bg-[rgba(247,246,241,0.97)] backdrop-blur-2xl",
-                        )}
+                        className="absolute left-0 top-[calc(100%+0.5rem)] z-[55] w-64 origin-top-left overflow-hidden rounded-2xl border border-white/10 bg-[rgba(10,12,18,0.96)] p-1.5 shadow-[0_24px_60px_rgba(0,0,0,0.4)] backdrop-blur-2xl"
                       >
                         {node.children.map((child) => {
                           const childActive =
@@ -238,16 +226,12 @@ export function SiteHeader({
                           return (
                             <Link
                               key={child.href}
-                              href={child.href}
+                              href={href(child.href)}
                               scroll={false}
                               onClick={() => setGroupOpen(null)}
                               className={cn(
                                 "flex items-start gap-3 rounded-xl px-3 py-2.5 transition-colors",
-                                childActive
-                                  ? "bg-accent-soft"
-                                  : isAdmin
-                                    ? "hover:bg-white/5"
-                                    : "hover:bg-black/[0.04]",
+                                childActive ? "bg-accent-soft" : "hover:bg-white/5",
                               )}
                             >
                               <span
@@ -255,20 +239,13 @@ export function SiteHeader({
                                   "mt-0.5 flex size-7 shrink-0 items-center justify-center rounded-lg",
                                   childActive
                                     ? "bg-accent text-white"
-                                    : isAdmin
-                                      ? "bg-white/10 text-zinc-300"
-                                      : "bg-black/[0.05] text-zinc-600",
+                                    : "bg-white/10 text-zinc-300",
                                 )}
                               >
                                 <child.icon className="h-4 w-4" />
                               </span>
                               <span>
-                                <span
-                                  className={cn(
-                                    "block text-sm font-medium",
-                                    isAdmin ? "text-zinc-100" : "text-zinc-900",
-                                  )}
-                                >
+                                <span className="block text-sm font-medium text-zinc-100">
                                   {child.label}
                                 </span>
                                 {child.hint ? (
@@ -289,22 +266,35 @@ export function SiteHeader({
           })}
         </nav>
 
-        {/* Right cluster: search + mobile toggle */}
+        {/* Right cluster: language toggle + search + mobile toggle */}
         <div className="flex items-center gap-2">
+          {!isAdmin ? (
+            <div className="hidden items-center rounded-full border border-white/10 bg-white/5 p-0.5 text-[11px] font-medium uppercase tracking-[0.08em] lg:flex">
+              {LOCALES.map((loc) => (
+                <Link
+                  key={loc}
+                  href={stripLocaleFromPathname(rawPathname) === "/" ? `/${loc}` : `/${loc}${stripLocaleFromPathname(rawPathname)}`}
+                  scroll={false}
+                  aria-current={loc === lang ? "page" : undefined}
+                  className={cn(
+                    "rounded-full px-2.5 py-1.5 transition-colors",
+                    loc === lang ? "bg-white/15 text-white" : "text-zinc-500 hover:text-white",
+                  )}
+                >
+                  {loc}
+                </Link>
+              ))}
+            </div>
+          ) : null}
           <button
             type="button"
             onClick={openSearch}
-            className={cn(
-              "hidden items-center gap-2 rounded-full border px-3 py-2 text-[12px] transition lg:flex",
-              isAdmin
-                ? "border-white/10 bg-white/5 text-zinc-300 hover:text-white"
-                : "border-black/8 bg-white/50 text-zinc-500 backdrop-blur-md hover:text-zinc-900",
-            )}
+            className="hidden items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-2 text-[12px] text-zinc-300 transition hover:text-white lg:flex"
             aria-label="Search the site"
           >
             <Search className="h-4 w-4" />
             <span>Search</span>
-            <span className="rounded border border-black/10 px-1.5 py-0.5 font-mono text-[10px] text-zinc-400">
+            <span className="rounded border border-white/10 px-1.5 py-0.5 font-mono text-[10px] text-zinc-500">
               ⌘K
             </span>
           </button>
@@ -313,12 +303,7 @@ export function SiteHeader({
           <button
             type="button"
             onClick={openSearch}
-            className={cn(
-              "flex h-10 w-10 items-center justify-center rounded-full border lg:hidden",
-              isAdmin
-                ? "border-white/15 bg-white/5 text-white"
-                : "border-black/8 bg-white/60 text-zinc-900 backdrop-blur-md",
-            )}
+            className="flex h-10 w-10 items-center justify-center rounded-full border border-white/15 bg-white/5 text-white lg:hidden"
             aria-label="Search the site"
           >
             <Search className="h-5 w-5" />
@@ -326,12 +311,7 @@ export function SiteHeader({
           <button
             type="button"
             onClick={() => setMenuOpen((v) => !v)}
-            className={cn(
-              "relative flex h-10 w-10 items-center justify-center rounded-full border lg:hidden",
-              isAdmin
-                ? "border-white/15 bg-white/5 text-white"
-                : "border-black/8 bg-white/60 text-zinc-900 backdrop-blur-md",
-            )}
+            className="relative flex h-10 w-10 items-center justify-center rounded-full border border-white/15 bg-white/5 text-white lg:hidden"
             aria-label={menuOpen ? "Close menu" : "Open menu"}
             aria-expanded={menuOpen}
           >
@@ -353,7 +333,7 @@ export function SiteHeader({
         </div>
       </div>
 
-      {/* Scroll progress bar */}
+      {/* Scroll progress bar — accent gold for public, amber for admin */}
       <motion.div
         aria-hidden
         style={{ scaleX: progress }}
@@ -373,12 +353,7 @@ export function SiteHeader({
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -12 }}
             transition={{ duration: 0.32, ease }}
-            className={cn(
-              "absolute inset-x-0 top-full origin-top border-b px-6 py-4 lg:hidden",
-              isAdmin
-                ? "border-white/10 bg-[rgba(6,7,11,0.96)] backdrop-blur-2xl"
-                : "border-black/5 bg-[rgba(247,246,241,0.96)] backdrop-blur-2xl",
-            )}
+            className="absolute inset-x-0 top-full origin-top border-b border-white/10 bg-[rgba(6,7,11,0.96)] px-6 py-4 backdrop-blur-2xl lg:hidden"
           >
             <div className="mx-auto flex max-w-7xl flex-col gap-1">
               {nav.map((node, i) => {
@@ -392,16 +367,12 @@ export function SiteHeader({
                       transition={{ duration: 0.32, ease, delay: 0.04 * i }}
                     >
                       <Link
-                        href={node.href}
+                        href={href(node.href)}
                         scroll={false}
                         onClick={() => setMenuOpen(false)}
                         className={cn(
                           "flex items-center gap-3 rounded-2xl px-4 py-3 text-[14px] transition-colors",
-                          active
-                            ? isAdmin
-                              ? "bg-white/10 text-white"
-                              : "bg-black/[0.06] text-zinc-950"
-                            : linkTone(false),
+                          active ? "bg-white/10 text-white" : linkTone(false),
                         )}
                       >
                         <node.icon className="h-[18px] w-[18px]" />
@@ -425,16 +396,15 @@ export function SiteHeader({
                     {node.children.map((child) => (
                       <Link
                         key={child.href}
-                        href={child.href}
+                        href={href(child.href)}
                         scroll={false}
                         onClick={() => setMenuOpen(false)}
                         className={cn(
                           "ml-3 flex items-center gap-3 rounded-2xl px-4 py-2.5 text-[14px] transition-colors",
-                          pathname?.startsWith(child.href) && child.href !== "/ai-regulation"
-                            ? "bg-black/[0.06] text-zinc-950"
-                            : pathname === child.href
-                              ? "bg-black/[0.06] text-zinc-950"
-                              : linkTone(false),
+                          (pathname?.startsWith(child.href) && child.href !== "/ai-regulation") ||
+                            pathname === child.href
+                            ? "bg-white/10 text-white"
+                            : linkTone(false),
                         )}
                       >
                         <child.icon className="h-[18px] w-[18px]" />

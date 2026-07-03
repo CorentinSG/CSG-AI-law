@@ -20,13 +20,17 @@ interface Route {
 }
 
 const publicRoutes: Route[] = [
-  { path: "/", expect: "Saint-Girons" },
-  { path: "/ai-regulation", expect: "intelligence" },
+  { path: "/en", expect: "Saint-Girons" },
+  { path: "/fr", expect: "Saint-Girons" },
+  { path: "/en/ai-regulation", expect: "intelligence" },
+  { path: "/en/ai-regulation/europe", expect: "Europe" },
+  { path: "/en/ai-regulation/europe/france", expect: "France" },
+  { path: "/en/ai-regulation/united-states", expect: "United States" },
+  { path: "/en/news", expect: "news" },
+  { path: "/en/research", expect: "research" },
+  // Locale-redirect safety net: an unprefixed path must still resolve (200
+  // after redirect), not 404 — this guards the proxy.ts fallback rule.
   { path: "/ai-regulation/europe", expect: "Europe" },
-  { path: "/ai-regulation/europe/france", expect: "France" },
-  { path: "/ai-regulation/united-states", expect: "United States" },
-  { path: "/news", expect: "news" },
-  { path: "/research", expect: "research" },
 ];
 
 const adminRoutes: Route[] = [

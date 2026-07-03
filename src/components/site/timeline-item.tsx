@@ -18,20 +18,28 @@ const statusLabels: Record<EuTimelineEntry["status"], string> = {
 export function TimelineItem({
   entry,
   isLast,
+  index = 0,
 }: {
   entry: EuTimelineEntry;
   isLast: boolean;
+  index?: number;
 }) {
   return (
     <motion.li
-      initial={{ opacity: 0, y: 20, filter: "blur(8px)" }}
-      whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+      initial={{ opacity: 0, x: -16 }}
+      whileInView={{ opacity: 1, x: 0 }}
       viewport={{ once: true, amount: 0.3 }}
-      transition={{ duration: 0.75, ease: [0.16, 1, 0.3, 1] }}
+      transition={{ duration: 0.75, ease: [0.16, 1, 0.3, 1], delay: index * 0.06 }}
       className="relative grid gap-4 pl-10 md:grid-cols-[160px_1fr]"
     >
       <div className="absolute left-0 top-1.5 flex flex-col items-center">
-        <span className="h-3 w-3 rounded-full border border-sky-300/60 bg-sky-300/80 shadow-[0_0_20px_rgba(148,163,184,0.25)]" />
+        <motion.span
+          className="h-3 w-3 rounded-full border border-sky-300/60 bg-sky-300/80 shadow-[0_0_20px_rgba(148,163,184,0.25)]"
+          initial={{ scale: 0 }}
+          whileInView={{ scale: [0, 1.3, 1] }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1], delay: index * 0.06 + 0.1 }}
+        />
         {!isLast ? (
           <span className="mt-2 h-full min-h-16 w-px bg-gradient-to-b from-sky-200/50 to-white/10" />
         ) : null}

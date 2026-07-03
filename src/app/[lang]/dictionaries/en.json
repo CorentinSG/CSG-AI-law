@@ -1,0 +1,52 @@
+{
+  "hero": {
+    "eyebrow": "AI Law & Legal Intelligence",
+    "headingLine1": "AI law.",
+    "headingLine2": "Legal intelligence.",
+    "subtitle": "Attorney-led AI regulatory monitoring — source-verified, structured for legal practice.",
+    "openHub": "Open the Hub",
+    "readNotes": "Read Notes",
+    "stat1": "EU AI Act · 113 art.",
+    "stat2": "51 U.S. jurisdictions",
+    "stat3": "40+ monitored sources"
+  },
+  "nav": {
+    "aiRegulation": "AI Regulation",
+    "notes": "Notes",
+    "standards": "Standards",
+    "openHub": "Open Hub"
+  },
+  "home": {
+    "stats": [
+      { "value": "113", "label": "EU AI Act articles tracked" },
+      { "value": "51", "label": "U.S. jurisdictions covered" },
+      { "value": "40+", "label": "Monitored sources" },
+      { "value": "Verified", "label": "Source-verified publishing" }
+    ],
+    "aboutEyebrow": "About",
+    "aboutHeadingLine1": "Attorney-led",
+    "aboutHeadingLine2": "AI legal",
+    "aboutHeadingLine3": "intelligence.",
+    "aboutBody": "Building a structured, source-backed legal intelligence layer for AI regulation across Europe and the United States — source-verified at every step.",
+    "readNotes": "Read notes →",
+    "contact": "Contact →",
+    "capabilities": [
+      { "title": "Regulatory monitoring", "desc": "Live tracking of EU AI Act obligations and 50-state U.S. AI legislation." },
+      { "title": "Source verification", "desc": "Only officially verified or multi-source-corroborated items are published." },
+      { "title": "Legal analysis", "desc": "Attorney-authored commentary — not algorithm-generated summaries." },
+      { "title": "Structured intelligence", "desc": "Jurisdiction-level profiles with binding status, legal area, and development type." }
+    ],
+    "exploreEyebrow": "Explore",
+    "entryPoints": [
+      { "label": "AI Regulation Hub", "description": "Europe · United States · Live monitoring" },
+      { "label": "Research Notes", "description": "Editorial analysis and legal commentary" },
+      { "label": "Legal Standards", "description": "Technical norms and compliance frameworks" }
+    ],
+    "postureEyebrow": "Intelligence posture",
+    "postureHeadlineLine1": "Source-verified. Attorney-reviewed.",
+    "postureHeadlineLine2": "Structured for legal practice.",
+    "postureBody": "Every published item is traceable to an official source, corroborated across sources, or attorney-reviewed before going live. No algorithmic summaries.",
+    "postureCta": "Open the Hub",
+    "footerTagline": "C. Saint-Girons, Esq — AI Law & Legal Intelligence"
+  }
+}

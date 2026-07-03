@@ -10,13 +10,17 @@ import { IntelligenceSignal } from "@/components/site/intelligence-signal";
 import { MotionStaggerItem } from "@/components/site/motion-stagger";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatDisplayDate } from "@/lib/utils";
+import { DEFAULT_LOCALE, type Locale } from "@/lib/i18n/config";
+import { localeHref } from "@/lib/i18n/href";
 
 export function UpdateCard({
   update,
   href,
+  lang = DEFAULT_LOCALE,
 }: {
   update: AiRegulatoryUpdate;
   href: string;
+  lang?: Locale;
 }) {
   const authorityType = deriveUpdateAuthorityType(update);
   const authority = getAuthorityPresentation(authorityType);
@@ -37,7 +41,7 @@ export function UpdateCard({
             <span>{update.importanceLevel}</span>
           </div>
           <CardTitle className="font-display text-xl font-medium uppercase tracking-[-0.04em] text-zinc-950">
-            <Link href={href}>{update.title}</Link>
+            <Link href={localeHref(lang, href)}>{update.title}</Link>
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4 text-sm text-zinc-700">

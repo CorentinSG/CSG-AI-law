@@ -43,7 +43,7 @@ export function SectionHeading({
             mode="words"
             stagger={0.055}
             duration={0.8}
-            className="font-display text-3xl font-medium uppercase tracking-[-0.05em] text-zinc-950 md:text-4xl"
+            className="font-display text-3xl font-medium tracking-[-0.04em] text-foreground md:text-4xl"
           />
           {description ? (
             <ScrollTextReveal

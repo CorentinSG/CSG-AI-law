@@ -3,6 +3,8 @@ import Link from "next/link";
 import type { AiRegulatoryUpdate } from "@/agents/ai-regulation/types";
 import type { AiLawNewsItem } from "@/content/ai-regulation/news";
 import { formatDisplayDate } from "@/lib/utils";
+import { DEFAULT_LOCALE, type Locale } from "@/lib/i18n/config";
+import { localeHref } from "@/lib/i18n/href";
 
 interface IntelligenceSummaryBandProps {
   recentUpdates: Pick<
@@ -16,6 +18,7 @@ interface IntelligenceSummaryBandProps {
   europeCount: number;
   usCount: number;
   totalPublished: number;
+  lang?: Locale;
 }
 
 function VerificationDot({ status }: { status: string }) {
@@ -40,6 +43,7 @@ export function IntelligenceSummaryBand({
   europeCount,
   usCount,
   totalPublished,
+  lang = DEFAULT_LOCALE,
 }: IntelligenceSummaryBandProps) {
   const hasUpdates = recentUpdates.length > 0;
   const hasNews = recentNews.length > 0;
@@ -73,7 +77,7 @@ export function IntelligenceSummaryBand({
               recentUpdates.map((item) => (
                 <Link
                   key={item.id}
-                  href={`/ai-regulation/${item.id}`}
+                  href={localeHref(lang, `/ai-regulation/${item.id}`)}
                   className="block group"
                 >
                   <p className="text-[12px] font-medium leading-5 text-zinc-800 group-hover:text-zinc-950 line-clamp-2">
@@ -95,7 +99,7 @@ export function IntelligenceSummaryBand({
           </div>
           {hasUpdates && (
             <Link
-              href="/ai-regulation?view=database"
+              href={localeHref(lang, "/ai-regulation?view=database")}
               className="mt-4 block font-mono text-[9px] uppercase tracking-[0.2em] text-zinc-500 hover:text-zinc-700"
             >
               Open legal database →
@@ -136,7 +140,7 @@ export function IntelligenceSummaryBand({
           </div>
           {hasNews && (
             <Link
-              href="/ai-regulation?view=news"
+              href={localeHref(lang, "/ai-regulation?view=news")}
               className="mt-4 block font-mono text-[9px] uppercase tracking-[0.2em] text-zinc-500 hover:text-zinc-700"
             >
               Open AI Law News →
@@ -151,7 +155,7 @@ export function IntelligenceSummaryBand({
           </p>
           <div className="mt-3 space-y-3">
             <Link
-              href="/ai-regulation/europe"
+              href={localeHref(lang, "/ai-regulation/europe")}
               className="flex items-center justify-between group"
             >
               <span className="text-[12px] text-zinc-700 group-hover:text-zinc-950">Europe hub</span>
@@ -161,7 +165,7 @@ export function IntelligenceSummaryBand({
             </Link>
             <div className="h-px bg-black/5" />
             <Link
-              href="/ai-regulation/united-states"
+              href={localeHref(lang, "/ai-regulation/united-states")}
               className="flex items-center justify-between group"
             >
               <span className="text-[12px] text-zinc-700 group-hover:text-zinc-950">United States hub</span>

@@ -7,6 +7,18 @@ import {
   requestHasAdminSession,
   requestHasValidAdminAuth,
 } from "@/lib/admin-auth";
+import { LOCALES, DEFAULT_LOCALE, type Locale } from "@/lib/i18n/config";
+
+function negotiateLocale(request: NextRequest): Locale {
+  const header = request.headers.get("accept-language") ?? "";
+  for (const part of header.split(",")) {
+    const tag = part.split(";")[0]?.trim().slice(0, 2).toLowerCase();
+    if (tag && (LOCALES as readonly string[]).includes(tag)) {
+      return tag as Locale;
+    }
+  }
+  return DEFAULT_LOCALE;
+}
 
 function buildUnauthorizedAdminHtml() {
   return `<!DOCTYPE html>
@@ -85,8 +97,31 @@ function buildUnauthorizedAdminHtml() {
 </html>`;
 }
 
+function hasLocalePrefix(pathname: string): boolean {
+  return (LOCALES as readonly string[]).some(
+    (locale) => pathname === `/${locale}` || pathname.startsWith(`/${locale}/`),
+  );
+}
+
 export function proxy(request: NextRequest) {
-  if (!request.nextUrl.pathname.startsWith("/admin")) {
+  const { pathname } = request.nextUrl;
+
+  // Every public route now lives under app/[lang]. Any request that isn't
+  // already locale-prefixed, admin, or an api/asset route gets redirected to
+  // its localized URL — this is a safety net so no internal or external link
+  // can ever 404 during the ongoing i18n migration, even ones not yet
+  // manually re-prefixed to include the locale segment.
+  if (
+    !pathname.startsWith("/admin") &&
+    !pathname.startsWith("/api") &&
+    !hasLocalePrefix(pathname)
+  ) {
+    const url = request.nextUrl.clone();
+    url.pathname = pathname === "/" ? `/${negotiateLocale(request)}` : `/${negotiateLocale(request)}${pathname}`;
+    return NextResponse.redirect(url);
+  }
+
+  if (!pathname.startsWith("/admin")) {
     return NextResponse.next();
   }
 
@@ -110,5 +145,8 @@ export function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/admin/:path*"],
+  // Excludes _next internals, /api, and any path containing a dot (static
+  // assets: favicon.ico, robots.txt, sitemap.xml, /geo/*.json, images, etc.)
+  // — none of those are locale-routed.
+  matcher: ["/((?!_next|api|.*\\..*).*)"],
 };

@@ -20,21 +20,29 @@ const bindingLabels = {
 function UsTimelineItem({
   entry,
   isLast,
+  index = 0,
 }: {
   entry: UsTimelineEntry;
   isLast: boolean;
+  index?: number;
 }) {
   return (
     <motion.li
-      initial={{ opacity: 0, y: 20, filter: "blur(8px)" }}
-      whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+      initial={{ opacity: 0, x: -16 }}
+      whileInView={{ opacity: 1, x: 0 }}
       viewport={{ once: true, amount: 0.3 }}
-      transition={{ duration: 0.75, ease: [0.16, 1, 0.3, 1] }}
+      transition={{ duration: 0.75, ease: [0.16, 1, 0.3, 1], delay: index * 0.06 }}
       className="relative grid gap-4 pl-10 md:grid-cols-[160px_1fr]"
     >
       {/* Vertical connector */}
       <div className="absolute left-0 top-1.5 flex flex-col items-center">
-        <span className="h-3 w-3 rounded-full border border-red-300/60 bg-red-300/80 shadow-[0_0_20px_rgba(248,113,113,0.2)]" />
+        <motion.span
+          className="h-3 w-3 rounded-full border border-red-300/60 bg-red-300/80 shadow-[0_0_20px_rgba(248,113,113,0.2)]"
+          initial={{ scale: 0 }}
+          whileInView={{ scale: [0, 1.3, 1] }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1], delay: index * 0.06 + 0.1 }}
+        />
         {!isLast ? (
           <span className="mt-2 h-full min-h-16 w-px bg-gradient-to-b from-red-200/40 to-white/5" />
         ) : null}
@@ -89,27 +97,39 @@ function UsTimelineItem({
 
 export function UsAiTimeline({ entries }: { entries: UsTimelineEntry[] }) {
   return (
-    <motion.ol
-      initial="hidden"
-      whileInView="visible"
-      viewport={{ once: true, amount: 0.15 }}
-      variants={{
-        hidden: {},
-        visible: {
-          transition: {
-            staggerChildren: 0.1,
+    <div className="relative">
+      {/* Animated vertical line that draws itself top→bottom */}
+      <motion.div
+        className="absolute left-[5px] top-0 w-px bg-gradient-to-b from-red-200/50 via-red-100/20 to-transparent origin-top"
+        style={{ height: "100%" }}
+        initial={{ scaleY: 0 }}
+        whileInView={{ scaleY: 1 }}
+        viewport={{ once: true }}
+        transition={{ duration: 1.4, ease: [0.16, 1, 0.3, 1], delay: 0.2 }}
+      />
+      <motion.ol
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, amount: 0.15 }}
+        variants={{
+          hidden: {},
+          visible: {
+            transition: {
+              staggerChildren: 0.1,
+            },
           },
-        },
-      }}
-      className="space-y-8"
-    >
-      {entries.map((entry, index) => (
-        <UsTimelineItem
-          key={entry.id}
-          entry={entry}
-          isLast={index === entries.length - 1}
-        />
-      ))}
-    </motion.ol>
+        }}
+        className="space-y-8"
+      >
+        {entries.map((entry, index) => (
+          <UsTimelineItem
+            key={entry.id}
+            entry={entry}
+            index={index}
+            isLast={index === entries.length - 1}
+          />
+        ))}
+      </motion.ol>
+    </div>
   );
 }

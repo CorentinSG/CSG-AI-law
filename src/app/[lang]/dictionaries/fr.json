@@ -1,0 +1,52 @@
+{
+  "hero": {
+    "eyebrow": "Droit de l'IA & Intelligence juridique",
+    "headingLine1": "Droit de l'IA.",
+    "headingLine2": "Intelligence juridique.",
+    "subtitle": "Veille réglementaire IA menée par un avocat — sources vérifiées, structurée pour la pratique juridique.",
+    "openHub": "Ouvrir le Hub",
+    "readNotes": "Lire les notes",
+    "stat1": "Règlement IA · 113 art.",
+    "stat2": "51 juridictions américaines",
+    "stat3": "40+ sources surveillées"
+  },
+  "nav": {
+    "aiRegulation": "Réglementation IA",
+    "notes": "Notes",
+    "standards": "Standards",
+    "openHub": "Ouvrir le Hub"
+  },
+  "home": {
+    "stats": [
+      { "value": "113", "label": "Articles du Règlement IA suivis" },
+      { "value": "51", "label": "Juridictions américaines couvertes" },
+      { "value": "40+", "label": "Sources surveillées" },
+      { "value": "Vérifié", "label": "Publication vérifiée à la source" }
+    ],
+    "aboutEyebrow": "À propos",
+    "aboutHeadingLine1": "Intelligence",
+    "aboutHeadingLine2": "juridique IA",
+    "aboutHeadingLine3": "par un avocat.",
+    "aboutBody": "Construction d'une couche d'intelligence juridique structurée et sourcée sur la réglementation de l'IA en Europe et aux États-Unis — vérifiée à la source à chaque étape.",
+    "readNotes": "Lire les notes →",
+    "contact": "Contact →",
+    "capabilities": [
+      { "title": "Veille réglementaire", "desc": "Suivi en direct des obligations du Règlement IA de l'UE et des lois IA des 50 États américains." },
+      { "title": "Vérification des sources", "desc": "Seuls les éléments officiellement vérifiés ou corroborés par plusieurs sources sont publiés." },
+      { "title": "Analyse juridique", "desc": "Commentaire rédigé par un avocat — pas de résumés générés par algorithme." },
+      { "title": "Intelligence structurée", "desc": "Profils par juridiction avec statut contraignant, domaine juridique et type de développement." }
+    ],
+    "exploreEyebrow": "Explorer",
+    "entryPoints": [
+      { "label": "Hub Réglementation IA", "description": "Europe · États-Unis · Veille en direct" },
+      { "label": "Notes de recherche", "description": "Analyses éditoriales et commentaire juridique" },
+      { "label": "Standards juridiques", "description": "Normes techniques et cadres de conformité" }
+    ],
+    "postureEyebrow": "Posture de veille",
+    "postureHeadlineLine1": "Sources vérifiées. Relu par un avocat.",
+    "postureHeadlineLine2": "Structuré pour la pratique juridique.",
+    "postureBody": "Chaque élément publié est traçable jusqu'à une source officielle, corroboré par plusieurs sources ou relu par un avocat avant mise en ligne. Aucun résumé algorithmique.",
+    "postureCta": "Ouvrir le Hub",
+    "footerTagline": "C. Saint-Girons, Esq — Droit de l'IA & Intelligence juridique"
+  }
+}

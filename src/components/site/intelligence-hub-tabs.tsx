@@ -14,14 +14,11 @@ export function IntelligenceHubTabs({
   activeValue: string;
   className?: string;
 }) {
+  const activeNote = tabs.find((tab) => tab.value === activeValue)?.note;
+
   return (
-    <div
-      className={cn(
-        "glass-panel-soft flex flex-col gap-3 rounded-[1.9rem] border border-black/6 p-3 shadow-[0_18px_50px_rgba(15,15,15,0.04)]",
-        className,
-      )}
-    >
-      <div className="no-scrollbar flex gap-2 overflow-x-auto">
+    <div className={cn("flex flex-col gap-3", className)}>
+      <div className="no-scrollbar inline-flex w-full gap-1 overflow-x-auto rounded-full border border-white/10 bg-white/[0.03] p-1 sm:w-auto">
         {tabs.map((tab) => {
           const active = tab.value === activeValue;
 
@@ -30,15 +27,16 @@ export function IntelligenceHubTabs({
               key={tab.value}
               href={tab.href}
               scroll={false}
+              aria-current={active ? "page" : undefined}
               className={cn(
-                "relative inline-flex shrink-0 items-center justify-center overflow-hidden rounded-full px-4 py-3 text-center font-mono text-[11px] uppercase tracking-[0.18em] transition-colors",
-                active ? "text-zinc-950" : "text-zinc-500 hover:text-zinc-900",
+                "relative inline-flex shrink-0 items-center justify-center rounded-full px-4 py-2 text-center font-mono text-[11px] uppercase tracking-[0.16em] transition-colors",
+                active ? "text-white" : "text-white/45 hover:text-white/80",
               )}
             >
               {active ? (
                 <motion.span
                   layoutId="intelligence-hub-pill"
-                  className="absolute inset-0 rounded-full border border-black/8 bg-white shadow-[0_10px_30px_rgba(15,15,15,0.08)]"
+                  className="absolute inset-0 rounded-full bg-white/[0.12]"
                   transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
                 />
               ) : null}
@@ -47,10 +45,8 @@ export function IntelligenceHubTabs({
           );
         })}
       </div>
-      {tabs.find((tab) => tab.value === activeValue)?.note ? (
-        <p className="px-2 text-sm leading-6 text-zinc-600">
-          {tabs.find((tab) => tab.value === activeValue)?.note}
-        </p>
+      {activeNote ? (
+        <p className="text-sm leading-6 text-white/55">{activeNote}</p>
       ) : null}
     </div>
   );

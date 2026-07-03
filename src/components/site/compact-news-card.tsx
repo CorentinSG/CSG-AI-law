@@ -2,10 +2,12 @@
 
 import Link from "next/link";
 import Image from "next/image";
+import { usePathname } from "next/navigation";
 import { useState } from "react";
 
 import { getNewsVerificationLabel, type AiLawNewsItem } from "@/content/ai-regulation/news";
 import { formatDisplayDate } from "@/lib/utils";
+import { getLocaleFromPathname, localeHref } from "@/lib/i18n/href";
 
 // Verification dot: green = official/corroborated, amber = media/needs_review, gray = discovery
 function VerificationDot({ status }: { status: string }) {
@@ -26,6 +28,7 @@ interface CompactNewsCardProps {
 
 export function CompactNewsCard({ item, horizontal = true }: CompactNewsCardProps) {
   const [imgError, setImgError] = useState(false);
+  const lang = getLocaleFromPathname(usePathname());
   const hasImage = Boolean(item.imageUrl) && !imgError;
 
   if (horizontal) {
@@ -63,7 +66,7 @@ export function CompactNewsCard({ item, horizontal = true }: CompactNewsCardProp
             </p>
           </div>
           <h3 className="line-clamp-2 text-sm font-medium leading-snug text-zinc-950">
-            <Link href={`/news/${item.slug}`} className="hover:underline decoration-black/15 underline-offset-4">
+            <Link href={localeHref(lang, `/news/${item.slug}`)} className="hover:underline decoration-black/15 underline-offset-4">
               {item.title}
             </Link>
           </h3>
@@ -95,7 +98,7 @@ export function CompactNewsCard({ item, horizontal = true }: CompactNewsCardProp
         </p>
       </div>
       <h3 className="mt-2 line-clamp-2 text-sm font-medium leading-snug text-zinc-950">
-        <Link href={`/news/${item.slug}`} className="hover:underline">
+        <Link href={localeHref(lang, `/news/${item.slug}`)} className="hover:underline">
           {item.title}
         </Link>
       </h3>

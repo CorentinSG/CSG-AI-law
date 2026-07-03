@@ -1,12 +1,15 @@
 'use client';
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { motion } from "framer-motion";
+import { getLocaleFromPathname, localeHref } from "@/lib/i18n/href";
 
 const footerNav = [
   { href: "/", label: "Home" },
   { href: "/research", label: "Notes" },
   { href: "/ai-regulation", label: "AI Law Hub" },
+  { href: "/ai-regulation/methodology", label: "Methodology" },
   { href: "/standards", label: "Standards" },
   { href: "/contact", label: "Contact" },
 ];
@@ -14,6 +17,8 @@ const footerNav = [
 const ease: [number, number, number, number] = [0.16, 1, 0.3, 1];
 
 export function SiteFooter() {
+  const lang = getLocaleFromPathname(usePathname());
+
   return (
     <footer className="relative mt-8">
       {/* Accent rule divider */}
@@ -23,7 +28,7 @@ export function SiteFooter() {
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, amount: 0.3 }}
         transition={{ duration: 0.8, ease }}
-        className="border-t border-black/5 bg-[#f4f4f1]"
+        className="border-t border-white/8 bg-[#0b0b0b]"
       >
         <div className="mx-auto grid max-w-7xl gap-10 px-6 py-12 lg:grid-cols-[1.35fr_0.65fr]">
           <div className="space-y-4">
@@ -48,7 +53,7 @@ export function SiteFooter() {
             {footerNav.map((item) => (
               <Link
                 key={item.href}
-                href={item.href}
+                href={localeHref(lang, item.href)}
                 className="font-mono text-[11px] uppercase tracking-[0.18em] text-zinc-600 transition-colors duration-200 hover:text-zinc-950"
               >
                 {item.label}
@@ -64,6 +69,7 @@ export function SiteFooter() {
           <div className="flex items-center gap-4">
             <Link
               href="/admin"
+              prefetch={false}
               className="font-mono text-[10px] uppercase tracking-[0.22em] text-zinc-300 transition-colors duration-200 hover:text-zinc-600"
             >
               Admin

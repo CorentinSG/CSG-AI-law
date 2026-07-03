@@ -6,7 +6,6 @@ import { CompactNewsCard } from "@/components/site/compact-news-card";
 import { FilterBar } from "@/components/site/filter-bar";
 import { IntelligenceHubTabs } from "@/components/site/intelligence-hub-tabs";
 import { IntelligenceSignal } from "@/components/site/intelligence-signal";
-import { LegalIntelligenceLegend } from "@/components/site/legal-intelligence-legend";
 import { MotionStagger, MotionStaggerItem } from "@/components/site/motion-stagger";
 import { NewsCard } from "@/components/site/news-card";
 import { CursorPaginationControls } from "@/components/site/pagination-controls";
@@ -184,37 +183,6 @@ export default async function AiRegulationPage({
         />
 
         <IntelligenceHubTabs tabs={[...hubTabs]} activeValue={activeView} />
-
-        <MotionStagger className="grid gap-4 md:grid-cols-2 xl:grid-cols-4" stagger={0.07}>
-          <MotionStaggerItem>
-            <IntelligenceSignal
-              label="Published legal database items"
-              value={updatesPage.hasMore ? `${updatesPage.limit}+` : String(updatesPage.items.length)}
-              tone="positive"
-            />
-          </MotionStaggerItem>
-          <MotionStaggerItem>
-            <IntelligenceSignal
-              label="Recent legal developments"
-              value={newsPage.hasMore ? `${newsPage.limit}+` : String(newsPage.items.length)}
-              tone="informative"
-            />
-          </MotionStaggerItem>
-          <MotionStaggerItem>
-            <IntelligenceSignal
-              label="Europe baseline"
-              value={`${allEuropeProfiles.length} states`}
-              tone="neutral"
-            />
-          </MotionStaggerItem>
-          <MotionStaggerItem>
-            <IntelligenceSignal
-              label="U.S. baseline"
-              value={`${allUsProfiles.length} states`}
-              tone="neutral"
-            />
-          </MotionStaggerItem>
-        </MotionStagger>
       </section>
 
       {activeView === "overview" ? (
@@ -348,14 +316,23 @@ export default async function AiRegulationPage({
                 </div>
               </CardContent>
             </Card>
-            <Card className="rounded-[2rem] border-black/6 bg-white/90 shadow-[0_18px_50px_rgba(15,15,15,0.04)]">
-              <CardContent className="p-6">
+            <Link
+              href="/ai-regulation/methodology"
+              className="group flex flex-col justify-between gap-6 rounded-[2rem] border border-white/10 bg-white/[0.03] p-6 transition-colors hover:bg-white/[0.05]"
+            >
+              <div className="space-y-2">
                 <p className="font-mono text-[11px] uppercase tracking-[0.28em] text-zinc-600">
                   How to read this hub
                 </p>
-                <LegalIntelligenceLegend />
-              </CardContent>
-            </Card>
+                <p className="text-sm leading-6 text-zinc-500">
+                  Verification levels, authority classification, and the source-and-review
+                  posture behind every published item.
+                </p>
+              </div>
+              <span className="inline-flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-[0.2em] text-zinc-500 transition-colors group-hover:text-white/80">
+                Read the methodology →
+              </span>
+            </Link>
           </section>
         </>
       ) : null}
@@ -369,8 +346,8 @@ export default async function AiRegulationPage({
             />
             <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
               <IntelligenceSignal
-                label="News items"
-                value={newsPage.hasMore ? `${newsPage.limit}+` : String(newsPage.items.length)}
+                label={newsPage.hasMore ? "News items shown" : "News items"}
+                value={String(newsPage.items.length)}
                 tone="informative"
               />
               <IntelligenceSignal
@@ -400,7 +377,7 @@ export default async function AiRegulationPage({
           />
 
           {newsItems.length > 0 ? (
-            <MotionStagger className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+            <MotionStagger className="mx-auto max-w-3xl divide-y divide-white/8 border-y border-white/8">
               {newsItems.map((item) => (
                 <NewsCard key={item.id} item={item} />
               ))}

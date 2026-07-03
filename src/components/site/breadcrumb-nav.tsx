@@ -1,5 +1,7 @@
 import Link from "next/link";
 import { cn } from "@/lib/utils";
+import { DEFAULT_LOCALE, type Locale } from "@/lib/i18n/config";
+import { localeHref } from "@/lib/i18n/href";
 
 interface BreadcrumbItem {
   label: string;
@@ -9,13 +11,14 @@ interface BreadcrumbItem {
 interface BreadcrumbNavProps {
   items: BreadcrumbItem[];
   className?: string;
+  lang?: Locale;
 }
 
 /**
  * Hierarchical breadcrumb navigation.
  * All items except the last are rendered as links; the last is the current page.
  */
-export function BreadcrumbNav({ items, className }: BreadcrumbNavProps) {
+export function BreadcrumbNav({ items, className, lang = DEFAULT_LOCALE }: BreadcrumbNavProps) {
   if (items.length === 0) return null;
 
   return (
@@ -35,7 +38,7 @@ export function BreadcrumbNav({ items, className }: BreadcrumbNavProps) {
               </span>
             ) : (
               <Link
-                href={item.href}
+                href={localeHref(lang, item.href)}
                 className="group relative font-mono text-[10px] uppercase tracking-[0.18em] text-zinc-400 transition-colors duration-200 hover:text-zinc-700"
               >
                 {item.label}

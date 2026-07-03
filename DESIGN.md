@@ -1,15 +1,17 @@
 ---
 name: C. Saint-Girons — AI Law & Legal Intelligence
-description: A quiet, futuristic legal-intelligence interface — glass surfaces, ink-on-light editorial type, a single gold signal accent.
+description: A quiet, futuristic legal-intelligence interface — near-black body, dark frosted-glass surfaces, light editorial type, a single gold signal accent.
 colors:
-  ink: "#111111"
-  body-bg: "#ecebe6"
-  paper: "#f7f6f1"
-  muted: "#666662"
-  border: "#e0dfd9"
+  bg: "#0a0a0a"
+  surface: "rgba(255,255,255,0.04)"
+  elevated: "rgba(255,255,255,0.07)"
+  ink: "rgba(255,255,255,0.95)"
+  body: "rgba(255,255,255,0.72)"
+  muted: "rgba(255,255,255,0.58)"
+  border: "rgba(255,255,255,0.10)"
   navy: "#1e293b"
   accent: "#9a6b1f"
-  accent-strong: "#7c5214"
+  accent-strong: "#c4882a"
   live: "#10b981"
 typography:
   display:
@@ -76,7 +78,9 @@ components:
 
 **Creative North Star: "The Quiet Terminal"**
 
-This is a legal-intelligence instrument, not a vitrine. The interface behaves like a calm command post: precise, instrumental, futuristic — but it never raises its voice. Authority is signaled through restraint. Surfaces are light and glassy; type is ink-dark and editorial; a single gold accent acts like a status light on an otherwise quiet console. The reader is a skeptical legal professional who must judge a development's reliability in seconds, so every element earns its place by clarifying *what changed, where, and how verified* — never by decorating.
+This is a legal-intelligence instrument, not a vitrine. The interface behaves like a calm command post: precise, instrumental, futuristic — but it never raises its voice. Authority is signaled through restraint. The site runs on a **near-black body (`#0a0a0a`)**; surfaces are **dark frosted glass** (translucent white fills 4–8% with a lit top edge); type is **light editorial** on dark; a single gold accent acts like a status light on an otherwise quiet console.
+
+> **Theme note (2026-07):** the system is now **dark** throughout. Muted text steps all clear WCAG AA (≥4.5:1) on the body. Legacy light-authored pages are bridged to dark by the `.dark-site` class in `globals.css`, which remaps Tailwind `zinc`/`white` utility classes to the dark ramp; `glass-panel*` classes are dark glass. New work should read from the dark tokens above rather than author light values. The reader is a skeptical legal professional who must judge a development's reliability in seconds, so every element earns its place by clarifying *what changed, where, and how verified* — never by decorating.
 
 The system rejects the flashy SaaS startup register outright: no purple gradients, no "Get started free" energy, no inflated marketing claims, no emoji. It equally rejects the generic navy-and-serif law-firm template and any neon/crypto "hacker" glow. Futurism here is carried by typography (Bricolage Grotesque), light/glass materials, and exact spacing — not by loud color or gimmicks.
 

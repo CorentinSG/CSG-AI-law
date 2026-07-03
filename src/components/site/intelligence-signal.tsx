@@ -20,7 +20,7 @@ export function IntelligenceSignal({
   value,
   note,
   tone = "neutral",
-  theme = "light",
+  theme = "dark",
   className,
 }: {
   label: string;

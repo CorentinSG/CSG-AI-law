@@ -2,6 +2,8 @@ import Link from "next/link";
 
 import { MotionStaggerItem } from "@/components/site/motion-stagger";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { DEFAULT_LOCALE, type Locale } from "@/lib/i18n/config";
+import { localeHref } from "@/lib/i18n/href";
 
 // Content-state styling so readers instantly tell what is live vs. announced.
 const statusStyles: Record<string, string> = {
@@ -24,6 +26,7 @@ export function ResearchCard({
   status,
   meta,
   tags,
+  lang = DEFAULT_LOCALE,
 }: {
   category: string;
   title: string;
@@ -32,6 +35,7 @@ export function ResearchCard({
   status?: string;
   meta?: string;
   tags?: string[];
+  lang?: Locale;
 }) {
   const isForthcoming = status === "forthcoming";
   const statusKey = status?.toLowerCase() ?? "";
@@ -86,7 +90,7 @@ export function ResearchCard({
   if (!href) return content;
 
   return (
-    <Link href={href} className="block h-full">
+    <Link href={localeHref(lang, href)} className="block h-full">
       {content}
     </Link>
   );

@@ -25,7 +25,7 @@ export function SiteShell({
         "min-h-screen",
         isAdmin
           ? "bg-[radial-gradient(circle_at_top,_rgba(183,194,225,0.12),_transparent_20%),linear-gradient(180deg,_#090a0f_0%,_#07080c_42%,_#09090b_100%)] text-zinc-100"
-          : "bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.95),_rgba(238,239,235,0)_26%),linear-gradient(180deg,_#f6f6f3_0%,_#efefeb_48%,_#ecece8_100%)] text-zinc-950",
+          : "dark-site bg-[radial-gradient(circle_at_top,_rgba(154,107,31,0.06),_transparent_22%),linear-gradient(180deg,_#080808_0%,_#0a0a0a_100%)] text-zinc-100",
       )}
     >
       {!isAdmin ? <CursorBot /> : null}
