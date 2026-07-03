@@ -48,7 +48,15 @@ YYYY-MM-DD · <Agent> · <TASK-ID> · <STATUS>
 
 ## Current status
 
-2026-07-02 · Codex · T-DURABLE-DATA-FINAL-REVIEW · DONE-LOCAL
+2026-07-03 · Claude Code · T-I18N-UX · DONE-LOCAL
+- Intent:        Ship bilingual EN/FR locale routing and a full dark-theme UX overhaul of the public site (contrast/AA, flat "ledger" redesign of the live-monitor + news frames, new sub-pages).
+- Files:         `src/app/[lang]/**` (all public routes moved under `[lang]`), `src/proxy.ts`, `src/app/sitemap.ts`, `src/app/globals.css`, `DESIGN.md`, `src/lib/i18n/**`, `src/lib/use-reduced-motion.ts`, public site components (`news-card`, `live-legal-intelligence-panel`, `intelligence-hub-tabs`, `site-header`, `site-footer`, `hero-video-section`, `animated-heading`, `fade-in`, breadcrumb/cards); new pages `.../methodology` and `.../united-states/states`.
+- Graph anchors: community "Intelligence Hub UI", "UI Components and Utilities"; `localeHref()`, `getDictionary()`, `LiveLegalIntelligencePanel`, `NewsCard`, `proxy()`. (Rebuild graph — many new nodes under `app/[lang]`.)
+- Verification:  `npm run typecheck` PASS · `npm run lint` PASS (0 errors, 1 pre-existing img warning) · `npm run build` PASS (26 routes, /en + /fr) · `npm test` PASS (107 files / 612) · `npx playwright test` PASS (14/14). Design critique score 21 → 29/40.
+- Branch/commit: `ops/t-ops9-ux` @ `5933f7c`
+- Next:          Deploying to Vercel from this branch. Codex: no backend change; `admin`/`api` are intentionally not locale-routed and the proxy admin-auth path is unchanged. Follow-ups: full token migration to drop the `.dark-site` bridge, tone US map legend colors, decide on the public CursorBot.
+
+
 - Intent:        Close all six durable-data final-review findings as one backend wave without touching Claude-owned UI/package changes.
 - Files:         schema audit, repository/scan-job backend, migration 015, focused tests, durable-data plan/status/reports.
 - Graph anchors: `evaluateSchemaIntegrity()`, `AiRegulationRepository`, `executeClaimedScanJob()`, community "DB Repository Layer", community "Scan Job Management", community "Data Ingestion Pipeline".
