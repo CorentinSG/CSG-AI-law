@@ -169,7 +169,7 @@ export function EuropeHubMap({
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 8, scale: 0.98 }}
               transition={{ type: "spring", stiffness: 400, damping: 30 }}
-              className="pointer-events-none absolute bottom-3 left-3 right-3 rounded-[1.4rem] border border-black/8 bg-white/96 p-3.5 shadow-[0_8px_30px_rgba(15,15,15,0.12)] backdrop-blur-sm"
+              className="pointer-events-none absolute bottom-3 left-3 right-3 rounded-[1.4rem] border border-black/8 bg-[rgba(14,14,16,0.96)] p-3.5 shadow-[0_8px_30px_rgba(15,15,15,0.12)] backdrop-blur-sm"
             >
               <div className="flex items-center gap-3">
                 <div

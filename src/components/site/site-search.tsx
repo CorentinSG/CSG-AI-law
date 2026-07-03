@@ -150,7 +150,7 @@ export function SiteSearch() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={reduce ? { opacity: 0 } : { opacity: 0, y: -10, scale: 0.98 }}
             transition={{ duration: 0.28, ease }}
-            className="relative w-full max-w-xl overflow-hidden rounded-[1.6rem] border border-black/8 bg-[rgba(247,246,241,0.92)] shadow-[0_40px_120px_rgba(15,15,15,0.22)] backdrop-blur-2xl"
+            className="relative w-full max-w-xl overflow-hidden rounded-[1.6rem] border border-white/10 bg-[rgba(14,14,16,0.94)] shadow-[0_40px_120px_rgba(0,0,0,0.5)] backdrop-blur-2xl"
           >
             <div className="flex items-center gap-3 border-b border-black/6 px-4 py-3.5">
               <Search className="size-4 shrink-0 text-accent-strong" />

@@ -75,7 +75,7 @@ export function ResearchCard({
               {tags.slice(0, 3).map((tag) => (
                 <span
                   key={tag}
-                  className="rounded-full border border-black/8 bg-white/55 px-2.5 py-1 font-mono text-[11px] uppercase tracking-[0.14em] text-zinc-600"
+                  className="rounded-full border border-black/8 bg-white/[0.06] px-2.5 py-1 font-mono text-[11px] uppercase tracking-[0.14em] text-zinc-600"
                 >
                   {tag}
                 </span>

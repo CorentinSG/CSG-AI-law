@@ -149,7 +149,7 @@ export function EuropeImplementationMap({
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -6 }}
             transition={{ duration: 0.32, ease: [0.16, 1, 0.3, 1] }}
-            className="flex flex-col gap-4 rounded-[2rem] border border-black/6 bg-white/95 p-6 shadow-[0_18px_40px_rgba(15,15,15,0.05)] backdrop-blur-sm"
+            className="flex flex-col gap-4 rounded-[2rem] border border-black/6 bg-[rgba(14,14,16,0.96)] p-6 shadow-[0_18px_40px_rgba(15,15,15,0.05)] backdrop-blur-sm"
           >
             <div>
               <p className="font-display text-2xl font-medium uppercase tracking-[-0.04em] text-zinc-950">
