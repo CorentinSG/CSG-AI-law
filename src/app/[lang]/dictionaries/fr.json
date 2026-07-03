@@ -43,9 +43,9 @@
       { "label": "Standards juridiques", "description": "Normes techniques et cadres de conformité" }
     ],
     "postureEyebrow": "Posture de veille",
-    "postureHeadlineLine1": "Sources vérifiées. Relu par un avocat.",
+    "postureHeadlineLine1": "Sources vérifiées. Traçables officiellement.",
     "postureHeadlineLine2": "Structuré pour la pratique juridique.",
-    "postureBody": "Chaque élément publié est traçable jusqu'à une source officielle, corroboré par plusieurs sources ou relu par un avocat avant mise en ligne. Aucun résumé algorithmique.",
+    "postureBody": "Chaque élément publié est traçable jusqu'à une source officielle ou corroboré par plusieurs sources sérieuses avant mise en ligne. Aucun résumé algorithmique.",
     "postureCta": "Ouvrir le Hub",
     "footerTagline": "C. Saint-Girons, Esq — Droit de l'IA & Intelligence juridique"
   }

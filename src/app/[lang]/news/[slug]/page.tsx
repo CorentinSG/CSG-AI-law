@@ -152,8 +152,8 @@ export default async function NewsDetailPage({
             <p>{item.fullSummary}</p>
             <div className="rounded-2xl border border-amber-100 bg-amber-50 p-4 text-xs text-amber-800">
               This entry belongs to the AI Law News layer. It becomes legal-authority-grade only when
-              supported by official source citations and human review. Refer to the verified database
-              for reviewed legal conclusions.
+              supported by official source citations. Refer to the verified database
+              for source-backed legal conclusions.
             </div>
           </CardContent>
         </Card>

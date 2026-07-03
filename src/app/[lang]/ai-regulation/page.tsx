@@ -287,7 +287,7 @@ export default async function AiRegulationPage({
                 <Card className="rounded-[1.8rem] border-black/6 bg-white/90 shadow-sm md:col-span-2 xl:col-span-3">
                   <CardContent className="p-6">
                     <p className="text-sm text-zinc-500">
-                      No published database entries yet. The structured legal database stays intentionally empty until a human reviewer approves and manually publishes an entry.
+                      No published database entries yet. The structured legal database stays intentionally empty until an entry is source-verified and published.
                     </p>
                   </CardContent>
                 </Card>
@@ -498,7 +498,7 @@ export default async function AiRegulationPage({
               hasActiveFilters={hasActiveFilterParams(params, databaseFilters.map((f) => f.key))}
               title={!dbAfterCursor ? "No published database entries yet" : undefined}
               body={!dbAfterCursor
-                ? "The structured legal database stays intentionally empty until a human reviewer approves and manually publishes an entry."
+                ? "The structured legal database stays intentionally empty until an entry is source-verified and published."
                 : undefined}
             />
           )}

@@ -44,7 +44,7 @@ export function JarvisOrb({
         <p className="font-mono text-[10px] uppercase tracking-[0.28em] text-zinc-500">
           {label}
         </p>
-        <p className="text-sm text-zinc-600">Human-reviewed monitoring active</p>
+        <p className="text-sm text-zinc-600">Source-verified monitoring active</p>
       </div>
     </div>
   );

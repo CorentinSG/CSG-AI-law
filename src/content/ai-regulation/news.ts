@@ -290,7 +290,7 @@ export function buildNewsItemFromUpdate(input: {
     publicVisibilityStatus: publicBySourceQuality ? "public" : "admin_only",
     reviewerNotes:
       input.update.status === "published"
-        ? "Published news derived from a human-reviewed AI Regulation Monitor entry."
+        ? "Published news derived from a source-verified AI Regulation Monitor entry."
         : publicBySourceQuality
           ? "Automatically public news item based on serious source quality, official confirmation, or cross-source corroboration."
           : "Admin-only news lead; not public until reviewed.",

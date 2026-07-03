@@ -248,21 +248,21 @@ export const researchEntries: ResearchEntry[] = [
     slug: "legal-intelligence-systems-future-regulatory-monitoring",
     title: "Legal Intelligence Systems and Regulatory Monitoring",
     subtitle:
-      "Why legal monitoring becomes more useful when sources, authority levels, and review workflows are structured rather than merely aggregated.",
+      "Why legal monitoring becomes more useful when sources, authority levels, and verification workflows are structured rather than merely aggregated.",
     author,
     status: "forthcoming",
     category: "Legal Intelligence Systems",
     tags: [
       "Legal intelligence",
       "Regulatory monitoring",
-      "Human review",
+      "Source verification",
       "Structured analysis",
     ],
     readingTime: "Note in development",
     summary:
-      "A note in development on how human-reviewed legal intelligence systems can organize AI law developments more meaningfully than a generic feed.",
+      "A note in development on how source-verified legal intelligence systems can organize AI law developments more meaningfully than a generic feed.",
     abstract:
-      "This piece will argue that monitoring only becomes durable legal intelligence when it includes source discipline, authority classification, editorial review, and structured comparison across jurisdictions.",
+      "This piece will argue that monitoring only becomes durable legal intelligence when it includes source discipline, authority classification, source verification, and structured comparison across jurisdictions.",
     relatedSlugs: [
       "emerging-architecture-ai-regulation",
       "from-monitoring-to-meaning",

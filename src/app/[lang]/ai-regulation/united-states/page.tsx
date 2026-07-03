@@ -24,7 +24,7 @@ import { localeHref } from "@/lib/i18n/href";
 export const metadata: Metadata = {
   title: "United States Hub",
   description:
-    "United States AI regulation monitoring — federal legislation, state-level activity, agency guidance, and human-reviewed legal intelligence.",
+    "United States AI regulation monitoring — federal legislation, state-level activity, agency guidance, and source-verified legal intelligence.",
 };
 
 export const revalidate = 300;

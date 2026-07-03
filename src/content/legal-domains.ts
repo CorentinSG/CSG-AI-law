@@ -32,7 +32,7 @@ export const legalDomains: LegalDomain[] = [
     shortLabel: "AI Law",
     tagline: "Artificial-intelligence regulation, governance, and enforcement.",
     description:
-      "Binding law, proposed law, regulator guidance, enforcement, soft law, and standards on artificial intelligence, monitored from official sources with human review before publication.",
+      "Binding law, proposed law, regulator guidance, enforcement, soft law, and standards on artificial intelligence, monitored and verified from official sources before publication.",
     status: "live",
     statusLabel: "Live",
     hubHref: "/ai-regulation",
@@ -45,7 +45,7 @@ export const legalDomains: LegalDomain[] = [
     shortLabel: "Privacy",
     tagline: "Personal-data and data-protection law across jurisdictions.",
     description:
-      "Data-protection authority guidance, enforcement, and legislative developments on personal data and privacy — built on the same official-source, human-reviewed model as the AI law hub.",
+      "Data-protection authority guidance, enforcement, and legislative developments on personal data and privacy — built on the same official-source, source-verified model as the AI law hub.",
     status: "in_development",
     statusLabel: "In development",
     hubHref: null,
@@ -68,10 +68,10 @@ export const legalDomains: LegalDomain[] = [
 
 /**
  * The editorial separation the platform preserves across every domain:
- * official authority vs. discovery-only signals vs. human-validated publication.
+ * official authority vs. discovery-only signals vs. source-verified publication.
  */
 export const legalDomainSourcingPrinciple =
-  "Across every domain the platform keeps the same separation: official sources are authority, discovery/media signals are leads requiring verification, and nothing is published without human review.";
+  "Across every domain the platform keeps the same separation: official sources are authority, discovery/media signals are leads requiring verification, and nothing is published without source verification.";
 
 export function getLegalDomains(): LegalDomain[] {
   return legalDomains;

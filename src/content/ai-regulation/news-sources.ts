@@ -181,7 +181,7 @@ export const aiLawNewsSourceConfigs: AiLawNewsSourceConfig[] = [
     lastChecked: checkedAt,
     parserStatus: "ready",
     notes:
-      "Official EUR-Lex predefined RSS alert for Parliament and Council legislation. This supports faster official publication awareness but still needs AI-specific filtering and human review.",
+      "Official EUR-Lex predefined RSS alert for Parliament and Council legislation. This supports faster official publication awareness but still needs AI-specific filtering and source verification.",
   },
   {
     id: "news-europe-newsapi-discovery",

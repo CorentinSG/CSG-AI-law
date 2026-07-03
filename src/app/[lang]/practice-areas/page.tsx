@@ -16,7 +16,7 @@ import {
 export const metadata: Metadata = {
   title: "Practice Areas",
   description:
-    "Legal-intelligence practice areas: AI law and governance, privacy and data protection, and cloud law — monitored from official sources with human review.",
+    "Legal-intelligence practice areas: AI law and governance, privacy and data protection, and cloud law — monitored and verified from official sources.",
 };
 
 // Static taxonomy content; served as cached HTML via ISR like the other public pages.
@@ -37,7 +37,7 @@ export default function PracticeAreasPage() {
         <SectionHeading
           eyebrow="Legal intelligence"
           title="Practice areas"
-          description="The legal domains this platform covers, each built on the same official-source, human-reviewed model. Domains still in development are clearly marked and never imply coverage that does not yet exist."
+          description="The legal domains this platform covers, each built on the same official-source, source-verified model. Domains still in development are clearly marked and never imply coverage that does not yet exist."
         />
       </section>
 

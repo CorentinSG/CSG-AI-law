@@ -13,7 +13,7 @@ import { localeHref } from "@/lib/i18n/href";
 export const metadata: Metadata = {
   title: "Methodology | AI Law Hub",
   description:
-    "How the AI-law monitor works: verification levels, authority classification, source provenance, and the human review posture behind every published item.",
+    "How the AI-law monitor works: verification levels, authority classification, source provenance, and the source-verification posture behind every published item.",
 };
 
 export const revalidate = 3600;
@@ -27,7 +27,7 @@ const COPY = {
     eyebrow: "How we verify · Trust",
     title: "Methodology",
     description:
-      "This is a legal-intelligence instrument, not a news feed. Every public item is classified, traced to a source, and reviewed before it can carry legal authority. Here is exactly how.",
+      "This is a legal-intelligence instrument, not a news feed. Every public item is classified and traced to a verifiable source before it can carry legal authority. Here is exactly how.",
     verificationTitle: "Verification levels",
     verificationIntro:
       "Each development is placed at one of three levels. Only the first two ever reach the public legal-authority layer.",
@@ -51,7 +51,7 @@ const COPY = {
     checks: [
       { key: "1", term: "1 · Authority", body: "What kind of legal signal is this — binding, proposed, guidance, enforcement, soft law, or standards?" },
       { key: "2", term: "2 · Source trail", body: "Can the claim be traced to a real source? Every public entry links to institution, official URL, and date." },
-      { key: "3", term: "3 · Review posture", body: "Has it been reviewed? Public items are reviewed before publication; discovery leads stay outside the public authority layer." },
+      { key: "3", term: "3 · Verification posture", body: "Is it source-verified? Public items come from official or corroborated sources before publication; discovery leads stay outside the public authority layer." },
       { key: "4", term: "4 · Regional structure", body: "Where does it belong? Europe and United States coverage stay separate, structured by jurisdiction, not by generic AI news." },
     ] as Row[],
     neverTitle: "What we never do",
@@ -68,7 +68,7 @@ const COPY = {
     eyebrow: "Comment nous vérifions · Confiance",
     title: "Méthodologie",
     description:
-      "Ceci est un instrument d'intelligence juridique, pas un fil d'actualité. Chaque élément public est classé, tracé jusqu'à sa source et relu avant de pouvoir porter une autorité juridique. Voici exactement comment.",
+      "Ceci est un instrument d'intelligence juridique, pas un fil d'actualité. Chaque élément public est classé et tracé jusqu'à une source vérifiable avant de pouvoir porter une autorité juridique. Voici exactement comment.",
     verificationTitle: "Niveaux de vérification",
     verificationIntro:
       "Chaque développement est placé à l'un de trois niveaux. Seuls les deux premiers atteignent la couche d'autorité juridique publique.",
@@ -92,7 +92,7 @@ const COPY = {
     checks: [
       { key: "1", term: "1 · Autorité", body: "Quel type de signal juridique : contraignant, proposé, guidance, enforcement, droit souple ou standards ?" },
       { key: "2", term: "2 · Piste de sources", body: "Le fait est-il traçable jusqu'à une source réelle ? Chaque entrée publique renvoie à l'institution, l'URL officielle et la date." },
-      { key: "3", term: "3 · Posture de revue", body: "A-t-il été relu ? Les éléments publics sont relus avant publication ; les signaux de découverte restent hors de la couche d'autorité publique." },
+      { key: "3", term: "3 · Posture de vérification", body: "Est-il vérifié à la source ? Les éléments publics proviennent de sources officielles ou corroborées avant publication ; les signaux de découverte restent hors de la couche d'autorité publique." },
       { key: "4", term: "4 · Structure régionale", body: "Où se place-t-il ? Europe et États-Unis restent séparés, structurés par juridiction, pas par actualité IA générique." },
     ] as Row[],
     neverTitle: "Ce que nous ne faisons jamais",

@@ -216,7 +216,7 @@ const prioritySources: Record<string, UsStateOfficialSource[]> = {
       parserStatus: "manual_reference",
       recommendation: "manual_review",
       note:
-        "Official Colorado legislature bill page verified as reachable. Baseline flags it for human review before detailed statutory claims.",
+        "Official Colorado legislature bill page verified as reachable. Baseline flags it for source verification before detailed statutory claims.",
     }),
   ],
   NY: [

@@ -12,9 +12,9 @@ const legendItems = [
     body: "Every public entry links back to structured source references, including institution, official URL, date, and pinpoint when available.",
   },
   {
-    label: "3. Review posture",
-    title: "Has it been human-reviewed?",
-    body: "Public monitor items are manually reviewed before publication. Discovery leads and unverified material stay outside the public legal-authority layer.",
+    label: "3. Verification posture",
+    title: "Is it source-verified?",
+    body: "Public monitor items come from official or corroborated sources before publication. Discovery leads and unverified material stay outside the public legal-authority layer.",
   },
   {
     label: "4. Regional structure",

@@ -11,7 +11,7 @@ export const metadata: Metadata = {
     template: "%s | C. Saint-Girons, Esq - AI Law & Legal Intelligence",
   },
   description:
-    "Attorney-led AI law and legal intelligence platform focused on AI regulation monitoring, structured legal research, and human-reviewed regulatory analysis.",
+    "Attorney-led AI law and legal intelligence platform focused on AI regulation monitoring, structured legal research, and source-verified regulatory analysis.",
   openGraph: {
     title: "C. Saint-Girons, Esq - AI Law & Legal Intelligence",
     description:

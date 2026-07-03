@@ -102,9 +102,9 @@ export default async function StandardsPage() {
             </p>
           </div>
           <div className="space-y-3 text-sm leading-6 text-zinc-800">
-            <p>- Human review is required before publication.</p>
+            <p>- Every item is verified against its official source before publication.</p>
             <p>- ISO standard full text is not reproduced where paywalled.</p>
-            <p>- Public items remain limited to reviewed and published entries.</p>
+            <p>- Public items remain limited to source-verified and published entries.</p>
             <p>- These materials can still shape governance, procurement, risk management, and enforcement expectations.</p>
           </div>
         </CardContent>
@@ -167,8 +167,8 @@ export default async function StandardsPage() {
           <Card className="rounded-[1.8rem] border-black/6 bg-white shadow-[0_16px_48px_rgba(15,15,15,0.04)]">
             <CardContent className="p-8 text-sm leading-7 text-zinc-700">
               No standards or soft-law items have been published publicly yet.
-              The monitoring and review pipeline is in place, but public
-              visibility still depends on human review and manual publication.
+              The monitoring pipeline is in place, but public visibility still
+              depends on source verification and publication.
             </CardContent>
           </Card>
         )}

@@ -262,7 +262,7 @@ export default async function LegalUpdateDetailPage({
             {/* Source note */}
             <div className="rounded-[1.2rem] border border-black/6 bg-white p-4 text-xs text-zinc-600">
               <p className="font-mono text-[9px] uppercase tracking-[0.18em] text-zinc-400 mb-2">Editorial note</p>
-              <p>{authority.adminNotes[0] ?? "Human review is required before publication. This entry has been approved and manually published."}</p>
+              <p>{authority.adminNotes[0] ?? "This entry is source-verified and published, and remains traceable to its official sources."}</p>
             </div>
           </CardContent>
         </Card>
@@ -335,7 +335,7 @@ export default async function LegalUpdateDetailPage({
 
       {/* Legal disclaimer */}
       <div className="rounded-[1.5rem] border border-amber-100 bg-amber-50 p-5 text-sm text-amber-800">
-        This entry is part of a human-reviewed legal intelligence database, not legal advice. It has been sourced, reviewed, and published by a qualified reviewer. Verify applicable law with qualified legal counsel before taking action.
+        This entry is part of a source-verified legal intelligence database, not legal advice. It is traceable to its official sources. Verify applicable law with qualified legal counsel before taking action.
       </div>
     </SiteShell>
   );
