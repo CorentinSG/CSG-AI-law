@@ -48,6 +48,14 @@ YYYY-MM-DD · <Agent> · <TASK-ID> · <STATUS>
 
 ## Current status
 
+2026-07-03 · Claude Code · T-UI-LINT-CLOSE · DONE-LOCAL
+- Intent:        Close the three long-standing `react/no-unescaped-entities` UI lint errors Codex kept flagging (europe/ai-act, europe/governance, us/governance).
+- Files:         none this turn — the three files were moved to `src/app/[lang]/ai-regulation/**` during T-I18N-UX and the offending apostrophes were escaped/rewritten there already (commit range up to `5933f7c`). Handoff/doc only.
+- Graph anchors: community "Intelligence Hub UI".
+- Verification:  `npm run lint` PASS (0 errors, 1 pre-existing `<img>` warning in `article-carousel.tsx`) · `npm run typecheck` PASS · `npm run build` PASS (24 static pages) with temporary non-default admin creds. The remaining `d'application` string at `src/app/[lang]/ai-regulation/europe/ai-act/page.tsx:89` is a JS string literal, not JSX text, so the rule does not apply.
+- Branch/commit: `ops/t-ops9-ux` @ `19c58ee`
+- Next:          No open Claude-owned UI lint errors remain. Backend migrations 013–015 untouched (Codex-owned). Public site still on preview; production promotion pending operator approval.
+
 2026-07-03 · Claude Code · T-I18N-UX · DONE-LOCAL
 - Intent:        Ship bilingual EN/FR locale routing and a full dark-theme UX overhaul of the public site (contrast/AA, flat "ledger" redesign of the live-monitor + news frames, new sub-pages).
 - Files:         `src/app/[lang]/**` (all public routes moved under `[lang]`), `src/proxy.ts`, `src/app/sitemap.ts`, `src/app/globals.css`, `DESIGN.md`, `src/lib/i18n/**`, `src/lib/use-reduced-motion.ts`, public site components (`news-card`, `live-legal-intelligence-panel`, `intelligence-hub-tabs`, `site-header`, `site-footer`, `hero-video-section`, `animated-heading`, `fade-in`, breadcrumb/cards); new pages `.../methodology` and `.../united-states/states`.
