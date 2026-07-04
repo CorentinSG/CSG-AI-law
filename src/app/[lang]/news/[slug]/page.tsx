@@ -69,6 +69,14 @@ export default async function NewsDetailPage({
         ? { label: "United States", href: "/ai-regulation/united-states" }
         : null;
 
+  // Officially-verified items don't need the "not legal authority" caveat —
+  // only surface it on discovery/unverified leads.
+  const isOfficiallyVerified =
+    item.verificationStatus === "official_verified" ||
+    item.verificationStatus === "corroborated" ||
+    item.verificationStatus === "published_news" ||
+    item.officialSourceFound;
+
   return (
     <SiteShell className="space-y-8">
       {/* Breadcrumb */}
@@ -150,11 +158,13 @@ export default async function NewsDetailPage({
               Summary
             </p>
             <p>{item.fullSummary}</p>
-            <div className="rounded-2xl border border-amber-100 bg-amber-50 p-4 text-xs text-amber-800">
-              This entry belongs to the AI Law News layer. It becomes legal-authority-grade only when
-              supported by official source citations. Refer to the verified database
-              for source-backed legal conclusions.
-            </div>
+            {!isOfficiallyVerified ? (
+              <div className="rounded-2xl border border-amber-100 bg-amber-50 p-4 text-xs text-amber-800">
+                This entry belongs to the AI Law News layer. It becomes legal-authority-grade only when
+                supported by official source citations. Refer to the verified database
+                for source-backed legal conclusions.
+              </div>
+            ) : null}
           </CardContent>
         </Card>
 
