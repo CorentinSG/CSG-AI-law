@@ -283,8 +283,17 @@ Create one logical dump and restore it into the disposable target. Confirm criti
 
 - [ ] **Step 4: Controlled production rollout**
 
-2026-07-02: operator-gated. No production migrations, live restore, or
-post-migration production scan was performed.
+2026-07-04: partially complete. The operator authorized rollout; the verified
+branch was merged to `main` at `2125242`, Vercel production is READY, and
+controlled official-source job
+`job-controlled-01b1d87c55074c64a35db3fa1116ca66` succeeded with one source
+processed and a lease-consistent terminal result. Migrations 013-015 remain
+unapplied because neither `DATABASE_URL` nor a Supabase access token is
+available locally and the authorized Chrome extension could not claim the
+logged-in Supabase tab after its prescribed retry. Railway remains pointed at
+`ops/t-ops9-ux`, which currently resolves to the same `2125242` code, until
+console access is restored. This step stays unchecked until migrations are
+applied/audited and both Railway services are repointed to `main`.
 
 Push the backend commits, apply migrations 013-015 only after explicit operator
 approval, then queue one official-source scan and confirm one canonical raw
@@ -317,5 +326,6 @@ git commit -m "docs(ops): hand off durable data phase"
   self-tests pass.
 - [ ] Apply migrations 001-015 twice to a disposable database and run the live
   catalog/concurrency/restore checks.
-- [ ] Apply migrations 013-015 to production only with explicit operator
-  approval, then run one controlled official-source scan.
+- [ ] Apply migrations 013-015 to production (operator approval received
+  2026-07-04) and run the post-migration audit. A pre-migration controlled
+  official-source scan already passed on 2026-07-04.
