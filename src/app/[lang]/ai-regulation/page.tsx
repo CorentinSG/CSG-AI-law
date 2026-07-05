@@ -20,14 +20,8 @@ import {
   normalizeNewsItemRecord,
   type NormalizedNewsItemRecord,
 } from "@/content/ai-regulation/news";
-import {
-  getEuropeCountryProfiles,
-  getPriorityEuropeCountryProfiles,
-} from "@/content/ai-regulation/europe-country-profiles";
-import {
-  getPriorityUsStateProfiles,
-  getUsStateAiLawProfiles,
-} from "@/content/ai-regulation/us-state-ai-law-baseline";
+import { getPriorityEuropeCountryProfiles } from "@/content/ai-regulation/europe-country-profiles";
+import { getPriorityUsStateProfiles } from "@/content/ai-regulation/us-state-ai-law-baseline";
 import { encodeCursor, parseCursorParam } from "@/lib/pagination";
 import type { RegulatoryUpdateFilters } from "@/db/repository-types";
 
@@ -140,9 +134,7 @@ export default async function AiRegulationPage({
   ] as const;
 
   const europeProfiles = getPriorityEuropeCountryProfiles();
-  const allEuropeProfiles = getEuropeCountryProfiles();
   const usProfiles = getPriorityUsStateProfiles();
-  const allUsProfiles = getUsStateAiLawProfiles();
 
   const verifiedNewsCount = newsPage.items.filter(
     (item) =>
