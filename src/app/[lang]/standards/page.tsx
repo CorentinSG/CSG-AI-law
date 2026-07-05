@@ -14,56 +14,99 @@ import { isLocale } from "@/lib/i18n/config";
 import { localeHref } from "@/lib/i18n/href";
 
 export const metadata: Metadata = {
-  title: "Standards & Governance",
+  title: "Standards & Soft Law",
   description:
-    "Influential soft law, governance frameworks, and technical standards relevant to AI compliance — tracked and clearly distinguished from binding law.",
+    "The layer between binding law and best practice: technical standards, governance frameworks, and soft law that shape AI compliance — sorted by type and clearly distinguished from binding law.",
 };
 
 // ISR (T-RT0C): serve from cache, revalidate every 5 min.
 export const revalidate = 300;
 
-type Framework = {
-  type: string;
-  title: string;
-  body: string;
+type Kind = {
+  name: string;
+  status: string;
+  whatItIs: string;
+  tracks: string;
+  note: string;
   access: string;
 };
 
-function getFrameworks(fr: boolean): Framework[] {
-  return [
+function getContent(fr: boolean) {
+  const kinds: Kind[] = [
     {
-      type: fr ? "Standard technique" : "Technical standard",
-      title: "ISO/IEC 42001",
-      body: fr
-        ? "Système de management de l'IA. Suivi via les métadonnées officielles ISO uniquement — le texte intégral est payant et n'est pas reproduit."
-        : "AI management system. Tracked through official ISO metadata only — full text is paywalled and not reproduced.",
+      name: fr ? "Standard technique" : "Technical standard",
+      status: fr ? "Volontaire — sauf si la loi l'impose" : "Voluntary — unless law requires it",
+      whatItIs: fr
+        ? "Spécifications formelles pour construire et gérer des systèmes d'IA."
+        : "Formal specifications for building and managing AI systems.",
+      tracks: "ISO/IEC 42001",
+      note: fr
+        ? "Système de management de l'IA. Suivi via les métadonnées officielles ISO."
+        : "AI management system. Tracked through official ISO metadata.",
       access: fr ? "Métadonnées seules" : "Metadata only",
     },
     {
-      type: fr ? "Framework de gouvernance" : "Governance framework",
-      title: "NIST AI RMF",
-      body: fr
-        ? "Framework de référence pour la gestion des risques, l'assurance et les contrôles de cycle de vie. Influent, mais pas contraignant en soi."
-        : "Reference framework for risk management, assurance, and lifecycle controls. Influential, but not binding on its own.",
+      name: fr ? "Framework de gouvernance" : "Governance framework",
+      status: fr ? "Indicatif" : "Advisory",
+      whatItIs: fr
+        ? "Approche structurée de gestion des risques et d'assurance, publiée par une autorité."
+        : "A structured risk-management and assurance approach published by an authority.",
+      tracks: "NIST AI RMF",
+      note: fr
+        ? "Gestion des risques, assurance et contrôles de cycle de vie."
+        : "Risk management, assurance, and lifecycle controls.",
       access: fr ? "Source officielle suivie" : "Official source monitored",
     },
     {
-      type: fr ? "Droit souple" : "Soft law",
-      title: fr ? "Matériel de politique IA de l'OCDE" : "OECD AI policy materials",
-      body: fr
-        ? "Politique et gouvernance internationales pouvant orienter les attentes réglementaires nationales, sans être du droit contraignant."
-        : "International policy and governance that may shape domestic regulatory expectations, without being binding law.",
+      name: fr ? "Droit souple" : "Soft law",
+      status: fr ? "Politique non contraignante" : "Non-binding policy",
+      whatItIs: fr
+        ? "Politique internationale qui oriente les attentes des régulateurs."
+        : "International policy that shapes what regulators come to expect.",
+      tracks: fr ? "Matériel IA de l'OCDE" : "OECD AI materials",
+      note: fr
+        ? "Peut influencer les attentes réglementaires nationales sans être contraignant."
+        : "May shape domestic regulatory expectations without being binding.",
       access: fr ? "Source officielle suivie" : "Official source monitored",
     },
     {
-      type: fr ? "Bonne pratique" : "Best practice",
-      title: "OWASP AIMA",
-      body: fr
-        ? "Matériel de bonnes pratiques pour la sécurité de l'IA, la maturité de gouvernance et le benchmarking opérationnel."
-        : "Best-practice material for AI security, governance maturity, and operational benchmarking.",
+      name: fr ? "Bonne pratique" : "Best practice",
+      status: fr ? "Guidance informelle" : "Informal guidance",
+      whatItIs: fr
+        ? "Guidance de la communauté et de l'industrie pour la sécurité et la maturité."
+        : "Community and industry guidance for security and maturity.",
+      tracks: "OWASP AIMA",
+      note: fr
+        ? "Sécurité de l'IA, maturité de gouvernance et benchmarking opérationnel."
+        : "AI security, governance maturity, and operational benchmarking.",
       access: fr ? "Source officielle suivie" : "Official source monitored",
     },
   ];
+
+  const binding = {
+    label: fr ? "Droit contraignant" : "Binding law",
+    hint: fr ? "Ailleurs sur le site" : "Elsewhere on the site",
+    points: fr
+      ? ["Fixé par les législateurs et régulateurs", "Applicable — obligation de conformité", "Fait autorité juridique"]
+      : ["Set by legislatures and regulators", "Enforceable — you must comply", "Carries legal authority"],
+  };
+  const soft = {
+    label: fr ? "Standards & soft law" : "Standards & soft law",
+    hint: fr ? "Cette page" : "This page",
+    points: fr
+      ? [
+          "Fixé par organismes de normalisation, agences, industrie",
+          "Non applicable en soi",
+          "Montre ce qu'est une bonne pratique — jusqu'à adoption par une autorité",
+        ]
+      : [
+          "Set by standards bodies, agencies, and industry",
+          "Not enforceable on its own",
+          "Shows what good looks like — until an authority adopts it",
+        ],
+  };
+
+  return { kinds, binding, soft };
 }
 
 export default async function StandardsPage({
@@ -74,6 +117,7 @@ export default async function StandardsPage({
   const { lang } = await params;
   if (!isLocale(lang)) notFound();
   const fr = lang === "fr";
+  const { kinds, binding, soft } = getContent(fr);
 
   const publishedUpdates = await updateRepository.listPublicUpdates();
   const relatedResearch = getPublicResearchEntries().filter((entry) =>
@@ -93,74 +137,89 @@ export default async function StandardsPage({
     ),
   );
 
-  const frameworks = getFrameworks(fr);
-  const principles = fr
-    ? [
-        "Rien ici n'est du droit contraignant, sauf si une autorité compétente l'incorpore.",
-        "On suit la source officielle ; les textes payants ne sont pas reproduits.",
-        "Seuls les éléments vérifiés à la source sont publiés.",
-      ]
-    : [
-        "Nothing here is binding law unless a competent authority incorporates it.",
-        "We track the official source; paywalled texts are not reproduced.",
-        "Only source-verified items are published.",
-      ];
-
   return (
-    <SiteShell className="space-y-12">
-      {/* Hero — one clear statement, no shouting */}
+    <SiteShell className="space-y-14">
+      {/* Hero */}
       <MotionReveal>
         <SectionHeading
-          eyebrow={fr ? "Droit souple · Standards · Gouvernance" : "Soft law · Standards · Governance"}
+          eyebrow={fr ? "Droit souple · Standards" : "Soft law · Standards"}
           title={fr ? "Standards & soft law" : "Standards & soft law"}
           description={
             fr
-              ? "Frameworks et standards techniques qui façonnent la conformité IA — suivis et clairement distingués du droit contraignant."
-              : "Frameworks and technical standards that shape AI compliance — tracked and clearly distinguished from binding law."
+              ? "La couche entre le droit contraignant et la simple bonne pratique : ce qui façonne la conformité IA sans être obligatoire — jusqu'à ce qu'une autorité l'adopte."
+              : "The layer between binding law and plain best practice: what shapes AI compliance without being mandatory — until an authority adopts it."
           }
         />
       </MotionReveal>
 
-      {/* Principle strip — compact, replaces the big editorial card */}
+      {/* The distinction — the one thing to understand */}
       <MotionReveal>
-        <div className="rounded-[1.6rem] border border-white/10 bg-white/[0.03] p-5">
-          <p className="font-mono text-[10px] uppercase tracking-[0.28em] text-zinc-400">
-            {fr ? "La règle" : "The rule"}
-          </p>
-          <ul className="mt-3 grid gap-2 sm:grid-cols-3">
-            {principles.map((p) => (
-              <li key={p} className="flex gap-2 text-[13px] leading-6 text-zinc-500">
-                <span aria-hidden className="mt-2 size-1 flex-shrink-0 rounded-full bg-[color:var(--color-accent-strong,#c4882a)]" />
-                {p}
-              </li>
-            ))}
-          </ul>
+        <div className="grid gap-3 md:grid-cols-2">
+          <div className="rounded-[1.6rem] border border-white/10 bg-white/[0.02] p-6">
+            <p className="font-mono text-[9px] uppercase tracking-[0.24em] text-zinc-400">
+              {binding.hint}
+            </p>
+            <p className="mt-2 font-display text-xl font-medium tracking-[-0.02em] text-zinc-950">
+              {binding.label}
+            </p>
+            <ul className="mt-4 space-y-2">
+              {binding.points.map((p) => (
+                <li key={p} className="flex gap-2.5 text-sm leading-6 text-zinc-500">
+                  <span aria-hidden className="mt-2 size-1 flex-shrink-0 rounded-full bg-zinc-500" />
+                  {p}
+                </li>
+              ))}
+            </ul>
+          </div>
+          <div className="rounded-[1.6rem] border border-[color:var(--color-accent-strong,#c4882a)]/30 bg-[color:var(--color-accent,#9a6b1f)]/[0.08] p-6">
+            <p className="font-mono text-[9px] uppercase tracking-[0.24em] text-[color:var(--color-accent-strong,#c4882a)]">
+              {soft.hint}
+            </p>
+            <p className="mt-2 font-display text-xl font-medium tracking-[-0.02em] text-zinc-950">
+              {soft.label}
+            </p>
+            <ul className="mt-4 space-y-2">
+              {soft.points.map((p) => (
+                <li key={p} className="flex gap-2.5 text-sm leading-6 text-zinc-600">
+                  <span aria-hidden className="mt-2 size-1 flex-shrink-0 rounded-full bg-[color:var(--color-accent-strong,#c4882a)]" />
+                  {p}
+                </li>
+              ))}
+            </ul>
+          </div>
         </div>
       </MotionReveal>
 
-      {/* Tracked frameworks — flat ledger, grouped by nothing but clearly typed */}
+      {/* The four kinds — sorted reference */}
       <section className="space-y-4">
         <MotionReveal>
           <h2 className="font-display text-xl font-medium tracking-[-0.03em] text-zinc-950">
-            {fr ? "Frameworks & standards suivis" : "Tracked frameworks & standards"}
+            {fr ? "Les quatre types, et ce que nous suivons" : "The four kinds, and what we track"}
           </h2>
         </MotionReveal>
         <MotionStagger className="divide-y divide-white/8 border-y border-white/8">
-          {frameworks.map((f) => (
-            <MotionStaggerItem key={f.title}>
-              <div className="grid gap-2 py-4 sm:grid-cols-[0.34fr_0.66fr] sm:gap-6">
-                <div>
-                  <p className="font-display text-[15px] font-medium tracking-[-0.01em] text-zinc-950">
-                    {f.title}
+          {kinds.map((k, i) => (
+            <MotionStaggerItem key={k.name}>
+              <div className="py-5">
+                <div className="flex flex-wrap items-baseline justify-between gap-2">
+                  <p className="font-display text-[17px] font-medium tracking-[-0.02em] text-zinc-950">
+                    <span className="mr-2 font-mono text-[11px] text-zinc-400">{String(i + 1).padStart(2, "0")}</span>
+                    {k.name}
                   </p>
-                  <p className="mt-1 font-mono text-[9px] uppercase tracking-[0.2em] text-zinc-400">
-                    {f.type}
-                  </p>
+                  <span className="rounded-full border border-black/8 bg-zinc-50 px-2.5 py-0.5 font-mono text-[9px] uppercase tracking-[0.16em] text-zinc-600">
+                    {k.status}
+                  </span>
                 </div>
-                <div>
-                  <p className="text-sm leading-6 text-zinc-500">{f.body}</p>
-                  <span className="mt-2 inline-block rounded-full border border-black/8 bg-zinc-50 px-2.5 py-0.5 font-mono text-[9px] uppercase tracking-[0.18em] text-zinc-600">
-                    {f.access}
+                <p className="mt-2 max-w-2xl text-sm leading-6 text-zinc-500">{k.whatItIs}</p>
+                <div className="mt-3 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-zinc-600">
+                  <span className="font-mono text-[9px] uppercase tracking-[0.18em] text-zinc-400">
+                    {fr ? "Nous suivons" : "We track"}
+                  </span>
+                  <span className="font-medium text-zinc-950">{k.tracks}</span>
+                  <span aria-hidden className="text-zinc-300">·</span>
+                  <span className="text-zinc-500">{k.note}</span>
+                  <span className="rounded-full border border-black/8 bg-zinc-50 px-2 py-0.5 font-mono text-[8.5px] uppercase tracking-[0.16em] text-zinc-500">
+                    {k.access}
                   </span>
                 </div>
               </div>
@@ -169,7 +228,7 @@ export default async function StandardsPage({
         </MotionStagger>
       </section>
 
-      {/* Published updates */}
+      {/* Published items */}
       <section className="space-y-4">
         <MotionReveal>
           <div className="flex items-center justify-between gap-4">
@@ -193,8 +252,8 @@ export default async function StandardsPage({
         ) : (
           <div className="rounded-[1.6rem] border border-white/10 bg-white/[0.03] p-6 text-sm leading-7 text-zinc-500">
             {fr
-              ? "Aucun élément de standards ou soft law publié pour l'instant. La veille est en place ; la visibilité publique dépend de la vérification à la source et de la publication."
-              : "No standards or soft-law items published yet. Monitoring is in place; public visibility depends on source verification and publication."}
+              ? "Aucun élément publié pour l'instant. La veille est en place ; la visibilité publique dépend de la vérification à la source et de la publication."
+              : "No items published yet. Monitoring is in place; public visibility depends on source verification and publication."}
           </div>
         )}
       </section>
