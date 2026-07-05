@@ -9,10 +9,6 @@ import { MotionStagger, MotionStaggerItem } from "@/components/site/motion-stagg
 import { SectionHeading } from "@/components/site/section-heading";
 import { SiteShell } from "@/components/site/shell";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  usAiCaseLawEntries,
-  usAiCaseLawSources,
-} from "@/content/ai-regulation/us-ai-case-law";
 import { usAiSoftLawBaseline } from "@/content/ai-regulation/us-ai-soft-law";
 import { formatDisplayDate } from "@/lib/utils";
 import { isLocale } from "@/lib/i18n/config";
@@ -34,7 +30,6 @@ export default async function UsGovernancePage({
   const { lang } = await params;
   if (!isLocale(lang)) notFound();
   const fr = lang === "fr";
-  const publishedCases = usAiCaseLawEntries.filter((e) => e.status === "published");
 
   return (
     <SiteShell className="space-y-10">
@@ -108,86 +103,27 @@ export default async function UsGovernancePage({
         </section>
       )}
 
-      {/* Case law */}
-      {publishedCases.length > 0 && (
-        <section className="space-y-4">
-          <MotionReveal>
-            <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-zinc-400">
+      {/* Case law — dedicated sub-page */}
+      <MotionReveal>
+        <Link
+          href={localeHref(lang, "/ai-regulation/united-states/case-law")}
+          className="group flex items-center justify-between gap-4 rounded-[1.8rem] border border-white/10 bg-white/[0.03] p-5 transition-colors hover:bg-white/[0.05]"
+        >
+          <div>
+            <p className="font-display text-lg font-medium tracking-[-0.02em] text-zinc-950">
               {fr ? "Jurisprudence & décisions d’application" : "Case law & enforcement decisions"}
             </p>
-          </MotionReveal>
-          <MotionStagger className="space-y-3">
-            {publishedCases.map((entry) => (
-              <MotionStaggerItem key={entry.id}>
-                <div className="rounded-[1.6rem] border border-black/6 bg-white p-5 shadow-[0_4px_20px_rgba(15,15,15,0.04)]">
-                  <div className="flex flex-wrap items-start gap-2">
-                    <span className="rounded-full border border-black/8 bg-zinc-50 px-2.5 py-0.5 font-mono text-[8.5px] uppercase tracking-[0.18em] text-zinc-600">
-                      {entry.authorityType.replaceAll("_", " ")}
-                    </span>
-                    {entry.docketNumber && (
-                      <span className="rounded-full border border-black/8 bg-zinc-50 px-2.5 py-0.5 font-mono text-[8.5px] uppercase tracking-[0.18em] text-zinc-600">
-                        {entry.docketNumber}
-                      </span>
-                    )}
-                  </div>
-                  <p className="mt-3 font-medium text-zinc-950">{entry.caseName}</p>
-                  <p className="mt-1.5 text-sm leading-7 text-zinc-600">{entry.holdingOrOutcome ?? entry.legalSignificance}</p>
-                  <div className="mt-3 flex flex-wrap items-center gap-3">
-                    <p className="font-mono text-[9px] uppercase tracking-[0.18em] text-zinc-400">
-                      {entry.court}
-                      {entry.date ? ` · ${formatDisplayDate(entry.date)}` : ""}
-                    </p>
-                    {entry.officialSourceUrl && (
-                      <a
-                        href={entry.officialSourceUrl}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="inline-flex items-center gap-1 font-mono text-[9px] uppercase tracking-[0.18em] text-sky-600 hover:text-sky-800"
-                      >
-                        <ArrowUpRight className="size-2.5" />
-                        {fr ? "Source officielle" : "Official source"}
-                      </a>
-                    )}
-                  </div>
-                </div>
-              </MotionStaggerItem>
-            ))}
-          </MotionStagger>
-        </section>
-      )}
-
-      {/* Case law sources */}
-      {usAiCaseLawSources.length > 0 && (
-        <section className="space-y-4">
-          <MotionReveal>
-            <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-zinc-400">
-              {fr ? "Sources de jurisprudence surveillées" : "Monitored case law sources"}
+            <p className="mt-1 text-sm leading-6 text-zinc-500">
+              {fr
+                ? "Décisions publiées et sources de jurisprudence surveillées — sur leur propre page."
+                : "Published decisions and monitored case-law sources — on their own page."}
             </p>
-          </MotionReveal>
-          <MotionStagger className="grid gap-3 md:grid-cols-2">
-            {usAiCaseLawSources.map((src) => (
-              <MotionStaggerItem key={src.id}>
-                <div className="rounded-[1.6rem] border border-black/6 bg-zinc-50/60 p-4">
-                  <p className="font-medium text-zinc-950">{src.name}</p>
-                  <p className="mt-0.5 font-mono text-[9px] uppercase tracking-[0.18em] text-zinc-400">
-                    {src.institution} · {src.jurisdiction}
-                  </p>
-                  <p className="mt-2 text-sm leading-6 text-zinc-600">{src.note}</p>
-                  <a
-                    href={src.sourceUrl}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="mt-2 inline-flex items-center gap-1 font-mono text-[9px] text-zinc-400 hover:text-zinc-700"
-                  >
-                    <ArrowUpRight className="size-2.5" />
-                    {src.sourceUrl}
-                  </a>
-                </div>
-              </MotionStaggerItem>
-            ))}
-          </MotionStagger>
-        </section>
-      )}
+          </div>
+          <span className="shrink-0 font-mono text-[10px] uppercase tracking-[0.2em] text-zinc-400 transition-colors group-hover:text-zinc-700">
+            {fr ? "Ouvrir →" : "Open →"}
+          </span>
+        </Link>
+      </MotionReveal>
 
       <MotionReveal>
         <Link

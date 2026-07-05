@@ -28,6 +28,9 @@ const publicRoutes: Route[] = [
   { path: "/en/ai-regulation/united-states", expect: "United States" },
   { path: "/en/news", expect: "news" },
   { path: "/en/research", expect: "research" },
+  { path: "/en/ai-regulation/europe/ai-act/calendar", expect: "calendar" },
+  { path: "/en/ai-regulation/europe/case-law", expect: "case law" },
+  { path: "/en/ai-regulation/united-states/case-law", expect: "case law" },
   // Locale-redirect safety net: an unprefixed path must still resolve (200
   // after redirect), not 404 — this guards the proxy.ts fallback rule.
   { path: "/ai-regulation/europe", expect: "Europe" },

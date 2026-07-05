@@ -72,6 +72,36 @@ export default async function UsFederalPage({
   const bindingLabel = fr ? bindingLabelFr : bindingLabelEn;
   const authorityTypeLabel = fr ? authorityTypeLabelFr : authorityTypeLabelEn;
 
+  // Chunk the long flat list into sections by legal weight so the page scans
+  // as a structured reference instead of a wall of instruments.
+  const GROUP_DEFS: { key: string; label: string; types: string[] }[] = [
+    { key: "binding", label: fr ? "Droit contraignant" : "Binding law", types: ["federal_hard_law"] },
+    {
+      key: "agency",
+      label: fr ? "Guidance & règlementation d'agence" : "Agency guidance & rulemaking",
+      types: ["federal_agency_guidance", "federal_agency_enforcement", "federal_rulemaking"],
+    },
+    { key: "legislative", label: fr ? "Activité législative" : "Legislative activity", types: ["federal_legislative_activity"] },
+    {
+      key: "soft",
+      label: fr ? "Droit souple & standards" : "Soft law & standards",
+      types: ["soft_law", "technical_standard", "case_law_source"],
+    },
+  ];
+  const covered = new Set(GROUP_DEFS.flatMap((g) => g.types));
+  const groups = [
+    ...GROUP_DEFS.map((g) => ({
+      ...g,
+      entries: usFederalBaselineEntries.filter((e) => g.types.includes(e.authorityType)),
+    })),
+    {
+      key: "other",
+      label: fr ? "Autres instruments" : "Other instruments",
+      types: [],
+      entries: usFederalBaselineEntries.filter((e) => !covered.has(e.authorityType)),
+    },
+  ].filter((g) => g.entries.length > 0);
+
   return (
     <SiteShell className="space-y-10">
       <MotionReveal>
@@ -94,9 +124,19 @@ export default async function UsFederalPage({
         />
       </MotionReveal>
 
-      <MotionStagger className="space-y-4">
-        {usFederalBaselineEntries.map((entry) => (
-          <MotionStaggerItem key={entry.id}>
+      {groups.map((group) => (
+        <section key={group.key} className="space-y-3">
+          <div className="flex items-center gap-2.5 border-b border-white/10 pb-2.5">
+            <h2 className="font-mono text-[10px] uppercase tracking-[0.26em] text-zinc-500">
+              {group.label}
+            </h2>
+            <span className="ml-auto font-mono text-[10px] text-zinc-400">
+              {group.entries.length}
+            </span>
+          </div>
+          <MotionStagger className="space-y-4">
+            {group.entries.map((entry) => (
+              <MotionStaggerItem key={entry.id}>
             <div
               id={entry.id}
               className="scroll-mt-28 rounded-[1.8rem] border border-black/6 bg-white p-5 shadow-[0_4px_20px_rgba(15,15,15,0.04)]"
@@ -162,9 +202,11 @@ export default async function UsFederalPage({
                 {fr ? "Source officielle" : "Official source"}
               </a>
             </div>
-          </MotionStaggerItem>
-        ))}
-      </MotionStagger>
+              </MotionStaggerItem>
+            ))}
+          </MotionStagger>
+        </section>
+      ))}
 
       <MotionReveal>
         <Link

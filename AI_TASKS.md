@@ -48,6 +48,14 @@ YYYY-MM-DD · <Agent> · <TASK-ID> · <STATUS>
 
 ## Current status
 
+2026-07-05 · Claude Code · T-IA-SUBPAGES · DONE-LOCAL
+- Intent:        Reduce per-page information density across the public site by splitting dense pages into focused sub-pages (user request: "une idée par page, très lisible").
+- Files:         new pages `src/app/[lang]/ai-regulation/europe/ai-act/calendar/`, `.../europe/case-law/`, `.../united-states/case-law/`; trimmed `europe/ai-act`, `europe/governance`, `united-states/governance` (moved content → link cards); `united-states/federal` grouped into sections by legal weight; hub tiles updated (`europe/page.tsx`, `united-states/page.tsx`); `sitemap.ts` now lists all hub sub-pages; `e2e/smoke.spec.ts` +3 routes.
+- Graph anchors: community "Intelligence Hub UI"; `getEuTiles()`, `getUsTiles()`, `europeAiCaseLawEntries`, `usFederalBaselineEntries`. (Rebuild graph — three new page nodes.)
+- Verification:  `npm run typecheck` PASS · `npm run lint` PASS (0 errors, 1 pre-existing `<img>` warning) · preview-env `npm run build` PASS (3 new routes present) · `npm test` PASS (107 files / 612) · `npx playwright test` PASS (17/17, incl. the 3 new routes).
+- Branch/commit: `ux/t-ia-subpages` (branched off `main` @ `e9d58f9` — main is now production, so this ships via preview → merge).
+- Next:          Operator validates the Vercel branch preview, then merge to `main` to deploy. Country/state profile pages keep their in-page tab nav (splitting 27+51 dynamic profiles into sub-routes deliberately deferred). Codex: no backend change.
+
 2026-07-04 · Codex · T-DURABLE-DATA · MERGED
 - Intent:        Merge the verified durable-data and UI integration into `main`, deploy production, and prove the live Vercel/Supabase/Railway scan path without overstating the still-unapplied migrations.
 - Files:         `AI_TASKS.md`, `docs/superpowers/plans/2026-07-01-durable-data-implementation-plan.md`; production merge contains migrations 013-015 and previously reviewed backend/UI changes.

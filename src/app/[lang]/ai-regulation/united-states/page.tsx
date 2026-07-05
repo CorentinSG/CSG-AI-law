@@ -59,8 +59,17 @@ function getUsTiles(fr: boolean) {
       eyebrow: fr ? "Acteurs & droit" : "Actors & law",
       title: fr ? "Gouvernance" : "Governance",
       description: fr
-        ? "FTC, EEOC, CFPB, jurisprudence et soft law fédérale — qui supervise quoi."
-        : "FTC, EEOC, CFPB, case law, and federal soft law — who oversees what.",
+        ? "FTC, EEOC, CFPB et soft law fédérale — qui supervise quoi."
+        : "FTC, EEOC, CFPB, and federal soft law — who oversees what.",
+      sub: [],
+    },
+    {
+      href: "/ai-regulation/united-states/case-law",
+      eyebrow: fr ? "Décisions & enforcement" : "Decisions & enforcement",
+      title: fr ? "Jurisprudence" : "Case law",
+      description: fr
+        ? "Décisions publiées et sources de jurisprudence surveillées."
+        : "Published decisions and monitored case-law sources.",
       sub: [],
     },
   ];
@@ -201,7 +210,7 @@ export default async function UnitedStatesAiRegulationPage({
           </p>
         </MotionReveal>
 
-        <MotionStagger className="grid gap-3 sm:grid-cols-3">
+        <MotionStagger className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           {usTiles.map((tile) => (
             <MotionStaggerItem key={tile.href}>
               <Link

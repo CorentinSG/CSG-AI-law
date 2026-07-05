@@ -38,7 +38,7 @@ function getEuTiles(fr: boolean) {
         { href: "/ai-regulation/europe/ai-act#risk", label: fr ? "Catégories de risque" : "Risk categories" },
         { href: "/ai-regulation/europe/ai-act#prohibited", label: fr ? "Pratiques interdites" : "Prohibited practices" },
         { href: "/ai-regulation/europe/ai-act#gpai", label: fr ? "Modèles GPAI" : "GPAI models" },
-        { href: "/ai-regulation/europe/ai-act#timeline", label: fr ? "Calendrier d'application" : "Application calendar" },
+        { href: "/ai-regulation/europe/ai-act/calendar", label: fr ? "Calendrier d'application" : "Application calendar" },
       ],
     },
     {
@@ -46,8 +46,17 @@ function getEuTiles(fr: boolean) {
       eyebrow: fr ? "Acteurs & droit dérivé" : "Actors & secondary law",
       title: fr ? "Gouvernance" : "Governance",
       description: fr
-        ? "AIBF, EDPB, autorités nationales, jurisprudence et décisions de supervision."
-        : "AI Office, EDPB, national authorities, case law, and oversight decisions.",
+        ? "AIBF, EDPB et autorités nationales — rôles, base légale, niveau d'autorité."
+        : "AI Office, EDPB, and national authorities — roles, legal basis, authority level.",
+      sub: [],
+    },
+    {
+      href: "/ai-regulation/europe/case-law",
+      eyebrow: fr ? "Décisions & enforcement" : "Decisions & enforcement",
+      title: fr ? "Jurisprudence" : "Case law",
+      description: fr
+        ? "Décisions publiées et sources de jurisprudence surveillées."
+        : "Published decisions and monitored case-law sources.",
       sub: [],
     },
     {
@@ -190,7 +199,7 @@ export default async function EuropeAiRegulationPage({
           </p>
         </MotionReveal>
 
-        <MotionStagger className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <MotionStagger className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
           {euTiles.map((tile) => (
             <MotionStaggerItem key={tile.href}>
               <Link

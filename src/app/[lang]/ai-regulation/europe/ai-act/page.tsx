@@ -174,67 +174,28 @@ export default async function EuAiActPage({
         ))}
       </MotionStagger>
 
-      {/* Phased application calendar */}
-      {act.phasedApplicationDates.length > 0 && (
-        <section id="timeline" className="scroll-mt-28 space-y-4">
-          <MotionReveal>
-            <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-zinc-400">
+      {/* Application calendar — dedicated sub-page */}
+      <MotionReveal>
+        <Link
+          id="timeline"
+          href={localeHref(lang, "/ai-regulation/europe/ai-act/calendar")}
+          className="group flex scroll-mt-28 items-center justify-between gap-4 rounded-[1.8rem] border border-white/10 bg-white/[0.03] p-5 transition-colors hover:bg-white/[0.05]"
+        >
+          <div>
+            <p className="font-display text-lg font-medium tracking-[-0.02em] text-zinc-950">
               {t.applicationCalendar}
             </p>
-          </MotionReveal>
-          <MotionStagger className="space-y-3">
-            {act.phasedApplicationDates.map((entry, i) => (
-              <MotionStaggerItem key={i}>
-                <div className="flex gap-4 rounded-[1.6rem] border border-black/6 bg-white p-4 shadow-[0_4px_20px_rgba(15,15,15,0.04)]">
-                  <div className="flex-shrink-0 text-right">
-                    <p className="font-display text-sm font-medium uppercase tracking-[-0.02em] text-zinc-950">
-                      {formatDisplayDate(entry.date)}
-                    </p>
-                    <span
-                      className={`mt-1 inline-block rounded-full px-2 py-0.5 font-mono text-[8px] uppercase tracking-[0.18em] ${
-                        entry.confidence === "high"
-                          ? "bg-emerald-50 text-emerald-700"
-                          : entry.confidence === "medium"
-                            ? "bg-amber-50 text-amber-700"
-                            : "bg-zinc-50 text-zinc-500"
-                      }`}
-                    >
-                      {entry.confidence}
-                    </span>
-                  </div>
-                  <div className="min-w-0 flex-1 border-l border-black/6 pl-4">
-                    <p className="font-medium text-zinc-950">{entry.label}</p>
-                    <p className="mt-1 text-sm leading-6 text-zinc-500">{entry.legalEffect}</p>
-                  </div>
-                </div>
-              </MotionStaggerItem>
-            ))}
-          </MotionStagger>
-        </section>
-      )}
-
-      {/* Key articles */}
-      {act.keyArticlesChaptersAnnexes.length > 0 && (
-        <section className="space-y-3">
-          <MotionReveal>
-            <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-zinc-400">
-              {t.keyArticles}
+            <p className="mt-1 text-sm leading-6 text-zinc-500">
+              {lang === "fr"
+                ? `${act.phasedApplicationDates.length} échéances officielles, avec leur effet juridique, et les articles clés.`
+                : `${act.phasedApplicationDates.length} official deadlines with their legal effect, plus key articles.`}
             </p>
-          </MotionReveal>
-          <MotionReveal delay={0.06}>
-            <div className="flex flex-wrap gap-2">
-              {act.keyArticlesChaptersAnnexes.map((ref) => (
-                <span
-                  key={ref}
-                  className="rounded-full border border-black/6 bg-zinc-50 px-3 py-1 font-mono text-[9px] uppercase tracking-[0.16em] text-zinc-600"
-                >
-                  {ref}
-                </span>
-              ))}
-            </div>
-          </MotionReveal>
-        </section>
-      )}
+          </div>
+          <span className="shrink-0 font-mono text-[10px] uppercase tracking-[0.2em] text-zinc-400 transition-colors group-hover:text-zinc-700">
+            {lang === "fr" ? "Ouvrir →" : "Open →"}
+          </span>
+        </Link>
+      </MotionReveal>
 
       <MotionReveal>
         <Link
