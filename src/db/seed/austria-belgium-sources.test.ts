@@ -55,9 +55,10 @@ describe("Austria and Belgium production source seed", () => {
     "configures the official AI hub %s with real listing selectors",
     (sourceId) => {
       const source = regulationSourcesSeed.find((entry) => entry.id === sourceId);
+      const config = source?.config ?? {};
 
-      expect(source?.config.itemSelector).toBe("main a[href]");
-      expect(source?.config.linkSelector).toBe("self");
+      expect(config.itemSelector).toBe("main a[href]");
+      expect(config.linkSelector).toBe("self");
     },
   );
 });
