@@ -66,6 +66,10 @@ function SelectFilter({
       <select
         value={value}
         onChange={(e) => onChange(e.target.value)}
+        // color-scheme:dark makes the native option popup render dark in
+        // Chromium/Firefox; the per-option style is the cross-browser fallback
+        // so the open dropdown is never white-on-white.
+        style={{ colorScheme: "dark" }}
         className={[
           "min-w-0 cursor-pointer appearance-none rounded-full border bg-white/[0.03] py-2 pl-3.5 pr-8 text-[13px] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-accent-strong,#c4882a)] focus-visible:ring-offset-1 focus-visible:ring-offset-[#0a0a0a]",
           active
@@ -73,9 +77,11 @@ function SelectFilter({
             : "border-white/10 text-white/60 hover:border-white/20 hover:text-white/85",
         ].join(" ")}
       >
-        <option value="">{label}</option>
+        <option value="" style={{ backgroundColor: "#141418", color: "#e9e9ea" }}>
+          {label}
+        </option>
         {options.map((o) => (
-          <option key={o.value} value={o.value}>
+          <option key={o.value} value={o.value} style={{ backgroundColor: "#141418", color: "#f4f4f5" }}>
             {o.label}
           </option>
         ))}
