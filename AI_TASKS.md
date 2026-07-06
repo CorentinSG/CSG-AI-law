@@ -64,7 +64,6 @@ YYYY-MM-DD · <Agent> · <TASK-ID> · <STATUS>
 - Verification:  baseline 612 tests PASS · final `npm test` PASS (110 files / 628 tests) · lint PASS with 3 pre-existing UI warnings · typecheck PASS · preview memory-mode build PASS · 14 production sources upserted and active (7 Austria / 7 Belgium) · direct runtime DSB scan parsed 5 items and APD scan parsed 8 items · official profile and source-specific production jobs reached the Railway worker but failed before connector execution because `service_role` lacks `SELECT` on `public.discovery_leads` (`42501`) · `main` fast-forwarded to `b7948cf` · Vercel production deployment `dpl_9qdyHoEv8cHYpHfF8VFtfWnVyomk` READY and aliased to `csg-ai-law.vercel.app`.
 - Branch/commit: `main` @ `b7948cf`.
 - Next:          Claude owns the production schema reconciliation: grant the required `service_role` privileges for `discovery_leads` (and complete the already-owned 003/013/016 reconciliation), then replay jobs `job-6a5c28aa-f1da-476a-ae2b-c43191db0204` and `job-b47a58fb-2dc3-4773-995b-34e90894ecb3`. Codex can then confirm Austria/Belgium leave `coverage.zeroSourceProfiles`; no Codex migration changes were made.
->>>>>>> origin/main
 
 2026-07-04 · Codex · T-DURABLE-DATA · MERGED
 - Intent:        Merge the verified durable-data and UI integration into `main`, deploy production, and prove the live Vercel/Supabase/Railway scan path without overstating the still-unapplied migrations.
