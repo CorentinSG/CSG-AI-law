@@ -9,6 +9,8 @@ import { getFranceAgentSourceIds } from "@/agents/ai-regulation/franceNewsSource
 import { getEuAgentSourceIds } from "@/agents/ai-regulation/euNewsSources";
 import { getItalyAgentSourceIds } from "@/agents/ai-regulation/italyNewsSources";
 import { getSpainAgentSourceIds } from "@/agents/ai-regulation/spainNewsSources";
+import { getAustriaAgentSourceIds } from "@/agents/ai-regulation/austriaNewsSources";
+import { getBelgiumAgentSourceIds } from "@/agents/ai-regulation/belgiumNewsSources";
 import type { RegulationSource } from "@/agents/ai-regulation/types";
 
 function createSource(overrides: Partial<RegulationSource>): RegulationSource {
@@ -34,6 +36,38 @@ function createSource(overrides: Partial<RegulationSource>): RegulationSource {
 }
 
 describe("scan profiles", () => {
+  it("gives Austria complete official and verification source contracts", () => {
+    const official = getAustriaAgentSourceIds("austria_official_legal_scan");
+    const verification = getAustriaAgentSourceIds("austria_verification_scan");
+
+    expect(official).toEqual(
+      expect.arrayContaining([
+        "src-at-dsb-ai",
+        "src-at-ris-ai-law",
+        "src-at-ris-ai-case-law",
+        "src-at-rtr-ai",
+      ]),
+    );
+    expect(official.some((id) => id.includes("newsapi") || id.includes("gdelt"))).toBe(false);
+    expect(verification.length).toBeGreaterThanOrEqual(2);
+  });
+
+  it("gives Belgium complete official and verification source contracts", () => {
+    const official = getBelgiumAgentSourceIds("belgium_official_legal_scan");
+    const verification = getBelgiumAgentSourceIds("belgium_verification_scan");
+
+    expect(official).toEqual(
+      expect.arrayContaining([
+        "src-be-apd-ai",
+        "src-be-justel-ai-law",
+        "src-be-courts-ai",
+        "src-be-digitalbelgium-ai",
+      ]),
+    );
+    expect(official.some((id) => id.includes("newsapi") || id.includes("gdelt"))).toBe(false);
+    expect(verification.length).toBeGreaterThanOrEqual(2);
+  });
+
   it("keeps discovery scans limited to discovery-like sources", () => {
     const sources = [
       createSource({ id: "official", sourceType: "regulator_page" }),
