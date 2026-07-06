@@ -46,47 +46,48 @@ function regionLabel(region: string, fr: boolean) {
   return "Europe";
 }
 
-/** A toggleable filter group: OR within the group, AND across groups. */
-function FilterGroup({
+/** A compact native <select> — familiar, quiet, keyboard-accessible. */
+function SelectFilter({
   label,
+  value,
+  onChange,
   options,
-  active,
-  onToggle,
 }: {
   label: string;
-  options: { value: string; label: string; count: number }[];
-  active: Set<string>;
-  onToggle: (value: string) => void;
+  value: string;
+  onChange: (v: string) => void;
+  options: { value: string; label: string }[];
 }) {
-  if (options.length <= 1) return null;
+  if (options.length === 0) return null;
+  const active = value !== "";
   return (
-    <div className="space-y-2">
-      <p className="font-mono text-[9px] uppercase tracking-[0.24em] text-white/40">{label}</p>
-      <div className="flex flex-wrap gap-1.5">
-        {options.map((opt) => {
-          const on = active.has(opt.value);
-          return (
-            <button
-              key={opt.value}
-              type="button"
-              onClick={() => onToggle(opt.value)}
-              aria-pressed={on}
-              className={[
-                "inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-[12px] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-accent-strong,#c4882a)] focus-visible:ring-offset-1 focus-visible:ring-offset-[#0a0a0a]",
-                on
-                  ? "border-[color:var(--color-accent-strong,#c4882a)]/40 bg-[color:var(--color-accent,#9a6b1f)]/[0.14] text-white"
-                  : "border-white/10 bg-white/[0.03] text-white/55 hover:border-white/20 hover:text-white/85",
-              ].join(" ")}
-            >
-              {opt.label}
-              <span className={on ? "text-[color:var(--color-accent-strong,#c4882a)]" : "text-white/30"}>
-                {opt.count}
-              </span>
-            </button>
-          );
-        })}
-      </div>
-    </div>
+    <label className="group relative inline-flex min-w-0 items-center">
+      <span className="sr-only">{label}</span>
+      <select
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className={[
+          "min-w-0 cursor-pointer appearance-none rounded-full border bg-white/[0.03] py-2 pl-3.5 pr-8 text-[13px] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-accent-strong,#c4882a)] focus-visible:ring-offset-1 focus-visible:ring-offset-[#0a0a0a]",
+          active
+            ? "border-[color:var(--color-accent-strong,#c4882a)]/40 text-white"
+            : "border-white/10 text-white/60 hover:border-white/20 hover:text-white/85",
+        ].join(" ")}
+      >
+        <option value="">{label}</option>
+        {options.map((o) => (
+          <option key={o.value} value={o.value}>
+            {o.label}
+          </option>
+        ))}
+      </select>
+      <svg
+        aria-hidden
+        viewBox="0 0 12 12"
+        className={`pointer-events-none absolute right-3 size-2.5 ${active ? "text-[color:var(--color-accent-strong,#c4882a)]" : "text-white/35"}`}
+      >
+        <path d="M2 4l4 4 4-4" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+      </svg>
+    </label>
   );
 }
 
@@ -100,119 +101,100 @@ export function StandardsExplorer({
   const fr = lang === "fr";
   const reduce = useReducedMotion();
   const [query, setQuery] = useState("");
-  const [types, setTypes] = useState<Set<string>>(new Set());
-  const [regions, setRegions] = useState<Set<string>>(new Set());
-  const [bindings, setBindings] = useState<Set<string>>(new Set());
-  const [access, setAccess] = useState<Set<string>>(new Set());
-  const [institutions, setInstitutions] = useState<Set<string>>(new Set());
+  const [type, setType] = useState("");
+  const [region, setRegion] = useState("");
+  const [binding, setBinding] = useState("");
 
-  const toggle = (set: Set<string>, setter: (s: Set<string>) => void) => (value: string) => {
-    const next = new Set(set);
-    if (next.has(value)) next.delete(value);
-    else next.add(value);
-    setter(next);
-  };
+  const L = (m: Record<string, { en: string; fr: string }>) => (v: string) =>
+    m[v] ? (fr ? m[v].fr : m[v].en) : v.replaceAll("_", " ");
+  const typeL = L(TYPE_LABEL);
+  const bindingL = L(BINDING_LABEL);
 
-  // Distinct filter options with live counts, derived from the data.
-  const options = useMemo(() => {
-    const tally = (key: (i: StandardsInstrument) => string, label: (v: string) => string) => {
-      const counts = new Map<string, number>();
-      for (const i of instruments) counts.set(key(i), (counts.get(key(i)) ?? 0) + 1);
-      return [...counts.entries()]
-        .map(([value, count]) => ({ value, label: label(value), count }))
-        .sort((a, b) => b.count - a.count || a.label.localeCompare(b.label));
-    };
-    const L = (m: Record<string, { en: string; fr: string }>) => (v: string) =>
-      (m[v] ? (fr ? m[v].fr : m[v].en) : v.replaceAll("_", " "));
+  // Distinct option values present in the data (so no dead filters).
+  const opts = useMemo(() => {
+    const distinct = (key: (i: StandardsInstrument) => string, label: (v: string) => string) =>
+      [...new Set(instruments.map(key))]
+        .map((value) => ({ value, label: label(value) }))
+        .sort((a, b) => a.label.localeCompare(b.label));
     return {
-      types: tally((i) => i.type, L(TYPE_LABEL)),
-      regions: tally((i) => i.region, (v) => regionLabel(v, fr)),
-      bindings: tally((i) => i.binding, L(BINDING_LABEL)),
-      access: tally((i) => i.access, L(ACCESS_LABEL)),
-      institutions: tally((i) => i.institution, (v) => v),
+      type: distinct((i) => i.type, typeL),
+      region: distinct((i) => i.region, (v) => regionLabel(v, fr)),
+      binding: distinct((i) => i.binding, bindingL),
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [instruments, fr]);
 
   const results = useMemo(() => {
     const q = query.trim().toLowerCase();
     return instruments.filter((i) => {
-      if (types.size && !types.has(i.type)) return false;
-      if (regions.size && !regions.has(i.region)) return false;
-      if (bindings.size && !bindings.has(i.binding)) return false;
-      if (access.size && !access.has(i.access)) return false;
-      if (institutions.size && !institutions.has(i.institution)) return false;
-      if (q) {
-        const hay = `${i.title} ${i.institution} ${i.summary}`.toLowerCase();
-        if (!hay.includes(q)) return false;
-      }
+      if (type && i.type !== type) return false;
+      if (region && i.region !== region) return false;
+      if (binding && i.binding !== binding) return false;
+      if (q && !`${i.title} ${i.institution} ${i.summary}`.toLowerCase().includes(q)) return false;
       return true;
     });
-  }, [instruments, query, types, regions, bindings, access, institutions]);
+  }, [instruments, query, type, region, binding]);
 
-  const activeCount =
-    types.size + regions.size + bindings.size + access.size + institutions.size + (query ? 1 : 0);
-
+  const hasFilters = Boolean(query || type || region || binding);
   const reset = () => {
     setQuery("");
-    setTypes(new Set());
-    setRegions(new Set());
-    setBindings(new Set());
-    setAccess(new Set());
-    setInstitutions(new Set());
+    setType("");
+    setRegion("");
+    setBinding("");
   };
 
   return (
-    <div className="space-y-6">
-      {/* Search */}
-      <div className="flex items-center gap-3 rounded-[1.4rem] border border-white/10 bg-white/[0.03] px-4 py-3">
-        <Search className="size-4 shrink-0 text-white/40" aria-hidden />
-        <input
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          placeholder={fr ? "Rechercher un instrument, une institution…" : "Search an instrument, an institution…"}
-          aria-label={fr ? "Rechercher parmi les standards" : "Search the standards"}
-          className="w-full bg-transparent text-[15px] text-white placeholder:text-white/35 focus:outline-none"
-        />
-        {query ? (
-          <button
-            type="button"
-            onClick={() => setQuery("")}
-            aria-label={fr ? "Effacer la recherche" : "Clear search"}
-            className="shrink-0 rounded-full p-1 text-white/40 transition-colors hover:text-white/80"
-          >
-            <X className="size-4" />
-          </button>
-        ) : null}
-      </div>
-
-      {/* Filters */}
-      <div className="grid gap-5 rounded-[1.6rem] border border-white/10 bg-white/[0.02] p-5 md:grid-cols-2">
-        <FilterGroup label={fr ? "Type" : "Type"} options={options.types} active={types} onToggle={toggle(types, setTypes)} />
-        <FilterGroup label={fr ? "Région" : "Region"} options={options.regions} active={regions} onToggle={toggle(regions, setRegions)} />
-        <FilterGroup label={fr ? "Statut contraignant" : "Binding status"} options={options.bindings} active={bindings} onToggle={toggle(bindings, setBindings)} />
-        <FilterGroup label={fr ? "Niveau d'accès" : "Access level"} options={options.access} active={access} onToggle={toggle(access, setAccess)} />
-        <div className="md:col-span-2">
-          <FilterGroup label={fr ? "Institution" : "Institution"} options={options.institutions} active={institutions} onToggle={toggle(institutions, setInstitutions)} />
+    <div className="space-y-5">
+      {/* Slim toolbar: search + compact dropdowns on one line */}
+      <div className="flex flex-wrap items-center gap-2">
+        <div className="flex min-w-[200px] flex-1 items-center gap-2.5 rounded-full border border-white/10 bg-white/[0.03] px-4 py-2">
+          <Search className="size-4 shrink-0 text-white/40" aria-hidden />
+          <input
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder={fr ? "Rechercher…" : "Search…"}
+            aria-label={fr ? "Rechercher parmi les standards" : "Search the standards"}
+            className="w-full bg-transparent text-[14px] text-white placeholder:text-white/35 focus:outline-none"
+          />
+          {query ? (
+            <button
+              type="button"
+              onClick={() => setQuery("")}
+              aria-label={fr ? "Effacer" : "Clear"}
+              className="shrink-0 rounded-full p-0.5 text-white/40 transition-colors hover:text-white/80"
+            >
+              <X className="size-3.5" />
+            </button>
+          ) : null}
         </div>
+        <SelectFilter label={fr ? "Type" : "Type"} value={type} onChange={setType} options={opts.type} />
+        <SelectFilter label={fr ? "Région" : "Region"} value={region} onChange={setRegion} options={opts.region} />
+        <SelectFilter label={fr ? "Statut" : "Status"} value={binding} onChange={setBinding} options={opts.binding} />
       </div>
 
-      {/* Result count + reset */}
+      {/* Count + reset */}
       <div className="flex items-center justify-between gap-4">
-        <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-white/45">
-          <motion.span key={results.length} initial={reduce ? false : { opacity: 0, y: -4 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.25, ease }} className="inline-block text-white/80">
+        <p className="font-mono text-[11px] uppercase tracking-[0.16em] text-white/45">
+          <motion.span
+            key={results.length}
+            initial={reduce ? false : { opacity: 0, y: -3 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.22, ease }}
+            className="inline-block text-white/80"
+          >
             {results.length}
           </motion.span>{" "}
           {fr
-            ? `instrument${results.length === 1 ? "" : "s"} sur ${instruments.length}`
+            ? `sur ${instruments.length} instrument${instruments.length === 1 ? "" : "s"}`
             : `of ${instruments.length} instrument${instruments.length === 1 ? "" : "s"}`}
         </p>
-        {activeCount > 0 ? (
+        {hasFilters ? (
           <button
             type="button"
             onClick={reset}
             className="font-mono text-[10px] uppercase tracking-[0.2em] text-white/45 underline decoration-white/15 underline-offset-4 transition-colors hover:text-white/80"
           >
-            {fr ? "Réinitialiser" : "Reset"} ({activeCount})
+            {fr ? "Réinitialiser" : "Reset"}
           </button>
         ) : null}
       </div>
@@ -240,11 +222,9 @@ export function StandardsExplorer({
               </div>
               <p className="mt-1.5 text-sm leading-6 text-white/55">{i.summary}</p>
               <div className="mt-3 flex flex-wrap items-center gap-x-2 gap-y-1.5 font-mono text-[9.5px] uppercase tracking-[0.14em] text-white/45">
-                <span className="text-white/60">
-                  {TYPE_LABEL[i.type] ? (fr ? TYPE_LABEL[i.type].fr : TYPE_LABEL[i.type].en) : i.type.replaceAll("_", " ")}
-                </span>
+                <span className="text-white/60">{typeL(i.type)}</span>
                 <span aria-hidden className="text-white/25">·</span>
-                <span>{BINDING_LABEL[i.binding] ? (fr ? BINDING_LABEL[i.binding].fr : BINDING_LABEL[i.binding].en) : i.binding}</span>
+                <span>{bindingL(i.binding)}</span>
                 <span aria-hidden className="text-white/25">·</span>
                 <span>{i.institution}</span>
                 <span aria-hidden className="text-white/25">·</span>
@@ -259,7 +239,7 @@ export function StandardsExplorer({
                       className="inline-flex items-center gap-1 text-[color:var(--color-accent-strong,#c4882a)] transition-colors hover:text-white/80"
                     >
                       <ArrowUpRight className="size-2.5" />
-                      {fr ? "source" : "source"}
+                      source
                     </a>
                   </>
                 ) : null}
@@ -270,7 +250,7 @@ export function StandardsExplorer({
 
         {results.length === 0 ? (
           <div className="py-10 text-center text-sm text-white/45">
-            {fr ? "Aucun instrument ne correspond à ces filtres." : "No instrument matches these filters."}
+            {fr ? "Aucun instrument ne correspond." : "No instrument matches."}
           </div>
         ) : null}
       </div>
