@@ -25,6 +25,7 @@ Each agent edits only its own rows. Status vocabulary: `CLAIMED` · `WIP` · `BL
 | T-AUDIT-HARDENING | Codex | DONE-LOCAL | `ops/t-ops9-ux` @ `ab63d39` | `src/content/ai-regulation/news.ts`, `src/lib/health.ts`, `src/agents/ai-regulation/agentApiCapabilities.ts`, `src/lib/admin-review-batch.ts`, related tests | `buildNewsItemFromUpdate()`, `buildHealthSnapshot()`, `listAgentApiCapabilities()`, `listPrioritizedReviewQueue()`, community "Source Runtime Health", community "Admin Review and Summaries" | 2026-06-22 |
 | T-DURABLE-DATA | Codex | MERGED | `main` @ `2125242` | migrations 013-015 awaiting production apply; Railway branch repoint awaiting console access | `evaluateSchemaIntegrity()`, `AiRegulationRepository`, `executeClaimedScanJob()`, community "DB Repository Layer", community "Scan Job Management", community "Data Ingestion Pipeline" | 2026-07-04 |
 | T-AT-BE-COVERAGE | Codex | MERGED | `main` @ `b7948cf` | production replay blocked only by existing `discovery_leads` service-role grant | `getAustriaAgentSourceIds()`, `getBelgiumAgentSourceIds()`, `selectSourcesForScanProfile()`, community "Community 32" | 2026-07-05 |
+| T-IE-NL-SE-COVERAGE | Codex | MERGED | `main` @ `f54ad63` | `src/db/seed/ai-regulation-seed.ts`, `src/db/migrations/018_ie_nl_se_monitoring_sources.sql`, `src/db/seed/ireland-netherlands-sweden-sources.test.ts` | `getIrelandAgentSourceIds()`, `getNetherlandsAgentSourceIds()`, `getSwedenAgentSourceIds()`, `selectSourcesForScanProfile()`, `buildHealthSnapshot()` | 2026-07-06 |
 | T-NEWS-BACKFILL-INTEGRITY | Codex | DONE-LOCAL | `ops/t-ops9-ux` @ working tree | `src/content/ai-regulation/news.ts`, `src/lib/news-backfill.ts`, `scripts/backfill-news-items.ts`, `src/db/seed/seed-profiles.ts`, related tests | `buildNewsItemFromUpdate()`, `backfillNewsItemsFromUpdates()`, `buildLegalDatabaseIntegrityReport()`, community "News and Regulation Admin", community "DB Repository Layer" | 2026-06-22 |
 | T-INGESTION-RUNTIME | Codex | DONE-LOCAL | `ops/t-ops9-ux` @ working tree | `src/agents/ingestion/**`, `scrapling_worker/**`, `src/agents/ai-regulation/agentApiCapabilities.ts` | `scraplingExtract()`, `firecrawlService.ts`, `listAgentApiCapabilities()`, community "Data Ingestion Pipeline", community "Scrapling Extraction Service", community "Agent API Capabilities" | 2026-06-22 |
 | T-BATCH-REVIEW-UI (P2b) | Claude Code | DONE-LOCAL | `ops/t-ops9-ux` @ `0f2809d` | `src/app/admin/ai-regulation/review/**`, `src/app/admin/ai-regulation/actions.ts`, `src/app/admin/page.tsx` | `listPrioritizedReviewQueue()`, `batchTransitionReviewStatus()`, `bulkUpdateReviewStatus`, community "Admin Review and Summaries" | 2026-06-21 |
@@ -48,6 +49,14 @@ YYYY-MM-DD · <Agent> · <TASK-ID> · <STATUS>
 ```
 
 ## Current status
+
+2026-07-06 · Codex · T-IE-NL-SE-COVERAGE · MERGED
+- Intent:        Add production-active Ireland, Netherlands, and Sweden monitoring sources so the remaining EU official scan profiles no longer resolve zero sources.
+- Files:         `src/db/seed/ai-regulation-seed.ts`, `src/db/migrations/018_ie_nl_se_monitoring_sources.sql`, `src/db/seed/ireland-netherlands-sweden-sources.test.ts`, `AI_TASKS.md`.
+- Graph anchors: `getIrelandAgentSourceIds()`, `getNetherlandsAgentSourceIds()`, `getSwedenAgentSourceIds()`, `selectSourcesForScanProfile()`, `buildHealthSnapshot()`.
+- Verification:  RED `npm test -- src/db/seed/ireland-netherlands-sweden-sources.test.ts` failed on missing sources · targeted tests PASS (24) · `npm test` PASS (111 files / 632 tests) · `npm run lint` PASS (0 errors, 1 pre-existing `<img>` warning) · `npm run typecheck` PASS · local `npm run build` PASS with temporary non-default admin creds · production migration 018 applied · replay jobs for Ireland/Netherlands/Sweden queued and drained by Railway · `/api/health` PASS with `ok=true`, `coverage.zeroSourceProfiles=[]`, worker `alive=true`.
+- Branch/commit: `main` @ `f54ad63`.
+- Next:          No EU zero-source profiles remain in prod health. Remaining backend follow-up is separate: durable DB-backed idle worker heartbeat so health does not rely only on recent scan-job activity.
 
 2026-07-05 · Claude Code · T-IA-SUBPAGES + T-STANDARDS-REDESIGN · DONE-LOCAL
 - Intent:        Reduce per-page information density (split dense pages into focused sub-pages) and fully redesign the Standards page (real data-driven inventory + slim search/filter toolbar + animations).
