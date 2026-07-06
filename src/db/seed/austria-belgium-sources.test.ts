@@ -37,11 +37,12 @@ describe("Austria and Belgium production source seed", () => {
           source?.sourceType,
         );
       } else {
+        const config = source?.config ?? {};
         expect(
-          discoveryProviders.has(String(source?.config.apiProvider)),
+          discoveryProviders.has(String(config.apiProvider)),
           descriptor.sourceId,
         ).toBe(true);
-        expect(source?.config.sourceCategory, descriptor.sourceId).toBe(
+        expect(config.sourceCategory, descriptor.sourceId).toBe(
           "media_discovery_source",
         );
       }

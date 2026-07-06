@@ -80,8 +80,11 @@ function getBelgiumDescriptorForItem(
             normalizedUrl.includes("gegevensbeschermingsautoriteit.be") ||
             normalizedUrl.includes("autoriteprotectiondonnees.be"))) ||
         (entry.sourceId === "src-be-digitalbelgium-ai" &&
-          normalizedUrl.includes("digitalbelgium.be")) ||
-        (entry.sourceId === "src-be-ai4belgium" && normalizedUrl.includes("ai4belgium.be")),
+          (normalizedUrl.includes("digitalbelgium.be") ||
+            normalizedUrl.includes("bosa.belgium.be"))) ||
+        (entry.sourceId === "src-be-ai4belgium" &&
+          (normalizedUrl.includes("ai4belgium.be") ||
+            normalizedUrl.includes("bosa.belgium.be"))),
     ) ?? null
   );
 }

@@ -787,7 +787,8 @@ export const regulationSourcesSeed: RegulationSource[] = [
     jurisdiction: "Belgium",
     region: "Europe",
     country: "Belgium",
-    sourceUrl: "https://digitalbelgium.be/",
+    sourceUrl:
+      "https://bosa.belgium.be/nl/themas/digitale-overheid/artificiele-intelligentie-en-nieuwe-technologieen/ethiek-en-recht/ai-act",
     sourceType: "regulator_page",
     scanFrequency: "daily",
     active: true,
@@ -810,7 +811,7 @@ export const regulationSourcesSeed: RegulationSource[] = [
     jurisdiction: "Belgium",
     region: "Europe",
     country: "Belgium",
-    sourceUrl: "https://www.ai4belgium.be/",
+    sourceUrl: "https://bosa.belgium.be/fr/AI4Belgium",
     sourceType: "regulator_page",
     scanFrequency: "daily",
     active: true,
