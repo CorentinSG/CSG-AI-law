@@ -250,3 +250,24 @@ Update only Codex-owned coordination rows and cite:
 git add AI_TASKS.md docs/superpowers/plans/2026-07-05-austria-belgium-monitoring-coverage-plan.md
 git commit -m "docs(monitoring): hand off Austria Belgium coverage"
 ```
+
+## Execution Status
+
+2026-07-05:
+
+- [x] Registry contracts implemented for all six profiles.
+- [x] Fourteen active sources added and tested: seven Austria, seven Belgium.
+- [x] Official profiles exclude NewsAPI/GDELT; verification profiles combine
+  authority and corroboration sources.
+- [x] Country-specific AI-plus-legal relevance filters implemented in German,
+  French, Dutch, and English.
+- [x] DSB and APD listing selectors verified against live pages.
+- [x] Production source upsert completed without migration changes.
+- [x] Local direct runtime proof: DSB parsed 5 items; APD parsed 8 items.
+- [x] Full local gate: 628 tests, lint without errors, typecheck, and preview
+  build pass.
+- [ ] Production profile proof is blocked before connector execution:
+  `service_role` lacks `SELECT` on `public.discovery_leads` (`42501`). This is
+  part of Claude Code's existing production schema reconciliation scope.
+- [ ] Health proof must be repeated after that grant so Austria and Belgium
+  disappear from `coverage.zeroSourceProfiles`.
