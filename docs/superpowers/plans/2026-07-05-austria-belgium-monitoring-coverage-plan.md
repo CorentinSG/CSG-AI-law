@@ -266,6 +266,9 @@ git commit -m "docs(monitoring): hand off Austria Belgium coverage"
 - [x] Local direct runtime proof: DSB parsed 5 items; APD parsed 8 items.
 - [x] Full local gate: 628 tests, lint without errors, typecheck, and preview
   build pass.
+- [x] Branch fast-forwarded to `main` at `b7948cf`; Vercel production
+  deployment `dpl_9qdyHoEv8cHYpHfF8VFtfWnVyomk` is READY and aliased to
+  `csg-ai-law.vercel.app`.
 - [ ] Production profile proof is blocked before connector execution:
   `service_role` lacks `SELECT` on `public.discovery_leads` (`42501`). This is
   part of Claude Code's existing production schema reconciliation scope.
