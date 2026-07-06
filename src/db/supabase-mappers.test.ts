@@ -1,9 +1,24 @@
 import { describe, expect, it } from "vitest";
 
-import { mapSourceRow, mapUpdateRow, updateToInsert } from "@/db/supabase-mappers";
+import {
+  mapSourceRow,
+  mapUpdateRow,
+  sourceToInsert,
+  updateToInsert,
+} from "@/db/supabase-mappers";
 import { aiRegulatoryUpdatesSeed } from "@/db/seed/ai-regulation-seed";
 
 describe("supabase mappers", () => {
+  it("defaults required ingestion fields when a source uses the existing pipeline", () => {
+    const row = sourceToInsert({
+      id: "src-test",
+      ingestionMethod: "existing",
+    });
+
+    expect(row.ingestion_method).toBe("existing");
+    expect(row.scrapling_config).toEqual({});
+  });
+
   it("maps regulatory update objects to insert rows and back", () => {
     const seed = aiRegulatoryUpdatesSeed[0];
     if (!seed) {

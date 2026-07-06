@@ -18,6 +18,8 @@ describe("Austria and Belgium production source seed", () => {
       expect(source?.active, descriptor.sourceId).toBe(true);
       expect(source?.country, descriptor.sourceId).toBe(country);
       expect(source?.jurisdiction, descriptor.sourceId).toBe(country);
+      expect(source?.ingestionMethod, descriptor.sourceId).toBeTruthy();
+      expect(source?.sourceCategory, descriptor.sourceId).toBeTruthy();
     }
   });
 
@@ -48,4 +50,14 @@ describe("Austria and Belgium production source seed", () => {
       }
     }
   });
+
+  it.each(["src-at-dsb-ai", "src-be-apd-ai"])(
+    "configures the official AI hub %s with real listing selectors",
+    (sourceId) => {
+      const source = regulationSourcesSeed.find((entry) => entry.id === sourceId);
+
+      expect(source?.config.itemSelector).toBe("main a[href]");
+      expect(source?.config.linkSelector).toBe("self");
+    },
+  );
 });
