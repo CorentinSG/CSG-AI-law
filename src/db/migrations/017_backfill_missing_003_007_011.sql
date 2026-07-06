@@ -197,6 +197,13 @@ create trigger discovery_leads_updated_at
   before update on discovery_leads
   for each row execute function update_discovery_leads_updated_at();
 
+-- NOTE: the original migration 007 never granted table privileges to service_role.
+-- In this project, tables created by the postgres role via the SQL editor do NOT
+-- inherit service_role grants automatically, so the discovery pipeline failed with
+-- "permission denied for table discovery_leads" (42501). Grant them explicitly,
+-- matching every other pipeline table.
+grant select, insert, update, delete on table discovery_leads to service_role;
+
 -- =====================================================================================
 -- From migration 011 — country-profile review audit + re-review flag
 -- =====================================================================================
