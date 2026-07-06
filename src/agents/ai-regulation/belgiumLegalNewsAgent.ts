@@ -21,13 +21,46 @@ import {
 import { normalizeNewsItemRecord, type AiLawNewsItem } from "@/content/ai-regulation/news";
 
 export function isBelgiumNewsItem(
-  item: Pick<AiLawNewsItem, "countryOrState" | "jurisdiction" | "region">,
+  item: Pick<
+    AiLawNewsItem,
+    | "countryOrState"
+    | "jurisdiction"
+    | "region"
+    | "title"
+    | "shortSummary"
+    | "legalArea"
+    | "topicTags"
+    | "authorityType"
+    | "developmentType"
+  >,
 ) {
-  return (
+  const isBelgium =
     item.countryOrState === "Belgium" ||
     item.jurisdiction === "Belgium" ||
-    (item.region === "Europe" && item.countryOrState === "Belgium")
-  );
+    (item.region === "Europe" && item.countryOrState === "Belgium");
+  if (!isBelgium) return false;
+
+  const text = [
+    item.title,
+    item.shortSummary,
+    item.legalArea,
+    item.authorityType,
+    item.developmentType,
+    ...item.topicTags,
+  ]
+    .join(" ")
+    .toLowerCase();
+
+  const hasAiSignal =
+    /\b(ai|ia)\b|intelligence artificielle|artificiële intelligentie|artificial intelligence|algorith|automatis|geautomatiseerd|profil|biometr|deepfake/.test(
+      text,
+    );
+  const hasLegalSignal =
+    /ai act|droit|recht|loi|wet|réglement|regelgeving|régulation|regulering|cour|hof|tribunal|rechtbank|décision|beslissing|apd|gba|justel|protection des données|gegevensbescherming|rgpd|avg|contrôle|toezicht|sanction|handhaving|compliance/.test(
+      text,
+    );
+
+  return hasAiSignal && hasLegalSignal;
 }
 
 function getBelgiumDescriptorForItem(
@@ -47,8 +80,11 @@ function getBelgiumDescriptorForItem(
             normalizedUrl.includes("gegevensbeschermingsautoriteit.be") ||
             normalizedUrl.includes("autoriteprotectiondonnees.be"))) ||
         (entry.sourceId === "src-be-digitalbelgium-ai" &&
-          normalizedUrl.includes("digitalbelgium.be")) ||
-        (entry.sourceId === "src-be-ai4belgium" && normalizedUrl.includes("ai4belgium.be")),
+          (normalizedUrl.includes("digitalbelgium.be") ||
+            normalizedUrl.includes("bosa.belgium.be"))) ||
+        (entry.sourceId === "src-be-ai4belgium" &&
+          (normalizedUrl.includes("ai4belgium.be") ||
+            normalizedUrl.includes("bosa.belgium.be"))),
     ) ?? null
   );
 }

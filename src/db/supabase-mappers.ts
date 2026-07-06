@@ -595,7 +595,7 @@ export function sourceToInsert(source: Partial<RegulationSource>) {
     config: source.config ?? {},
     ingestion_method: source.ingestionMethod,
     source_category: source.sourceCategory,
-    scrapling_config: source.scraplingConfig,
+    scrapling_config: source.scraplingConfig ?? {},
     crawl_root_url: source.crawlRootUrl,
     created_at: source.createdAt,
     updated_at: source.updatedAt,

@@ -21,13 +21,46 @@ import {
 import { normalizeNewsItemRecord, type AiLawNewsItem } from "@/content/ai-regulation/news";
 
 export function isAustriaNewsItem(
-  item: Pick<AiLawNewsItem, "countryOrState" | "jurisdiction" | "region">,
+  item: Pick<
+    AiLawNewsItem,
+    | "countryOrState"
+    | "jurisdiction"
+    | "region"
+    | "title"
+    | "shortSummary"
+    | "legalArea"
+    | "topicTags"
+    | "authorityType"
+    | "developmentType"
+  >,
 ) {
-  return (
+  const isAustria =
     item.countryOrState === "Austria" ||
     item.jurisdiction === "Austria" ||
-    (item.region === "Europe" && item.countryOrState === "Austria")
-  );
+    (item.region === "Europe" && item.countryOrState === "Austria");
+  if (!isAustria) return false;
+
+  const text = [
+    item.title,
+    item.shortSummary,
+    item.legalArea,
+    item.authorityType,
+    item.developmentType,
+    ...item.topicTags,
+  ]
+    .join(" ")
+    .toLowerCase();
+
+  const hasAiSignal =
+    /\b(ai|ki)\b|künstliche intelligenz|artificial intelligence|algorithm|automatisiert|profiling|biometr|deepfake|maschinelles lernen/.test(
+      text,
+    );
+  const hasLegalSignal =
+    /ai act|ki-verordnung|recht|gesetz|regulier|verordnung|gericht|entscheidung|urteil|dsb|datenschutz|dsgvo|rtr|ris|ams|aufsicht|durchsetzung|compliance|haftung/.test(
+      text,
+    );
+
+  return hasAiSignal && hasLegalSignal;
 }
 
 function getAustriaDescriptorForItem(
