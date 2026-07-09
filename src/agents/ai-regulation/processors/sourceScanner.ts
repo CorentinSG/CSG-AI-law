@@ -89,8 +89,10 @@ async function scanStaticSourceWithBrowserFallback(
 ): Promise<ConnectorScanResult> {
   const fallbackErrors: string[] = [];
   let document: NormalizedDocument | null = null;
+  let attemptedBrowserFallback = false;
 
   if (isScraplingRuntimeAvailable()) {
+    attemptedBrowserFallback = true;
     try {
       document = await scraplingExtract(
         source.sourceUrl,
@@ -103,6 +105,7 @@ async function scanStaticSourceWithBrowserFallback(
   }
 
   if (!document && process.env.FIRECRAWL_API_KEY) {
+    attemptedBrowserFallback = true;
     try {
       document = await scrapeUrl(source.sourceUrl, source.id);
     } catch (error) {
@@ -111,6 +114,20 @@ async function scanStaticSourceWithBrowserFallback(
   }
 
   if (!document) {
+    if (attemptedBrowserFallback && fallbackErrors.length === 0) {
+      const message =
+        `Browser fallback reached ${source.sourceUrl} after html_static failed, but returned no extractable title/body content.`;
+      return {
+        items: [],
+        errors: [],
+        warnings: [message],
+        responseStatus: null,
+        itemsFetched: 0,
+        zeroResultsReason: message,
+        fetchMetadata: null,
+      };
+    }
+
     const fallbackSummary =
       fallbackErrors.length > 0
         ? ` Fallback attempts also failed: ${fallbackErrors.join(" ")}`

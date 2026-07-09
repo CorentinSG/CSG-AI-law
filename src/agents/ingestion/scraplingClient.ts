@@ -18,13 +18,17 @@ export function getScraplingWorkerUrl() {
   const configuredUrl = process.env.SCRAPLING_WORKER_URL?.trim();
   if (configuredUrl) return configuredUrl;
 
-  return process.env.NODE_ENV === "production"
+  return isProductionLikeRuntime()
     ? PRODUCTION_SCRAPLING_WORKER_URL
     : LOCAL_SCRAPLING_WORKER_URL;
 }
 
+function isProductionLikeRuntime() {
+  return process.env.NODE_ENV === "production" || process.env.APP_DATA_MODE === "supabase";
+}
+
 export function isScraplingRuntimeAvailable() {
-  return Boolean(process.env.SCRAPLING_WORKER_URL?.trim()) || process.env.NODE_ENV === "production";
+  return Boolean(process.env.SCRAPLING_WORKER_URL?.trim()) || isProductionLikeRuntime();
 }
 
 /** Extract a single URL via the Scrapling worker. */

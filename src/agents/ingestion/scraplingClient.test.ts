@@ -62,4 +62,15 @@ describe("scrapling client", () => {
       "https://fantastic-nourishment-production-6d34.up.railway.app",
     );
   });
+
+  it("uses the public Railway sidecar in Supabase data mode even outside NODE_ENV production", () => {
+    vi.stubEnv("NODE_ENV", "development");
+    vi.stubEnv("APP_DATA_MODE", "supabase");
+    vi.stubEnv("SCRAPLING_WORKER_URL", "");
+
+    expect(isScraplingRuntimeAvailable()).toBe(true);
+    expect(getScraplingWorkerUrl()).toBe(
+      "https://fantastic-nourishment-production-6d34.up.railway.app",
+    );
+  });
 });

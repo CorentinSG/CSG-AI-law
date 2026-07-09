@@ -108,4 +108,17 @@ describe("sourceScanner static fallback", () => {
     await expect(sourceScanner.scanSource(mediaSource)).rejects.toThrow("fetch failed");
     expect(mocks.scraplingExtract).not.toHaveBeenCalled();
   });
+
+  it("treats an empty browser fallback document as a non-fatal zero-result scan", async () => {
+    mocks.staticScan.mockRejectedValueOnce(new Error("fetch failed"));
+    mocks.scraplingExtract.mockResolvedValueOnce(null);
+
+    const { sourceScanner } = await import("./sourceScanner");
+    const result = await sourceScanner.scanSource(officialStaticSource);
+
+    expect(result.items).toEqual([]);
+    expect(result.errors).toEqual([]);
+    expect(result.zeroResultsReason).toContain("returned no extractable title/body content");
+    expect(result.warnings.join(" ")).toContain("Browser fallback reached");
+  });
 });
