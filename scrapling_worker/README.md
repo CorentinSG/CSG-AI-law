@@ -55,6 +55,7 @@ project and private networking is enabled.
 | `SCRAPLING_WORKER_URL` | `http://localhost:8765` | URL used by Next.js to reach the worker |
 | `SCRAPING_USER_AGENT` | CSG-Law-AI-Intelligence/1.0 | HTTP user agent sent to target sites |
 | `SCRAPING_RATE_LIMIT_PER_DOMAIN` | `5` | Max requests per domain per run |
+| `SCRAPLING_ALLOW_INSECURE_SSL_FALLBACK` | `true` | Retry once with TLS certificate verification disabled when an official site fails certificate-chain validation |
 
 ## API
 

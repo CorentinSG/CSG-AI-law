@@ -35,6 +35,10 @@ USER_AGENT = os.getenv(
     "SCRAPING_USER_AGENT",
     "CSG-Law-AI-Intelligence/1.0 (legal monitoring; contact@saint-girons.com)",
 )
+ALLOW_INSECURE_SSL_FALLBACK = (
+    os.getenv("SCRAPLING_ALLOW_INSECURE_SSL_FALLBACK", "true").strip().lower()
+    in {"1", "true", "yes", "on"}
+)
 
 # Per-source extractor configs loaded from extractors/ directory
 _extractor_configs: dict[str, dict[str, Any]] = {}
@@ -59,6 +63,26 @@ def load_extractor_configs() -> None:
 # Load extractor configs at import time so they are populated under any WSGI
 # server (e.g. gunicorn imports `worker:app` and never runs the __main__ block).
 load_extractor_configs()
+
+
+def is_ssl_certificate_error(exc: Exception) -> bool:
+    message = str(exc).lower()
+    return "ssl certificate" in message or "certificate_verify_failed" in message
+
+
+def fetch_with_official_site_ssl_fallback(fetcher: Any, url: str) -> tuple[Any, list[str]]:
+    fetch_kwargs = {"headers": {"User-Agent": USER_AGENT}}
+    try:
+        return fetcher.get(url, **fetch_kwargs), []
+    except Exception as exc:  # noqa: BLE001
+        if not ALLOW_INSECURE_SSL_FALLBACK or not is_ssl_certificate_error(exc):
+            raise
+
+        warning = (
+            "Retried with HTTPS certificate verification disabled after the official "
+            f"site failed certificate validation: {exc}"
+        )
+        return fetcher.get(url, **fetch_kwargs, verify=False), [warning]
 
 
 def extract_page(url: str, config: dict[str, Any]) -> dict[str, Any]:
@@ -87,7 +111,7 @@ def extract_page(url: str, config: dict[str, Any]) -> dict[str, Any]:
         }
 
     try:
-        page = Fetcher.get(url, headers={"User-Agent": USER_AGENT})
+        page, fetch_warnings = fetch_with_official_site_ssl_fallback(Fetcher, url)
     except Exception as exc:  # noqa: BLE001
         return {
             "url": url,
@@ -151,12 +175,13 @@ def extract_page(url: str, config: dict[str, Any]) -> dict[str, Any]:
         "published_at": published_at,
         "canonical_url": canonical_url,
         "pdf_links": pdf_links,
+        "fetch_warnings": fetch_warnings,
     }
 
 
 @app.get("/health")
 def health():
-    return jsonify({"status": "ok", "version": "1.0.0"})
+    return jsonify({"status": "ok", "version": "1.0.1"})
 
 
 @app.post("/extract")
