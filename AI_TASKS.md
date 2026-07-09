@@ -26,6 +26,7 @@ Each agent edits only its own rows. Status vocabulary: `CLAIMED` · `WIP` · `BL
 | T-DURABLE-DATA | Codex | MERGED | `main` @ `2125242` | migrations 013-015 awaiting production apply; Railway branch repoint awaiting console access | `evaluateSchemaIntegrity()`, `AiRegulationRepository`, `executeClaimedScanJob()`, community "DB Repository Layer", community "Scan Job Management", community "Data Ingestion Pipeline" | 2026-07-04 |
 | T-AT-BE-COVERAGE | Codex | MERGED | `main` @ `b7948cf` | production replay blocked only by existing `discovery_leads` service-role grant | `getAustriaAgentSourceIds()`, `getBelgiumAgentSourceIds()`, `selectSourcesForScanProfile()`, community "Community 32" | 2026-07-05 |
 | T-IE-NL-SE-COVERAGE | Codex | MERGED | `main` @ `f65331c` | `src/db/seed/ai-regulation-seed.ts`, `src/db/migrations/018_ie_nl_se_monitoring_sources.sql`, `src/db/seed/ireland-netherlands-sweden-sources.test.ts` | `getIrelandAgentSourceIds()`, `getNetherlandsAgentSourceIds()`, `getSwedenAgentSourceIds()`, `selectSourcesForScanProfile()`, `buildHealthSnapshot()` | 2026-07-06 |
+| T-REMAINING-EU-COVERAGE | Codex | DONE-LOCAL | `main` @ working tree | `src/db/seed/ai-regulation-seed.ts`, `src/db/migrations/019_remaining_eu_member_state_monitoring_sources.sql`, `src/agents/ai-regulation/remainingEuMemberStateSources.test.ts` | `missingEuMemberStateAgentDefinitions`, `buildDefaultCountrySourceRegistry()`, `createCountryNewsSourceModule()`, community "Scan Pipeline" | 2026-07-08 |
 | T-NEWS-BACKFILL-INTEGRITY | Codex | DONE-LOCAL | `ops/t-ops9-ux` @ working tree | `src/content/ai-regulation/news.ts`, `src/lib/news-backfill.ts`, `scripts/backfill-news-items.ts`, `src/db/seed/seed-profiles.ts`, related tests | `buildNewsItemFromUpdate()`, `backfillNewsItemsFromUpdates()`, `buildLegalDatabaseIntegrityReport()`, community "News and Regulation Admin", community "DB Repository Layer" | 2026-06-22 |
 | T-INGESTION-RUNTIME | Codex | DONE-LOCAL | `ops/t-ops9-ux` @ working tree | `src/agents/ingestion/**`, `scrapling_worker/**`, `src/agents/ai-regulation/agentApiCapabilities.ts` | `scraplingExtract()`, `firecrawlService.ts`, `listAgentApiCapabilities()`, community "Data Ingestion Pipeline", community "Scrapling Extraction Service", community "Agent API Capabilities" | 2026-06-22 |
 | T-BATCH-REVIEW-UI (P2b) | Claude Code | DONE-LOCAL | `ops/t-ops9-ux` @ `0f2809d` | `src/app/admin/ai-regulation/review/**`, `src/app/admin/ai-regulation/actions.ts`, `src/app/admin/page.tsx` | `listPrioritizedReviewQueue()`, `batchTransitionReviewStatus()`, `bulkUpdateReviewStatus`, community "Admin Review and Summaries" | 2026-06-21 |
@@ -49,6 +50,14 @@ YYYY-MM-DD · <Agent> · <TASK-ID> · <STATUS>
 ```
 
 ## Current status
+
+2026-07-08 · Codex · T-REMAINING-EU-COVERAGE · DONE-LOCAL
+- Intent:        Activate the existing remaining-EU country agents by backing their expected default source IDs with real official/regulator and discovery sources for Bulgaria, Croatia, Cyprus, Czechia, Denmark, Estonia, Finland, Greece, Hungary, Latvia, Lithuania, Luxembourg, Malta, Poland, Portugal, Romania, Slovakia, and Slovenia.
+- Files:         `src/db/seed/ai-regulation-seed.ts`, `src/db/migrations/019_remaining_eu_member_state_monitoring_sources.sql`, `src/agents/ai-regulation/remainingEuMemberStateSources.test.ts`, `AI_TASKS.md`.
+- Graph anchors: `missingEuMemberStateAgentDefinitions`, `buildDefaultCountrySourceRegistry()`, `createCountryNewsSourceModule()`, community "Scan Pipeline".
+- Verification:  RED `npm test -- --run src/agents/ai-regulation/remainingEuMemberStateSources.test.ts` failed on missing source seeds · targeted tests PASS (10) · `npm test` PASS (112 files / 634 tests) · `npm run lint` PASS (0 errors, 1 pre-existing `<img>` warning) · `npm run typecheck` PASS · local `npm run build` PASS with temporary non-default admin credentials.
+- Branch/commit: `main` @ working tree.
+- Next:          Apply migration 019 to production after merge/deploy, then enqueue representative source jobs so Railway proves the new country sources drain end-to-end.
 
 2026-07-06 · Codex · T-IE-NL-SE-COVERAGE · MERGED
 - Intent:        Add production-active Ireland, Netherlands, and Sweden monitoring sources so the remaining EU official scan profiles no longer resolve zero sources.

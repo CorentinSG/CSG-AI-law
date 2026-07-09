@@ -8,7 +8,384 @@ import type {
 
 const now = "2026-05-24T18:30:00.000Z";
 
+const remainingEuMemberStateSourceInputs = [
+  {
+    code: "bg",
+    country: "Bulgaria",
+    dpaName: "Bulgarian Commission for Personal Data Protection",
+    dpaUrl: "https://www.cpdp.bg/",
+    governmentName: "Bulgarian Ministry of Electronic Governance",
+    governmentUrl: "https://egov.government.bg/",
+    newsQuery:
+      '(("artificial intelligence" OR "AI Act" OR "изкуствен интелект") AND (Bulgaria OR Bulgarian) AND (law OR regulation OR legal OR CPDP))',
+    gdeltQuery:
+      '("artificial intelligence" OR "AI Act" OR "изкуствен интелект") AND Bulgaria AND (law OR regulation OR CPDP)',
+    domains: ["bta.bg", "capital.bg", "dnevnik.bg", "reuters.com", "politico.eu", "euractiv.com"],
+  },
+  {
+    code: "hr",
+    country: "Croatia",
+    dpaName: "Croatian Personal Data Protection Agency",
+    dpaUrl: "https://azop.hr/",
+    governmentName: "Croatian Ministry of Justice, Public Administration and Digital Transformation",
+    governmentUrl: "https://mpudt.gov.hr/",
+    newsQuery:
+      '(("artificial intelligence" OR "AI Act" OR "umjetna inteligencija") AND (Croatia OR Hrvatska OR AZOP) AND (law OR regulation OR legal))',
+    gdeltQuery:
+      '("artificial intelligence" OR "AI Act" OR "umjetna inteligencija") AND (Croatia OR Hrvatska) AND (law OR regulation OR AZOP)',
+    domains: ["hina.hr", "jutarnji.hr", "vecernji.hr", "reuters.com", "politico.eu", "euractiv.com"],
+  },
+  {
+    code: "cy",
+    country: "Cyprus",
+    dpaName: "Cyprus Commissioner for Personal Data Protection",
+    dpaUrl: "https://www.dataprotection.gov.cy/",
+    governmentName: "Cyprus Deputy Ministry of Research, Innovation and Digital Policy",
+    governmentUrl:
+      "https://www.gov.cy/dmrid/en/uncategorized/regulation-eu-2024-1689-establishing-harmonised-rules-on-artificial-intelligence-ai-act/",
+    newsQuery:
+      '(("artificial intelligence" OR "AI Act") AND Cyprus AND (law OR regulation OR legal OR data protection))',
+    gdeltQuery:
+      '("artificial intelligence" OR "AI Act") AND Cyprus AND (law OR regulation OR legal)',
+    domains: ["cyprus-mail.com", "philenews.com", "stockwatch.com.cy", "reuters.com", "politico.eu", "euractiv.com"],
+  },
+  {
+    code: "cz",
+    country: "Czechia",
+    dpaName: "Czech Office for Personal Data Protection",
+    dpaUrl: "https://uoou.gov.cz/en",
+    governmentName: "Czech Ministry of Industry and Trade AI Act implementation",
+    governmentUrl:
+      "https://mpo.gov.cz/en/guidepost/for-the-media/press-releases/the-ministry-of-industry-and-trade-has-prepared-a-draft-law-on-artificial-intelligence----289865/",
+    newsQuery:
+      '(("artificial intelligence" OR "AI Act" OR "umělá inteligence") AND (Czechia OR Czech Republic OR ÚOOÚ) AND (law OR regulation OR legal))',
+    gdeltQuery:
+      '("artificial intelligence" OR "AI Act" OR "umělá inteligence") AND (Czechia OR "Czech Republic") AND (law OR regulation OR ÚOOÚ)',
+    domains: ["ctk.eu", "hn.cz", "lupa.cz", "reuters.com", "politico.eu", "euractiv.com"],
+  },
+  {
+    code: "dk",
+    country: "Denmark",
+    dpaName: "Danish Data Protection Agency",
+    dpaUrl: "https://www.datatilsynet.dk/english",
+    governmentName: "Danish Agency for Digital Government AI guidance",
+    governmentUrl:
+      "https://en.digst.dk/news/news-archive/2024/maj/the-agency-for-digital-government-publishes-ai-guides/",
+    newsQuery:
+      '(("artificial intelligence" OR "AI Act" OR "kunstig intelligens") AND Denmark AND (law OR regulation OR legal OR Datatilsynet))',
+    gdeltQuery:
+      '("artificial intelligence" OR "AI Act" OR "kunstig intelligens") AND Denmark AND (law OR regulation OR Datatilsynet)',
+    domains: ["berlingske.dk", "borsen.dk", "version2.dk", "reuters.com", "politico.eu", "euractiv.com"],
+  },
+  {
+    code: "ee",
+    country: "Estonia",
+    dpaName: "Estonian Data Protection Inspectorate",
+    dpaUrl: "https://www.aki.ee/en",
+    governmentName: "Estonia Kratid AI initiative",
+    governmentUrl: "https://www.kratid.ee/en",
+    newsQuery:
+      '(("artificial intelligence" OR "AI Act" OR "tehisintellekt") AND Estonia AND (law OR regulation OR legal OR AKI))',
+    gdeltQuery:
+      '("artificial intelligence" OR "AI Act" OR "tehisintellekt") AND Estonia AND (law OR regulation OR AKI)',
+    domains: ["err.ee", "news.err.ee", "postimees.ee", "reuters.com", "politico.eu", "euractiv.com"],
+  },
+  {
+    code: "fi",
+    country: "Finland",
+    dpaName: "Finnish Office of the Data Protection Ombudsman",
+    dpaUrl: "https://tietosuoja.fi/en/ai-systems-and-data-protection",
+    governmentName: "Traficom EU Artificial Intelligence Act materials",
+    governmentUrl: "https://traficom.fi/en/ai-regulation/about-eu-artificial-intelligence-act",
+    newsQuery:
+      '(("artificial intelligence" OR "AI Act" OR tekoäly) AND Finland AND (law OR regulation OR legal OR Traficom))',
+    gdeltQuery:
+      '("artificial intelligence" OR "AI Act" OR tekoäly) AND Finland AND (law OR regulation OR Traficom)',
+    domains: ["yle.fi", "hs.fi", "kauppalehti.fi", "reuters.com", "politico.eu", "euractiv.com"],
+  },
+  {
+    code: "gr",
+    country: "Greece",
+    dpaName: "Hellenic Data Protection Authority",
+    dpaUrl: "https://www.dpa.gr/en",
+    governmentName: "Greek National Codification Portal",
+    governmentUrl: "https://gslegal.gov.gr/en/national-codification-portal/",
+    newsQuery:
+      '(("artificial intelligence" OR "AI Act" OR "τεχνητή νοημοσύνη") AND Greece AND (law OR regulation OR legal OR DPA))',
+    gdeltQuery:
+      '("artificial intelligence" OR "AI Act" OR "τεχνητή νοημοσύνη") AND Greece AND (law OR regulation OR DPA)',
+    domains: ["ekathimerini.com", "lawspot.gr", "naftemporiki.gr", "reuters.com", "politico.eu", "euractiv.com"],
+  },
+  {
+    code: "hu",
+    country: "Hungary",
+    dpaName: "Hungarian National Authority for Data Protection and Freedom of Information",
+    dpaUrl: "https://www.naih.hu/",
+    governmentName: "Hungarian National Legislation Database",
+    governmentUrl: "https://njt.hu/",
+    newsQuery:
+      '(("artificial intelligence" OR "AI Act" OR "mesterséges intelligencia") AND Hungary AND (law OR regulation OR legal OR NAIH))',
+    gdeltQuery:
+      '("artificial intelligence" OR "AI Act" OR "mesterséges intelligencia") AND Hungary AND (law OR regulation OR NAIH)',
+    domains: ["portfolio.hu", "jogaszvilag.hu", "hvg.hu", "reuters.com", "politico.eu", "euractiv.com"],
+  },
+  {
+    code: "lv",
+    country: "Latvia",
+    dpaName: "Latvian Data State Inspectorate",
+    dpaUrl: "https://www.dvi.gov.lv/en",
+    governmentName: "Likumi.lv official legislation database",
+    governmentUrl: "https://likumi.lv/",
+    newsQuery:
+      '(("artificial intelligence" OR "AI Act" OR "mākslīgais intelekts") AND Latvia AND (law OR regulation OR legal OR DVI))',
+    gdeltQuery:
+      '("artificial intelligence" OR "AI Act" OR "mākslīgais intelekts") AND Latvia AND (law OR regulation OR DVI)',
+    domains: ["lvportals.lv", "juristavards.lv", "lsm.lv", "reuters.com", "politico.eu", "euractiv.com"],
+  },
+  {
+    code: "lt",
+    country: "Lithuania",
+    dpaName: "Lithuanian State Data Protection Inspectorate",
+    dpaUrl: "https://vdai.lrv.lt/en/",
+    governmentName: "Lithuanian Register of Legal Acts",
+    governmentUrl: "https://www.e-tar.lt/portal/en/index",
+    newsQuery:
+      '(("artificial intelligence" OR "AI Act" OR "dirbtinis intelektas") AND Lithuania AND (law OR regulation OR legal OR VDAI))',
+    gdeltQuery:
+      '("artificial intelligence" OR "AI Act" OR "dirbtinis intelektas") AND Lithuania AND (law OR regulation OR VDAI)',
+    domains: ["teise.pro", "vz.lt", "lrt.lt", "reuters.com", "politico.eu", "euractiv.com"],
+  },
+  {
+    code: "lu",
+    country: "Luxembourg",
+    dpaName: "Luxembourg National Commission for Data Protection",
+    dpaUrl: "https://cnpd.public.lu/en.html",
+    governmentName: "Legilux official legal portal",
+    governmentUrl: "https://legilux.public.lu/",
+    newsQuery:
+      '(("artificial intelligence" OR "AI Act") AND Luxembourg AND (law OR regulation OR legal OR CNPD))',
+    gdeltQuery:
+      '("artificial intelligence" OR "AI Act") AND Luxembourg AND (law OR regulation OR CNPD)',
+    domains: ["paperjam.lu", "luxtimes.lu", "virgule.lu", "reuters.com", "politico.eu", "euractiv.com"],
+  },
+  {
+    code: "mt",
+    country: "Malta",
+    dpaName: "Malta Information and Data Protection Commissioner",
+    dpaUrl: "https://idpc.org.mt/",
+    governmentName: "Legislation Malta",
+    governmentUrl: "https://legislation.mt/",
+    newsQuery:
+      '(("artificial intelligence" OR "AI Act") AND Malta AND (law OR regulation OR legal OR IDPC))',
+    gdeltQuery:
+      '("artificial intelligence" OR "AI Act") AND Malta AND (law OR regulation OR IDPC)',
+    domains: ["timesofmalta.com", "maltatoday.com.mt", "newsbook.com.mt", "reuters.com", "politico.eu", "euractiv.com"],
+  },
+  {
+    code: "pl",
+    country: "Poland",
+    dpaName: "Polish Personal Data Protection Office",
+    dpaUrl: "https://uodo.gov.pl/en",
+    governmentName: "Polish Ministry of Digital Affairs AI Act implementation",
+    governmentUrl: "https://www.gov.pl/web/cyfryzacja/wdrozenie-aktu-o-ai",
+    newsQuery:
+      '(("artificial intelligence" OR "AI Act" OR "sztuczna inteligencja") AND Poland AND (law OR regulation OR legal OR UODO))',
+    gdeltQuery:
+      '("artificial intelligence" OR "AI Act" OR "sztuczna inteligencja") AND Poland AND (law OR regulation OR UODO)',
+    domains: ["rp.pl", "prawo.pl", "dziennik.pl", "reuters.com", "politico.eu", "euractiv.com"],
+  },
+  {
+    code: "pt",
+    country: "Portugal",
+    dpaName: "Portuguese National Data Protection Commission",
+    dpaUrl: "https://www.cnpd.pt/",
+    governmentName: "Diário da República",
+    governmentUrl: "https://diariodarepublica.pt/",
+    newsQuery:
+      '(("artificial intelligence" OR "AI Act" OR "inteligência artificial") AND Portugal AND (law OR regulation OR legal OR CNPD))',
+    gdeltQuery:
+      '("artificial intelligence" OR "AI Act" OR "inteligência artificial") AND Portugal AND (law OR regulation OR CNPD)',
+    domains: ["observador.pt", "jornaldenegocios.pt", "publico.pt", "reuters.com", "politico.eu", "euractiv.com"],
+  },
+  {
+    code: "ro",
+    country: "Romania",
+    dpaName: "Romanian National Supervisory Authority for Personal Data Processing",
+    dpaUrl: "https://www.dataprotection.ro/",
+    governmentName: "Romanian national AI strategy",
+    governmentUrl:
+      "https://www.research.gov.ro/programe-nationale/strategia-nationala-in-domeniul-inteligentei-artificiale-2024-2027/",
+    newsQuery:
+      '(("artificial intelligence" OR "AI Act" OR "inteligența artificială") AND Romania AND (law OR regulation OR legal OR ANSPDCP))',
+    gdeltQuery:
+      '("artificial intelligence" OR "AI Act" OR "inteligența artificială") AND Romania AND (law OR regulation OR ANSPDCP)',
+    domains: ["juridice.ro", "hotnews.ro", "g4media.ro", "reuters.com", "politico.eu", "euractiv.com"],
+  },
+  {
+    code: "sk",
+    country: "Slovakia",
+    dpaName: "Slovak Office for Personal Data Protection",
+    dpaUrl: "https://dataprotection.gov.sk/uoou/en",
+    governmentName: "Slov-lex official legislation portal",
+    governmentUrl: "https://www.slov-lex.sk/",
+    newsQuery:
+      '(("artificial intelligence" OR "AI Act" OR "umelá inteligencia") AND Slovakia AND (law OR regulation OR legal OR UOOU))',
+    gdeltQuery:
+      '("artificial intelligence" OR "AI Act" OR "umelá inteligencia") AND Slovakia AND (law OR regulation OR UOOU)',
+    domains: ["pravnenoviny.sk", "sme.sk", "dennikn.sk", "reuters.com", "politico.eu", "euractiv.com"],
+  },
+  {
+    code: "si",
+    country: "Slovenia",
+    dpaName: "Slovenian Information Commissioner",
+    dpaUrl: "https://www.ip-rs.si/en",
+    governmentName: "Slovenian national AI ecosystem",
+    governmentUrl: "https://www.gov.si/teme/nacionalni-ekosistem-za-umetno-inteligenco/",
+    newsQuery:
+      '(("artificial intelligence" OR "AI Act" OR "umetna inteligenca") AND Slovenia AND (law OR regulation OR legal OR IPRS))',
+    gdeltQuery:
+      '("artificial intelligence" OR "AI Act" OR "umetna inteligenca") AND Slovenia AND (law OR regulation OR IPRS)',
+    domains: ["iusinfo.si", "sta.si", "delo.si", "reuters.com", "politico.eu", "euractiv.com"],
+  },
+] as const;
+
+function buildRemainingEuMemberStateSources(): RegulationSource[] {
+  return remainingEuMemberStateSourceInputs.flatMap((input) => {
+    const code = input.code;
+    const encodedNewsQuery = encodeURIComponent(input.newsQuery);
+    const encodedGdeltQuery = encodeURIComponent(input.gdeltQuery);
+    const domains = input.domains.join(",");
+
+    return [
+      {
+        id: `src-${code}-dpa-ai`,
+        name: `${input.dpaName} AI and data-protection materials`,
+        jurisdiction: input.country,
+        region: "Europe",
+        country: input.country,
+        sourceUrl: input.dpaUrl,
+        sourceType: "regulator_page",
+        scanFrequency: "daily",
+        active: true,
+        lastScannedAt: null,
+        notes: `Official ${input.country} data-protection authority source for AI, automated-decision, biometric, and data-protection enforcement monitoring.`,
+        reliabilityLevel: "high",
+        preferredExtractionMethod: "html_static",
+        config: {
+          maxItems: 15,
+          authorityTypeHint: "Agency guidance",
+          itemSelector: "main a[href], article a[href], a[href]",
+          linkSelector: "self",
+          includeAnyTerms: [
+            "artificial intelligence",
+            "AI Act",
+            "algorithm",
+            "automated decision",
+            "biometric",
+            "data protection",
+          ],
+          editorialNotes: [
+            "Official DPA/regulator source.",
+            "Regulator guidance and enforcement signals must be classified separately from binding legislation.",
+          ],
+        },
+        ingestionMethod: "existing",
+        sourceCategory: "regulator",
+        createdAt: now,
+        updatedAt: now,
+      },
+      {
+        id: `src-${code}-government-ai`,
+        name: `${input.governmentName} AI legal materials`,
+        jurisdiction: input.country,
+        region: "Europe",
+        country: input.country,
+        sourceUrl: input.governmentUrl,
+        sourceType: "static_page",
+        scanFrequency: "daily",
+        active: true,
+        lastScannedAt: null,
+        notes: `Official ${input.country} government or legal-database anchor for AI Act implementation, legislation, soft-law, and public-sector AI materials.`,
+        reliabilityLevel: "high",
+        preferredExtractionMethod: "html_static",
+        config: {
+          maxItems: 15,
+          authorityTypeHint: "Government policy",
+          itemSelector: "main a[href], article a[href], a[href]",
+          linkSelector: "self",
+          includeAnyTerms: [
+            "artificial intelligence",
+            "AI Act",
+            "algorithm",
+            "automated decision",
+            "regulation",
+            "legislation",
+          ],
+          editorialNotes: [
+            "Official government or legal-database source.",
+            "Use as authoritative legal-database input only when the item itself is an official legal or policy document.",
+          ],
+        },
+        ingestionMethod: "existing",
+        sourceCategory: "official",
+        createdAt: now,
+        updatedAt: now,
+      },
+      {
+        id: `src-${code}-newsapi-ai`,
+        name: `${input.country} AI legal news discovery (NewsAPI)`,
+        jurisdiction: input.country,
+        region: "Europe",
+        country: input.country,
+        sourceUrl: `https://newsapi.org/v2/everything?q=${encodedNewsQuery}&sortBy=publishedAt&pageSize=20&domains=${domains}`,
+        sourceType: "media_source",
+        scanFrequency: "hourly",
+        active: true,
+        lastScannedAt: null,
+        notes: `Discovery-only ${input.country} AI legal news query restricted to reputable national and EU policy media. Official confirmation remains required for legal-database publication.`,
+        reliabilityLevel: "medium",
+        preferredExtractionMethod: "api",
+        config: {
+          apiProvider: "newsapi",
+          sourceCategory: "media_discovery_source",
+          maxItems: 12,
+          allowedDomains: input.domains,
+        },
+        ingestionMethod: "existing",
+        sourceCategory: "media",
+        createdAt: now,
+        updatedAt: now,
+      },
+      {
+        id: `src-${code}-gdelt-ai`,
+        name: `${input.country} AI legal news corroboration (GDELT)`,
+        jurisdiction: input.country,
+        region: "Europe",
+        country: input.country,
+        sourceUrl: `https://api.gdeltproject.org/api/v2/doc/doc?query=${encodedGdeltQuery}&mode=artlist&format=json&maxrecords=20`,
+        sourceType: "discovery_source",
+        scanFrequency: "hourly",
+        active: true,
+        lastScannedAt: null,
+        notes: `Discovery and corroboration channel for ${input.country}; never authoritative by itself.`,
+        reliabilityLevel: "medium",
+        preferredExtractionMethod: "api",
+        config: {
+          apiProvider: "gdelt",
+          sourceCategory: "media_discovery_source",
+          maxItems: 12,
+        },
+        ingestionMethod: "existing",
+        sourceCategory: "media",
+        createdAt: now,
+        updatedAt: now,
+      },
+    ] satisfies RegulationSource[];
+  });
+}
+
 export const regulationSourcesSeed: RegulationSource[] = [
+  ...buildRemainingEuMemberStateSources(),
   {
     id: "src-federal-register-ai",
     name: "Federal Register AI Search Feed",
