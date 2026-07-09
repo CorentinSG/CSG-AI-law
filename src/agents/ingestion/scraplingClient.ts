@@ -10,8 +10,22 @@
 import { computeContentHash, normalizeUrl } from "./deduplication";
 import type { NormalizedDocument, ScraplingConfig, ScraplingExtractResult, ScraplingHealthResult } from "./types";
 
-const SCRAPLING_WORKER_URL =
-  process.env.SCRAPLING_WORKER_URL ?? "http://localhost:8765";
+const LOCAL_SCRAPLING_WORKER_URL = "http://localhost:8765";
+const PRODUCTION_SCRAPLING_WORKER_URL =
+  "https://fantastic-nourishment-production-6d34.up.railway.app";
+
+export function getScraplingWorkerUrl() {
+  const configuredUrl = process.env.SCRAPLING_WORKER_URL?.trim();
+  if (configuredUrl) return configuredUrl;
+
+  return process.env.NODE_ENV === "production"
+    ? PRODUCTION_SCRAPLING_WORKER_URL
+    : LOCAL_SCRAPLING_WORKER_URL;
+}
+
+export function isScraplingRuntimeAvailable() {
+  return Boolean(process.env.SCRAPLING_WORKER_URL?.trim()) || process.env.NODE_ENV === "production";
+}
 
 /** Extract a single URL via the Scrapling worker. */
 export async function scraplingExtract(
@@ -20,10 +34,11 @@ export async function scraplingExtract(
   config?: ScraplingConfig
 ): Promise<NormalizedDocument | null> {
   const normalized = normalizeUrl(url);
+  const workerUrl = getScraplingWorkerUrl();
 
   let res: Response;
   try {
-    res = await fetch(`${SCRAPLING_WORKER_URL}/extract`, {
+    res = await fetch(`${workerUrl}/extract`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -35,7 +50,7 @@ export async function scraplingExtract(
     });
   } catch (err) {
     throw new Error(
-      `Scrapling worker unreachable at ${SCRAPLING_WORKER_URL}: ${String(err)}`
+      `Scrapling worker unreachable at ${workerUrl}: ${String(err)}`
     );
   }
 
@@ -74,8 +89,9 @@ export async function scraplingExtract(
 
 /** Check if the Scrapling worker is healthy. */
 export async function checkScraplingHealth(): Promise<ScraplingHealthResult> {
+  const workerUrl = getScraplingWorkerUrl();
   try {
-    const res = await fetch(`${SCRAPLING_WORKER_URL}/health`, {
+    const res = await fetch(`${workerUrl}/health`, {
       signal: AbortSignal.timeout(5_000),
     });
     if (!res.ok) return { status: "error" };

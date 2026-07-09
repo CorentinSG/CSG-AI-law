@@ -1,10 +1,16 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { scraplingExtract, checkScraplingHealth } from "./scraplingClient";
+import {
+  checkScraplingHealth,
+  getScraplingWorkerUrl,
+  isScraplingRuntimeAvailable,
+  scraplingExtract,
+} from "./scraplingClient";
 
 describe("scrapling client", () => {
   afterEach(() => {
     vi.unstubAllGlobals();
+    vi.unstubAllEnvs();
   });
 
   it("passes source_id so the worker can load per-source extractor config", async () => {
@@ -45,5 +51,15 @@ describe("scrapling client", () => {
     vi.stubGlobal("fetch", vi.fn().mockRejectedValue(new Error("connection refused")));
 
     await expect(checkScraplingHealth()).resolves.toEqual({ status: "error" });
+  });
+
+  it("uses the public Railway sidecar as a production fallback when the env var is missing", () => {
+    vi.stubEnv("NODE_ENV", "production");
+    vi.stubEnv("SCRAPLING_WORKER_URL", "");
+
+    expect(isScraplingRuntimeAvailable()).toBe(true);
+    expect(getScraplingWorkerUrl()).toBe(
+      "https://fantastic-nourishment-production-6d34.up.railway.app",
+    );
   });
 });

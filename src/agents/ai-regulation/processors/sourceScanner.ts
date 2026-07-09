@@ -11,7 +11,10 @@ import type {
   SourceConnector,
 } from "@/agents/ai-regulation/connectors/types";
 import { scrapeUrl } from "@/agents/ingestion/firecrawlService";
-import { scraplingExtract } from "@/agents/ingestion/scraplingClient";
+import {
+  isScraplingRuntimeAvailable,
+  scraplingExtract,
+} from "@/agents/ingestion/scraplingClient";
 import type { NormalizedDocument } from "@/agents/ingestion/types";
 import type {
   ExtractedCandidateItem,
@@ -87,7 +90,7 @@ async function scanStaticSourceWithBrowserFallback(
   const fallbackErrors: string[] = [];
   let document: NormalizedDocument | null = null;
 
-  if (process.env.SCRAPLING_WORKER_URL) {
+  if (isScraplingRuntimeAvailable()) {
     try {
       document = await scraplingExtract(
         source.sourceUrl,

@@ -17,6 +17,7 @@ vi.mock("@/agents/ai-regulation/connectors/static-page-connector", () => ({
 }));
 
 vi.mock("@/agents/ingestion/scraplingClient", () => ({
+  isScraplingRuntimeAvailable: vi.fn(() => true),
   scraplingExtract: mocks.scraplingExtract,
 }));
 
