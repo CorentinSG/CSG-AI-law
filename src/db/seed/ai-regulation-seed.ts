@@ -13,7 +13,7 @@ const remainingEuMemberStateSourceInputs = [
     code: "bg",
     country: "Bulgaria",
     dpaName: "Bulgarian Commission for Personal Data Protection",
-    dpaUrl: "https://www.cpdp.bg/",
+    dpaUrl: "https://cpdp.bg/",
     governmentName: "Bulgarian Ministry of Electronic Governance",
     governmentUrl: "https://egov.government.bg/",
     newsQuery:
@@ -39,7 +39,7 @@ const remainingEuMemberStateSourceInputs = [
     code: "cy",
     country: "Cyprus",
     dpaName: "Cyprus Commissioner for Personal Data Protection",
-    dpaUrl: "https://www.dataprotection.gov.cy/",
+    dpaUrl: "https://www.dataprotection.gov.cy/dataprotection/dataprotection.nsf",
     governmentName: "Cyprus Deputy Ministry of Research, Innovation and Digital Policy",
     governmentUrl:
       "https://www.gov.cy/dmrid/en/uncategorized/regulation-eu-2024-1689-establishing-harmonised-rules-on-artificial-intelligence-ai-act/",
