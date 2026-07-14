@@ -8,6 +8,18 @@ import type {
 
 const now = "2026-05-24T18:30:00.000Z";
 
+type CountryMonitoringSourceInput = {
+  code: string;
+  country: RegulationSource["jurisdiction"];
+  dpaName: string;
+  dpaUrl: string;
+  governmentName: string;
+  governmentUrl: string;
+  newsQuery: string;
+  gdeltQuery: string;
+  domains: readonly string[];
+};
+
 const remainingEuMemberStateSourceInputs = [
   {
     code: "bg",
@@ -247,10 +259,208 @@ const remainingEuMemberStateSourceInputs = [
       '("artificial intelligence" OR "AI Act" OR "umetna inteligenca") AND Slovenia AND (law OR regulation OR IPRS)',
     domains: ["iusinfo.si", "sta.si", "delo.si", "reuters.com", "politico.eu", "euractiv.com"],
   },
-] as const;
+] as const satisfies readonly CountryMonitoringSourceInput[];
 
-function buildRemainingEuMemberStateSources(): RegulationSource[] {
-  return remainingEuMemberStateSourceInputs.flatMap((input) => {
+const nonEuEuropeSourceInputs = [
+  {
+    code: "gb",
+    country: "United Kingdom",
+    dpaName: "Information Commissioner's Office",
+    dpaUrl: "https://ico.org.uk/for-organisations/uk-gdpr-guidance-and-resources/artificial-intelligence/",
+    governmentName: "UK legislation and AI policy sources",
+    governmentUrl: "https://www.legislation.gov.uk/",
+    newsQuery:
+      '(("artificial intelligence" OR "AI Act" OR "algorithmic decision") AND ("United Kingdom" OR Britain OR ICO) AND (law OR regulation OR legal))',
+    gdeltQuery:
+      '("artificial intelligence" OR "AI Act" OR "algorithmic decision") AND ("United Kingdom" OR Britain OR ICO) AND (law OR regulation OR legal)',
+    domains: ["lawgazette.co.uk", "legalfutures.co.uk", "theregister.com", "reuters.com", "politico.eu", "ft.com"],
+  },
+  {
+    code: "no",
+    country: "Norway",
+    dpaName: "Norwegian Data Protection Authority",
+    dpaUrl: "https://www.datatilsynet.no/en/regulations-and-tools/artificial-intelligence/",
+    governmentName: "Lovdata official legal information",
+    governmentUrl: "https://lovdata.no/",
+    newsQuery:
+      '(("artificial intelligence" OR "AI Act" OR "kunstig intelligens") AND Norway AND (law OR regulation OR legal OR Datatilsynet))',
+    gdeltQuery:
+      '("artificial intelligence" OR "AI Act" OR "kunstig intelligens") AND Norway AND (law OR regulation OR Datatilsynet)',
+    domains: ["rett24.no", "digi.no", "nrk.no", "reuters.com", "politico.eu", "euractiv.com"],
+  },
+  {
+    code: "is",
+    country: "Iceland",
+    dpaName: "Icelandic Data Protection Authority",
+    dpaUrl: "https://www.personuvernd.is/information-in-english/",
+    governmentName: "Icelandic official gazette",
+    governmentUrl: "https://www.stjornartidindi.is/",
+    newsQuery:
+      '(("artificial intelligence" OR "AI Act" OR algorithm) AND Iceland AND (law OR regulation OR legal OR data protection))',
+    gdeltQuery:
+      '("artificial intelligence" OR "AI Act" OR algorithm) AND Iceland AND (law OR regulation OR legal)',
+    domains: ["ruv.is", "icelandreview.com", "visir.is", "reuters.com", "politico.eu"],
+  },
+  {
+    code: "ch",
+    country: "Switzerland",
+    dpaName: "Federal Data Protection and Information Commissioner",
+    dpaUrl: "https://www.edoeb.admin.ch/edoeb/en/home/datenschutz/technologien/ki.html",
+    governmentName: "Fedlex official publication platform",
+    governmentUrl: "https://www.fedlex.admin.ch/",
+    newsQuery:
+      '(("artificial intelligence" OR "AI Act" OR algorithm) AND Switzerland AND (law OR regulation OR legal OR FDPIC))',
+    gdeltQuery:
+      '("artificial intelligence" OR "AI Act" OR algorithm) AND Switzerland AND (law OR regulation OR FDPIC)',
+    domains: ["swissinfo.ch", "nzz.ch", "tagesanzeiger.ch", "reuters.com", "politico.eu"],
+  },
+  {
+    code: "li",
+    country: "Liechtenstein",
+    dpaName: "Liechtenstein Data Protection Office",
+    dpaUrl: "https://www.datenschutzstelle.li/",
+    governmentName: "Liechtenstein legal information system",
+    governmentUrl: "https://www.gesetze.li/",
+    newsQuery:
+      '(("artificial intelligence" OR "AI Act" OR algorithm) AND Liechtenstein AND (law OR regulation OR legal OR data protection))',
+    gdeltQuery:
+      '("artificial intelligence" OR "AI Act" OR algorithm) AND Liechtenstein AND (law OR regulation OR legal)',
+    domains: ["vaterland.li", "volksblatt.li", "liechtenstein-business.li", "reuters.com"],
+  },
+  {
+    code: "mc",
+    country: "Monaco",
+    dpaName: "Commission de Controle des Informations Nominatives",
+    dpaUrl: "https://www.ccin.mc/",
+    governmentName: "Legimonaco official legal portal",
+    governmentUrl: "https://legimonaco.mc/",
+    newsQuery:
+      '(("artificial intelligence" OR "AI Act" OR algorithm) AND Monaco AND (law OR regulation OR legal OR CCIN))',
+    gdeltQuery:
+      '("artificial intelligence" OR "AI Act" OR algorithm) AND Monaco AND (law OR regulation OR legal)',
+    domains: ["monacolife.net", "monaco-tribune.com", "reuters.com", "politico.eu"],
+  },
+  {
+    code: "ad",
+    country: "Andorra",
+    dpaName: "Andorran Data Protection Agency",
+    dpaUrl: "https://www.apda.ad/",
+    governmentName: "Butlleti Oficial del Principat d'Andorra",
+    governmentUrl: "https://www.bopa.ad/",
+    newsQuery:
+      '(("artificial intelligence" OR "AI Act" OR algorithm) AND Andorra AND (law OR regulation OR legal OR APDA))',
+    gdeltQuery:
+      '("artificial intelligence" OR "AI Act" OR algorithm) AND Andorra AND (law OR regulation OR legal)',
+    domains: ["andorradifusio.ad", "diariandorra.ad", "altaveu.com", "reuters.com"],
+  },
+  {
+    code: "sm",
+    country: "San Marino",
+    dpaName: "San Marino Data Protection Authority",
+    dpaUrl: "https://www.garanteprivacy.sm/",
+    governmentName: "San Marino institutional legal sources",
+    governmentUrl: "https://www.consigliograndeegenerale.sm/",
+    newsQuery:
+      '(("artificial intelligence" OR "AI Act" OR algorithm) AND "San Marino" AND (law OR regulation OR legal OR privacy))',
+    gdeltQuery:
+      '("artificial intelligence" OR "AI Act" OR algorithm) AND "San Marino" AND (law OR regulation OR legal)',
+    domains: ["sanmarinortv.sm", "libertas.sm", "reuters.com", "politico.eu"],
+  },
+  {
+    code: "va",
+    country: "Vatican City",
+    dpaName: "Vatican City official legal sources",
+    dpaUrl: "https://www.vaticanstate.va/",
+    governmentName: "Vatican archive and official documents",
+    governmentUrl: "https://www.vatican.va/archive/",
+    newsQuery:
+      '(("artificial intelligence" OR "AI Act" OR algorithm) AND (Vatican OR "Holy See") AND (law OR regulation OR legal))',
+    gdeltQuery:
+      '("artificial intelligence" OR "AI Act" OR algorithm) AND (Vatican OR "Holy See") AND (law OR regulation OR legal)',
+    domains: ["vaticannews.va", "reuters.com", "politico.eu"],
+  },
+  {
+    code: "al",
+    country: "Albania",
+    dpaName: "Information and Data Protection Commissioner",
+    dpaUrl: "https://www.idp.al/",
+    governmentName: "Albanian official publications center",
+    governmentUrl: "https://qbz.gov.al/",
+    newsQuery:
+      '(("artificial intelligence" OR "AI Act" OR algorithm) AND Albania AND (law OR regulation OR legal OR IDP))',
+    gdeltQuery:
+      '("artificial intelligence" OR "AI Act" OR algorithm) AND Albania AND (law OR regulation OR IDP)',
+    domains: ["exit.al", "tiranatimes.com", "balkaninsight.com", "euractiv.com", "reuters.com"],
+  },
+  {
+    code: "ba",
+    country: "Bosnia and Herzegovina",
+    dpaName: "Personal Data Protection Agency of Bosnia and Herzegovina",
+    dpaUrl: "https://azlp.ba/",
+    governmentName: "Parliamentary Assembly of Bosnia and Herzegovina",
+    governmentUrl: "https://www.parlament.ba/",
+    newsQuery:
+      '(("artificial intelligence" OR "AI Act" OR algorithm) AND ("Bosnia and Herzegovina" OR Bosnia) AND (law OR regulation OR legal OR data protection))',
+    gdeltQuery:
+      '("artificial intelligence" OR "AI Act" OR algorithm) AND ("Bosnia and Herzegovina" OR Bosnia) AND (law OR regulation OR legal)',
+    domains: ["balkaninsight.com", "klix.ba", "sarajevotimes.com", "reuters.com", "euractiv.com"],
+  },
+  {
+    code: "xk",
+    country: "Kosovo",
+    dpaName: "Information and Privacy Agency",
+    dpaUrl: "https://aip.rks-gov.net/",
+    governmentName: "Official Gazette of Kosovo",
+    governmentUrl: "https://gzk.rks-gov.net/",
+    newsQuery:
+      '(("artificial intelligence" OR "AI Act" OR algorithm) AND Kosovo AND (law OR regulation OR legal OR privacy))',
+    gdeltQuery:
+      '("artificial intelligence" OR "AI Act" OR algorithm) AND Kosovo AND (law OR regulation OR legal)',
+    domains: ["prishtinainsight.com", "koha.net", "balkaninsight.com", "reuters.com", "euractiv.com"],
+  },
+  {
+    code: "me",
+    country: "Montenegro",
+    dpaName: "Agency for Personal Data Protection and Free Access to Information",
+    dpaUrl: "https://www.azlp.me/",
+    governmentName: "Government of Montenegro legal and policy portal",
+    governmentUrl: "https://www.gov.me/",
+    newsQuery:
+      '(("artificial intelligence" OR "AI Act" OR algorithm) AND Montenegro AND (law OR regulation OR legal OR data protection))',
+    gdeltQuery:
+      '("artificial intelligence" OR "AI Act" OR algorithm) AND Montenegro AND (law OR regulation OR legal)',
+    domains: ["vijesti.me", "balkaninsight.com", "reuters.com", "euractiv.com"],
+  },
+  {
+    code: "mk",
+    country: "North Macedonia",
+    dpaName: "Personal Data Protection Agency of North Macedonia",
+    dpaUrl: "https://azlp.mk/",
+    governmentName: "Official Gazette of North Macedonia",
+    governmentUrl: "https://www.slvesnik.com.mk/",
+    newsQuery:
+      '(("artificial intelligence" OR "AI Act" OR algorithm) AND ("North Macedonia" OR Macedonia) AND (law OR regulation OR legal OR data protection))',
+    gdeltQuery:
+      '("artificial intelligence" OR "AI Act" OR algorithm) AND ("North Macedonia" OR Macedonia) AND (law OR regulation OR legal)',
+    domains: ["mia.mk", "balkaninsight.com", "slobodenpecat.mk", "reuters.com", "euractiv.com"],
+  },
+  {
+    code: "rs",
+    country: "Serbia",
+    dpaName: "Commissioner for Information of Public Importance and Personal Data Protection",
+    dpaUrl: "https://www.poverenik.rs/",
+    governmentName: "Serbian legal information system",
+    governmentUrl: "https://www.pravno-informacioni-sistem.rs/",
+    newsQuery:
+      '(("artificial intelligence" OR "AI Act" OR algorithm) AND Serbia AND (law OR regulation OR legal OR data protection))',
+    gdeltQuery:
+      '("artificial intelligence" OR "AI Act" OR algorithm) AND Serbia AND (law OR regulation OR legal)',
+    domains: ["balkaninsight.com", "n1info.rs", "politika.rs", "reuters.com", "euractiv.com"],
+  },
+] as const satisfies readonly CountryMonitoringSourceInput[];
+
+function buildCountryMonitoringSources(inputs: readonly CountryMonitoringSourceInput[]): RegulationSource[] {
+  return inputs.flatMap((input) => {
     const code = input.code;
     const encodedNewsQuery = encodeURIComponent(input.newsQuery);
     const encodedGdeltQuery = encodeURIComponent(input.gdeltQuery);
@@ -384,8 +594,17 @@ function buildRemainingEuMemberStateSources(): RegulationSource[] {
   });
 }
 
+function buildRemainingEuMemberStateSources(): RegulationSource[] {
+  return buildCountryMonitoringSources(remainingEuMemberStateSourceInputs);
+}
+
+function buildNonEuEuropeSources(): RegulationSource[] {
+  return buildCountryMonitoringSources(nonEuEuropeSourceInputs);
+}
+
 export const regulationSourcesSeed: RegulationSource[] = [
   ...buildRemainingEuMemberStateSources(),
+  ...buildNonEuEuropeSources(),
   {
     id: "src-federal-register-ai",
     name: "Federal Register AI Search Feed",

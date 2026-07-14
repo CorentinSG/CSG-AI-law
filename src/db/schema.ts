@@ -28,6 +28,23 @@ const euMemberStateJurisdictions = [
   "Sweden",
 ] as const;
 
+const nonEuWesternBalkanEuropeJurisdictions = [
+  "Albania",
+  "Andorra",
+  "Bosnia and Herzegovina",
+  "Iceland",
+  "Kosovo",
+  "Liechtenstein",
+  "Monaco",
+  "Montenegro",
+  "North Macedonia",
+  "Norway",
+  "San Marino",
+  "Serbia",
+  "Switzerland",
+  "Vatican City",
+] as const;
+
 const usStateJurisdictions = [
   "Alabama",
   "Alaska",
@@ -88,6 +105,7 @@ export const jurisdictions = [
   "European Union",
   ...euMemberStateJurisdictions,
   "United Kingdom",
+  ...nonEuWesternBalkanEuropeJurisdictions,
   "Canada",
   "OECD",
   "Council of Europe",
