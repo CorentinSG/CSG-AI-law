@@ -19,6 +19,7 @@
     "backfill:country-baselines": "tsx scripts/backfill-country-baselines.ts",
     "backfill:country-legal-baselines": "tsx scripts/backfill-country-legal-baselines.ts",
     "backfill:monitored-country-legal-baselines": "tsx scripts/backfill-monitored-country-legal-baselines.ts",
+    "backfill:pilot-country-deep-entries": "tsx scripts/backfill-pilot-country-deep-entries.ts",
     "scan:france-official-legal": "tsx scripts/run-france-official-legal-scan.ts",
     "scan:france-legal-news": "tsx scripts/run-france-legal-news-scan.ts",
     "scan:france-verification": "tsx scripts/run-france-verification-scan.ts",
