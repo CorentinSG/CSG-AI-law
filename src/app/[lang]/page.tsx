@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { ArrowUpRight, Scale, FileText, ShieldCheck } from "lucide-react";
 
 import { HeroVideoSection } from "@/components/site/hero-video-section";
+import { HomeScrollNav } from "@/components/site/home-scroll-nav";
 import { MotionReveal } from "@/components/site/motion-reveal";
 import { MotionStagger, MotionStaggerItem } from "@/components/site/motion-stagger";
 import { LOCALES, isLocale } from "@/lib/i18n/config";
@@ -48,6 +49,9 @@ export default async function HomePage({
 
   return (
     <div className="bg-[#080808] text-white">
+      {/* Condensed nav — reveals once the hero scrolls out of view */}
+      <HomeScrollNav dict={dict} lang={lang} />
+
       {/* ── Full-screen hero ── */}
       <HeroVideoSection dict={dict} lang={lang} />
 
