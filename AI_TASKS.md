@@ -55,6 +55,14 @@ YYYY-MM-DD · <Agent> · <TASK-ID> · <STATUS>
 
 ## Current status
 
+2026-07-15 - Codex - T-COUNTRY-MONITORING-BACKFILL-WAVE-2 - MERGED
+- Intent:        Continue progressive country database alimentation and clear recent active-source failures after the first wave.
+- Files:         `AI_TASKS.md`.
+- Graph anchors: `runAiRegulationScan()`, `sourceScanner`, `scraplingExtract()`, `getCountryDatabaseReadiness()`, community "Scan Pipeline", community "Scrapling Extraction Service", community "Source Runtime Health".
+- Verification:  official-source backfill wave executed for Iceland, Kosovo, Latvia, Liechtenstein, Lithuania, Luxembourg, Malta, Monaco, Montenegro, North Macedonia, Norway, Poland, Portugal, Romania, San Marino, Serbia, Slovakia, Slovenia, and Switzerland (38 source executions; no scan crashes; Scrapling recovered Iceland, North Macedonia, Norway, Romania, Slovakia/Switzerland/Slovenia DPA fallbacks where plain static fetch failed) - exact replay of recent failing sources `src-ie-gov-ai`, `src-nl-rijksoverheid-ai`, `src-edpb-ai`, `src-edps-ai` all returned `success` - final active-source recent-failure audit reports `failingCount=0` - readiness remains honest: `blocked=0`, `degraded=16`, `needsBackfill=30`, `averageScore=92` because many country profiles still need verified citations and/or structured legal entries, not because monitoring is broken.
+- Branch/commit: `main` @ working tree.
+- Next:          Continue slower media/news discovery batches after confirming `NEWSAPI_API_KEY` in the execution runtime; consider targeted selector/source refinements for official pages that return success but no extractable content (Lithuania official pages, Monaco legislation page, EDPS/Irish government pages).
+
 2026-07-15 - Codex - T-COUNTRY-MONITORING-BACKFILL-WAVE-1 - MERGED
 - Intent:        Start progressive country database alimentation with small official-source waves, then repair the one source failure found during replay.
 - Files:         `src/db/seed/ai-regulation-seed.ts`, `src/db/migrations/019_remaining_eu_member_state_monitoring_sources.sql`, `src/db/migrations/023_repair_hungary_legislation_source_url.sql`, `AI_TASKS.md`.
