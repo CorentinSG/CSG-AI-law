@@ -55,6 +55,14 @@ YYYY-MM-DD · <Agent> · <TASK-ID> · <STATUS>
 
 ## Current status
 
+2026-07-15 - Codex - T-MONITORED-NON-EU-LEGAL-BASELINES - MERGED
+- Intent:        Complete the first structured baseline layer for monitored non-EU western/balkan Europe jurisdictions so no covered country remains empty.
+- Files:         `scripts/backfill-monitored-country-legal-baselines.ts`, `package.json`, `AI_TASKS.md`.
+- Graph anchors: `updateRepository.getSources()`, `updateRepository.createRawItem()`, `updateRepository.createUpdate()`, `getCountryDatabaseReadiness()`, community "DB Repository Layer", community "Scan Pipeline", community "Source Runtime Health".
+- Verification:  added dry-run-first `npm run backfill:monitored-country-legal-baselines` that builds reviewable baselines directly from active official/regulator monitoring sources; live Supabase created 14 structured baselines for Albania, Andorra, Bosnia and Herzegovina, Iceland, Kosovo, Liechtenstein, Monaco, Montenegro, North Macedonia, Norway, San Marino, Serbia, Switzerland, and Vatican City; total `country-legal-baseline` updates now 41; readiness now reports `ready=0`, `degraded=46`, `needsBackfill=0`, `blocked=0`, `averageScore=97`; `npm test -- src/lib/country-database-readiness.test.ts src/agents/ai-regulation/nonEuEuropeSources.test.ts` PASS (7); `npm run typecheck` PASS.
+- Branch/commit: `main` @ working tree.
+- Next:          The first complete monitoring-baseline layer is now present. Next work should deepen quality: final authority designation instruments, national acts, soft-law/guidance, case-law, timelines, media/news enrichment, and admin review/publication of selected baseline updates.
+
 2026-07-15 - Codex - T-COUNTRY-LEGAL-BASELINE-UPDATES - MERGED
 - Intent:        Turn country profiles into structured legal-database baseline entries so the backend has one reviewable AI Act monitoring baseline update per EU Member State.
 - Files:         `scripts/backfill-country-legal-baselines.ts`, `package.json`, `AI_TASKS.md`.
