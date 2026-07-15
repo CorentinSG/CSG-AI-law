@@ -1,8 +1,32 @@
 import type { Metadata } from "next";
+import { Inter, Bricolage_Grotesque, IBM_Plex_Mono } from "next/font/google";
 
 import { env } from "@/lib/env";
 
 import "./globals.css";
+
+// Self-hosted via next/font so the site's typography survives the strict CSP
+// (font-src 'self') and drops the render-blocking Google Fonts @import.
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-inter",
+  display: "swap",
+});
+
+const bricolage = Bricolage_Grotesque({
+  subsets: ["latin"],
+  variable: "--font-bricolage",
+  display: "swap",
+});
+
+// The instrument-panel label face. Previously declared in the token stack but
+// never actually loaded — every mono label fell back to the system monospace.
+const plexMono = IBM_Plex_Mono({
+  subsets: ["latin"],
+  weight: ["400", "500"],
+  variable: "--font-plex-mono",
+  display: "swap",
+});
 
 export const metadata: Metadata = {
   metadataBase: new URL(env.NEXT_PUBLIC_SITE_URL),
@@ -26,7 +50,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="h-full antialiased">
+    <html
+      lang="en"
+      className={`${inter.variable} ${bricolage.variable} ${plexMono.variable} h-full antialiased`}
+    >
       <body className="min-h-full flex flex-col">{children}</body>
     </html>
   );

@@ -45,17 +45,17 @@ export function HeroVideoSection({
             C. Saint-Girons, Esq
           </span>
 
-          <div className="hidden items-center gap-7 text-[13px] text-white/50 md:flex">
-            <Link href="/ai-regulation" className="transition-colors hover:text-white/90">{dict.nav.aiRegulation}</Link>
-            <Link href="/research" className="transition-colors hover:text-white/90">{dict.nav.notes}</Link>
-            <Link href="/standards" className="transition-colors hover:text-white/90">{dict.nav.standards}</Link>
+          <div className="hidden items-center gap-7 text-[13px] text-white/70 md:flex">
+            <Link href={`/${lang}/ai-regulation`} className="transition-colors hover:text-white">{dict.nav.aiRegulation}</Link>
+            <Link href={`/${lang}/research`} className="transition-colors hover:text-white">{dict.nav.notes}</Link>
+            <Link href={`/${lang}/standards`} className="transition-colors hover:text-white">{dict.nav.standards}</Link>
           </div>
 
           <div className="flex items-center gap-3">
             <LanguageToggle lang={lang} />
             <Link
-              href="/ai-regulation"
-              className="rounded-lg border border-white/15 px-5 py-2 text-[13px] font-medium text-white/70 transition hover:border-white/35 hover:text-white"
+              href={`/${lang}/ai-regulation`}
+              className="rounded-lg border border-white/15 px-5 py-2 text-[13px] font-medium text-white/80 transition hover:border-white/35 hover:text-white"
             >
               {dict.nav.openHub}
             </Link>
@@ -67,7 +67,7 @@ export function HeroVideoSection({
           <div className="max-w-full sm:max-w-[80%] lg:max-w-[50%]">
 
             <FadeIn delay={80} duration={700}>
-              <p className="mb-7 font-mono text-[10.5px] uppercase tracking-[0.32em] text-white/28">
+              <p className="mb-7 font-mono text-[10.5px] uppercase tracking-[0.32em] text-white/70">
                 {hero.eyebrow}
               </p>
             </FadeIn>
@@ -82,21 +82,21 @@ export function HeroVideoSection({
             />
 
             <FadeIn delay={860} duration={900} className="mt-7">
-              <p className="max-w-sm text-[15px] leading-[1.75] text-white/42">
+              <p className="max-w-sm text-[15px] leading-[1.75] text-white/68">
                 {hero.subtitle}
               </p>
             </FadeIn>
 
             <FadeIn delay={1260} duration={800} className="mt-9 flex items-center gap-3">
               <Link
-                href="/ai-regulation"
+                href={`/${lang}/ai-regulation`}
                 className="rounded-xl bg-white px-7 py-3 text-[13px] font-semibold text-black transition hover:bg-white/90 active:scale-[0.98]"
               >
                 {hero.openHub}
               </Link>
               <Link
-                href="/research"
-                className="rounded-xl border border-white/18 px-7 py-3 text-[13px] font-medium text-white/65 transition hover:border-white/36 hover:text-white active:scale-[0.98]"
+                href={`/${lang}/research`}
+                className="rounded-xl border border-white/18 px-7 py-3 text-[13px] font-medium text-white/75 transition hover:border-white/36 hover:text-white active:scale-[0.98]"
               >
                 {hero.readNotes}
               </Link>
@@ -108,15 +108,15 @@ export function HeroVideoSection({
         {/* ── Bottom strip — anchored metadata ── */}
         <FadeIn delay={1500} duration={700} className="pb-8">
           <div className="flex items-center gap-0 border-t border-white/7 pt-5">
-            <span className="font-mono text-[9.5px] uppercase tracking-[0.28em] text-white/20 pr-6">
+            <span className="font-mono text-[9.5px] uppercase tracking-[0.28em] text-white/55 pr-6">
               {hero.stat1}
             </span>
             <span className="h-3 w-px bg-white/12 mr-6" />
-            <span className="font-mono text-[9.5px] uppercase tracking-[0.28em] text-white/20 pr-6">
+            <span className="font-mono text-[9.5px] uppercase tracking-[0.28em] text-white/55 pr-6">
               {hero.stat2}
             </span>
             <span className="h-3 w-px bg-white/12 mr-6" />
-            <span className="font-mono text-[9.5px] uppercase tracking-[0.28em] text-white/20">
+            <span className="font-mono text-[9.5px] uppercase tracking-[0.28em] text-white/55">
               {hero.stat3}
             </span>
           </div>

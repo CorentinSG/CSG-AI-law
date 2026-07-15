@@ -28,7 +28,7 @@ export default function ResearchPage() {
     title: entry.title,
     description: entry.summary,
     href: `/research/${entry.slug}`,
-    image: entry.image ?? "https://images.unsplash.com/photo-1589829545856-d10d557cf95f?w=1080&q=80",
+    image: entry.image,
     category: entry.category,
     meta: entry.readingTime,
   }));
@@ -41,11 +41,11 @@ export default function ResearchPage() {
           Notes &amp; Commentary
         </p>
         <h1 className="max-w-4xl font-display text-5xl font-medium uppercase tracking-[-0.05em] text-zinc-950 md:text-6xl">
-          Analyse juridique de l&rsquo;IA
+          AI legal analysis
         </h1>
         <p className="max-w-2xl text-lg leading-8 text-zinc-600">
-          Notes et commentaires sur la régulation de l&rsquo;IA, la gouvernance, l&rsquo;éthique juridique
-          et le droit comparé — rédigés par Corentin Saint-Girons.
+          Notes and commentary on AI regulation, governance, legal ethics, and
+          comparative law — written by Corentin Saint-Girons.
         </p>
       </MotionReveal>
 
@@ -54,7 +54,7 @@ export default function ResearchPage() {
         <section className="-mx-6 space-y-6 border-t border-black/6 pt-16 md:-mx-10 lg:-mx-16">
           <div className="px-6 md:px-10 lg:px-16">
             <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-zinc-400">
-              Notes publiées
+              Published notes
             </p>
           </div>
           <ArticleCarousel items={carouselItems} />
@@ -67,15 +67,14 @@ export default function ResearchPage() {
           <div className="flex items-end justify-between gap-4">
             <div className="space-y-2">
               <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-amber-600">
-                À venir · Forthcoming
+                Forthcoming
               </p>
               <h2 className="font-display text-2xl font-medium uppercase tracking-[-0.04em] text-zinc-900">
-                Notes en préparation
+                Notes in preparation
               </h2>
             </div>
             <p className="hidden max-w-xs text-right text-xs leading-6 text-zinc-500 sm:block">
-              Annoncées et en cours de rédaction. Le texte complet n&rsquo;est pas
-              encore publié.
+              Announced and being drafted. The full text is not published yet.
             </p>
           </div>
           <MotionStagger className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
@@ -104,14 +103,14 @@ export default function ResearchPage() {
               </div>
               <div className="space-y-3">
                 <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-zinc-400">
-                  En cours de rédaction
+                  In preparation
                 </p>
                 <h2 className="font-display text-3xl font-medium uppercase tracking-[-0.04em] text-zinc-900">
-                  Notes à venir
+                  Notes coming soon
                 </h2>
                 <p className="mx-auto max-w-md text-sm leading-7 text-zinc-500">
-                  Les premières notes sur la régulation de l&rsquo;IA, le droit comparé et la gouvernance
-                  seront publiées prochainement.
+                  The first notes on AI regulation, comparative law, and
+                  governance will be published shortly.
                 </p>
               </div>
               <Link

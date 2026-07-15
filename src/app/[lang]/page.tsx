@@ -66,7 +66,7 @@ export default async function HomePage({
                 >
                   {stat.value}
                 </span>
-                <span className="font-mono text-[10px] uppercase tracking-[0.22em] text-white/35">
+                <span className="font-mono text-[10px] uppercase tracking-[0.22em] text-white/60">
                   {stat.label}
                 </span>
               </div>
@@ -79,7 +79,7 @@ export default async function HomePage({
       <section className="px-6 py-24 md:px-12 lg:px-16">
         <div className="mx-auto max-w-7xl">
           <MotionReveal>
-            <p className="mb-10 font-mono text-[10px] uppercase tracking-[0.32em] text-white/30">
+            <p className="mb-10 font-mono text-[10px] uppercase tracking-[0.32em] text-accent-strong">
               {home.aboutEyebrow}
             </p>
           </MotionReveal>
@@ -93,19 +93,19 @@ export default async function HomePage({
               >
                 {home.aboutHeadingLine1}<br />{home.aboutHeadingLine2}<br />{home.aboutHeadingLine3}
               </h2>
-              <p className="mt-6 max-w-md text-base leading-7 text-white/50">
+              <p className="mt-6 max-w-md text-base leading-7 text-white/65">
                 {home.aboutBody}
               </p>
               <div className="mt-8 flex gap-6">
                 <Link
                   href={`/${lang}/research`}
-                  className="font-mono text-[11px] uppercase tracking-[0.22em] text-white/55 underline decoration-white/15 underline-offset-4 transition hover:text-white/80"
+                  className="font-mono text-[11px] uppercase tracking-[0.22em] text-white/70 underline decoration-white/15 underline-offset-4 transition hover:text-white"
                 >
                   {home.readNotes}
                 </Link>
                 <Link
                   href={`/${lang}/contact`}
-                  className="font-mono text-[11px] uppercase tracking-[0.22em] text-white/55 underline decoration-white/15 underline-offset-4 transition hover:text-white/80"
+                  className="font-mono text-[11px] uppercase tracking-[0.22em] text-white/70 underline decoration-white/15 underline-offset-4 transition hover:text-white"
                 >
                   {home.contact}
                 </Link>
@@ -121,7 +121,7 @@ export default async function HomePage({
                     <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-white/70">
                       {cap.title}
                     </p>
-                    <p className="text-sm leading-6 text-white/42">
+                    <p className="text-sm leading-6 text-white/65">
                       {cap.desc}
                     </p>
                   </div>
@@ -136,7 +136,7 @@ export default async function HomePage({
       <section className="border-t border-white/8 px-6 py-20 md:px-12 lg:px-16">
         <div className="mx-auto max-w-7xl">
           <MotionReveal>
-            <p className="mb-10 font-mono text-[10px] uppercase tracking-[0.32em] text-white/30">
+            <p className="mb-10 font-mono text-[10px] uppercase tracking-[0.32em] text-accent-strong">
               {home.exploreEyebrow}
             </p>
           </MotionReveal>
@@ -150,12 +150,12 @@ export default async function HomePage({
                     className="group flex flex-col justify-between gap-10 bg-[#080808] p-8 transition-colors duration-300 hover:bg-white/[0.03]"
                   >
                     <div className="flex items-start justify-between">
-                      <Icon className="size-5 text-white/20 transition-colors duration-300 group-hover:text-accent/60" />
+                      <Icon className="size-5 text-white/40 transition-colors duration-300 group-hover:text-accent-strong" />
                       <ArrowUpRight className="size-4 text-white/15 transition-all duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:text-white/50" />
                     </div>
                     <div>
                       <p className="text-base font-medium text-white/90">{entry.label}</p>
-                      <p className="mt-2 font-mono text-[10px] uppercase tracking-[0.2em] text-white/30">
+                      <p className="mt-2 font-mono text-[10px] uppercase tracking-[0.2em] text-white/58">
                         {entry.description}
                       </p>
                     </div>
@@ -174,7 +174,7 @@ export default async function HomePage({
             <div className="liquid-glass rounded-2xl border border-white/10 px-8 py-8 md:px-12">
               <div className="grid gap-8 md:grid-cols-[1fr_auto]">
                 <div>
-                  <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-white/40">
+                  <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-accent-strong">
                     {home.postureEyebrow}
                   </p>
                   <p
@@ -184,7 +184,7 @@ export default async function HomePage({
                     {home.postureHeadlineLine1}<br />
                     {home.postureHeadlineLine2}
                   </p>
-                  <p className="mt-3 text-sm leading-7 text-white/45">
+                  <p className="mt-3 text-sm leading-7 text-white/65">
                     {home.postureBody}
                   </p>
                 </div>
@@ -205,10 +205,10 @@ export default async function HomePage({
       {/* ── Footer ── */}
       <footer className="border-t border-white/8 px-6 py-10 md:px-12 lg:px-16">
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-4">
-          <p className="font-mono text-[10px] uppercase tracking-[0.28em] text-white/22">
+          <p className="font-mono text-[10px] uppercase tracking-[0.28em] text-white/55">
             {home.footerTagline}
           </p>
-          <p className="font-mono text-[10px] uppercase tracking-[0.28em] text-white/22">
+          <p className="font-mono text-[10px] uppercase tracking-[0.28em] text-white/55">
             © {new Date().getFullYear()}
           </p>
         </div>
