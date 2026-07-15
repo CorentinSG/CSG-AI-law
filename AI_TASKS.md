@@ -55,6 +55,14 @@ YYYY-MM-DD · <Agent> · <TASK-ID> · <STATUS>
 
 ## Current status
 
+2026-07-15 - Codex - T-COUNTRY-PROFILES-EE-FI-GR-HU - MERGED
+- Intent:        Continue country-by-country legal database enrichment for Estonia, Finland, Greece, and Hungary with conservative official-source profiles.
+- Files:         `src/content/ai-regulation/europe-member-state-implementation.ts`, `AI_TASKS.md`.
+- Graph anchors: `getEuropeCountryProfiles()`, `sourceReferenceFromCountrySource()`, `mapEuropeCountryProfileToCountryIntelligenceInput()`, `getCountryDatabaseReadiness()`, community "DB Repository Layer", community "Source Runtime Health".
+- Verification:  live Supabase upserted `country-estonia`, `country-finland`, `country-greece`, and `country-hungary` to `implementation_in_progress`, `citation_quality_status=partial`, `review_status=needs_review`, with 10 `country_intelligence_sources` rows total - readiness confirms all four no longer report `missing_official_source` but remain `needs_backfill` because structured legal updates/news and authority-designation/case-law layers remain incomplete - `npm test -- src/content/ai-regulation/europe-country-profiles.test.ts src/agents/ai-regulation/legalIntegrity.test.ts src/lib/country-database-readiness.test.ts` PASS (23) - `npm run typecheck` PASS.
+- Branch/commit: `main` @ working tree.
+- Next:          Continue with Latvia, Lithuania, Luxembourg, Malta, Portugal, Romania, Slovakia, and Slovenia; keep final-designation claims blocked until official designation instruments are found.
+
 2026-07-15 - Codex - T-COUNTRY-PROFILES-HR-CY-CZ-DK - MERGED
 - Intent:        Continue country-by-country legal database enrichment for Croatia, Cyprus, Czechia, and Denmark with conservative official-source profiles.
 - Files:         `src/content/ai-regulation/europe-member-state-implementation.ts`, `AI_TASKS.md`.
