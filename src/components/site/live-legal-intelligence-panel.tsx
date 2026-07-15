@@ -14,6 +14,13 @@ import { formatDisplayDate, formatExactDateTime } from "@/lib/utils";
 import { DEFAULT_LOCALE, type Locale } from "@/lib/i18n/config";
 import { localeHref } from "@/lib/i18n/href";
 
+// Left border accent by region for at-a-glance geographic identification
+function getRegionBorderClass(region: string): string {
+  if (region === "Europe" || region.startsWith("EU")) return "border-l-blue-500";
+  if (region === "United States" || region === "North America") return "border-l-emerald-500";
+  return "border-l-zinc-600";
+}
+
 interface LiveSourceActivityItem {
   sourceId: string;
   sourceName: string;
@@ -99,11 +106,14 @@ export function LiveLegalIntelligencePanel({
         <p className="max-w-2xl text-sm leading-7 text-white/60">{description}</p>
       </div>
 
-      {/* Signals — flat ledger rows */}
+      {/* Signals — card rows with region accent */}
       {items.length > 0 ? (
-        <ol className="divide-y divide-white/8 border-b border-white/8">
+        <ol className="space-y-3 border-b border-white/8 pb-3">
           {items.map((item) => (
-            <li key={item.id} className="group py-5">
+            <li
+              key={item.id}
+              className={`group rounded-xl border border-white/8 bg-white/[0.03] px-4 py-4 transition-all duration-200 hover:-translate-y-0.5 hover:bg-white/[0.06] border-l-2 ${getRegionBorderClass(item.region)}`}
+            >
               <div className="mb-2 flex flex-wrap items-center gap-x-2 gap-y-1 font-mono text-[9.5px] uppercase tracking-[0.16em] text-white/45">
                 <span className="text-white/65">{getLiveStatusBadgeLabel(item)}</span>
                 <span aria-hidden className="text-white/25">·</span>

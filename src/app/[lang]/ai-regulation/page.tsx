@@ -195,7 +195,7 @@ export default async function AiRegulationPage({
             </div>
 
             {overviewNewsItems.length > 0 ? (
-              <MotionStagger className="grid gap-3" stagger={0.06}>
+              <MotionStagger className="grid gap-4" stagger={0.06}>
                 {overviewNewsItems.map((item) => (
                   <MotionStaggerItem key={item.id}>
                     <CompactNewsCard item={item} horizontal />
