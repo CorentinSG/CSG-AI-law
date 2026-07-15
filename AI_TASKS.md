@@ -55,6 +55,14 @@ YYYY-MM-DD · <Agent> · <TASK-ID> · <STATUS>
 
 ## Current status
 
+2026-07-15 - Codex - T-COUNTRY-PROFILES-LV-LT-LU-MT-PT-RO-SK-SI - MERGED
+- Intent:        Continue country-by-country legal database enrichment for Latvia, Lithuania, Luxembourg, Malta, Portugal, Romania, Slovakia, and Slovenia with conservative official-source profiles.
+- Files:         `src/content/ai-regulation/europe-member-state-implementation.ts`, `AI_TASKS.md`.
+- Graph anchors: `getEuropeCountryProfiles()`, `sourceReferenceFromCountrySource()`, `mapEuropeCountryProfileToCountryIntelligenceInput()`, `getCountryDatabaseReadiness()`, community "DB Repository Layer", community "Source Runtime Health".
+- Verification:  live Supabase upserted 8 country profiles to `implementation_in_progress`, `citation_quality_status=partial`, `review_status=needs_review`, with 18 `country_intelligence_sources` rows total - readiness confirms all 8 no longer report `missing_official_source`; Slovenia is now `degraded`, while Latvia/Lithuania/Luxembourg/Malta/Portugal/Romania/Slovakia remain `needs_backfill` due empty structured updates/news - `npm test -- src/content/ai-regulation/europe-country-profiles.test.ts src/agents/ai-regulation/legalIntegrity.test.ts src/lib/country-database-readiness.test.ts` PASS (23) - `npm run typecheck` PASS.
+- Branch/commit: `main` @ working tree.
+- Next:          Remaining EU country-profile work is no longer basic official-source attachment; next pass should add structured legal updates/news/case-law and verify final AI Act designation instruments before promoting any country to `verified`.
+
 2026-07-15 - Codex - T-COUNTRY-PROFILES-EE-FI-GR-HU - MERGED
 - Intent:        Continue country-by-country legal database enrichment for Estonia, Finland, Greece, and Hungary with conservative official-source profiles.
 - Files:         `src/content/ai-regulation/europe-member-state-implementation.ts`, `AI_TASKS.md`.
