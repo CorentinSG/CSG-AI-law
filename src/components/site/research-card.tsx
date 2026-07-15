@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ArrowRight } from "lucide-react";
 
 import { MotionStaggerItem } from "@/components/site/motion-stagger";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -61,15 +62,20 @@ export function ResearchCard({
               </span>
             ) : null}
           </div>
-          <CardTitle className="font-display text-xl font-medium uppercase tracking-[-0.04em] text-zinc-950">
-            {title}
-          </CardTitle>
+          <div className="flex items-start justify-between gap-2">
+            <CardTitle className="font-display text-xl font-medium uppercase tracking-[-0.04em] text-zinc-950">
+              {title}
+            </CardTitle>
+            {!isForthcoming ? (
+              <ArrowRight className="mt-1 size-4 shrink-0 text-zinc-400 opacity-0 transition-opacity duration-200 group-hover:opacity-100" />
+            ) : null}
+          </div>
           {meta ? (
             <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-zinc-500">{meta}</p>
           ) : null}
         </CardHeader>
         <CardContent className="space-y-4 text-sm leading-6 text-zinc-700">
-          <p>{description}</p>
+          <p className="line-clamp-2">{description}</p>
           {tags?.length ? (
             <div className="flex flex-wrap gap-2">
               {tags.slice(0, 3).map((tag) => (
@@ -90,7 +96,7 @@ export function ResearchCard({
   if (!href) return content;
 
   return (
-    <Link href={localeHref(lang, href)} className="block h-full">
+    <Link href={localeHref(lang, href)} className="group block h-full">
       {content}
     </Link>
   );
