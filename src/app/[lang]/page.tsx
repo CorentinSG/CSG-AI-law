@@ -140,17 +140,22 @@ export default async function HomePage({
               {home.exploreEyebrow}
             </p>
           </MotionReveal>
-          <MotionStagger className="grid gap-px bg-white/8 sm:grid-cols-3" stagger={0.1}>
+          <MotionStagger className="grid gap-4 sm:grid-cols-3" stagger={0.1}>
             {home.entryPoints.map((entry, i) => {
               const Icon = ENTRY_ICONS[i];
               return (
                 <MotionStaggerItem key={entry.label}>
                   <Link
                     href={`/${lang}${ENTRY_HREFS[i]}`}
-                    className="group flex flex-col justify-between gap-10 bg-[#080808] p-8 transition-colors duration-300 hover:bg-white/[0.03]"
+                    className="group relative flex flex-col justify-between gap-10 overflow-hidden rounded-2xl border border-white/10 bg-white/5 p-8 backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:border-white/25 hover:shadow-[0_20px_60px_rgba(0,0,0,0.3)]"
                   >
+                    {/* Hover gradient shimmer */}
+                    <div
+                      className="pointer-events-none absolute inset-0 bg-gradient-to-br from-white/5 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+                      aria-hidden="true"
+                    />
                     <div className="flex items-start justify-between">
-                      <Icon className="size-5 text-white/20 transition-colors duration-300 group-hover:text-accent/60" />
+                      <Icon className="size-8 text-white/20 transition-colors duration-300 group-hover:text-accent/60" />
                       <ArrowUpRight className="size-4 text-white/15 transition-all duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:text-white/50" />
                     </div>
                     <div>
