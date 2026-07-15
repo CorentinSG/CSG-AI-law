@@ -51,10 +51,13 @@ export function classifyTimelineAuthority(update: Pick<AiRegulatoryUpdate, "deve
     ...update.tags,
   ].join(" ").toLowerCase();
 
-  if (/case|court|judgment|judgement|decision|sanction|enforcement|attorney general/.test(haystack)) {
+  if (/country-baseline/.test(haystack)) {
+    return "soft_law";
+  }
+  if (/\b(case|court|judgment|judgement|decision|sanction|enforcement)\b|attorney general/.test(haystack)) {
     return "case_law_and_decisions";
   }
-  if (/guidance|framework|standard|soft law|best practice|policy|recommendation|opinion/.test(haystack)) {
+  if (/guidance|framework|standard|soft law|best practice|policy|recommendation|opinion|country-baseline/.test(haystack)) {
     return "soft_law";
   }
   if (/law|act|regulation|rule|statute|bill|ordinance|code|legislation|final rule/.test(haystack)) {

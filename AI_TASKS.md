@@ -55,6 +55,14 @@ YYYY-MM-DD · <Agent> · <TASK-ID> · <STATUS>
 
 ## Current status
 
+2026-07-15 - Codex - T-PILOT-COUNTRY-TIMELINES - MERGED
+- Intent:        Start the deep-quality phase by publishing only the official-source baseline updates for the five pilot countries and making their public jurisdiction timelines non-empty.
+- Files:         `src/agents/ai-regulation/jurisdictionTimeline.ts`, `src/agents/ai-regulation/jurisdictionTimeline.test.ts`, `AI_TASKS.md`.
+- Graph anchors: `getJurisdictionLegalDatabaseSnapshot()`, `classifyTimelineAuthority()`, `updateRepository.updateReviewStatus()`, community "Source Runtime Health", community "DB Repository Layer".
+- Verification:  live Supabase promoted the `country-legal-baseline` updates for France, Germany, Italy, Spain, and Netherlands through `approved` to `published` under reviewer `system:official-baseline-policy`; public timeline snapshots now show France=1, Germany=1, Italy=1, Spain=1, Netherlands=3; fixed timeline classifier so `authority-designation-gap` / `case-law-gap` tags do not create false `case_law_and_decisions` entries and `country-baseline` entries classify as `soft_law`; `npm test -- src/agents/ai-regulation/jurisdictionTimeline.test.ts src/lib/country-database-readiness.test.ts` PASS (9); `npm run typecheck` PASS.
+- Branch/commit: `main` @ working tree.
+- Next:          Deepen the five pilot countries with actual hard-law, authority-designation, soft-law, case-law, and legal-news entries rather than only baseline entries; then repeat publication in controlled batches.
+
 2026-07-15 - Codex - T-MONITORED-NON-EU-LEGAL-BASELINES - MERGED
 - Intent:        Complete the first structured baseline layer for monitored non-EU western/balkan Europe jurisdictions so no covered country remains empty.
 - Files:         `scripts/backfill-monitored-country-legal-baselines.ts`, `package.json`, `AI_TASKS.md`.
