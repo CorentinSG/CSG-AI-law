@@ -134,7 +134,7 @@ const remainingEuMemberStateSourceInputs = [
     dpaName: "Hungarian National Authority for Data Protection and Freedom of Information",
     dpaUrl: "https://www.naih.hu/",
     governmentName: "Hungarian National Legislation Database",
-    governmentUrl: "https://njt.hu/",
+    governmentUrl: "https://njt.jog.gov.hu/",
     newsQuery:
       '(("artificial intelligence" OR "AI Act" OR "mesterséges intelligencia") AND Hungary AND (law OR regulation OR legal OR NAIH))',
     gdeltQuery:

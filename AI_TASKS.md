@@ -55,6 +55,14 @@ YYYY-MM-DD · <Agent> · <TASK-ID> · <STATUS>
 
 ## Current status
 
+2026-07-15 - Codex - T-COUNTRY-MONITORING-BACKFILL-WAVE-1 - MERGED
+- Intent:        Start progressive country database alimentation with small official-source waves, then repair the one source failure found during replay.
+- Files:         `src/db/seed/ai-regulation-seed.ts`, `src/db/migrations/019_remaining_eu_member_state_monitoring_sources.sql`, `src/db/migrations/023_repair_hungary_legislation_source_url.sql`, `AI_TASKS.md`.
+- Graph anchors: `runAiRegulationScan()`, `sourceScanner`, `scraplingExtract()`, `getCountryDatabaseReadiness()`, community "Scan Pipeline", community "Scrapling Extraction Service", community "Source Runtime Health", community "DB Repository Layer".
+- Verification:  live official backfill waves executed for Albania, Andorra, Bosnia and Herzegovina, Bulgaria, Croatia, Cyprus, Czechia, Denmark, Estonia, Finland, Greece, and Hungary (25 source executions after Hungary replay; all non-Hungary-government failures avoided; Scrapling recovered Bosnia, Bulgaria, and Czechia items) - Hungary government source failed on old `https://njt.hu/`, repaired to `https://njt.jog.gov.hu/` in live Supabase and code, replayed successfully (`src-hu-government-ai` success, 6 items found) - limited media/API wave for Albania, Andorra, Bosnia and Herzegovina, Bulgaria showed NewsAPI unavailable in local runtime (`NEWSAPI_API_KEY` missing) and GDELT rate-limiting on rapid repeated calls, no crashes - readiness recalculation reports `blocked=0`, `degraded=16`, `needsBackfill=30`, `averageScore=92` - `npm test -- src/agents/ai-regulation/remainingEuMemberStateSources.test.ts src/lib/country-database-readiness.test.ts` PASS (7).
+- Branch/commit: `main` @ working tree.
+- Next:          Continue backfill in slower batches. Use official sources first; run media/GDELT with larger spacing or via scheduled worker; configure/verify `NEWSAPI_API_KEY` in the runtime that performs media discovery before expecting NewsAPI results.
+
 2026-07-15 - Codex - T-COUNTRY-MONITORING-RELIABILITY - MERGED
 - Intent:        Make country monitoring health measurable and actionable: score every country database, expose readiness in admin operations, add a safe baseline backfill runner, and repair the unstable Bulgaria official source.
 - Files:         `src/lib/country-database-readiness.ts`, `src/lib/country-database-readiness.test.ts`, `src/lib/admin-operations-summary.ts`, `src/lib/admin-operations-summary.test.ts`, `scripts/backfill-country-baselines.ts`, `package.json`, `src/db/seed/ai-regulation-seed.ts`, `src/db/migrations/022_repair_bulgaria_government_ai_source.sql`, `docs/superpowers/plans/2026-07-15-country-monitoring-reliability.md`, `AI_TASKS.md`.
