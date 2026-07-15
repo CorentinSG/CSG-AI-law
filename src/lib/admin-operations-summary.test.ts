@@ -4,6 +4,7 @@ const buildHealthSnapshot = vi.fn();
 const listAgentApiCapabilities = vi.fn();
 const listGlobalMonitoringAgents = vi.fn();
 const getSourceRuntimeHealthSummaries = vi.fn();
+const getCountryDatabaseReadiness = vi.fn();
 const updateRepository = {
   listUpdatesPage: vi.fn(),
   getNewsItemsPage: vi.fn(),
@@ -29,6 +30,10 @@ vi.mock("@/agents/ai-regulation/globalMonitoringSupervisorAgent", () => ({
 
 vi.mock("@/agents/ai-regulation/sourceRuntimeHealth", () => ({
   getSourceRuntimeHealthSummaries,
+}));
+
+vi.mock("@/lib/country-database-readiness", () => ({
+  getCountryDatabaseReadiness,
 }));
 
 vi.mock("@/agents/ai-regulation/processors/updateRepository", () => ({
@@ -93,6 +98,27 @@ describe("buildAdminOperationsSummary", () => {
       { severity: "medium" },
       { severity: "medium" },
     ]);
+    getCountryDatabaseReadiness.mockResolvedValueOnce({
+      summary: {
+        total: 3,
+        ready: 1,
+        degraded: 1,
+        needsBackfill: 1,
+        blocked: 0,
+        averageScore: 71,
+      },
+      blockers: [
+        {
+          country: "Albania",
+          status: "needs_backfill",
+          score: 52,
+          blockers: ["empty_country_database"],
+          failingSources: [],
+        },
+      ],
+      countries: [],
+      checkedAt: now.toISOString(),
+    });
     listAgentApiCapabilities.mockReturnValue([
       {
         id: "newsapi",
@@ -132,6 +158,25 @@ describe("buildAdminOperationsSummary", () => {
       total: 2,
       active: 1,
       byRuntimeState: { healthy: 1, degraded: 1, stale: 0, inactive: 1 },
+    });
+    expect(summary.operations.countryReadiness).toMatchObject({
+      summary: {
+        total: 3,
+        ready: 1,
+        degraded: 1,
+        needsBackfill: 1,
+        blocked: 0,
+        averageScore: 71,
+      },
+      topBlockers: [
+        {
+          country: "Albania",
+          status: "needs_backfill",
+          score: 52,
+          blockers: ["empty_country_database"],
+          failingSources: [],
+        },
+      ],
     });
     expect(summary.operations.scanJobs.byStatus).toMatchObject({
       queued: 1,

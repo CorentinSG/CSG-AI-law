@@ -2,6 +2,7 @@ import { listAgentApiCapabilities } from "@/agents/ai-regulation/agentApiCapabil
 import { listGlobalMonitoringAgents } from "@/agents/ai-regulation/globalMonitoringSupervisorAgent";
 import { updateRepository } from "@/agents/ai-regulation/processors/updateRepository";
 import { getSourceRuntimeHealthSummaries } from "@/agents/ai-regulation/sourceRuntimeHealth";
+import { getCountryDatabaseReadiness } from "@/lib/country-database-readiness";
 import { buildHealthSnapshot } from "@/lib/health";
 
 const REVIEW_STATUSES = ["needs_review", "approved", "published", "rejected", "archived"] as const;
@@ -59,6 +60,7 @@ export async function buildAdminOperationsSummary(options?: { now?: Date }) {
     discoveryLeadsPage,
     countries,
     dataQuality,
+    countryReadiness,
   ] = await Promise.all([
     buildHealthSnapshot({ access: "authenticated", now }),
     countUpdatesByStatus(),
@@ -70,6 +72,7 @@ export async function buildAdminOperationsSummary(options?: { now?: Date }) {
     updateRepository.listDiscoveryLeadsPage(undefined, { limit: 1, offset: 0 }),
     updateRepository.listCountryIntelligence(),
     countDataQualityBySeverity(),
+    getCountryDatabaseReadiness({ now }),
   ]);
 
   const capabilities = listAgentApiCapabilities();
@@ -129,6 +132,10 @@ export async function buildAdminOperationsSummary(options?: { now?: Date }) {
         byRuntimeState: sourceHealthCounts,
       },
       dataQuality,
+      countryReadiness: {
+        summary: countryReadiness.summary,
+        topBlockers: countryReadiness.blockers.slice(0, 10),
+      },
     },
     agents: {
       regionalSupervisors: monitoringAgents.regionalSupervisors.length,

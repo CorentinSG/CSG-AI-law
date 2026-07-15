@@ -26,8 +26,8 @@ const remainingEuMemberStateSourceInputs = [
     country: "Bulgaria",
     dpaName: "Bulgarian Commission for Personal Data Protection",
     dpaUrl: "https://cpdp.bg/",
-    governmentName: "Bulgarian Ministry of Electronic Governance",
-    governmentUrl: "https://egov.government.bg/",
+    governmentName: "European Commission AI Watch Bulgaria strategy report",
+    governmentUrl: "https://ai-watch.ec.europa.eu/countries/bulgaria/bulgaria-ai-strategy-report_en",
     newsQuery:
       '(("artificial intelligence" OR "AI Act" OR "изкуствен интелект") AND (Bulgaria OR Bulgarian) AND (law OR regulation OR legal OR CPDP))',
     gdeltQuery:
