@@ -96,18 +96,20 @@ export default async function HomePage({
               <p className="mt-6 max-w-md text-base leading-7 text-white/50">
                 {home.aboutBody}
               </p>
-              <div className="mt-8 flex gap-6">
+              <div className="mt-8 flex flex-wrap gap-3">
                 <Link
                   href={`/${lang}/research`}
-                  className="font-mono text-[11px] uppercase tracking-[0.22em] text-white/55 underline decoration-white/15 underline-offset-4 transition hover:text-white/80"
+                  className="group inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-5 py-2.5 text-sm font-medium text-white/80 transition-all duration-200 hover:-translate-y-0.5 hover:border-white/35 hover:bg-white/15"
                 >
                   {home.readNotes}
+                  <ArrowUpRight className="size-3.5 transition-transform duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
                 </Link>
                 <Link
                   href={`/${lang}/contact`}
-                  className="font-mono text-[11px] uppercase tracking-[0.22em] text-white/55 underline decoration-white/15 underline-offset-4 transition hover:text-white/80"
+                  className="group inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-5 py-2.5 text-sm font-medium text-white/80 transition-all duration-200 hover:-translate-y-0.5 hover:border-white/35 hover:bg-white/15"
                 >
                   {home.contact}
+                  <ArrowUpRight className="size-3.5 transition-transform duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
                 </Link>
               </div>
             </MotionReveal>
