@@ -1434,7 +1434,125 @@ const dutchAiConsultation: CountrySourceRecord = {
     "Official Dutch government announcement stating on 20 April 2026 that the proposal for the AI Regulation implementing act was opened for internet consultation. This supports a consultation-or-draft-identified label.",
 };
 
+// --- Bulgarian sources ---
+
+const bulgariaCpdp: CountrySourceRecord = {
+  label: "Bulgarian Commission for Personal Data Protection official site",
+  url: "https://cpdp.bg/en/",
+  institution: "Commission for Personal Data Protection",
+  sourceType: "regulator",
+  official: true,
+  public: true,
+  runtimeAccessible: true,
+  responseStatus: 200,
+  lastCheckedDate: "2026-07-15T00:00:00.000Z",
+  parserStatus: "candidate_for_monitoring",
+  recommendation: "manual_review",
+  note:
+    "Official Bulgarian data-protection authority site. CPDP is a verified national regulator for data protection and AI-related privacy issues, but this source does not by itself designate a Bulgarian AI Act competent authority.",
+};
+
+const bulgariaAiWatchStrategy: CountrySourceRecord = {
+  label: "European Commission AI Watch Bulgaria strategy report",
+  url: "https://ai-watch.ec.europa.eu/countries/bulgaria/bulgaria-ai-strategy-report_en",
+  institution: "European Commission AI Watch",
+  sourceType: "policy",
+  official: true,
+  public: true,
+  runtimeAccessible: true,
+  responseStatus: 200,
+  lastCheckedDate: "2026-07-15T00:00:00.000Z",
+  parserStatus: "candidate_for_monitoring",
+  recommendation: "manual_review",
+  note:
+    "Official European Commission AI Watch country report summarising Bulgaria's AI strategy and policy initiatives for the 2020-2030 period.",
+};
+
+const bulgariaAiConcept2030: CountrySourceRecord = {
+  label: "Concept for the Development of Artificial Intelligence in Bulgaria until 2030",
+  url: "https://www.mtc.government.bg/sites/default/files/conceptforthedevelopmentofaiinbulgariauntil2030.pdf",
+  institution: "Ministry of Transport, Information Technology and Communications",
+  sourceType: "policy",
+  official: true,
+  public: true,
+  runtimeAccessible: true,
+  responseStatus: 200,
+  publicationDate: "2020-10-01",
+  lastCheckedDate: "2026-07-15T00:00:00.000Z",
+  parserStatus: "manual_reference",
+  recommendation: "manual_review",
+  note:
+    "Official Bulgarian government AI policy concept through 2030. This is a strategy/soft-law source, not a binding AI Act implementation measure.",
+};
+
 const firstWaveProfiles: EuropeCountryProfile[] = [
+  {
+    countryCode: "BG",
+    countryName: "Bulgaria",
+    slug: "bulgaria",
+    region: "Europe",
+    euMemberState: true,
+    implementationStatus: "implementation_in_progress",
+    implementationStatusLabel:
+      europeImplementationStatusTaxonomy.implementation_in_progress.label,
+    implementationStatusDescription:
+      europeImplementationStatusTaxonomy.implementation_in_progress.shortExplanation,
+    implementationConfidence: "low",
+    aiActImplementationNotes:
+      "Bulgaria is an EU member state to which the EU AI Act applies directly. Official sources verify a national AI strategy/policy baseline through the Concept for the Development of Artificial Intelligence in Bulgaria until 2030 and the European Commission AI Watch country report. The Bulgarian Commission for Personal Data Protection is a verified national data-protection authority relevant to AI/privacy oversight. This baseline does not yet verify a final Bulgarian AI Act implementation act, competent-authority designation, market-surveillance authority, or notifying authority.",
+    nationalImplementationMeasures: [
+      "Official AI policy baseline: Concept for the Development of Artificial Intelligence in Bulgaria until 2030.",
+      "European Commission AI Watch country report summarises Bulgaria's AI strategy and policy initiatives for 2020-2030.",
+    ],
+    nationalCompetentAuthorities: [],
+    marketSurveillanceAuthorities: [],
+    notifyingAuthorities: [],
+    dataProtectionAuthority: "Commission for Personal Data Protection",
+    relevantMinistriesOrAgencies: [
+      "Commission for Personal Data Protection",
+      "Ministry of Transport, Information Technology and Communications",
+    ],
+    nationalAIRegulationSources: [
+      bulgariaCpdp,
+      bulgariaAiWatchStrategy,
+      bulgariaAiConcept2030,
+    ],
+    nationalAIRegulationNotes:
+      "Bulgaria now has verified official institutional and policy anchors for the baseline: CPDP for data-protection and AI/privacy oversight, the European Commission AI Watch country report, and the official Bulgarian AI Concept until 2030. These sources support an implementation-in-progress label, but they do not verify final AI Act authority designations.",
+    nationalCaseLawSources: [],
+    nationalCaseLawNotes:
+      "No Bulgaria-specific AI case-law source has been verified into this baseline in this phase.",
+    nationalSoftLawSources: [bulgariaAiWatchStrategy, bulgariaAiConcept2030],
+    nationalSoftLawNotes:
+      "The verified Bulgaria layer currently consists mainly of AI strategy and policy material. Binding national AI Act implementation instruments remain under review.",
+    latestRelevantUpdates: [],
+    officialSourceUrls: [
+      bulgariaCpdp.url,
+      bulgariaAiWatchStrategy.url,
+      bulgariaAiConcept2030.url,
+    ],
+    sourceReferences: [
+      sourceReferenceFromCountrySource(bulgariaCpdp),
+      sourceReferenceFromCountrySource(bulgariaAiWatchStrategy, "supporting"),
+      sourceReferenceFromCountrySource(bulgariaAiConcept2030, "supporting"),
+    ],
+    citationQualityStatus: "partial",
+    sourceVerificationStatus: "partially_verified",
+    lastReviewedDate: "2026-07-15T00:00:00.000Z",
+    missingSourceWarnings: [
+      "No specific Bulgarian AI Act implementation act verified.",
+      "No competent-authority designation instrument verified.",
+      "No market-surveillance or notifying authority verified.",
+      "No country-specific AI case-law source verified.",
+    ],
+    editorialNotes: [
+      "Do not describe CPDP as a Bulgarian AI Act competent authority unless a final official designation instrument is verified.",
+      "The AI Concept and AI Watch report are policy/strategy sources and should not be treated as binding AI Act implementation law.",
+      "Absence of a verified designation here does not mean absence of Bulgarian regulatory work.",
+    ],
+    publicSummary:
+      "Bulgaria is included in the EU AI baseline with verified official policy and institutional anchors. The EU AI Act applies directly, CPDP is the national data-protection authority relevant to AI/privacy oversight, and Bulgaria has an official AI strategy/policy baseline through 2030. Final national AI Act authority designations remain under review.",
+  },
   {
     countryCode: "FR",
     countryName: "France",

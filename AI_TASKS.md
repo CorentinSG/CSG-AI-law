@@ -55,6 +55,14 @@ YYYY-MM-DD · <Agent> · <TASK-ID> · <STATUS>
 
 ## Current status
 
+2026-07-15 - Codex - T-COUNTRY-PROFILE-BULGARIA - MERGED
+- Intent:        Start the country-by-country legal database enrichment by replacing Bulgaria's placeholder profile with a conservative official-source baseline.
+- Files:         `src/content/ai-regulation/europe-member-state-implementation.ts`, `AI_TASKS.md`.
+- Graph anchors: `getEuropeCountryProfiles()`, `sourceReferenceFromCountrySource()`, `mapEuropeCountryProfileToCountryIntelligenceInput()`, `getCountryDatabaseReadiness()`, community "DB Repository Layer", community "Source Runtime Health".
+- Verification:  Bulgaria profile now has official CPDP, European Commission AI Watch, and Bulgarian government AI Concept sources; live Supabase `country-bulgaria` upserted to `implementation_in_progress`, `citation_quality_status=partial`, `review_status=needs_review`, with 5 `country_intelligence_sources` rows - readiness confirms Bulgaria no longer has `missing_official_source` but remains honest `needs_backfill` due empty structured updates/news and unverified authority-designation/case-law layers - `npm test -- src/content/ai-regulation/europe-country-profiles.test.ts src/agents/ai-regulation/legalIntegrity.test.ts src/lib/country-database-readiness.test.ts` PASS (23) - `npm run typecheck` PASS.
+- Branch/commit: `main` @ working tree.
+- Next:          Continue country-by-country enrichment with Croatia, Cyprus, Czechia, Denmark, Estonia, Finland, Greece, and Hungary, keeping labels conservative until final AI Act designation instruments are verified.
+
 2026-07-15 - Codex - T-COUNTRY-MONITORING-BACKFILL-WAVE-2 - MERGED
 - Intent:        Continue progressive country database alimentation and clear recent active-source failures after the first wave.
 - Files:         `AI_TASKS.md`.
