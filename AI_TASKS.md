@@ -55,6 +55,14 @@ YYYY-MM-DD · <Agent> · <TASK-ID> · <STATUS>
 
 ## Current status
 
+2026-07-15 - Codex - T-COUNTRY-LEGAL-BASELINE-UPDATES - MERGED
+- Intent:        Turn country profiles into structured legal-database baseline entries so the backend has one reviewable AI Act monitoring baseline update per EU Member State.
+- Files:         `scripts/backfill-country-legal-baselines.ts`, `package.json`, `AI_TASKS.md`.
+- Graph anchors: `getEuropeCountryProfiles()`, `updateRepository.createRawItem()`, `updateRepository.createUpdate()`, `getCountryDatabaseReadiness()`, community "DB Repository Layer", community "Scan Pipeline", community "Source Runtime Health".
+- Verification:  added dry-run-first `npm run backfill:country-legal-baselines` with stable hashes, source-reference normalization for the live `source_references` constraint, and orphan raw-item recovery; live Supabase now has synthetic source `country-legal-baseline` plus 27 structured country baseline updates in `ai_regulatory_updates`, all `needs_review` and `authorityType=Governance framework`; readiness improved from `degraded=16 / needsBackfill=30 / averageScore=92` to `degraded=32 / needsBackfill=14 / averageScore=95`; `npm test -- src/content/ai-regulation/europe-country-profiles.test.ts src/agents/ai-regulation/legalIntegrity.test.ts src/lib/country-database-readiness.test.ts` PASS (23); `npm run typecheck` PASS.
+- Branch/commit: `main` @ working tree.
+- Next:          Admin/Claude can review and publish baseline updates selectively. Codex next should enrich the remaining 14 non-UE/other monitored countries with country_intelligence profiles or add deeper country-specific acts/case-law/news entries.
+
 2026-07-15 - Codex - T-COUNTRY-PROFILES-LV-LT-LU-MT-PT-RO-SK-SI - MERGED
 - Intent:        Continue country-by-country legal database enrichment for Latvia, Lithuania, Luxembourg, Malta, Portugal, Romania, Slovakia, and Slovenia with conservative official-source profiles.
 - Files:         `src/content/ai-regulation/europe-member-state-implementation.ts`, `AI_TASKS.md`.
