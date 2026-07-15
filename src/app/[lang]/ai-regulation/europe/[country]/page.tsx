@@ -24,7 +24,6 @@ import { getIrelandAiIntelligenceSnapshot } from "@/content/ai-regulation/irelan
 import { getItalyAiIntelligenceSnapshot } from "@/content/ai-regulation/italy-ai-intelligence";
 import { getSpainAiIntelligenceSnapshot } from "@/content/ai-regulation/spain-ai-intelligence";
 import {
-  europeImplementationStatusTaxonomy,
   getEuropeCountryProfileBySlug,
   getEuropeCountryProfiles,
 } from "@/content/ai-regulation/europe-country-profiles";
@@ -181,7 +180,7 @@ export default async function EuropeCountryPage({
       update.jurisdiction === profile.countryName,
   );
 
-  const statusMeta = europeImplementationStatusTaxonomy[profile.implementationStatus];
+
 
   // F8: prefer the editable DB editorial fields when present, falling back to
   // the verified TypeScript baseline. Blank/empty DB fields keep the baseline,
@@ -297,9 +296,6 @@ export default async function EuropeCountryPage({
               <p className="font-display text-2xl font-medium uppercase tracking-[-0.04em] text-zinc-950">
                 {profile.implementationStatusLabel}
               </p>
-              <p className="text-sm leading-7 text-zinc-700">
-                {profile.implementationStatusDescription}
-              </p>
             </CardContent>
           </Card>
           </MotionStaggerItem>
@@ -311,9 +307,6 @@ export default async function EuropeCountryPage({
               </p>
               <p className="font-display text-2xl font-medium uppercase tracking-[-0.04em] text-zinc-950">
                 {profile.implementationConfidence}
-              </p>
-              <p className="text-sm leading-7 text-zinc-700">
-                {statusMeta.sourceRequirements}
               </p>
             </CardContent>
           </Card>
@@ -327,11 +320,8 @@ export default async function EuropeCountryPage({
               <p className="font-display text-2xl font-medium uppercase tracking-[-0.04em] text-zinc-950">
                 {formatDisplayDate(profile.lastReviewedDate)}
               </p>
-              <p className="text-sm leading-7 text-zinc-700">
-                Source verification status: {profile.sourceVerificationStatus.replaceAll("_", " ")}.
-              </p>
-              <p className="text-sm leading-7 text-zinc-700">
-                Citation quality: {profile.citationQualityStatus.replaceAll("_", " ")}.
+              <p className="truncate font-mono text-[10px] uppercase tracking-[0.18em] text-zinc-500">
+                {profile.sourceVerificationStatus.replaceAll("_", " ")}
               </p>
             </CardContent>
           </Card>
