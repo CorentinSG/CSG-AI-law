@@ -87,28 +87,29 @@ The system rejects the flashy SaaS startup register outright: no purple gradient
 Motion is purposeful and fast, easing out on `[0.16, 1, 0.3, 1]`, and always has a reduced-motion fallback. Glass and a quiet light-sweep "sheen" are the premium materials; they appear on a few high-signal surfaces, never everywhere.
 
 **Key Characteristics:**
-- Light, warm-neutral body with frosted-glass panels floating above it.
-- Ink-dark editorial typography; one geometric display face for presence.
+- Near-black body with dark frosted-glass panels floating above it.
+- Light editorial typography on dark; one geometric display face for presence.
 - A single gold/bronze accent used as a *signal*, never as decoration.
 - Status semantics are explicit: live is green, verification is labeled — never color alone.
 - Restrained, eased motion; a subtle hover sheen as the signature flourish.
 
 ## 2. Colors
 
-A warm-neutral, ink-on-light palette with one disciplined gold signal and a structural navy. Glassmorphism is achieved with translucent whites layered over the body.
+A light-on-dark palette with one disciplined gold signal and a structural navy. Glassmorphism is achieved with translucent whites (4–8% fills, lit top edge) layered over the near-black body.
 
 ### Primary
-- **Signal Gold** (`#9a6b1f`, deepening to `#7c5214` for text): the lone accent. Used on section kickers, entry-point icons, focus rings, and small "authority" marks. It is the console's status light — its rarity is the point.
+- **Signal Gold** (`#9a6b1f`, brightening to `#c4882a` for text/marks on dark): the lone accent. Used on section kickers, entry-point icons, focus rings, and small "authority" marks. It is the console's status light — its rarity is the point.
 
 ### Secondary
 - **Command Navy** (`#1e293b`): structural depth on dark panels (timelines, live-monitoring desks) and as a restrained tint in radial backgrounds. Carries gravity without going full corporate-navy.
 
-### Neutral
-- **Ink** (`#111111`): primary text and the solid primary button.
-- **Stone Body** (`#ecebe6`): the warm-neutral page background.
-- **Paper** (`#f7f6f1`): card and panel fills, and the secondary button.
-- **Muted** (`#666662`): secondary text and labels — only where it still clears 4.5:1.
-- **Hairline** (`#e0dfd9` / `rgba(17,17,17,0.08)`): borders and dividers.
+### Neutral (light-on-dark ramp)
+- **Body** (`#080808`–`#0a0a0a`): the near-black page background.
+- **Surface / Elevated** (`rgba(255,255,255,0.04)` → `0.07`): glass card and panel fills.
+- **Ink** (`rgba(255,255,255,0.95)`): primary text; the solid primary button is white on dark.
+- **Body text** (`rgba(255,255,255,0.72)`): default prose.
+- **Muted** (`rgba(255,255,255,0.58)`): secondary text and labels — only where it still clears 4.5:1. Steps below ~0.55 are decorative-only (dividers, dots).
+- **Hairline** (`rgba(255,255,255,0.10)`): borders and dividers.
 
 ### Status (functional, non-decorative)
 - **Live Green** (`#10b981`): the live-monitoring pulse. Never repurposed as an accent.
@@ -139,20 +140,20 @@ A warm-neutral, ink-on-light palette with one disciplined gold signal and a stru
 
 A hybrid: the page is flat and matte; **glass panels** float above it with soft, wide, low-opacity shadows and an inset top highlight. Depth reads as *layering of light-through-frosted-glass*, not drop-shadow weight. Surfaces are calm at rest; elevation responds to state (hover lifts 1–4px, shadow widens).
 
-### Shadow Vocabulary
-- **Panel ambient** (`box-shadow: 0 24px 60px rgba(15,15,15,0.06)`): the resting float of glass cards.
-- **Hover lift** (`box-shadow: 0 28px 80px rgba(15,15,15,0.08)` + `translateY(-2px to -4px)`): response to pointer.
-- **Inset highlight** (`inset 0 1px 0 rgba(255,255,255,0.75)`): the lit top edge that makes glass read as glass.
+### Shadow Vocabulary (on the near-black body)
+- **Panel ambient** (`box-shadow: 0 24px 60px rgba(0,0,0,0.4)`): the resting float of glass cards.
+- **Hover lift** (`box-shadow: 0 28px 80px rgba(0,0,0,0.45)` + `translateY(-2px to -4px)`): response to pointer.
+- **Inset highlight** (`inset 0 1px 0 rgba(255,255,255,0.08)`): the lit top edge that makes glass read as glass on dark.
 
 ### Named Rules
-**The Float-Not-Stamp Rule.** Shadows are wide and faint (blur ≥ 24px, alpha ≤ 0.08). A tight dark shadow makes it look like a 2014 app; if it looks stamped, the blur is too small and the alpha too high.
+**The Float-Not-Stamp Rule.** Shadows are wide and soft (blur ≥ 24px). On dark, depth comes from a deep, wide black shadow (alpha ~0.35–0.45) paired with a faint light inset edge — not from a tight, hard shadow. If it looks stamped, the blur is too small.
 
 ## 5. Components
 
 ### Buttons
 - **Shape:** full pills (`9999px`).
-- **Primary:** Ink background (`#111111`), Paper text, `0.75rem 1.5rem` padding; the single solid element on a glass field.
-- **Secondary:** `glass-panel-soft` — translucent white, ink text, hairline border; same pill shape.
+- **Primary:** near-white background (`#f0f0f0`), near-black text, `0.75rem 1.5rem` padding; the single solid element on a dark glass field.
+- **Secondary:** `glass-panel-soft` — translucent white fill, light text, hairline border; same pill shape.
 - **Hover / Focus:** primary darkens slightly / lifts; all interactive elements get the on-brand focus-visible ring (`2px solid Signal Gold`, offset 2px).
 
 ### Chips / Labels
@@ -161,7 +162,7 @@ A hybrid: the page is flat and matte; **glass panels** float above it with soft,
 
 ### Cards / Containers
 - **Corner Style:** generous — `2rem` (cards) to `2.8rem` (hero), `1.2rem` for inner chips.
-- **Background:** Paper or `glass-panel*` translucent fills over the Stone body.
+- **Background:** `glass-panel*` translucent fills over the near-black body.
 - **Shadow Strategy:** Panel ambient at rest, Hover lift on interaction (see Elevation).
 - **Border:** single hairline (`1px`) all around. Never a colored side-stripe.
 - **Internal Padding:** `1.5rem` (mobile) to `2rem`+ (desktop).
@@ -178,7 +179,7 @@ A `premium-sheen` class sweeps a soft light band across a glass surface on hover
 
 ### Do:
 - **Do** keep Signal Gold (`#9a6b1f`) to ≤10% of any screen — kickers, focus rings, a few marks.
-- **Do** float panels on wide, faint shadows (blur ≥24px, alpha ≤0.08) with an inset top highlight.
+- **Do** float panels on wide, soft dark shadows (blur ≥24px, black alpha ~0.35–0.45 on the near-black body) with a faint light inset top highlight.
 - **Do** pair every status color with a label or icon (verified, binding, live).
 - **Do** give one display moment per viewport in Bricolage Grotesque; step everything else down.
 - **Do** ship a `prefers-reduced-motion` fallback for every animation, including the sheen.
