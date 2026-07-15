@@ -22,18 +22,18 @@ export function BreadcrumbNav({ items, className, lang = DEFAULT_LOCALE }: Bread
   if (items.length === 0) return null;
 
   return (
-    <nav aria-label="Breadcrumb" className={cn("flex flex-wrap items-center gap-1.5", className)}>
+    <nav aria-label="Breadcrumb" className={cn("mb-3 flex flex-wrap items-center gap-2.5", className)}>
       {items.map((item, index) => {
         const isLast = index === items.length - 1;
         return (
-          <span key={item.href} className="flex items-center gap-1.5">
+          <span key={item.href} className="flex items-center gap-2.5">
             {index > 0 ? (
-              <span className="font-mono text-[9px] text-zinc-300" aria-hidden>
+              <span className="font-mono text-[9px] text-zinc-200" aria-hidden>
                 /
               </span>
             ) : null}
             {isLast ? (
-              <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-zinc-600">
+              <span className="font-mono text-[10px] font-medium uppercase tracking-[0.18em] text-zinc-600">
                 {item.label}
               </span>
             ) : (
