@@ -124,6 +124,17 @@ export default async function ResearchArticlePage({
         </Card>
       </MotionReveal>
 
+      {entry.image ? (
+        <MotionReveal>
+          <div
+            role="img"
+            aria-label={entry.title}
+            className="h-[18rem] w-full rounded-[2rem] border border-white/10 bg-[#0d0d0d] bg-cover bg-center md:h-[28rem]"
+            style={{ backgroundImage: `url(${entry.image})` }}
+          />
+        </MotionReveal>
+      ) : null}
+
       <section className="grid gap-10 xl:grid-cols-[minmax(0,1fr)_19rem]">
         <article className="space-y-10">
           <div className="space-y-4">
