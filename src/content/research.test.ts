@@ -24,7 +24,7 @@ describe("research content registry", () => {
   it("returns the configured featured public entry", () => {
     const featured = getFeaturedResearchEntry();
 
-    expect(featured?.slug).toBe("emerging-architecture-ai-regulation");
+    expect(featured?.slug).toBe("white-collar-revolution-law-firms-ai");
   });
 
   it("returns related entries without including the current article", () => {

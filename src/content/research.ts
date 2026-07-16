@@ -53,6 +53,107 @@ export type ResearchEntry = {
 const author = "Corentin Saint-Girons";
 export const researchEntries: ResearchEntry[] = [
   {
+    slug: "white-collar-revolution-law-firms-ai",
+    title:
+      "The White Collar Revolution: The Transformation of Law Firms in the Age of Artificial Intelligence",
+    subtitle:
+      "Why the shift from a labor-based model to a system-based model is reshaping the economics, organization, and role of the modern law firm.",
+    author,
+    status: "published",
+    category: "Legal Technology",
+    tags: [
+      "Law firms",
+      "Legal technology",
+      "Billable hour",
+      "AI automation",
+      "Legal industry",
+    ],
+    jurisdiction: "General / cross-jurisdictional",
+    readingTime: "10 min read",
+    summary:
+      "How large language models are not just accelerating legal work but disrupting the economic foundations of legal practice — and pushing firms from labor-driven services toward system-driven value.",
+    abstract:
+      "For decades, law firms have operated under a model that appeared both stable and self reinforcing. Artificial intelligence, particularly large language models, is not simply accelerating legal work — it is changing the nature of that work, and with it the economic foundations of legal practice.",
+    image: "/images/research/white-collar-revolution.png",
+    publishedAt: "2026-07-16",
+    featured: true,
+    relatedSlugs: [
+      "emerging-architecture-ai-regulation",
+      "legal-intelligence-systems-future-regulatory-monitoring",
+      "why-soft-law-matters-ai-compliance",
+    ],
+    body: [
+      {
+        heading: "The end of a self-reinforcing model",
+        paragraphs: [
+          "For decades, law firms have operated under a model that appeared both stable and self reinforcing. They attracted top graduates, trained them through apprenticeship, and monetized their expertise through billable hours. Prestige, experience, and institutional reputation served as proxies for quality. This structure has proven remarkably resilient, but it is increasingly misaligned with the technological reality emerging today.",
+          "Artificial intelligence, particularly large language models, is not simply accelerating legal work. It is changing the nature of that work. Tasks that once required extensive human effort such as document review, legal research, contract drafting, and even elements of legal reasoning can now be partially or substantially automated. The result is not just a gain in productivity, but a disruption of the economic foundations of legal practice.",
+        ],
+      },
+      {
+        heading: "The billable hour under pressure",
+        paragraphs: [
+          "The billable hour, long considered the backbone of law firm revenue, becomes difficult to sustain in a context where time is no longer the primary constraint. When a task that previously required ten hours can be completed in minutes, billing based on effort rather than outcome creates tension between efficiency and revenue. Firms are faced with a structural contradiction. The more they adopt AI to improve efficiency, the more they undermine the very metric through which they generate income.",
+        ],
+      },
+      {
+        heading: "From labor-driven services to system-driven value",
+        paragraphs: [
+          "This tension is pushing the legal industry toward a new model. A growing number of firms are beginning to move away from purely labor driven services toward system driven value creation. These organizations integrate lawyers with engineers and AI specialists, investing in tools and workflows that transform legal processes into repeatable, scalable systems. Instead of relying solely on human expertise, they embed that expertise into technology that can be reused, refined, and deployed across multiple matters.",
+        ],
+      },
+      {
+        heading: "How legal quality gets redefined",
+        paragraphs: [
+          "This shift also alters how legal quality is defined and perceived. Historically, clients have relied on reputation, credentials, and firm brand as indicators of competence. However, as AI enables the measurement and benchmarking of outputs, quality becomes more transparent and more comparable. Legal work that was once evaluated subjectively can increasingly be assessed through structured criteria, testing frameworks, and empirical performance. Over time, this may lead clients to prioritize demonstrable outcomes over institutional prestige.",
+        ],
+      },
+      {
+        heading: "Partnership structures and the incentive problem",
+        paragraphs: [
+          "The implications for law firm organization are significant. Traditional partnership structures are designed to maximize short term profit distribution rather than long term investment. Partners are incentivized to generate revenue within the current fiscal year, which limits the willingness to allocate time and resources to experimentation, research, and system building. By contrast, firms that adopt a more corporate approach, or that are structured to support reinvestment, are better positioned to develop proprietary technologies and capture long term gains from automation.",
+        ],
+      },
+      {
+        heading: "The evolving role of the lawyer",
+        paragraphs: [
+          "At the same time, the role of the lawyer is evolving. Artificial intelligence is particularly effective at handling large volumes of text, identifying patterns, and executing structured tasks. These capabilities overlap directly with many core legal functions. However, they do not eliminate the need for human judgment. Strategic decision making, negotiation, client counseling, and ethical considerations remain deeply human domains. The challenge for modern law firms is therefore not to replace lawyers, but to redefine their role. Lawyers increasingly act as supervisors of systems, designers of workflows, and interpreters of outputs rather than sole producers of legal work.",
+        ],
+      },
+      {
+        heading: "New competitive dynamics",
+        paragraphs: [
+          "This transformation also introduces new competitive dynamics. The barriers to entry in certain areas of legal practice are beginning to shift. Smaller, technology driven organizations can deliver high quality services without the same scale of human capital, leveraging systems to achieve efficiency and consistency. This creates pressure on established firms, particularly in areas where work can be standardized and automated. At the same time, elite expertise may become even more valuable when combined with technology, as a single highly skilled lawyer can be amplified by a network of automated processes.",
+        ],
+      },
+      {
+        heading: "Rising client expectations",
+        paragraphs: [
+          "Client expectations are evolving accordingly. As faster and more cost effective solutions become available, clients will demand greater transparency, predictability, and efficiency. They will expect not only accurate legal advice but also timely delivery, clear pricing, and measurable outcomes. In this environment, firms that continue to rely solely on traditional methods risk being perceived as inefficient or outdated.",
+        ],
+      },
+      {
+        heading: "When law firms become technology creators",
+        paragraphs: [
+          "The convergence of software and legal services further accelerates this shift. Law firms are no longer just consumers of technology. Increasingly, they are becoming creators of it. By building internal tools, developing specialized AI systems, and integrating these systems into their workflows, firms can differentiate themselves and create defensible advantages. Over time, the distinction between a law firm and a legal technology company may become increasingly blurred.",
+        ],
+      },
+      {
+        heading: "Uneven but inevitable adoption",
+        paragraphs: [
+          "Despite these changes, adoption remains uneven. The legal profession is inherently conservative, with a strong emphasis on risk mitigation and reliability. This can slow the integration of new technologies, particularly in high stakes contexts. However, the trajectory is clear. As AI capabilities continue to improve and as early adopters demonstrate tangible benefits, the pressure to adapt will intensify.",
+        ],
+      },
+      {
+        heading: "A restructuring, not a disappearance",
+        paragraphs: [
+          "The transformation of law firms is therefore not a question of if, but of how quickly and to what extent. Firms that recognize the need to move from a labor based model to a system based model will be better positioned to navigate this transition. Those that invest in building, measuring, and continuously improving their processes will be able to deliver greater value with fewer resources.",
+          "In this emerging landscape, the defining advantage will not lie solely in the quality of individual lawyers, but in the quality of the systems that support them. The firms that succeed will be those that understand how to encode expertise into scalable processes, how to integrate human judgment with machine capability, and how to align their economic incentives with this new reality. The practice of law is not disappearing, but it is being fundamentally restructured.",
+        ],
+      },
+    ],
+  },
+  {
     slug: "emerging-architecture-ai-regulation",
     title: "The Emerging Architecture of AI Regulation",
     subtitle:
@@ -72,7 +173,6 @@ export const researchEntries: ResearchEntry[] = [
       "A public note on how AI regulation is becoming a layered architecture of law, guidance, enforcement signals, and governance frameworks.",
     abstract:
       "AI compliance is no longer shaped only by enacted rules. In practice, obligations and expectations are emerging through a combination of binding law, implementation guidance, supervisory attention, and standards-linked governance frameworks.",
-    featured: true,
     relatedSlugs: [
       "why-soft-law-matters-ai-compliance",
       "eu-us-ai-governance-comparative-note",
