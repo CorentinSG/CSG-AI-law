@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
@@ -14,25 +15,30 @@ import { ResearchCard } from "@/components/site/research-card";
 import { ResearchStatusBadge } from "@/components/site/research-status-badge";
 import { SiteShell } from "@/components/site/shell";
 import { Card, CardContent } from "@/components/ui/card";
+import { LOCALES, isLocale } from "@/lib/i18n/config";
+import { getDictionary } from "../../dictionaries";
 
 type ResearchArticlePageProps = {
-  params: Promise<{ slug: string }>;
+  params: Promise<{ lang: string; slug: string }>;
 };
 
 export async function generateStaticParams() {
-  return getPublicResearchEntries().map((entry) => ({ slug: entry.slug }));
+  return LOCALES.flatMap((lang) =>
+    getPublicResearchEntries().map((entry) => ({ lang, slug: entry.slug })),
+  );
 }
 
 export async function generateMetadata({
   params,
 }: ResearchArticlePageProps): Promise<Metadata> {
-  const { slug } = await params;
+  const { lang, slug } = await params;
   const entry = getPublicResearchEntryBySlug(slug);
 
   if (!entry) {
-    return {
-      title: "Notes & Commentary",
-    };
+    const fallback = isLocale(lang)
+      ? (await getDictionary(lang)).research.metaTitle
+      : "Notes & Commentary";
+    return { title: fallback };
   }
 
   return {
@@ -49,13 +55,13 @@ export async function generateMetadata({
 export default async function ResearchArticlePage({
   params,
 }: ResearchArticlePageProps) {
-  const { slug } = await params;
+  const { lang, slug } = await params;
+  if (!isLocale(lang)) notFound();
+
   const entry = getPublicResearchEntryBySlug(slug);
+  if (!entry) notFound();
 
-  if (!entry) {
-    notFound();
-  }
-
+  const t = (await getDictionary(lang)).research.article;
   const relatedEntries = getRelatedResearchEntries(entry, 3);
 
   return (
@@ -63,9 +69,14 @@ export default async function ResearchArticlePage({
       <MotionReveal className="space-y-6">
         <BreadcrumbNav
           items={[
-            { label: "Home", href: "/" },
-            { label: "Notes & Commentary", href: "/research" },
-            { label: entry.title.slice(0, 30) + (entry.title.length > 30 ? "…" : ""), href: `/research/${entry.slug}` },
+            { label: t.home, href: `/${lang}` },
+            { label: t.notesCommentary, href: `/${lang}/research` },
+            {
+              label:
+                entry.title.slice(0, 30) +
+                (entry.title.length > 30 ? "…" : ""),
+              href: `/${lang}/research/${entry.slug}`,
+            },
           ]}
         />
 
@@ -88,35 +99,37 @@ export default async function ResearchArticlePage({
           <CardContent className="grid gap-4 p-6 md:grid-cols-2 xl:grid-cols-4">
             <div className="space-y-1">
               <p className="text-[11px] uppercase tracking-[0.22em] text-zinc-500">
-                Author
+                {t.author}
               </p>
               <p className="text-sm text-zinc-800">{entry.author}</p>
             </div>
             <div className="space-y-1">
               <p className="text-[11px] uppercase tracking-[0.22em] text-zinc-500">
-                Reading time
+                {t.readingTime}
               </p>
               <p className="text-sm text-zinc-800">{entry.readingTime}</p>
             </div>
             <div className="space-y-1">
               <p className="text-[11px] uppercase tracking-[0.22em] text-zinc-500">
-                Status
+                {t.status}
               </p>
               <p className="text-sm text-zinc-800">
-                {entry.status === "published" ? "Public note" : "Note in development"}
+                {entry.status === "published" ? t.publicNote : t.noteInDevelopment}
               </p>
             </div>
             <div className="space-y-1">
               <p className="text-[11px] uppercase tracking-[0.22em] text-zinc-500">
-                Jurisdiction
+                {t.jurisdiction}
               </p>
               <p className="text-sm text-zinc-800">
-                {entry.jurisdiction ?? "General / cross-jurisdictional"}
+                {entry.jurisdiction ?? t.generalJurisdiction}
               </p>
             </div>
             {entry.publishedAt ? (
               <div className="space-y-1">
-                <p className="text-[11px] uppercase tracking-[0.22em] text-zinc-500">Published</p>
+                <p className="text-[11px] uppercase tracking-[0.22em] text-zinc-500">
+                  {t.published}
+                </p>
                 <p className="text-sm text-zinc-800">{entry.publishedAt}</p>
               </div>
             ) : null}
@@ -126,12 +139,16 @@ export default async function ResearchArticlePage({
 
       {entry.image ? (
         <MotionReveal>
-          <div
-            role="img"
-            aria-label={entry.title}
-            className="h-[18rem] w-full rounded-[2rem] border border-white/10 bg-[#0d0d0d] bg-cover bg-center md:h-[28rem]"
-            style={{ backgroundImage: `url(${entry.image})` }}
-          />
+          <div className="relative h-[18rem] w-full overflow-hidden rounded-[2rem] border border-white/10 bg-[#0d0d0d] md:h-[28rem]">
+            <Image
+              src={entry.image}
+              alt={entry.title}
+              fill
+              sizes="(max-width: 768px) 100vw, 1200px"
+              className="object-cover"
+              priority
+            />
+          </div>
         </MotionReveal>
       ) : null}
 
@@ -139,7 +156,7 @@ export default async function ResearchArticlePage({
         <article className="space-y-10">
           <div className="space-y-4">
             <p className="text-xs uppercase tracking-[0.26em] text-zinc-500">
-              Abstract
+              {t.abstract}
             </p>
             <p className="max-w-4xl text-base leading-8 text-zinc-700 md:text-lg">
               {entry.abstract}
@@ -173,13 +190,17 @@ export default async function ResearchArticlePage({
 
           {entry.references?.length ? (
             <section className="space-y-4 border-t border-black/6 pt-8">
-              <h2 className="font-serif text-3xl text-zinc-950">Sources and references</h2>
+              <h2 className="font-serif text-3xl text-zinc-950">{t.references}</h2>
               <div className="space-y-3 text-sm leading-7 text-zinc-700">
                 {entry.references.map((reference) => (
                   <div key={reference.label}>
                     {reference.href ? (
                       <Link
-                        href={reference.href}
+                        href={
+                          reference.href.startsWith("/")
+                            ? `/${lang}${reference.href}`
+                            : reference.href
+                        }
                         className="text-zinc-900 underline decoration-black/15 underline-offset-4"
                       >
                         {reference.label}
@@ -199,15 +220,12 @@ export default async function ResearchArticlePage({
           <Card className="glass-panel-soft rounded-[2rem] border-black/6 text-zinc-950">
             <CardContent className="space-y-4 p-6">
               <p className="text-[11px] uppercase tracking-[0.24em] text-zinc-500">
-                Editorial context
+                {t.editorialContext}
               </p>
-              <p className="text-sm leading-7 text-zinc-700">
-                This section publishes notes, commentary, and legal analysis for
-                informational purposes only and does not constitute legal advice.
-              </p>
+              <p className="text-sm leading-7 text-zinc-700">{t.disclaimer}</p>
               {entry.updatedAt ? (
                 <p className="text-xs uppercase tracking-[0.16em] text-zinc-500">
-                  Last updated {entry.updatedAt}
+                  {t.lastUpdated} {entry.updatedAt}
                 </p>
               ) : null}
             </CardContent>
@@ -216,7 +234,7 @@ export default async function ResearchArticlePage({
           <Card className="glass-panel-soft rounded-[2rem] border-black/6 text-zinc-950">
             <CardContent className="space-y-4 p-6">
               <p className="text-[11px] uppercase tracking-[0.24em] text-zinc-500">
-                Tags
+                {t.tags}
               </p>
               <div className="flex flex-wrap gap-2">
                 {entry.tags.map((tag) => (
@@ -237,19 +255,25 @@ export default async function ResearchArticlePage({
         <section className="space-y-8 border-t border-black/6 pt-12">
           <div className="space-y-2">
             <p className="text-xs uppercase tracking-[0.3em] text-zinc-500">
-              Related notes
+              {t.relatedNotes}
             </p>
-            <h2 className="font-serif text-3xl text-zinc-950">Continue reading</h2>
+            <h2 className="font-serif text-3xl text-zinc-950">
+              {t.continueReading}
+            </h2>
           </div>
           <MotionStagger className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
             {relatedEntries.map((related) => (
               <ResearchCard
                 key={related.slug}
-                href={`/research/${related.slug}`}
+                href={`/${lang}/research/${related.slug}`}
                 category={related.category}
                 title={related.title}
                 description={related.summary}
-                status={related.status === "published" ? "Public note" : "Note forthcoming"}
+                status={
+                  related.status === "published"
+                    ? t.publicNote
+                    : t.noteForthcoming
+                }
                 meta={`${related.readingTime}${related.jurisdiction ? ` · ${related.jurisdiction}` : ""}`}
                 tags={related.tags}
               />

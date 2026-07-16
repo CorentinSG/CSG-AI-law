@@ -63,6 +63,27 @@
     "emptyBody": "Les premières notes sur la régulation de l'IA, le droit comparé et la gouvernance seront publiées prochainement.",
     "emptyCta": "Consulter le moniteur IA en attendant",
     "metaTitle": "Notes & commentaires",
-    "metaDescription": "Notes, commentaires et analyses juridiques sur la régulation de l'IA, la gouvernance, l'éthique juridique, la legaltech et le droit comparé de l'IA."
+    "metaDescription": "Notes, commentaires et analyses juridiques sur la régulation de l'IA, la gouvernance, l'éthique juridique, la legaltech et le droit comparé de l'IA.",
+    "article": {
+      "home": "Accueil",
+      "notesCommentary": "Notes & commentaires",
+      "author": "Auteur",
+      "readingTime": "Temps de lecture",
+      "status": "Statut",
+      "jurisdiction": "Juridiction",
+      "published": "Publié",
+      "publicNote": "Note publique",
+      "noteInDevelopment": "Note en préparation",
+      "noteForthcoming": "Note à venir",
+      "generalJurisdiction": "Général / transjuridictionnel",
+      "abstract": "Résumé",
+      "references": "Sources et références",
+      "editorialContext": "Contexte éditorial",
+      "disclaimer": "Cette section publie des notes, commentaires et analyses juridiques à titre informatif uniquement ; elles ne constituent pas un conseil juridique.",
+      "lastUpdated": "Dernière mise à jour",
+      "tags": "Étiquettes",
+      "relatedNotes": "Notes liées",
+      "continueReading": "Continuer la lecture"
+    }
   }
 }

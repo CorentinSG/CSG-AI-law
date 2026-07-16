@@ -63,6 +63,27 @@
     "emptyBody": "The first notes on AI regulation, comparative law, and governance will be published shortly.",
     "emptyCta": "Browse the AI monitor in the meantime",
     "metaTitle": "Notes & Commentary",
-    "metaDescription": "Notes, commentary, and legal analysis on AI regulation, governance, legal ethics, legal technology, and comparative AI law."
+    "metaDescription": "Notes, commentary, and legal analysis on AI regulation, governance, legal ethics, legal technology, and comparative AI law.",
+    "article": {
+      "home": "Home",
+      "notesCommentary": "Notes & Commentary",
+      "author": "Author",
+      "readingTime": "Reading time",
+      "status": "Status",
+      "jurisdiction": "Jurisdiction",
+      "published": "Published",
+      "publicNote": "Public note",
+      "noteInDevelopment": "Note in development",
+      "noteForthcoming": "Note forthcoming",
+      "generalJurisdiction": "General / cross-jurisdictional",
+      "abstract": "Abstract",
+      "references": "Sources and references",
+      "editorialContext": "Editorial context",
+      "disclaimer": "This section publishes notes, commentary, and legal analysis for informational purposes only and does not constitute legal advice.",
+      "lastUpdated": "Last updated",
+      "tags": "Tags",
+      "relatedNotes": "Related notes",
+      "continueReading": "Continue reading"
+    }
   }
 }

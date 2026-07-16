@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import useEmblaCarousel from "embla-carousel-react";
@@ -84,22 +85,24 @@ export function ArticleCarousel({
                 className="group block overflow-hidden rounded-[2rem] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900 focus-visible:ring-offset-2"
               >
                 <div className="relative h-[30rem] overflow-hidden rounded-[2rem] bg-[linear-gradient(135deg,#1c1c1c_0%,#0d0d0d_60%,#0a0a0a_100%)] lg:h-[34rem]">
-                  {/* Cover rendered as a background image: a local asset shows
-                      when present, and a missing file simply reveals the
-                      container gradient below — no broken-image icon, and it
-                      dodges the hydration gap that makes <img onError> unreliable
-                      for assets that 404 before React attaches its handler. */}
-                  <div
-                    aria-hidden
-                    className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(154,107,31,0.16),transparent_55%)] bg-cover bg-center transition-transform duration-500 group-hover:scale-105"
-                    style={
-                      item.image &&
-                      (item.image.startsWith("/") ||
-                        item.image.startsWith("data:"))
-                        ? { backgroundImage: `url(${item.image})` }
-                        : undefined
-                    }
-                  />
+                  {/* Optimized cover for local assets; entries without an image
+                      fall back to the on-brand gradient below. */}
+                  {item.image &&
+                  (item.image.startsWith("/") ||
+                    item.image.startsWith("data:")) ? (
+                    <Image
+                      src={item.image}
+                      alt={item.title}
+                      fill
+                      sizes="(max-width: 1024px) 300px, 380px"
+                      className="object-cover transition-transform duration-500 group-hover:scale-105"
+                    />
+                  ) : (
+                    <div
+                      aria-hidden
+                      className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(154,107,31,0.16),transparent_55%)] transition-transform duration-500 group-hover:scale-105"
+                    />
+                  )}
                   <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/25 to-transparent" />
                   <div className="absolute inset-x-0 bottom-0 p-7">
                     {item.category && (
