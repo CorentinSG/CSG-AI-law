@@ -29,7 +29,7 @@ export function PageTransition({ children }: { children: ReactNode }) {
         className="relative"
       >
         <motion.div
-          className="pointer-events-none fixed inset-0 z-[60] bg-[linear-gradient(180deg,rgba(244,244,240,0.82),rgba(244,244,240,0.24),transparent)]"
+          className="pointer-events-none fixed inset-0 z-[60] bg-[linear-gradient(180deg,rgba(8,8,8,0.92),rgba(8,8,8,0.35),transparent)]"
           initial={{ opacity: 0.92, scaleY: 1, transformOrigin: "top" }}
           animate={{ opacity: 0, scaleY: 0.86 }}
           transition={{ duration: 0.9, ease }}
