@@ -40,7 +40,8 @@ Each agent edits only its own rows. Status vocabulary: `CLAIMED` · `WIP` · `BL
 | T-EU-OFFICIAL-WAVE-5 | Codex | MERGED | `main` @ `d31686b` | `scripts/backfill-eu-official-wave5.ts`, `package.json` | `backfill-eu-official-wave5.ts`, `SourceReference`, community "Data Repository and Pagination", community "Scan Pipeline" | 2026-07-15 |
 | T-EU-OFFICIAL-WAVE-6 | Codex | MERGED | `main` @ `4df13d9` | `scripts/backfill-eu-official-wave6.ts`, `package.json` | `backfill-eu-official-wave6.ts`, `SourceReference`, community "Data Repository and Pagination", community "Scan Pipeline" | 2026-07-15 |
 | T-EU-DEPTH-WAVE-7 | Codex | MERGED | `main` @ `8ca3ecd` | `scripts/backfill-eu-depth-wave7.ts`, `package.json` | `backfill-eu-depth-wave7.ts`, `SourceReference`, community "Data Repository and Pagination", community "Scan Pipeline" | 2026-07-15 |
-| T-EU-DEPTH-WAVE-8 | Codex | DONE-LOCAL | `main` @ working tree | `scripts/backfill-eu-depth-wave8.ts`, `package.json` | `backfill-eu-depth-wave8.ts`, `SourceReference`, community "Data Repository and Pagination", community "Scan Pipeline" | 2026-07-15 |
+| T-EU-DEPTH-WAVE-8 | Codex | MERGED | `main` @ `7c6bc28` | `scripts/backfill-eu-depth-wave8.ts`, `package.json` | `backfill-eu-depth-wave8.ts`, `SourceReference`, community "Data Repository and Pagination", community "Scan Pipeline" | 2026-07-15 |
+| T-CRON-AUTH-CI | Codex | DONE-LOCAL | `main` @ working tree | `src/lib/cron-auth.test.ts` | `getCronAuthStatus()`, community "Admin Authentication" | 2026-07-15 |
 | T-NEWS-BACKFILL-INTEGRITY | Codex | DONE-LOCAL | `ops/t-ops9-ux` @ working tree | `src/content/ai-regulation/news.ts`, `src/lib/news-backfill.ts`, `scripts/backfill-news-items.ts`, `src/db/seed/seed-profiles.ts`, related tests | `buildNewsItemFromUpdate()`, `backfillNewsItemsFromUpdates()`, `buildLegalDatabaseIntegrityReport()`, community "News and Regulation Admin", community "DB Repository Layer" | 2026-06-22 |
 | T-INGESTION-RUNTIME | Codex | DONE-LOCAL | `ops/t-ops9-ux` @ working tree | `src/agents/ingestion/**`, `scrapling_worker/**`, `src/agents/ai-regulation/agentApiCapabilities.ts` | `scraplingExtract()`, `firecrawlService.ts`, `listAgentApiCapabilities()`, community "Data Ingestion Pipeline", community "Scrapling Extraction Service", community "Agent API Capabilities" | 2026-06-22 |
 | T-BATCH-REVIEW-UI (P2b) | Claude Code | DONE-LOCAL | `ops/t-ops9-ux` @ `0f2809d` | `src/app/admin/ai-regulation/review/**`, `src/app/admin/ai-regulation/actions.ts`, `src/app/admin/page.tsx` | `listPrioritizedReviewQueue()`, `batchTransitionReviewStatus()`, `bulkUpdateReviewStatus`, community "Admin Review and Summaries" | 2026-06-21 |
@@ -64,6 +65,14 @@ YYYY-MM-DD · <Agent> · <TASK-ID> · <STATUS>
 ```
 
 ## Current status
+
+2026-07-15 - Codex - T-CRON-AUTH-CI - DONE-LOCAL
+- Intent:        Fix the red GitHub `verify` check after Claude's PR merge by isolating the `cron-auth` missing-secret test from ambient CI `CRON_SECRET` secrets.
+- Files:         `src/lib/cron-auth.test.ts`, `AI_TASKS.md`.
+- Graph anchors: `getCronAuthStatus()`, community "Admin Authentication".
+- Verification:  Reproduced the CI-sensitive failure with ambient `CRON_SECRET`; added explicit `delete process.env.CRON_SECRET` before `resetEnvForTests()` in the missing-secret test; `CRON_SECRET=ci-secret-value-123456 npm test -- src/lib/cron-auth.test.ts` PASS (4 tests); `npm test` PASS (115 files / 649 tests); `npm run typecheck` PASS; `npm run lint` PASS; `npm run build` PASS with temporary non-default admin env vars for local verification.
+- Branch/commit: `main` @ working tree.
+- Next:          Commit and push the one-line backend test fix so GitHub verify returns green on `main`.
 
 2026-07-15 - Codex - T-EU-DEPTH-WAVE-8 - DONE-LOCAL
 - Intent:        Continue the depth phase with official court judgments, DPA enforcement, biometric law-enforcement guidance, AI sandbox guidance, and automated-decision guidance so country timelines move beyond baseline coverage.

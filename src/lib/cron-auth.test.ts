@@ -11,6 +11,7 @@ describe("cron auth", () => {
   });
 
   it("rejects when CRON_SECRET is not configured", () => {
+    delete process.env.CRON_SECRET;
     process.env.ADMIN_AUTH_SECRET = "123456789012345678901234";
     resetEnvForTests();
     const request = new Request("http://localhost/api/cron");
