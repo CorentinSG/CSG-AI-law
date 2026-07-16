@@ -40,14 +40,20 @@ export function ShaderAnimation() {
         float t = time*0.05;
         float lineWidth = 0.002;
 
-        vec3 color = vec3(0.0);
-        for(int j = 0; j < 3; j++){
-          for(int i=0; i < 5; i++){
-            color[j] += lineWidth*float(i*i) / abs(fract(t - 0.01*float(j)+float(i)*0.01)*5.0 - length(uv) + mod(uv.x+uv.y, 0.2));
-          }
+        // Single monochrome intensity — no per-channel phase split, so the field
+        // stays on-brand (a quiet gold "signal", not a prism). See DESIGN.md:
+        // one gold accent, no neon.
+        float intensity = 0.0;
+        for(int i=0; i < 5; i++){
+          intensity += lineWidth*float(i*i) / abs(fract(t + float(i)*0.01)*5.0 - length(uv) + mod(uv.x+uv.y, 0.2));
         }
 
-        gl_FragColor = vec4(color[0],color[1],color[2],1.0);
+        vec3 gold = vec3(0.77, 0.53, 0.16);
+        vec3 color = gold * intensity;
+        // A faint warm-white core on the brightest strands keeps it from reading flat.
+        color += vec3(1.0, 0.92, 0.78) * pow(intensity, 3.0) * 0.12;
+
+        gl_FragColor = vec4(color, 1.0);
       }
     `
 
