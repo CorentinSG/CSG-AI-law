@@ -41,7 +41,7 @@ Each agent edits only its own rows. Status vocabulary: `CLAIMED` · `WIP` · `BL
 | T-EU-OFFICIAL-WAVE-6 | Codex | MERGED | `main` @ `4df13d9` | `scripts/backfill-eu-official-wave6.ts`, `package.json` | `backfill-eu-official-wave6.ts`, `SourceReference`, community "Data Repository and Pagination", community "Scan Pipeline" | 2026-07-15 |
 | T-EU-DEPTH-WAVE-7 | Codex | MERGED | `main` @ `8ca3ecd` | `scripts/backfill-eu-depth-wave7.ts`, `package.json` | `backfill-eu-depth-wave7.ts`, `SourceReference`, community "Data Repository and Pagination", community "Scan Pipeline" | 2026-07-15 |
 | T-EU-DEPTH-WAVE-8 | Codex | MERGED | `main` @ `7c6bc28` | `scripts/backfill-eu-depth-wave8.ts`, `package.json` | `backfill-eu-depth-wave8.ts`, `SourceReference`, community "Data Repository and Pagination", community "Scan Pipeline" | 2026-07-15 |
-| T-EU-DEPTH-WAVE-9 | Codex | DONE-LOCAL | `main` @ working tree | `scripts/backfill-eu-depth-wave9.ts`, `package.json` | `backfill-eu-depth-wave9.ts`, `SourceReference`, community "Data Repository and Pagination", community "Scan Pipeline" | 2026-07-16 |
+| T-EU-DEPTH-WAVE-9 | Codex | MERGED | `main` @ `07a2b72` | `scripts/backfill-eu-depth-wave9.ts`, `package.json` | `backfill-eu-depth-wave9.ts`, `SourceReference`, community "Data Repository and Pagination", community "Scan Pipeline" | 2026-07-16 |
 | T-CRON-AUTH-CI | Codex | MERGED | `main` @ `230c8e3` | `src/lib/cron-auth.test.ts` | `getCronAuthStatus()`, community "Admin Authentication" | 2026-07-15 |
 | T-REVIEW-BACKLOG-REDUCTION | Codex | MERGED | `main` @ `9df039e` | `scripts/reduce-review-backlog.ts`, `package.json` | `evaluatePublicationEligibility()`, `updateRepository.updateReviewStatus()`, community "Admin Review and Summaries", community "DB Repository Layer" | 2026-07-15 |
 | T-US-LOCUS-DISCOVERY | Codex | MERGED | `main` @ `e8a1b24` | `src/agents/ai-regulation/usLocusDiscovery.ts`, `src/agents/ai-regulation/usLocusDiscovery.test.ts`, `README.md`, `PROJECT_LOGBOOK.md`, `AI_AGENT_MASTER_CONTEXT.md`, `docs/superpowers/plans/2026-07-15-locus-us-discovery-corpus.md` | `buildLocusDiscoveryLead()`, `DiscoveryLead`, community "Scan Pipeline", community "DB Repository Layer" | 2026-07-16 |
@@ -69,12 +69,12 @@ YYYY-MM-DD · <Agent> · <TASK-ID> · <STATUS>
 
 ## Current status
 
-2026-07-16 - Codex - T-EU-DEPTH-WAVE-9 - DONE-LOCAL
+2026-07-16 - Codex - T-EU-DEPTH-WAVE-9 - MERGED
 - Intent:        Continue country-by-country depth with official DPA enforcement, AI/GDPR guidance, public-sector AI guidance, model-training soft law, and sandbox material for Italy, Hungary, France, Denmark, Finland, Norway, Ireland, and the EU layer.
 - Files:         `scripts/backfill-eu-depth-wave9.ts`, `package.json`, `AI_TASKS.md`.
 - Graph anchors: `backfill-eu-depth-wave9.ts`, `SourceReference`, community "Data Repository and Pagination", community "Scan Pipeline".
 - Verification:  Added dry-run-first `npm run backfill:eu-depth-wave9`; dry-run selected 8 official entries; live Supabase created 8 `published` updates with tag `eu-depth-wave9` for Italy=1, Hungary=1, France=1, Denmark=1, Finland=1, Norway=1, Ireland=1, European Union=1; DB recount confirms count=8 and all `published`, split `Enforcement action`=2 and `Agency guidance`=6; targeted legal/database tests PASS (4 files / 23 tests); `npm test` PASS (116 files / 654 tests); `npm run typecheck` PASS; `npm run lint` PASS; `npm run build` PASS with temporary non-default admin env vars for local verification.
-- Branch/commit: `main` @ working tree.
+- Branch/commit: `main` @ `07a2b72`.
 - Next:          Continue wave 10 with more official court decisions, DPA sanctions, local/regional AI enforcement, and reliable legal-news discovery only after official-source verification.
 
 2026-07-15 - Codex - T-US-LOCUS-DISCOVERY - DONE-LOCAL
