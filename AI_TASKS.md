@@ -41,7 +41,8 @@ Each agent edits only its own rows. Status vocabulary: `CLAIMED` · `WIP` · `BL
 | T-EU-OFFICIAL-WAVE-6 | Codex | MERGED | `main` @ `4df13d9` | `scripts/backfill-eu-official-wave6.ts`, `package.json` | `backfill-eu-official-wave6.ts`, `SourceReference`, community "Data Repository and Pagination", community "Scan Pipeline" | 2026-07-15 |
 | T-EU-DEPTH-WAVE-7 | Codex | MERGED | `main` @ `8ca3ecd` | `scripts/backfill-eu-depth-wave7.ts`, `package.json` | `backfill-eu-depth-wave7.ts`, `SourceReference`, community "Data Repository and Pagination", community "Scan Pipeline" | 2026-07-15 |
 | T-EU-DEPTH-WAVE-8 | Codex | MERGED | `main` @ `7c6bc28` | `scripts/backfill-eu-depth-wave8.ts`, `package.json` | `backfill-eu-depth-wave8.ts`, `SourceReference`, community "Data Repository and Pagination", community "Scan Pipeline" | 2026-07-15 |
-| T-CRON-AUTH-CI | Codex | DONE-LOCAL | `main` @ working tree | `src/lib/cron-auth.test.ts` | `getCronAuthStatus()`, community "Admin Authentication" | 2026-07-15 |
+| T-CRON-AUTH-CI | Codex | MERGED | `main` @ `230c8e3` | `src/lib/cron-auth.test.ts` | `getCronAuthStatus()`, community "Admin Authentication" | 2026-07-15 |
+| T-REVIEW-BACKLOG-REDUCTION | Codex | DONE-LOCAL | `main` @ working tree | `scripts/reduce-review-backlog.ts`, `package.json` | `evaluatePublicationEligibility()`, `updateRepository.updateReviewStatus()`, community "Admin Review and Summaries", community "DB Repository Layer" | 2026-07-15 |
 | T-NEWS-BACKFILL-INTEGRITY | Codex | DONE-LOCAL | `ops/t-ops9-ux` @ working tree | `src/content/ai-regulation/news.ts`, `src/lib/news-backfill.ts`, `scripts/backfill-news-items.ts`, `src/db/seed/seed-profiles.ts`, related tests | `buildNewsItemFromUpdate()`, `backfillNewsItemsFromUpdates()`, `buildLegalDatabaseIntegrityReport()`, community "News and Regulation Admin", community "DB Repository Layer" | 2026-06-22 |
 | T-INGESTION-RUNTIME | Codex | DONE-LOCAL | `ops/t-ops9-ux` @ working tree | `src/agents/ingestion/**`, `scrapling_worker/**`, `src/agents/ai-regulation/agentApiCapabilities.ts` | `scraplingExtract()`, `firecrawlService.ts`, `listAgentApiCapabilities()`, community "Data Ingestion Pipeline", community "Scrapling Extraction Service", community "Agent API Capabilities" | 2026-06-22 |
 | T-BATCH-REVIEW-UI (P2b) | Claude Code | DONE-LOCAL | `ops/t-ops9-ux` @ `0f2809d` | `src/app/admin/ai-regulation/review/**`, `src/app/admin/ai-regulation/actions.ts`, `src/app/admin/page.tsx` | `listPrioritizedReviewQueue()`, `batchTransitionReviewStatus()`, `bulkUpdateReviewStatus`, community "Admin Review and Summaries" | 2026-06-21 |
@@ -65,6 +66,14 @@ YYYY-MM-DD · <Agent> · <TASK-ID> · <STATUS>
 ```
 
 ## Current status
+
+2026-07-15 - Codex - T-REVIEW-BACKLOG-REDUCTION - DONE-LOCAL
+- Intent:        Reduce the `needs_review` backlog by auto-publishing only items that already satisfy the official-source/citation eligibility gate, without weakening publication controls.
+- Files:         `scripts/reduce-review-backlog.ts`, `package.json`, `AI_TASKS.md`.
+- Graph anchors: `evaluatePublicationEligibility()`, `updateRepository.updateReviewStatus()`, community "Admin Review and Summaries", community "DB Repository Layer".
+- Verification:  Added dry-run-first `npm run review:reduce-backlog`; dry-run found 39 eligible items out of 331 (`Country legal baseline curator`=31, trusted guidance sources NIST/ICO/NYDFS=8); live run transitioned 39 items through `needs_review -> approved -> published` with 0 failures; DB recount now reports `needs_review`=292, `published`=544, `archived`=2, and `autoEligibleRemaining`=0; remaining backlog is blocked mostly by missing official/authoritative sources and citation quality; targeted review/publication/health tests PASS (3 files / 15 tests); `npm test` PASS (115 files / 649 tests); `npm run typecheck` PASS; `npm run lint` PASS; `npm run build` PASS with temporary non-default admin env vars for local verification.
+- Branch/commit: `main` @ working tree.
+- Next:          To reduce the remaining 292, attach official source references or corroborated reliable legal-news evidence first, then re-run `npm run review:reduce-backlog`.
 
 2026-07-15 - Codex - T-CRON-AUTH-CI - DONE-LOCAL
 - Intent:        Fix the red GitHub `verify` check after Claude's PR merge by isolating the `cron-auth` missing-secret test from ambient CI `CRON_SECRET` secrets.
