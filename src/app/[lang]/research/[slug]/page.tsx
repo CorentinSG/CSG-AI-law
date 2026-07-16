@@ -62,7 +62,11 @@ export default async function ResearchArticlePage({
   if (!entry) notFound();
 
   const t = (await getDictionary(lang)).research.article;
-  const relatedEntries = getRelatedResearchEntries(entry, 3);
+  // Only surface published notes as "related" — forthcoming notes are not shown
+  // publicly (they stay in the registry for admin).
+  const relatedEntries = getRelatedResearchEntries(entry, 3).filter(
+    (related) => related.status === "published",
+  );
 
   return (
     <SiteShell className="space-y-14 md:space-y-20">

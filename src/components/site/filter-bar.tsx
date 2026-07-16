@@ -103,11 +103,17 @@ export function FilterBar({
             <select
               name={filter.key}
               defaultValue={String(searchParams[filter.key] ?? "all")}
+              // colorScheme:dark makes the native option popup render dark; the
+              // per-option style is the cross-browser fallback so the open
+              // dropdown is never white-on-white on the dark site.
+              style={{ colorScheme: "dark" }}
               className="w-full rounded-xl border border-black/8 bg-white/70 px-3 py-2 text-sm text-zinc-900 backdrop-blur-sm transition-colors duration-150 hover:border-black/16 focus:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900/20"
             >
-              <option value="all">All</option>
+              <option value="all" style={{ backgroundColor: "#141418", color: "#e9e9ea" }}>
+                All
+              </option>
               {(options[filter.key] ?? []).map((value) => (
-                <option key={value} value={value}>
+                <option key={value} value={value} style={{ backgroundColor: "#141418", color: "#f4f4f5" }}>
                   {value}
                 </option>
               ))}

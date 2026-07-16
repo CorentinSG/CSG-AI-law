@@ -12,16 +12,19 @@ interface RegionPortalCardProps {
   isLive?: boolean;
 }
 
+// Dark frosted glass with a faint regional tint. The site renders on a near-black
+// body and .dark-site whitens the zinc text, so these backgrounds must be dark —
+// a light fill here would put white text on a white card.
 const regionGradients = {
   europe:
-    "bg-[radial-gradient(ellipse_at_top_left,rgba(99,102,241,0.10),transparent_55%),linear-gradient(180deg,rgba(255,255,255,0.97),rgba(248,248,252,0.97))]",
+    "bg-[radial-gradient(ellipse_at_top_left,rgba(129,140,248,0.16),transparent_55%),linear-gradient(180deg,rgba(255,255,255,0.05),rgba(255,255,255,0.02))]",
   "united-states":
-    "bg-[radial-gradient(ellipse_at_top_right,rgba(239,68,68,0.08),transparent_55%),linear-gradient(180deg,rgba(255,255,255,0.97),rgba(252,250,248,0.97))]",
+    "bg-[radial-gradient(ellipse_at_top_right,rgba(248,113,113,0.14),transparent_55%),linear-gradient(180deg,rgba(255,255,255,0.05),rgba(255,255,255,0.02))]",
 };
 
 const regionAccent = {
-  europe: "text-indigo-600",
-  "united-states": "text-red-600",
+  europe: "text-indigo-300",
+  "united-states": "text-red-300",
 };
 
 export function RegionPortalCard({
