@@ -17,7 +17,13 @@ export interface ArticleCarouselItem {
   meta?: string;
 }
 
-export function ArticleCarousel({ items }: { items: ArticleCarouselItem[] }) {
+export function ArticleCarousel({
+  items,
+  readLabel = "Read note",
+}: {
+  items: ArticleCarouselItem[];
+  readLabel?: string;
+}) {
   const [emblaRef, emblaApi] = useEmblaCarousel({ dragFree: true, align: "start" });
   const [canScrollPrev, setCanScrollPrev] = useState(false);
   const [canScrollNext, setCanScrollNext] = useState(false);
@@ -107,7 +113,7 @@ export function ArticleCarousel({ items }: { items: ArticleCarouselItem[] }) {
                       {item.description}
                     </p>
                     <span className="inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.22em] text-white/70 transition-all group-hover:gap-3 group-hover:text-white/90">
-                      Read note
+                      {readLabel}
                       <ArrowRight className="size-3.5 transition-transform group-hover:translate-x-0.5" />
                     </span>
                   </div>

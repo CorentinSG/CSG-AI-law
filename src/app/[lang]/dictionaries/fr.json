@@ -48,5 +48,21 @@
     "postureBody": "Chaque élément publié est traçable jusqu'à une source officielle ou corroboré par plusieurs sources sérieuses avant mise en ligne. Aucun résumé algorithmique.",
     "postureCta": "Ouvrir le Hub",
     "footerTagline": "C. Saint-Girons, Esq — Droit de l'IA & Intelligence juridique"
+  },
+  "research": {
+    "eyebrow": "Notes & commentaires",
+    "title": "Analyse juridique de l'IA",
+    "intro": "Notes et commentaires sur la régulation de l'IA, la gouvernance, l'éthique juridique et le droit comparé — rédigés par Corentin Saint-Girons.",
+    "readLabel": "Lire la note",
+    "publishedLabel": "Notes publiées",
+    "forthcomingLabel": "À venir",
+    "forthcomingHeading": "Notes en préparation",
+    "forthcomingNote": "Annoncées et en cours de rédaction. Le texte complet n'est pas encore publié.",
+    "emptyLabel": "En préparation",
+    "emptyHeading": "Notes à venir",
+    "emptyBody": "Les premières notes sur la régulation de l'IA, le droit comparé et la gouvernance seront publiées prochainement.",
+    "emptyCta": "Consulter le moniteur IA en attendant",
+    "metaTitle": "Notes & commentaires",
+    "metaDescription": "Notes, commentaires et analyses juridiques sur la régulation de l'IA, la gouvernance, l'éthique juridique, la legaltech et le droit comparé de l'IA."
   }
 }

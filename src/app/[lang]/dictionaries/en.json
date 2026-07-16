@@ -48,5 +48,21 @@
     "postureBody": "Every published item is traceable to an official source or corroborated across serious sources before going live. No algorithmic summaries.",
     "postureCta": "Open the Hub",
     "footerTagline": "C. Saint-Girons, Esq — AI Law & Legal Intelligence"
+  },
+  "research": {
+    "eyebrow": "Notes & Commentary",
+    "title": "AI legal analysis",
+    "intro": "Notes and commentary on AI regulation, governance, legal ethics, and comparative law — written by Corentin Saint-Girons.",
+    "readLabel": "Read note",
+    "publishedLabel": "Published notes",
+    "forthcomingLabel": "Forthcoming",
+    "forthcomingHeading": "Notes in preparation",
+    "forthcomingNote": "Announced and being drafted. The full text is not published yet.",
+    "emptyLabel": "In preparation",
+    "emptyHeading": "Notes coming soon",
+    "emptyBody": "The first notes on AI regulation, comparative law, and governance will be published shortly.",
+    "emptyCta": "Browse the AI monitor in the meantime",
+    "metaTitle": "Notes & Commentary",
+    "metaDescription": "Notes, commentary, and legal analysis on AI regulation, governance, legal ethics, legal technology, and comparative AI law."
   }
 }
