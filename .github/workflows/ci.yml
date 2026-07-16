@@ -13,6 +13,10 @@ env:
   APP_DATA_MODE: memory
   ALLOW_MEMORY_MODE_IN_PRODUCTION: "true"
   ADMIN_AUTH_SECRET: ci-placeholder-admin-secret-000000
+  # Non-default admin creds: the production build rejects the admin/change-me
+  # defaults, so the build step needs these placeholders too.
+  ADMIN_USERNAME: ci-placeholder-admin
+  ADMIN_PASSWORD: ci-placeholder-admin-password-000000
   CRON_SECRET: ci-placeholder-cron-secret-0000
 
 jobs:
