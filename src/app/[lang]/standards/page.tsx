@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { updateRepository } from "@/agents/ai-regulation/processors/updateRepository";
+import { AuthoritySpectrum } from "@/components/site/authority-spectrum";
 import { getPublicResearchEntries } from "@/content/research";
 import { europeAiSoftLawBaseline } from "@/content/ai-regulation/europe-ai-soft-law";
 import { usAiSoftLawBaseline } from "@/content/ai-regulation/us-ai-soft-law";
@@ -86,28 +87,7 @@ export default async function StandardsPage({
     ),
   );
 
-  const binding = {
-    hint: fr ? "Ailleurs sur le site" : "Elsewhere on the site",
-    label: fr ? "Droit contraignant" : "Binding law",
-    points: fr
-      ? ["Fixé par les législateurs et régulateurs", "Applicable — obligation de conformité", "Fait autorité juridique"]
-      : ["Set by legislatures and regulators", "Enforceable — you must comply", "Carries legal authority"],
-  };
-  const soft = {
-    hint: fr ? "Cette page" : "This page",
-    label: fr ? "Standards & soft law" : "Standards & soft law",
-    points: fr
-      ? [
-          "Fixé par organismes de normalisation, agences, industrie",
-          "Non applicable en soi",
-          "Montre ce qu'est une bonne pratique — jusqu'à adoption par une autorité",
-        ]
-      : [
-          "Set by standards bodies, agencies, and industry",
-          "Not enforceable on its own",
-          "Shows what good looks like — until an authority adopts it",
-        ],
-  };
+  const typeCount = new Set(instruments.map((i) => i.type)).size;
 
   return (
     <SiteShell className="space-y-14">
@@ -118,55 +98,26 @@ export default async function StandardsPage({
           title={fr ? "Standards & soft law" : "Standards & soft law"}
           description={
             fr
-              ? "La couche entre le droit contraignant et la simple bonne pratique : ce qui façonne la conformité IA sans être obligatoire — jusqu'à ce qu'une autorité l'adopte."
-              : "The layer between binding law and plain best practice: what shapes AI compliance without being mandatory — until an authority adopts it."
+              ? "Ce qui façonne la conformité IA sans être obligatoire — jusqu'à ce qu'une autorité l'adopte."
+              : "What shapes AI compliance without being mandatory — until an authority adopts it."
           }
         />
       </MotionReveal>
 
-      {/* The distinction — the one thing to understand */}
-      <MotionReveal>
-        <div className="grid gap-3 md:grid-cols-2">
-          <div className="rounded-[1.6rem] border border-white/10 bg-white/[0.02] p-6">
-            <p className="font-mono text-[9px] uppercase tracking-[0.24em] text-zinc-400">{binding.hint}</p>
-            <p className="mt-2 font-display text-xl font-medium tracking-[-0.02em] text-zinc-950">{binding.label}</p>
-            <ul className="mt-4 space-y-2">
-              {binding.points.map((p) => (
-                <li key={p} className="flex gap-2.5 text-sm leading-6 text-zinc-500">
-                  <span aria-hidden className="mt-2 size-1 flex-shrink-0 rounded-full bg-zinc-500" />
-                  {p}
-                </li>
-              ))}
-            </ul>
-          </div>
-          <div className="rounded-[1.6rem] border border-[color:var(--color-accent-strong,#c4882a)]/30 bg-[color:var(--color-accent,#9a6b1f)]/[0.08] p-6">
-            <p className="font-mono text-[9px] uppercase tracking-[0.24em] text-[color:var(--color-accent-strong,#c4882a)]">{soft.hint}</p>
-            <p className="mt-2 font-display text-xl font-medium tracking-[-0.02em] text-zinc-950">{soft.label}</p>
-            <ul className="mt-4 space-y-2">
-              {soft.points.map((p) => (
-                <li key={p} className="flex gap-2.5 text-sm leading-6 text-zinc-600">
-                  <span aria-hidden className="mt-2 size-1 flex-shrink-0 rounded-full bg-[color:var(--color-accent-strong,#c4882a)]" />
-                  {p}
-                </li>
-              ))}
-            </ul>
-          </div>
-        </div>
-      </MotionReveal>
+      {/* Counters + the authority spectrum — one glanceable visual */}
+      <AuthoritySpectrum
+        lang={lang}
+        instruments={instruments.length}
+        types={typeCount}
+        regions={2}
+      />
 
-      {/* What we track — the full, real inventory with search + filters */}
+      {/* The inventory — search + pill filters + animated tiles */}
       <section className="space-y-5">
         <MotionReveal>
-          <div className="space-y-1">
-            <h2 className="font-display text-xl font-medium tracking-[-0.03em] text-zinc-950">
-              {fr ? "Ce que nous suivons" : "What we track"}
-            </h2>
-            <p className="text-sm leading-6 text-zinc-500">
-              {fr
-                ? `${instruments.length} instruments officiels — normes techniques, frameworks de gouvernance et soft law en Europe et aux États-Unis. Recherche et filtres ci-dessous.`
-                : `${instruments.length} official instruments — technical standards, governance frameworks, and soft law across Europe and the United States. Search and filter below.`}
-            </p>
-          </div>
+          <h2 className="font-display text-xl font-medium tracking-[-0.03em] text-zinc-950">
+            {fr ? "Ce que nous suivons" : "What we track"}
+          </h2>
         </MotionReveal>
         <MotionReveal delay={0.05}>
           <StandardsExplorer instruments={instruments} lang={lang} />
