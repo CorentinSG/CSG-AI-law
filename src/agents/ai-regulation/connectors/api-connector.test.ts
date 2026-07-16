@@ -31,6 +31,7 @@ afterEach(() => {
   delete process.env.NEWSAPI_API_KEY;
   delete process.env.JUDILIBRE_API_KEYID;
   delete process.env.COURTLISTENER_API_KEY;
+  delete process.env.COURTLISTENER_API_TOKEN;
   delete process.env.LEGAL_DATA_HUNTER_MCP_URL;
   delete process.env.LEGAL_DATA_HUNTER_API_KEY;
   delete process.env.LEGAL_RESEARCH_MCP_URL;
@@ -364,11 +365,11 @@ describe("ApiConnector", () => {
 
     expect(result.items).toHaveLength(0);
     expect(result.errors).toHaveLength(0);
-    expect(result.zeroResultsReason).toContain("COURTLISTENER_API_KEY");
+    expect(result.zeroResultsReason).toContain("COURTLISTENER_API_KEY/COURTLISTENER_API_TOKEN");
   });
 
   it("maps CourtListener case-law results when credentials are available", async () => {
-    process.env.COURTLISTENER_API_KEY = "test-courtlistener-key";
+    process.env.COURTLISTENER_API_TOKEN = "test-courtlistener-token";
     resetEnvForTests();
     const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue(
       new Response(
@@ -408,7 +409,7 @@ describe("ApiConnector", () => {
     const [, requestInit] = fetchMock.mock.calls[0] ?? [];
     expect(requestInit?.headers).toBeInstanceOf(Headers);
     expect((requestInit?.headers as Headers).get("authorization")).toBe(
-      "Token test-courtlistener-key",
+      "Token test-courtlistener-token",
     );
     expect(result.items).toHaveLength(1);
     expect(result.items[0]?.title).toBe("Doe v. AI Platform Inc.");

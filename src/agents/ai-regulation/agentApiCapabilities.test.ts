@@ -66,8 +66,8 @@ describe("agent API capabilities", () => {
         expect.objectContaining({
           id: "courtlistener-recap",
           status: "needs_user_setup",
-          envVars: ["COURTLISTENER_API_KEY"],
-          missingEnvVars: ["COURTLISTENER_API_KEY"],
+          envVars: ["COURTLISTENER_API_KEY", "COURTLISTENER_API_TOKEN"],
+          missingEnvVars: ["COURTLISTENER_API_KEY", "COURTLISTENER_API_TOKEN"],
         }),
       ]),
     );
@@ -112,6 +112,16 @@ describe("agent API capabilities", () => {
     ).toEqual(["COURTLISTENER_API_KEY"]);
   });
 
+  it("accepts COURTLISTENER_API_TOKEN as an operator-friendly alias", () => {
+    const capability = listAgentApiCapabilities({
+      COURTLISTENER_API_TOKEN: "courtlistener-token",
+    }).find((item) => item.id === "courtlistener-recap");
+
+    expect(capability?.status).toBe("available");
+    expect(capability?.configuredEnvVars).toEqual(["COURTLISTENER_API_TOKEN"]);
+    expect(capability?.missingEnvVars).toEqual([]);
+  });
+
   it("distinguishes blocked from configured_unverified connector state", () => {
     const blockedFirecrawl = listAgentApiCapabilities({}).find(
       (capability) => capability.id === "firecrawl",
@@ -133,7 +143,7 @@ describe("agent API capabilities", () => {
       expect.objectContaining({
         id: "courtlistener-recap",
         status: "needs_user_setup",
-        envVars: ["COURTLISTENER_API_KEY"],
+        envVars: ["COURTLISTENER_API_KEY", "COURTLISTENER_API_TOKEN"],
         notes: expect.stringContaining("Preferred over generic scraping"),
       }),
     );

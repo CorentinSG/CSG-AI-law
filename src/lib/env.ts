@@ -18,6 +18,7 @@ const rawEnvSchema = z.object({
   NEWSAPI_API_KEY: z.string().min(1).optional(),
   JUDILIBRE_API_KEYID: z.string().min(1).optional(),
   COURTLISTENER_API_KEY: z.string().min(1).optional(),
+  COURTLISTENER_API_TOKEN: z.string().min(1).optional(),
   LEGAL_DATA_HUNTER_MCP_URL: z.string().url().optional(),
   LEGAL_DATA_HUNTER_API_KEY: z.string().min(1).optional(),
   LEGAL_RESEARCH_MCP_URL: z.string().url().optional(),
@@ -69,7 +70,10 @@ export interface AppEnv {
   OPENAI_API_KEY?: string;
   NEWSAPI_API_KEY?: string;
   JUDILIBRE_API_KEYID?: string;
+  /** US CourtListener/RECAP token. COURTLISTENER_API_TOKEN is accepted as an alias. */
   COURTLISTENER_API_KEY?: string;
+  /** Alias for COURTLISTENER_API_KEY when operators copy the credential as a token. */
+  COURTLISTENER_API_TOKEN?: string;
   LEGAL_DATA_HUNTER_MCP_URL?: string;
   LEGAL_DATA_HUNTER_API_KEY?: string;
   LEGAL_RESEARCH_MCP_URL?: string;
@@ -123,6 +127,7 @@ function buildEnv(): AppEnv {
     NEWSAPI_API_KEY: process.env.NEWSAPI_API_KEY,
     JUDILIBRE_API_KEYID: process.env.JUDILIBRE_API_KEYID,
     COURTLISTENER_API_KEY: process.env.COURTLISTENER_API_KEY,
+    COURTLISTENER_API_TOKEN: process.env.COURTLISTENER_API_TOKEN,
     LEGAL_DATA_HUNTER_MCP_URL: process.env.LEGAL_DATA_HUNTER_MCP_URL,
     LEGAL_DATA_HUNTER_API_KEY: process.env.LEGAL_DATA_HUNTER_API_KEY,
     LEGAL_RESEARCH_MCP_URL: process.env.LEGAL_RESEARCH_MCP_URL,
@@ -229,12 +234,15 @@ function buildEnv(): AppEnv {
 
   const aiProcessingEnabled =
     parsed.AI_ENABLE_PROCESSING ?? parsed.AI_PROCESSING_ENABLED;
+  const courtListenerApiKey =
+    parsed.COURTLISTENER_API_KEY ?? parsed.COURTLISTENER_API_TOKEN;
 
   return {
     ...parsed,
     APP_DATA_MODE: appDataMode as RepositoryMode,
     AI_PROCESSING_ENABLED: aiProcessingEnabled,
     AI_ENABLE_PROCESSING: aiProcessingEnabled,
+    COURTLISTENER_API_KEY: courtListenerApiKey,
     ADMIN_AUTH_SECRET: parsed.ADMIN_AUTH_SECRET,
   };
 }

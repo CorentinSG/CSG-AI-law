@@ -1364,9 +1364,9 @@ The U.S. case-law layer currently prepares source architecture rather than inven
 Prepared sources include:
 
 - Supreme Court official opinions page
-- CourtListener / RECAP as a non-official secondary reference only
+- CourtListener / RECAP API search for AI-related opinions and docket signals
 
-CourtListener returned `403` from the runtime and is not treated as an official authority. Specific case facts, holdings, procedural posture, docket numbers, and citations must be verified from official court records or other permissible reliable legal databases before publication.
+CourtListener is now registered as an optional API-backed case-law discovery source (`src-us-courtlistener-ai`) and the runtime accepts either `COURTLISTENER_API_KEY` or `COURTLISTENER_API_TOKEN`. When no token is configured, the connector degrades honestly as blocked by missing credentials. CourtListener/RECAP improves discovery speed, but specific case facts, holdings, procedural posture, docket numbers, and citations must still be verified from official court records or other permissible reliable legal databases before publication.
 
 ### U.S. soft law and standards methodology
 

@@ -6,7 +6,7 @@ config({ path: ".env.local", quiet: true });
 type ProviderStatus = "live_verified" | "blocked_missing_credentials" | "failed";
 
 interface ProviderProbeResult {
-  provider: "scrapling" | "firecrawl" | "newsapi" | "judilibre" | "runtime";
+  provider: "scrapling" | "firecrawl" | "newsapi" | "judilibre" | "courtlistener" | "runtime";
   status: ProviderStatus;
   latency: number;
   errorClass?: string;
@@ -23,6 +23,8 @@ const NEWSAPI_PROBE_URL =
   "https://newsapi.org/v2/everything?q=%22AI%20Act%22&language=en&pageSize=1&sortBy=publishedAt";
 const JUDILIBRE_PROBE_URL =
   "https://api.piste.gouv.fr/cassation/judilibre/v1.0/search?query=intelligence%20artificielle&page_size=1";
+const COURTLISTENER_PROBE_URL =
+  "https://www.courtlistener.com/api/rest/v4/search/?q=%22artificial%20intelligence%22&type=o&order_by=dateFiled%20desc";
 const MIN_FIRECRAWL_MARKDOWN_CHARS = 40;
 const MIN_FIRECRAWL_DISTINCT_CONTENT_CHARS = 20;
 
@@ -204,12 +206,32 @@ async function verifyJudilibre(): Promise<ProviderProbeResult> {
   });
 }
 
+async function verifyCourtListener(): Promise<ProviderProbeResult> {
+  const token = process.env.COURTLISTENER_API_KEY?.trim() || process.env.COURTLISTENER_API_TOKEN?.trim();
+
+  return runConfiguredProbe("courtlistener", Boolean(token), async () => {
+    const response = await fetch(COURTLISTENER_PROBE_URL, {
+      headers: {
+        Authorization: `Token ${token}`,
+      },
+      signal: AbortSignal.timeout(15_000),
+    });
+
+    if (!response.ok) {
+      throw new Error(`CourtListener HTTP ${response.status}`);
+    }
+
+    await response.json();
+  });
+}
+
 async function main() {
   const results = await Promise.all([
     verifyScrapling(),
     verifyFirecrawl(),
     verifyNewsApi(),
     verifyJudilibre(),
+    verifyCourtListener(),
   ]);
 
   process.stdout.write(`${JSON.stringify(results, null, 2)}\n`);

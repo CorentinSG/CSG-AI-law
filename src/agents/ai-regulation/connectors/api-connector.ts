@@ -799,7 +799,7 @@ function buildCourtListenerUrl(result: CourtListenerCluster) {
 async function scanCourtListener(source: RegulationSource): Promise<ConnectorScanResult> {
   if (!env.COURTLISTENER_API_KEY) {
     return buildMissingCredentialResult(
-      "COURTLISTENER_API_KEY is not configured, so CourtListener/RECAP case-law discovery cannot be queried from this runtime.",
+      "COURTLISTENER_API_KEY/COURTLISTENER_API_TOKEN is not configured, so CourtListener/RECAP case-law discovery cannot be queried from this runtime.",
     );
   }
 

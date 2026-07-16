@@ -10,6 +10,7 @@ Multi-agent project. Always update this file after meaningful changes. Include: 
 
 | Date | Phase | Summary |
 |------|-------|---------|
+| 2026-07-16 | CourtListener readiness | Added operator-friendly `COURTLISTENER_API_TOKEN` alias, runtime probe coverage, and `src-us-courtlistener-ai` migration/seed source for U.S. AI case-law discovery once the token is configured |
 | 2026-07-15 | LOCUS U.S. local-law discovery prep | Added optional LOCUS-v1 policy/helper for U.S. local AI-law discovery leads only; LOCUS remains non-official, admin-only, non-public, and cannot create legal database items without official municipal/county verification |
 | early 2025 | Foundation Hardening 1–12 | Core persistence (Supabase), seed-backed memory mode, admin auth, review workflow, scan pipeline, deduplication, basic public/admin routes |
 | 2025 | Phase 2 | Supabase persistence upgrade, production hardening |

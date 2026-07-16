@@ -40,12 +40,20 @@ function hasAllEnv(names: string[], rawEnv: AgentApiCapabilityEnv = process.env)
   return names.every((name) => hasEnv(name, rawEnv));
 }
 
+function getCourtListenerEnvVars(rawEnv: AgentApiCapabilityEnv) {
+  if (hasEnv("COURTLISTENER_API_KEY", rawEnv)) return ["COURTLISTENER_API_KEY"];
+  if (hasEnv("COURTLISTENER_API_TOKEN", rawEnv)) return ["COURTLISTENER_API_TOKEN"];
+  return ["COURTLISTENER_API_KEY", "COURTLISTENER_API_TOKEN"];
+}
+
 export function listAgentApiCapabilities(
   rawEnv: AgentApiCapabilityEnv = process.env,
 ): AgentApiCapability[] {
   const newsApiReady = hasEnv("NEWSAPI_API_KEY", rawEnv);
   const judilibreReady = hasEnv("JUDILIBRE_API_KEYID", rawEnv);
-  const courtListenerReady = hasEnv("COURTLISTENER_API_KEY", rawEnv);
+  const courtListenerReady =
+    hasEnv("COURTLISTENER_API_KEY", rawEnv) || hasEnv("COURTLISTENER_API_TOKEN", rawEnv);
+  const courtListenerEnvVars = getCourtListenerEnvVars(rawEnv);
   const firecrawlReady = hasEnv("FIRECRAWL_API_KEY", rawEnv);
   const scraplingReady = hasEnv("SCRAPLING_WORKER_URL", rawEnv);
   const legalDataHunterReady =
@@ -185,12 +193,12 @@ export function listAgentApiCapabilities(
       status: courtListenerReady ? "available" : "needs_user_setup",
       uses: ["case_law_discovery", "official_legal_database"],
       regions: ["United States"],
-      envVars: ["COURTLISTENER_API_KEY"],
+      envVars: courtListenerEnvVars,
       implementedProvider: "courtlistener",
       userAction:
         courtListenerReady
           ? undefined
-          : "Create a CourtListener token and set COURTLISTENER_API_KEY to enable faster US federal/state case-law and docket discovery.",
+          : "Create a CourtListener token and set COURTLISTENER_API_KEY or COURTLISTENER_API_TOKEN to enable faster US federal/state case-law and docket discovery.",
       notes:
         "Preferred over generic scraping for US federal case law, RECAP docket metadata, and state/federal court monitoring when credentials are available.",
     }),
