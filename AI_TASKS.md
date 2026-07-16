@@ -42,7 +42,7 @@ Each agent edits only its own rows. Status vocabulary: `CLAIMED` · `WIP` · `BL
 | T-EU-DEPTH-WAVE-7 | Codex | MERGED | `main` @ `8ca3ecd` | `scripts/backfill-eu-depth-wave7.ts`, `package.json` | `backfill-eu-depth-wave7.ts`, `SourceReference`, community "Data Repository and Pagination", community "Scan Pipeline" | 2026-07-15 |
 | T-EU-DEPTH-WAVE-8 | Codex | MERGED | `main` @ `7c6bc28` | `scripts/backfill-eu-depth-wave8.ts`, `package.json` | `backfill-eu-depth-wave8.ts`, `SourceReference`, community "Data Repository and Pagination", community "Scan Pipeline" | 2026-07-15 |
 | T-EU-DEPTH-WAVE-9 | Codex | MERGED | `main` @ `07a2b72` | `scripts/backfill-eu-depth-wave9.ts`, `package.json` | `backfill-eu-depth-wave9.ts`, `SourceReference`, community "Data Repository and Pagination", community "Scan Pipeline" | 2026-07-16 |
-| T-LIVE-LEGAL-NEWS-AUTOPUBLISH | Codex | DONE-LOCAL | `main` @ working tree | `src/content/ai-regulation/news.ts`, `src/content/ai-regulation/news.test.ts`, `src/agents/ai-regulation/utils/discovery.ts` | `buildNewsItemFromUpdate()`, `isDiscoveryOnlySource()`, `isMediaDiscoverySource()`, community "News and Regulation Admin", community "Scan Pipeline" | 2026-07-16 |
+| T-LIVE-LEGAL-NEWS-AUTOPUBLISH | Codex | MERGED | `main` @ `9f4c7df` | `src/content/ai-regulation/news.ts`, `src/content/ai-regulation/news.test.ts`, `src/agents/ai-regulation/utils/discovery.ts` | `buildNewsItemFromUpdate()`, `isDiscoveryOnlySource()`, `isMediaDiscoverySource()`, community "News and Regulation Admin", community "Scan Pipeline" | 2026-07-16 |
 | T-CRON-AUTH-CI | Codex | MERGED | `main` @ `230c8e3` | `src/lib/cron-auth.test.ts` | `getCronAuthStatus()`, community "Admin Authentication" | 2026-07-15 |
 | T-REVIEW-BACKLOG-REDUCTION | Codex | MERGED | `main` @ `9df039e` | `scripts/reduce-review-backlog.ts`, `package.json` | `evaluatePublicationEligibility()`, `updateRepository.updateReviewStatus()`, community "Admin Review and Summaries", community "DB Repository Layer" | 2026-07-15 |
 | T-US-LOCUS-DISCOVERY | Codex | MERGED | `main` @ `e8a1b24` | `src/agents/ai-regulation/usLocusDiscovery.ts`, `src/agents/ai-regulation/usLocusDiscovery.test.ts`, `README.md`, `PROJECT_LOGBOOK.md`, `AI_AGENT_MASTER_CONTEXT.md`, `docs/superpowers/plans/2026-07-15-locus-us-discovery-corpus.md` | `buildLocusDiscoveryLead()`, `DiscoveryLead`, community "Scan Pipeline", community "DB Repository Layer" | 2026-07-16 |
@@ -70,12 +70,12 @@ YYYY-MM-DD · <Agent> · <TASK-ID> · <STATUS>
 
 ## Current status
 
-2026-07-16 - Codex - T-LIVE-LEGAL-NEWS-AUTOPUBLISH - DONE-LOCAL
+2026-07-16 - Codex - T-LIVE-LEGAL-NEWS-AUTOPUBLISH - MERGED
 - Intent:        Make the live legal-news lane match the product rule: reputable media/legal press can auto-publish to the public live feed, while only official/authority sources auto-publish into the verified legal database; media-derived items remain non-authoritative until official-source verification.
 - Files:         `src/content/ai-regulation/news.ts`, `src/content/ai-regulation/news.test.ts`, `src/agents/ai-regulation/utils/discovery.ts`, `AI_TASKS.md`.
 - Graph anchors: `buildNewsItemFromUpdate()`, `isDiscoveryOnlySource()`, `isMediaDiscoverySource()`, community "News and Regulation Admin", community "Scan Pipeline".
 - Verification:  Added `media_discovery_source` handling as `legal_regulatory_press`/`reputable_secondary`; added tests for reputable media live publication and reported bills without official-source conversion; refreshed Supabase `news_items` with `npm run backfill:news-items -- --write` (`scanned`=846, `upserted`=844, `publicItems`=370, `adminOnlyItems`=474, no missing raw/source rows); DB check confirms the Ireland AI Bill item is public live with `verificationStatus=media_reported` and `officialSourceFound=false`; Europe public legal DB remains filterable by legal area with 273 published Europe updates; `npm test` PASS (116 files / 656 tests); `npm run typecheck` PASS; `npm run lint` PASS; `npm run build` PASS with temporary non-default admin env vars.
-- Branch/commit: `main` @ working tree.
+- Branch/commit: `main` @ `9f4c7df`.
 - Next:          Continue improving source coverage and real-time scheduling; if a live media item later gets an official source URL, convert/promote it through official-source verification into the relevant country/regional legal database.
 
 2026-07-16 - Codex - T-EU-DEPTH-WAVE-9 - MERGED
