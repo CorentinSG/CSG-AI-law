@@ -41,6 +41,7 @@ export default async function ResearchPage({
     tags: entry.tags,
     jurisdiction: entry.jurisdiction,
     readingTime: entry.readingTime,
+    image: entry.image,
   }));
 
   return (

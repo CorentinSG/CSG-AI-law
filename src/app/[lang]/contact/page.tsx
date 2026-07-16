@@ -1,81 +1,137 @@
 import type { Metadata } from "next";
+import Image from "next/image";
+import { ArrowUpRight, FileText, Mail, Mic, Scale } from "lucide-react";
 
 import { MotionReveal } from "@/components/site/motion-reveal";
-import { ProfilePortrait } from "@/components/site/profile-portrait";
-import { SectionHeading } from "@/components/site/section-heading";
+import { MotionStagger, MotionStaggerItem } from "@/components/site/motion-stagger";
 import { SiteShell } from "@/components/site/shell";
-import { Card, CardContent } from "@/components/ui/card";
 
 export const metadata: Metadata = {
   title: "Contact",
   description:
-    "Professional contact page for research collaborations, writing, speaking, and inquiries related to the developing AI law and legal intelligence platform.",
+    "Professional contact for research collaborations, writing, speaking, and inquiries related to AI law and legal intelligence.",
 };
+
+// Single place to change the published contact address.
+const CONTACT_EMAIL = "corentinsaintgirons18@gmail.com";
+
+const INQUIRY_TYPES = [
+  {
+    icon: Scale,
+    title: "Research collaborations",
+    desc: "Comparative AI law, regulatory monitoring, and legal intelligence systems.",
+  },
+  {
+    icon: FileText,
+    title: "Writing & commentary",
+    desc: "Editorial contributions, legal analysis, and co-authored notes.",
+  },
+  {
+    icon: Mic,
+    title: "Speaking & teaching",
+    desc: "Panels, seminars, and guest lectures on AI regulation and legal technology.",
+  },
+];
 
 export default function ContactPage() {
   return (
-    <SiteShell className="space-y-20">
+    <SiteShell className="space-y-16">
+      {/* ── Hero ── */}
       <MotionReveal className="space-y-5">
-        <p className="font-mono text-[11px] uppercase tracking-[0.35em] text-zinc-600">
+        <p className="font-mono text-[11px] uppercase tracking-[0.35em] text-accent-strong">
           Contact
         </p>
-        <h1 className="max-w-4xl font-display text-5xl font-medium uppercase tracking-[-0.05em] text-zinc-950 md:text-6xl">
-          Contact
+        <h1 className="max-w-4xl font-display text-5xl font-medium tracking-[-0.05em] text-zinc-950 md:text-6xl">
+          Start a conversation
         </h1>
-        <p className="max-w-3xl text-lg leading-8 text-zinc-700">
-          This page is intended for professional inquiries related to research,
-          writing, speaking, and collaborations at the intersection of
-          artificial intelligence, law, regulation, legal intelligence, and
-          legal technology.
+        <p className="max-w-2xl text-lg leading-8 text-zinc-600">
+          For professional inquiries at the intersection of artificial
+          intelligence, law, and legal intelligence — research, writing,
+          speaking, and collaborations.
         </p>
       </MotionReveal>
 
-      <SectionHeading
-        eyebrow="Professional inquiries"
-        title="Research, writing, speaking, and collaboration"
-        description="A full contact workflow is not built yet, but the platform now offers a clearer professional point of contact for future editorial, research, and institutional conversations."
-      />
-
+      {/* ── Channel + portrait ── */}
       <MotionReveal>
-      <section className="grid gap-8 border-t border-black/6 pt-16 lg:grid-cols-[0.85fr_1.15fr] lg:items-center">
-        <div className="mx-auto w-full max-w-sm lg:max-w-none">
-          <ProfilePortrait className="max-w-[24rem]" />
-        </div>
-
-        <Card className="rounded-[2rem] border-black/6 bg-white text-zinc-950 shadow-[0_18px_50px_rgba(15,15,15,0.04)]">
-          <CardContent className="space-y-4 p-8">
-            <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-zinc-600">
-              Current contact posture
-            </p>
-            <p className="text-base leading-7 text-zinc-700">
-              The site can already serve as a point of contact for research
-              collaborations, speaking opportunities, writing inquiries, and
-              professional conversations related to AI law and legal
-              intelligence.
-            </p>
-            <p className="text-base leading-7 text-zinc-700">
-              A fuller direct-contact or newsletter workflow may be introduced
-              later, but only once it fits the same editorial and review
-              posture as the rest of the platform.
-            </p>
-            <p className="text-base leading-7 text-zinc-700">
-              Content on this site is provided for legal research and
-              informational purposes only and does not constitute legal advice.
-            </p>
-            <div className="rounded-[1.4rem] border border-black/10 bg-white/60 p-5">
-              <p className="font-mono text-[11px] uppercase tracking-[0.24em] text-zinc-600">
-                Contact channel
+        <section className="grid gap-6 border-t border-white/8 pt-14 lg:grid-cols-[1.2fr_0.8fr] lg:items-stretch">
+          {/* Primary channel */}
+          <div className="glass-panel flex flex-col justify-between gap-10 rounded-[2rem] p-8 md:p-10">
+            <div className="space-y-4">
+              <p className="flex items-center gap-2.5 font-mono text-[10px] uppercase tracking-[0.3em] text-zinc-500">
+                <Mail className="size-3.5 text-accent-strong" aria-hidden />
+                Direct channel
               </p>
-              <p className="mt-2 text-base leading-7 text-zinc-700">
-                Direct public contact details are intentionally not published in
-                this phase. A dedicated professional contact method can be added
-                later once the site&apos;s broader editorial workflow is
-                finalized.
+              <p className="font-display text-2xl font-medium tracking-[-0.03em] text-zinc-950 md:text-3xl">
+                One inbox, read personally.
+              </p>
+              <p className="max-w-md text-sm leading-7 text-zinc-600">
+                Write in English or French. Include who you are, the context,
+                and what you have in mind — a focused paragraph beats a long
+                brief.
               </p>
             </div>
-          </CardContent>
-        </Card>
+            <div className="flex flex-wrap items-center gap-4">
+              <a
+                href={`mailto:${CONTACT_EMAIL}`}
+                className="inline-flex items-center gap-2 rounded-xl bg-white px-6 py-3 text-sm font-semibold text-black transition hover:bg-white/90 active:scale-[0.98]"
+              >
+                {CONTACT_EMAIL}
+                <ArrowUpRight className="size-4" aria-hidden />
+              </a>
+              <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-zinc-500">
+                Replies within a few days
+              </span>
+            </div>
+          </div>
+
+          {/* Portrait */}
+          <div className="relative min-h-[24rem] overflow-hidden rounded-[2rem] border border-white/10 bg-[#0d0d0d]">
+            <Image
+              src="/images/profile/corentin-saint-girons-hero-v2.png"
+              alt="Portrait of Corentin Saint-Girons"
+              fill
+              sizes="(max-width: 1024px) 100vw, 40vw"
+              className="object-cover object-top"
+            />
+            <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 to-transparent p-6">
+              <p className="font-display text-lg font-medium tracking-[-0.02em] text-white">
+                C. Saint-Girons, Esq
+              </p>
+              <p className="mt-1 font-mono text-[10px] uppercase tracking-[0.24em] text-white/60">
+                AI Law &amp; Legal Intelligence
+              </p>
+            </div>
+          </div>
+        </section>
+      </MotionReveal>
+
+      {/* ── What this covers ── */}
+      <section className="space-y-8">
+        <MotionReveal>
+          <p className="font-mono text-[10px] uppercase tracking-[0.32em] text-accent-strong">
+            What this covers
+          </p>
+        </MotionReveal>
+        <MotionStagger className="grid gap-px overflow-hidden rounded-[1.6rem] border border-white/8 bg-white/8 sm:grid-cols-3" stagger={0.08}>
+          {INQUIRY_TYPES.map((item) => (
+            <MotionStaggerItem key={item.title}>
+              <div className="flex h-full flex-col gap-3 bg-[#0b0b0b] p-7">
+                <item.icon className="size-5 text-accent-strong" aria-hidden />
+                <p className="text-base font-medium text-zinc-950">{item.title}</p>
+                <p className="text-sm leading-6 text-zinc-600">{item.desc}</p>
+              </div>
+            </MotionStaggerItem>
+          ))}
+        </MotionStagger>
       </section>
+
+      {/* ── Disclaimer ── */}
+      <MotionReveal>
+        <p className="border-t border-white/8 pt-8 text-xs leading-6 text-zinc-500">
+          Contacting this address does not create an attorney–client
+          relationship. Content on this site is provided for research and
+          informational purposes only and does not constitute legal advice.
+        </p>
       </MotionReveal>
     </SiteShell>
   );

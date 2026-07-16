@@ -1,10 +1,11 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Search, X } from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
+import { ArrowRight, Search, X } from "lucide-react";
 
-import { ResearchCard } from "@/components/site/research-card";
-import { MotionStagger } from "@/components/site/motion-stagger";
+import { MotionStagger, MotionStaggerItem } from "@/components/site/motion-stagger";
 import type { Locale } from "@/lib/i18n/config";
 
 export type ResearchNote = {
@@ -15,6 +16,8 @@ export type ResearchNote = {
   tags: string[];
   jurisdiction?: string;
   readingTime: string;
+  /** Local cover illustration (`/images/...`); falls back to a dark gradient. */
+  image?: string;
 };
 
 /** A compact native <select> styled for the dark site (see StandardsExplorer). */
@@ -158,21 +161,51 @@ export function ResearchExplorer({
         ) : null}
       </div>
 
-      {/* Results grid */}
+      {/* Results grid — illustrated cover cards (the pre-filter card design) */}
       {results.length > 0 ? (
         <MotionStagger key={filterKey} className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
           {results.map((n) => (
-            <ResearchCard
-              key={n.slug}
-              lang={lang}
-              href={`/research/${n.slug}`}
-              category={n.category}
-              title={n.title}
-              description={n.summary}
-              status="published"
-              meta={n.readingTime}
-              tags={n.tags}
-            />
+            <MotionStaggerItem key={n.slug} className="h-full">
+              <Link
+                href={`/${lang}/research/${n.slug}`}
+                className="group block h-full overflow-hidden rounded-[2rem] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-accent-strong,#c4882a)] focus-visible:ring-offset-2 focus-visible:ring-offset-[#0a0a0a]"
+              >
+                <div className="relative h-[26rem] overflow-hidden rounded-[2rem] bg-[linear-gradient(135deg,#1c1c1c_0%,#0d0d0d_60%,#0a0a0a_100%)]">
+                  {n.image ? (
+                    <Image
+                      src={n.image}
+                      alt={n.title}
+                      fill
+                      sizes="(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 33vw"
+                      className="object-cover transition-transform duration-500 group-hover:scale-105"
+                    />
+                  ) : (
+                    <div
+                      aria-hidden
+                      className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(154,107,31,0.16),transparent_55%)] transition-transform duration-500 group-hover:scale-105"
+                    />
+                  )}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/25 to-transparent" />
+                  <div className="absolute inset-x-0 bottom-0 p-7">
+                    <p className="mb-3 font-mono text-[10px] uppercase tracking-[0.3em] text-white/60">
+                      {n.category}
+                      <span aria-hidden className="mx-1.5 text-white/30">·</span>
+                      {n.readingTime}
+                    </p>
+                    <h3 className="mb-3 font-display text-xl font-medium uppercase leading-snug tracking-[-0.03em] text-white">
+                      {n.title}
+                    </h3>
+                    <p className="mb-5 line-clamp-2 text-sm leading-6 text-white/65">
+                      {n.summary}
+                    </p>
+                    <span className="inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.22em] text-white/70 transition-all group-hover:gap-3 group-hover:text-white/90">
+                      {fr ? "Lire la note" : "Read note"}
+                      <ArrowRight className="size-3.5 transition-transform group-hover:translate-x-0.5" />
+                    </span>
+                  </div>
+                </div>
+              </Link>
+            </MotionStaggerItem>
           ))}
         </MotionStagger>
       ) : (

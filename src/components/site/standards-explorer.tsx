@@ -216,25 +216,28 @@ export function StandardsExplorer({
               animate={{ opacity: 1, y: 0 }}
               exit={reduce ? { opacity: 0 } : { opacity: 0, y: -6 }}
               transition={{ duration: 0.32, ease, delay: reduce ? 0 : Math.min(idx * 0.03, 0.24) }}
-              className="border-b border-white/8 py-5 last:border-b-0"
+              className="group border-b border-white/8 py-5 transition-colors last:border-b-0 hover:bg-white/[0.02] sm:-mx-4 sm:rounded-2xl sm:border-b-0 sm:px-4"
             >
-              <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
-                <h3 className="text-[16px] font-medium leading-6 tracking-[-0.01em] text-white/90">
-                  {i.title}
-                </h3>
-                <span className="rounded-full border border-white/10 bg-white/[0.04] px-2 py-0.5 font-mono text-[9px] uppercase tracking-[0.16em] text-white/55">
+              {/* Chips first: type carries the accent, status stays worded */}
+              <div className="flex flex-wrap items-center gap-1.5">
+                <span className="rounded-full border border-[color:var(--color-accent-strong,#c4882a)]/30 bg-[color:var(--color-accent,#9a6b1f)]/[0.10] px-2.5 py-0.5 font-mono text-[9px] uppercase tracking-[0.16em] text-[color:var(--color-accent-strong,#c4882a)]">
+                  {typeL(i.type)}
+                </span>
+                <span className="rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-0.5 font-mono text-[9px] uppercase tracking-[0.16em] text-white/55">
+                  {bindingL(i.binding)}
+                </span>
+                <span className="rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-0.5 font-mono text-[9px] uppercase tracking-[0.16em] text-white/55">
                   {regionLabel(i.region, fr)}
                 </span>
               </div>
-              <p className="mt-1.5 text-sm leading-6 text-white/55">{i.summary}</p>
-              <div className="mt-3 flex flex-wrap items-center gap-x-2 gap-y-1.5 font-mono text-[9.5px] uppercase tracking-[0.14em] text-white/45">
-                <span className="text-white/60">{typeL(i.type)}</span>
+              <h3 className="mt-2.5 text-[16px] font-medium leading-6 tracking-[-0.01em] text-white/90">
+                {i.title}
+              </h3>
+              <p className="mt-1.5 line-clamp-2 text-sm leading-6 text-white/55">{i.summary}</p>
+              <div className="mt-2.5 flex flex-wrap items-center gap-x-2 gap-y-1 font-mono text-[9.5px] uppercase tracking-[0.14em] text-white/40">
+                <span className="text-white/55">{i.institution}</span>
                 <span aria-hidden className="text-white/25">·</span>
-                <span>{bindingL(i.binding)}</span>
-                <span aria-hidden className="text-white/25">·</span>
-                <span>{i.institution}</span>
-                <span aria-hidden className="text-white/25">·</span>
-                <span className="text-white/40">{fr ? ACCESS_LABEL[i.access].fr : ACCESS_LABEL[i.access].en}</span>
+                <span>{fr ? ACCESS_LABEL[i.access].fr : ACCESS_LABEL[i.access].en}</span>
                 {i.sourceUrl ? (
                   <>
                     <span aria-hidden className="text-white/25">·</span>
