@@ -6,13 +6,15 @@ import {
   getAuthorityPresentation,
 } from "@/agents/ai-regulation/utils/authority";
 import { AuthorityBadge } from "@/components/site/authority-badge";
-import { IntelligenceSignal } from "@/components/site/intelligence-signal";
 import { MotionStaggerItem } from "@/components/site/motion-stagger";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatDisplayDate } from "@/lib/utils";
 import { DEFAULT_LOCALE, type Locale } from "@/lib/i18n/config";
 import { localeHref } from "@/lib/i18n/href";
 
+// Compact monitor-entry card. One kicker line, title, summary, one metadata
+// line, source link — no KPI tiles, no boilerplate explainers, no field table.
+// The detail page carries the full record; the card only has to earn the click.
 export function UpdateCard({
   update,
   href,
@@ -24,71 +26,49 @@ export function UpdateCard({
 }) {
   const authorityType = deriveUpdateAuthorityType(update);
   const authority = getAuthorityPresentation(authorityType);
+  const highSignal =
+    update.importanceLevel === "critical" || update.importanceLevel === "high";
 
   return (
     <MotionStaggerItem className="h-full">
-      <Card className="glass-panel-soft h-full rounded-[1.9rem] shadow-[0_18px_45px_rgba(15,15,15,0.05)] transition duration-300 hover:-translate-y-0.5 hover:shadow-[0_24px_60px_rgba(15,15,15,0.08)]">
-        <CardHeader>
-          <div className="flex flex-wrap items-center gap-2 font-mono text-[11px] uppercase tracking-[0.24em] text-zinc-500">
-            <span>{update.region}</span>
-            <span>{update.jurisdiction}</span>
+      <Card className="glass-panel-soft group h-full rounded-[1.9rem] transition duration-300 hover:-translate-y-0.5 hover:shadow-[0_24px_60px_rgba(0,0,0,0.4)]">
+        <CardHeader className="space-y-3">
+          <div className="flex items-start justify-between gap-3">
+            <p className="min-w-0 truncate font-mono text-[10px] uppercase tracking-[0.22em] text-zinc-500">
+              {update.region}
+              {update.country ? ` · ${update.country}` : ""}
+            </p>
             <AuthorityBadge
               label={authority.label}
               authorityType={authorityType}
-              className="normal-case tracking-[0.12em]"
+              className="shrink-0 normal-case tracking-[0.12em]"
             />
-            <span>{update.developmentType}</span>
-            <span>{update.importanceLevel}</span>
           </div>
-          <CardTitle className="font-display text-xl font-medium uppercase tracking-[-0.04em] text-zinc-950">
+          <CardTitle className="font-display text-lg font-medium leading-snug tracking-[-0.02em] text-zinc-950">
             <Link href={localeHref(lang, href)}>{update.title}</Link>
           </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4 text-sm text-zinc-700">
-          <p className="leading-7">{update.oneSentenceSummary}</p>
-
-          {/* Key metadata: date + importance */}
-          <div className="grid gap-3 md:grid-cols-2">
-            <IntelligenceSignal
-              label="Publication date"
-              value={formatDisplayDate(update.publicationDate)}
-              note="Date of the underlying development or official publication."
-              tone="informative"
-            />
-            <IntelligenceSignal
-              label="Importance"
-              value={update.importanceLevel}
-              note={authority.shortNote}
-              tone={update.importanceLevel === "critical" || update.importanceLevel === "high" ? "warning" : "neutral"}
-            />
-          </div>
-
-          {/* Quick-scan metadata */}
-          <div className="grid grid-cols-2 gap-x-4 gap-y-1.5 rounded-[1.4rem] border border-black/6 bg-zinc-50/80 p-4 text-xs">
-            <span className="text-zinc-400">Source</span>
-            <span className="font-medium text-zinc-800 truncate">{update.sourceName}</span>
-            <span className="text-zinc-400">Legal area</span>
-            <span className="text-zinc-700">{update.legalArea}</span>
-            {update.country ? (
+          <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-zinc-500">
+            {formatDisplayDate(update.publicationDate)}
+            <span aria-hidden className="mx-1.5 text-zinc-300">·</span>
+            {update.legalArea}
+            {highSignal ? (
               <>
-                <span className="text-zinc-400">Country / state</span>
-                <span className="text-zinc-700">{update.country}</span>
+                <span aria-hidden className="mx-1.5 text-zinc-300">·</span>
+                <span className="text-[color:var(--color-accent-strong,#c4882a)]">
+                  {update.importanceLevel === "critical"
+                    ? "Critical"
+                    : "High importance"}
+                </span>
               </>
             ) : null}
-          </div>
-
-          {/* Tags + source link */}
-          <div className="flex items-center justify-between gap-3">
-            <div className="flex flex-wrap gap-1.5">
-              {update.tags.slice(0, 3).map((tag) => (
-                <span
-                  key={tag}
-                  className="rounded-full border border-black/6 bg-zinc-50 px-2 py-0.5 text-xs text-zinc-600"
-                >
-                  {tag}
-                </span>
-              ))}
-            </div>
+          </p>
+        </CardHeader>
+        <CardContent className="flex h-full flex-col justify-between gap-4 text-sm text-zinc-700">
+          <p className="line-clamp-3 leading-7">{update.oneSentenceSummary}</p>
+          <div className="flex items-center justify-between gap-3 border-t border-white/8 pt-3">
+            <span className="min-w-0 truncate text-xs text-zinc-500">
+              {update.sourceName}
+            </span>
             {update.sourceUrl ? (
               <a
                 href={update.sourceUrl}
