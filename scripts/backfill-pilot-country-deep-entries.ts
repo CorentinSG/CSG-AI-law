@@ -15,11 +15,11 @@ import type { RawRegulatoryItemInput, RegulatoryUpdateDraftInput } from "@/db/re
 import type { AuthorityType, DevelopmentType, LegalArea } from "@/db/schema";
 import { env } from "@/lib/env";
 
-const SOURCE_ID = "pilot-country-legal-deepener";
-const SOURCE_NAME = "Pilot country legal database deepener";
+const SOURCE_ID = "country-legal-deepener";
+const SOURCE_NAME = "Country legal database deepener";
 const SOURCE_URL = "https://csg-ai-law.vercel.app/ai-regulation/europe";
 const DETECTED_AT = "2026-07-15T00:00:00.000Z";
-const DEFAULT_PILOT_COUNTRIES = ["france", "germany", "italy", "spain", "netherlands"];
+const DEFAULT_COUNTRIES = ["france", "germany", "italy", "spain", "netherlands"];
 
 type EntryFamily = "implementation" | "soft_law" | "case_law" | "latest_update";
 
@@ -247,7 +247,7 @@ function buildEntries(profile: EuropeCountryProfile): DeepEntryDraft[] {
 }
 
 function rawItemId(entry: DeepEntryDraft) {
-  return `pilot-country-deep:${entry.profile.slug}:${entry.family}:${slugify(entry.title)}:${stableHash(
+  return `country-deep:${entry.profile.slug}:${entry.family}:${slugify(entry.title)}:${stableHash(
     entry.source.url,
   ).slice(0, 12)}:v1`;
 }
@@ -267,7 +267,7 @@ function buildRawItem(entry: DeepEntryDraft): RawRegulatoryItemInput {
     rawUrl: entry.source.url,
     rawText,
     rawMetadata: {
-      baselineKind: "pilot_country_deep_legal_database",
+      baselineKind: "country_deep_legal_database",
       countrySlug: entry.profile.slug,
       countryCode: entry.profile.countryCode,
       entryFamily: entry.family,
@@ -281,10 +281,10 @@ function buildRawItem(entry: DeepEntryDraft): RawRegulatoryItemInput {
         sourceName: SOURCE_NAME,
         sourceUrl: SOURCE_URL,
         officialSource: entry.source.official,
-        parserUsed: "pilot_country_deep_entry_backfill",
+        parserUsed: "country_deep_entry_backfill",
         scanTimestamp: DETECTED_AT,
         scanTrigger: "manual",
-        scanProfile: "pilot_country_deep_legal_database_backfill",
+        scanProfile: "country_deep_legal_database_backfill",
         contentHash: stableHash(`${id}:${rawText}`),
         rawUrlScanned: entry.source.url,
       },
@@ -371,7 +371,7 @@ async function ensureDeepenerSource() {
     preferredExtractionMethod: "html_static",
     config: {
       sourceCategory: "official",
-      baselineKind: "pilot_country_deep_legal_database",
+      baselineKind: "country_deep_legal_database",
     },
     ingestionMethod: "existing",
     sourceCategory: "official",
@@ -384,7 +384,7 @@ async function main() {
   const dryRun = boolEnv(process.env.PILOT_COUNTRY_DEEP_DRY_RUN, true);
   const requestedCountries = parseList(process.env.PILOT_COUNTRY_DEEP_COUNTRIES);
   const selectedSlugs =
-    requestedCountries.size > 0 ? [...requestedCountries] : DEFAULT_PILOT_COUNTRIES;
+    requestedCountries.size > 0 ? [...requestedCountries] : DEFAULT_COUNTRIES;
   const profiles = selectedSlugs
     .map((slug) => getEuropeCountryProfileBySlug(slug))
     .filter((profile): profile is EuropeCountryProfile => Boolean(profile));
