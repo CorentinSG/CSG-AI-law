@@ -843,7 +843,10 @@ Examples now covered include:
 - NIST AI RMF resources
 - OWASP AIMA
 - ISO/IEC 42001 official metadata
+- ISO/IEC 23894, 22989, 23053, and 42005 official metadata
 - OECD AI policy and governance materials
+- UNESCO Recommendation on the Ethics of Artificial Intelligence
+- IEEE 7000 official standard metadata
 
 Important editorial rule:
 
@@ -1024,7 +1027,7 @@ No case facts, holdings, procedural posture, or outcomes are added unless a spec
 
 ### Soft law and standards methodology
 
-The Europe baseline tracks soft law, standards, and governance frameworks separately from binding law.
+The Europe and International baselines track soft law, standards, and governance frameworks separately from binding law.
 
 Current baseline examples include:
 
@@ -1033,8 +1036,14 @@ Current baseline examples include:
 - EDPB AI topic materials
 - EDPS AI topic materials
 - ISO/IEC 42001 official metadata
+- ISO/IEC 23894 AI risk-management guidance metadata
+- ISO/IEC 22989 AI concepts and terminology metadata
+- ISO/IEC 23053 machine-learning framework metadata
+- ISO/IEC 42005 AI system impact-assessment metadata
 - OWASP AI Maturity Assessment
 - OECD AI Principles
+- UNESCO Recommendation on the Ethics of Artificial Intelligence
+- IEEE 7000 ethical concerns in system design metadata
 - Council of Europe AI materials, currently marked with runtime-access limitations
 
 Soft law and technical standards are not presented as binding law unless an official legal source clearly incorporates them. Paywalled standards text must not be reproduced.

@@ -6,6 +6,7 @@ import { updateRepository } from "@/agents/ai-regulation/processors/updateReposi
 import { AuthoritySpectrum } from "@/components/site/authority-spectrum";
 import { getPublicResearchEntries } from "@/content/research";
 import { europeAiSoftLawBaseline } from "@/content/ai-regulation/europe-ai-soft-law";
+import { internationalAiStandardsBaseline } from "@/content/ai-regulation/international-ai-standards";
 import { usAiSoftLawBaseline } from "@/content/ai-regulation/us-ai-soft-law";
 import { MotionReveal } from "@/components/site/motion-reveal";
 import { MotionStagger, MotionStaggerItem } from "@/components/site/motion-stagger";
@@ -53,7 +54,20 @@ function buildInstruments(): StandardsInstrument[] {
     summary: e.summary,
     sourceUrl: e.sourceUrl,
   }));
-  return [...eu, ...us].sort((a, b) => a.title.localeCompare(b.title));
+  const international = internationalAiStandardsBaseline.map((e) => ({
+    id: `intl-${e.id}`,
+    title: e.title,
+    institution: e.institution,
+    region: "International" as const,
+    type: e.authorityType,
+    binding: e.bindingStatus,
+    access: (e.authorityType === "technical_standard" ? "metadata" : "monitored") as
+      | "metadata"
+      | "monitored",
+    summary: e.summary,
+    sourceUrl: e.sourceUrl,
+  }));
+  return [...international, ...eu, ...us].sort((a, b) => a.title.localeCompare(b.title));
 }
 
 export default async function StandardsPage({
@@ -109,7 +123,7 @@ export default async function StandardsPage({
         lang={lang}
         instruments={instruments.length}
         types={typeCount}
-        regions={2}
+        regions={3}
       />
 
       {/* The inventory — search + pill filters + animated tiles */}

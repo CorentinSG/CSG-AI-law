@@ -90,6 +90,7 @@ Official sources control legal authority. Discovery/tracker/media sources genera
 - Unresolved discovery-only items must not be presented publicly as settled law
 - LOCUS-v1 (`https://huggingface.co/datasets/davidyinyan/LOCUS-v1`) is U.S.-only local-law discovery corpus material, not official legal authority. LOCUS hits may become private `DiscoveryLead` records only, with `requiresOfficialSource=true` in reviewer metadata and `publicVisibilityAllowed=false`; conversion requires accessible official municipal/county text, verified jurisdiction/date/citation/pinpoint, AI relevance, and admin review.
 - CourtListener/RECAP is registered as an optional U.S. case-law discovery source (`src-us-courtlistener-ai`). Runtime accepts `COURTLISTENER_API_KEY` or `COURTLISTENER_API_TOKEN`; without one it must degrade honestly as missing credentials. CourtListener accelerates discovery only: official court citations, dates, jurisdiction, docket/case identifiers, and legal relevance remain mandatory before verified legal-database reliance.
+- Public Standards coverage now includes a dedicated International lane (`internationalAiStandardsBaseline`) for ISO/IEC AI standards, OECD AI Principles, UNESCO AI Ethics Recommendation, and IEEE 7000. Treat these as standards, governance frameworks, or soft law; they are not binding law unless incorporated by a legal/procurement/contractual source.
 
 ---
 

@@ -10,7 +10,7 @@ export type StandardsInstrument = {
   id: string;
   title: string;
   institution: string;
-  region: "Europe" | "United States";
+  region: "Europe" | "United States" | "International";
   type: string;
   binding: string;
   access: "metadata" | "monitored";
@@ -38,6 +38,7 @@ const BINDING_LABEL: Record<string, { en: string; fr: string }> = {
 
 function regionLabel(region: string, fr: boolean) {
   if (region === "United States") return fr ? "États-Unis" : "United States";
+  if (region === "International") return "International";
   return "Europe";
 }
 
