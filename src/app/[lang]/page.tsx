@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { ArrowUpRight, Scale, FileText, ShieldCheck } from "lucide-react";
 
 import { HeroVideoSection } from "@/components/site/hero-video-section";
+import { HomeScrollNav } from "@/components/site/home-scroll-nav";
 import { MotionReveal } from "@/components/site/motion-reveal";
 import { MotionStagger, MotionStaggerItem } from "@/components/site/motion-stagger";
 import { LOCALES, isLocale } from "@/lib/i18n/config";
@@ -48,6 +49,9 @@ export default async function HomePage({
 
   return (
     <div className="bg-[#080808] text-white">
+      {/* Condensed nav — reveals once the hero scrolls out of view */}
+      <HomeScrollNav dict={dict} lang={lang} />
+
       {/* ── Full-screen hero ── */}
       <HeroVideoSection dict={dict} lang={lang} />
 
@@ -66,7 +70,7 @@ export default async function HomePage({
                 >
                   {stat.value}
                 </span>
-                <span className="font-mono text-[10px] uppercase tracking-[0.22em] text-white/35">
+                <span className="font-mono text-[10px] uppercase tracking-[0.22em] text-white/60">
                   {stat.label}
                 </span>
               </div>
@@ -79,7 +83,7 @@ export default async function HomePage({
       <section className="px-6 py-24 md:px-12 lg:px-16">
         <div className="mx-auto max-w-7xl">
           <MotionReveal>
-            <p className="mb-10 font-mono text-[10px] uppercase tracking-[0.32em] text-white/30">
+            <p className="mb-10 font-mono text-[10px] uppercase tracking-[0.32em] text-accent-strong">
               {home.aboutEyebrow}
             </p>
           </MotionReveal>
@@ -93,7 +97,7 @@ export default async function HomePage({
               >
                 {home.aboutHeadingLine1}<br />{home.aboutHeadingLine2}<br />{home.aboutHeadingLine3}
               </h2>
-              <p className="mt-6 max-w-md text-base leading-7 text-white/50">
+              <p className="mt-6 max-w-md text-base leading-7 text-white/65">
                 {home.aboutBody}
               </p>
               <div className="mt-8 flex flex-wrap gap-3">
@@ -123,7 +127,7 @@ export default async function HomePage({
                     <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-white/70">
                       {cap.title}
                     </p>
-                    <p className="text-sm leading-6 text-white/42">
+                    <p className="text-sm leading-6 text-white/65">
                       {cap.desc}
                     </p>
                   </div>
@@ -138,7 +142,7 @@ export default async function HomePage({
       <section className="border-t border-white/8 px-6 py-20 md:px-12 lg:px-16">
         <div className="mx-auto max-w-7xl">
           <MotionReveal>
-            <p className="mb-10 font-mono text-[10px] uppercase tracking-[0.32em] text-white/30">
+            <p className="mb-10 font-mono text-[10px] uppercase tracking-[0.32em] text-accent-strong">
               {home.exploreEyebrow}
             </p>
           </MotionReveal>
@@ -162,7 +166,7 @@ export default async function HomePage({
                     </div>
                     <div>
                       <p className="text-base font-medium text-white/90">{entry.label}</p>
-                      <p className="mt-2 font-mono text-[10px] uppercase tracking-[0.2em] text-white/30">
+                      <p className="mt-2 font-mono text-[10px] uppercase tracking-[0.2em] text-white/58">
                         {entry.description}
                       </p>
                     </div>
@@ -181,7 +185,7 @@ export default async function HomePage({
             <div className="liquid-glass rounded-2xl border border-white/10 px-8 py-8 md:px-12">
               <div className="grid gap-8 md:grid-cols-[1fr_auto]">
                 <div>
-                  <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-white/40">
+                  <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-accent-strong">
                     {home.postureEyebrow}
                   </p>
                   <p
@@ -191,7 +195,7 @@ export default async function HomePage({
                     {home.postureHeadlineLine1}<br />
                     {home.postureHeadlineLine2}
                   </p>
-                  <p className="mt-3 text-sm leading-7 text-white/45">
+                  <p className="mt-3 text-sm leading-7 text-white/65">
                     {home.postureBody}
                   </p>
                 </div>
@@ -212,10 +216,10 @@ export default async function HomePage({
       {/* ── Footer ── */}
       <footer className="border-t border-white/8 px-6 py-10 md:px-12 lg:px-16">
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-4">
-          <p className="font-mono text-[10px] uppercase tracking-[0.28em] text-white/22">
+          <p className="font-mono text-[10px] uppercase tracking-[0.28em] text-white/55">
             {home.footerTagline}
           </p>
-          <p className="font-mono text-[10px] uppercase tracking-[0.28em] text-white/22">
+          <p className="font-mono text-[10px] uppercase tracking-[0.28em] text-white/55">
             © {new Date().getFullYear()}
           </p>
         </div>

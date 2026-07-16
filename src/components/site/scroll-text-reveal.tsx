@@ -47,8 +47,7 @@ export function ScrollTextReveal<T extends ElementType = "p">({
     return (
       <motion.div
         initial={{ opacity: 0, y: 20, filter: blur ? "blur(8px)" : "blur(0px)" }}
-        whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-        viewport={{ once: true, amount: 0.45 }}
+        animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
         transition={{ duration, ease }}
       >
         <Tag className={className}>{text}</Tag>
@@ -59,8 +58,7 @@ export function ScrollTextReveal<T extends ElementType = "p">({
   return (
     <motion.div
       initial="hidden"
-      whileInView="visible"
-      viewport={{ once: true, amount: 0.45 }}
+      animate="visible"
       variants={{
         hidden: {},
         visible: {

@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import useEmblaCarousel from "embla-carousel-react";
@@ -10,12 +11,20 @@ export interface ArticleCarouselItem {
   title: string;
   description: string;
   href: string;
-  image: string;
+  /** Local (`/…`) or data: image. Remote URLs are blocked by the CSP, so when
+   *  no local image is available the card renders an on-brand gradient. */
+  image?: string;
   category?: string;
   meta?: string;
 }
 
-export function ArticleCarousel({ items }: { items: ArticleCarouselItem[] }) {
+export function ArticleCarousel({
+  items,
+  readLabel = "Read note",
+}: {
+  items: ArticleCarouselItem[];
+  readLabel?: string;
+}) {
   const [emblaRef, emblaApi] = useEmblaCarousel({ dragFree: true, align: "start" });
   const [canScrollPrev, setCanScrollPrev] = useState(false);
   const [canScrollNext, setCanScrollNext] = useState(false);
@@ -75,13 +84,25 @@ export function ArticleCarousel({ items }: { items: ArticleCarouselItem[] }) {
                 href={item.href}
                 className="group block overflow-hidden rounded-[2rem] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900 focus-visible:ring-offset-2"
               >
-                <div className="relative h-[30rem] overflow-hidden rounded-[2rem] lg:h-[34rem]">
-                  <img
-                    src={item.image}
-                    alt={item.title}
-                    className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-                    loading="lazy"
-                  />
+                <div className="relative h-[30rem] overflow-hidden rounded-[2rem] bg-[linear-gradient(135deg,#1c1c1c_0%,#0d0d0d_60%,#0a0a0a_100%)] lg:h-[34rem]">
+                  {/* Optimized cover for local assets; entries without an image
+                      fall back to the on-brand gradient below. */}
+                  {item.image &&
+                  (item.image.startsWith("/") ||
+                    item.image.startsWith("data:")) ? (
+                    <Image
+                      src={item.image}
+                      alt={item.title}
+                      fill
+                      sizes="(max-width: 1024px) 300px, 380px"
+                      className="object-cover transition-transform duration-500 group-hover:scale-105"
+                    />
+                  ) : (
+                    <div
+                      aria-hidden
+                      className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(154,107,31,0.16),transparent_55%)] transition-transform duration-500 group-hover:scale-105"
+                    />
+                  )}
                   <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/25 to-transparent" />
                   <div className="absolute inset-x-0 bottom-0 p-7">
                     {item.category && (
@@ -96,7 +117,7 @@ export function ArticleCarousel({ items }: { items: ArticleCarouselItem[] }) {
                       {item.description}
                     </p>
                     <span className="inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.22em] text-white/70 transition-all group-hover:gap-3 group-hover:text-white/90">
-                      Lire la note
+                      {readLabel}
                       <ArrowRight className="size-3.5 transition-transform group-hover:translate-x-0.5" />
                     </span>
                   </div>

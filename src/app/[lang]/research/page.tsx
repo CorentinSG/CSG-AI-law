@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { notFound } from "next/navigation";
 import { ArrowRight, PenLine } from "lucide-react";
 
 import { getPublicResearchEntries } from "@/content/research";
@@ -8,27 +9,36 @@ import {
   type ArticleCarouselItem,
 } from "@/components/site/article-carousel";
 import { MotionReveal } from "@/components/site/motion-reveal";
-import { ResearchCard } from "@/components/site/research-card";
-import { MotionStagger } from "@/components/site/motion-stagger";
 import { SiteShell } from "@/components/site/shell";
+import { isLocale } from "@/lib/i18n/config";
+import { getDictionary } from "../dictionaries";
 
-export const metadata: Metadata = {
-  title: "Notes & Commentary",
-  description:
-    "Notes, commentary, and legal analysis on AI regulation, governance, legal ethics, legal technology, and comparative AI law.",
-};
+export async function generateMetadata({
+  params,
+}: PageProps<"/[lang]/research">): Promise<Metadata> {
+  const { lang } = await params;
+  if (!isLocale(lang)) return {};
+  const t = (await getDictionary(lang)).research;
+  return { title: t.metaTitle, description: t.metaDescription };
+}
 
-export default function ResearchPage() {
-  const publicEntries = getPublicResearchEntries();
-  const published = publicEntries.filter((e) => e.status === "published");
-  const forthcoming = publicEntries.filter((e) => e.status === "forthcoming");
+export default async function ResearchPage({
+  params,
+}: PageProps<"/[lang]/research">) {
+  const { lang } = await params;
+  if (!isLocale(lang)) notFound();
+
+  const t = (await getDictionary(lang)).research;
+  const published = getPublicResearchEntries().filter(
+    (e) => e.status === "published",
+  );
 
   const carouselItems: ArticleCarouselItem[] = published.map((entry) => ({
     id: entry.slug,
     title: entry.title,
     description: entry.summary,
-    href: `/research/${entry.slug}`,
-    image: entry.image ?? "https://images.unsplash.com/photo-1589829545856-d10d557cf95f?w=1080&q=80",
+    href: `/${lang}/research/${entry.slug}`,
+    image: entry.image,
     category: entry.category,
     meta: entry.readingTime,
   }));
@@ -38,15 +48,12 @@ export default function ResearchPage() {
       {/* ── Hero ─────────────────────────────────────────────── */}
       <MotionReveal className="space-y-6">
         <p className="font-mono text-[11px] uppercase tracking-[0.35em] text-zinc-500">
-          Notes &amp; Commentary
+          {t.eyebrow}
         </p>
         <h1 className="max-w-4xl font-display text-5xl font-medium uppercase tracking-[-0.05em] text-zinc-950 md:text-6xl">
-          Analyse juridique de l&rsquo;IA
+          {t.title}
         </h1>
-        <p className="max-w-2xl text-lg leading-8 text-zinc-600">
-          Notes et commentaires sur la régulation de l&rsquo;IA, la gouvernance, l&rsquo;éthique juridique
-          et le droit comparé — rédigés par Corentin Saint-Girons.
-        </p>
+        <p className="max-w-2xl text-lg leading-8 text-zinc-600">{t.intro}</p>
       </MotionReveal>
 
       {/* ── Published articles ───────────────────────────────── */}
@@ -54,48 +61,17 @@ export default function ResearchPage() {
         <section className="-mx-6 space-y-6 border-t border-black/6 pt-16 md:-mx-10 lg:-mx-16">
           <div className="px-6 md:px-10 lg:px-16">
             <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-zinc-400">
-              Notes publiées
+              {t.publishedLabel}
             </p>
           </div>
-          <ArticleCarousel items={carouselItems} />
+          <ArticleCarousel items={carouselItems} readLabel={t.readLabel} />
         </section>
       ) : null}
 
-      {/* ── Forthcoming notes — announced, not yet published ──── */}
-      {forthcoming.length > 0 ? (
-        <section className="space-y-6 border-t border-black/6 pt-16">
-          <div className="flex items-end justify-between gap-4">
-            <div className="space-y-2">
-              <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-amber-600">
-                À venir · Forthcoming
-              </p>
-              <h2 className="font-display text-2xl font-medium uppercase tracking-[-0.04em] text-zinc-900">
-                Notes en préparation
-              </h2>
-            </div>
-            <p className="hidden max-w-xs text-right text-xs leading-6 text-zinc-500 sm:block">
-              Annoncées et en cours de rédaction. Le texte complet n&rsquo;est pas
-              encore publié.
-            </p>
-          </div>
-          <MotionStagger className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-            {forthcoming.map((entry) => (
-              <ResearchCard
-                key={entry.slug}
-                category={entry.category}
-                title={entry.title}
-                description={entry.summary}
-                href={`/research/${entry.slug}`}
-                status="forthcoming"
-                meta={entry.readingTime}
-                tags={entry.tags}
-              />
-            ))}
-          </MotionStagger>
-        </section>
-      ) : null}
+      {/* Forthcoming notes are intentionally not shown publicly — they stay in
+          the registry for the admin side only. */}
 
-      {carouselItems.length === 0 && forthcoming.length === 0 ? (
+      {carouselItems.length === 0 ? (
         <MotionReveal>
           <section className="border-t border-black/6 pt-16">
             <div className="flex flex-col items-center gap-8 rounded-[2.5rem] border border-black/6 bg-zinc-50/60 px-8 py-20 text-center">
@@ -104,21 +80,20 @@ export default function ResearchPage() {
               </div>
               <div className="space-y-3">
                 <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-zinc-400">
-                  En cours de rédaction
+                  {t.emptyLabel}
                 </p>
                 <h2 className="font-display text-3xl font-medium uppercase tracking-[-0.04em] text-zinc-900">
-                  Notes à venir
+                  {t.emptyHeading}
                 </h2>
                 <p className="mx-auto max-w-md text-sm leading-7 text-zinc-500">
-                  Les premières notes sur la régulation de l&rsquo;IA, le droit comparé et la gouvernance
-                  seront publiées prochainement.
+                  {t.emptyBody}
                 </p>
               </div>
               <Link
-                href="/ai-regulation"
+                href={`/${lang}/ai-regulation`}
                 className="inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.22em] text-zinc-700 underline decoration-black/15 underline-offset-4 hover:text-zinc-900"
               >
-                Consulter le moniteur IA en attendant
+                {t.emptyCta}
                 <ArrowRight className="size-3.5" />
               </Link>
             </div>
