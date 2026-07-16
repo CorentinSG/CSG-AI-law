@@ -21,9 +21,10 @@ export function MotionStagger({
   return (
     <motion.div
       className={className}
+      // Animate on mount, not on scroll-into-view — see MotionReveal: the
+      // page-transition transform breaks in-view detection for on-screen content.
       initial={reduced ? false : "hidden"}
-      whileInView={reduced ? undefined : "visible"}
-      viewport={{ once: true, amount: 0.15 }}
+      animate={reduced ? undefined : "visible"}
       transition={{ staggerChildren: reduced ? 0 : stagger, delayChildren: delay }}
       variants={{ hidden: {}, visible: {} }}
     >

@@ -19,10 +19,13 @@ export function MotionReveal({
   return (
     <motion.div
       className={className}
+      // Animate on mount rather than on scroll-into-view: the page-transition
+      // wrapper transforms the whole page, which prevents the in-view observer
+      // from firing for content already on screen (it would stay hidden until a
+      // manual scroll).
       initial={reduced ? false : { opacity: 0, y: 16 }}
-      whileInView={reduced ? undefined : { opacity: 1, y: 0 }}
-      viewport={{ once: true, amount: 0.24 }}
-      transition={{ duration: 0.8, delay, ease }}
+      animate={reduced ? undefined : { opacity: 1, y: 0 }}
+      transition={{ duration: 0.6, delay, ease }}
     >
       {children}
     </motion.div>
