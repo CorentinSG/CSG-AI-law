@@ -21,6 +21,7 @@ import {
   type NormalizedNewsItemRecord,
 } from "@/content/ai-regulation/news";
 import { getPriorityEuropeCountryProfiles } from "@/content/ai-regulation/europe-country-profiles";
+import { internationalAiStandardsBaseline } from "@/content/ai-regulation/international-ai-standards";
 import { getPriorityUsStateProfiles } from "@/content/ai-regulation/us-state-ai-law-baseline";
 import { encodeCursor, parseCursorParam } from "@/lib/pagination";
 import type { RegulatoryUpdateFilters } from "@/db/repository-types";
@@ -66,6 +67,27 @@ function parseView(value: string | undefined): HubView {
     return value;
   }
   return "overview";
+}
+
+function isInternationalSignal(input: {
+  region?: string | null;
+  jurisdiction?: string | null;
+  sourceName?: string | null;
+  tags?: string[];
+}) {
+  const haystack = [
+    input.region,
+    input.jurisdiction,
+    input.sourceName,
+    ...(input.tags ?? []),
+  ]
+    .filter(Boolean)
+    .join(" ")
+    .toLowerCase();
+
+  return /\b(international|global|oecd|unesco|iso|iec|ieee|council of europe|standards?)\b/.test(
+    haystack,
+  );
 }
 
 // Uses listDistinctFilterValues() — fetches only lightweight filter columns
@@ -157,6 +179,8 @@ export default async function AiRegulationPage({
   const usNewsCount = newsPage.items.filter(
     (i) => i.region === "United States" || i.region === "North America",
   ).length;
+  const internationalNewsCount = newsPage.items.filter(isInternationalSignal).length;
+  const internationalDatabaseCount = updatesPage.items.filter(isInternationalSignal).length;
 
   return (
     <SiteShell className="space-y-10">
@@ -220,9 +244,9 @@ export default async function AiRegulationPage({
           <section className="space-y-4">
             <SectionHeading
               eyebrow="Regional intelligence"
-              title="Europe and United States"
+              title="Europe, United States, and International"
             />
-            <MotionStagger className="grid gap-5 lg:grid-cols-2" stagger={0.12}>
+            <MotionStagger className="grid gap-5 lg:grid-cols-3" stagger={0.12}>
               <MotionStaggerItem>
                 <RegionPortalCard
                   region="europe"
@@ -246,6 +270,22 @@ export default async function AiRegulationPage({
                   liveCount={usNewsCount}
                   dbCount={updatesPage.items.length}
                   highlights={usProfiles.map((p) => ({ label: p.stateName, href: `/ai-regulation/united-states/${p.slug}` }))}
+                  isLive
+                />
+              </MotionStaggerItem>
+              <MotionStaggerItem>
+                <RegionPortalCard
+                  region="international"
+                  title="International"
+                  description="ISO/IEC, OECD, UNESCO, IEEE, and cross-border AI governance instruments."
+                  href="/ai-regulation/international"
+                  liveLabel="International news"
+                  liveCount={internationalNewsCount}
+                  dbCount={internationalDatabaseCount}
+                  highlights={internationalAiStandardsBaseline.map((entry) => ({
+                    label: entry.institution,
+                    href: "/standards",
+                  }))}
                   isLive
                 />
               </MotionStaggerItem>
@@ -354,7 +394,7 @@ export default async function AiRegulationPage({
               />
               <IntelligenceSignal
                 label="Regions"
-                value="Europe + U.S."
+                value="EU + U.S. + Intl"
                 tone="neutral"
               />
             </div>
@@ -397,7 +437,7 @@ export default async function AiRegulationPage({
               eyebrow="Structured legal database"
               title="The AI law database"
             />
-            <div className="grid gap-6 lg:grid-cols-2">
+            <div className="grid gap-6 lg:grid-cols-3">
               <Card className="rounded-[2rem] border-black/6 bg-white/90 shadow-[0_18px_50px_rgba(15,15,15,0.04)]">
                 <CardContent className="space-y-5 p-7">
                   <div className="flex items-start justify-between gap-4">
@@ -456,6 +496,38 @@ export default async function AiRegulationPage({
                         className="rounded-full border border-black/8 bg-zinc-50 px-3 py-1.5 text-xs uppercase tracking-[0.16em] text-zinc-700 transition hover:bg-zinc-100"
                       >
                         {profile.stateName}
+                      </Link>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="rounded-[2rem] border-black/6 bg-white/90 shadow-[0_18px_50px_rgba(15,15,15,0.04)]">
+                <CardContent className="space-y-5 p-7">
+                  <div className="flex items-start justify-between gap-4">
+                    <div>
+                      <p className="font-mono text-[11px] uppercase tracking-[0.28em] text-zinc-600">
+                        International
+                      </p>
+                      <p className="mt-3 font-display text-3xl font-medium uppercase tracking-[-0.05em] text-zinc-950">
+                        Standards, soft law, and global governance
+                      </p>
+                    </div>
+                    <Link
+                      href="/ai-regulation/international"
+                      className="text-sm uppercase tracking-[0.16em] text-zinc-800 underline decoration-black/15 underline-offset-4"
+                    >
+                      Intl hub
+                    </Link>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {internationalAiStandardsBaseline.slice(0, 8).map((entry) => (
+                      <Link
+                        key={entry.id}
+                        href="/standards"
+                        className="rounded-full border border-black/8 bg-zinc-50 px-3 py-1.5 text-xs uppercase tracking-[0.16em] text-zinc-700 transition hover:bg-zinc-100"
+                      >
+                        {entry.institution}
                       </Link>
                     ))}
                   </div>

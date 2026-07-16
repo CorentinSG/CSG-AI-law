@@ -45,6 +45,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { path: "/news", lastModified: now, changeFrequency: "daily", priority: 0.85 },
     { path: "/ai-regulation/europe", lastModified: now, changeFrequency: "daily", priority: 0.85 },
     { path: "/ai-regulation/united-states", lastModified: now, changeFrequency: "daily", priority: 0.85 },
+    { path: "/ai-regulation/international", lastModified: now, changeFrequency: "weekly", priority: 0.8 },
     { path: "/ai-regulation/methodology", lastModified: now, changeFrequency: "monthly", priority: 0.7 },
     { path: "/ai-regulation/europe/ai-act", lastModified: now, changeFrequency: "weekly", priority: 0.8 },
     { path: "/ai-regulation/europe/ai-act/calendar", lastModified: now, changeFrequency: "weekly", priority: 0.75 },

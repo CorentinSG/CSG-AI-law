@@ -860,6 +860,7 @@ The public AI Regulation Monitor is now split into distinct regional intelligenc
 
 - `/ai-regulation/europe`
 - `/ai-regulation/united-states`
+- `/ai-regulation/international`
 
 Europe is the current priority hub.
 

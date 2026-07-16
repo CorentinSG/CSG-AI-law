@@ -10,6 +10,7 @@ Multi-agent project. Always update this file after meaningful changes. Include: 
 
 | Date | Phase | Summary |
 |------|-------|---------|
+| 2026-07-16 | International AI hub | Added `/ai-regulation/international`, linked it from the main AI regulation overview and database-region cards, and exposed the route in sitemap/smoke coverage |
 | 2026-07-16 | International standards coverage | Added an international standards baseline for the public Standards page, including ISO/IEC AI standards, OECD AI Principles, UNESCO AI Ethics Recommendation, and IEEE 7000, with non-binding/incorporation caveats and tests |
 | 2026-07-16 | CourtListener readiness | Added operator-friendly `COURTLISTENER_API_TOKEN` alias, runtime probe coverage, and `src-us-courtlistener-ai` migration/seed source for U.S. AI case-law discovery once the token is configured |
 | 2026-07-15 | LOCUS U.S. local-law discovery prep | Added optional LOCUS-v1 policy/helper for U.S. local AI-law discovery leads only; LOCUS remains non-official, admin-only, non-public, and cannot create legal database items without official municipal/county verification |

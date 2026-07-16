@@ -1,7 +1,7 @@
 import Link from "next/link";
 
 interface RegionPortalCardProps {
-  region: "europe" | "united-states";
+  region: "europe" | "united-states" | "international";
   title: string;
   description: string;
   href: string;
@@ -20,11 +20,14 @@ const regionGradients = {
     "bg-[radial-gradient(ellipse_at_top_left,rgba(129,140,248,0.16),transparent_55%),linear-gradient(180deg,rgba(255,255,255,0.05),rgba(255,255,255,0.02))]",
   "united-states":
     "bg-[radial-gradient(ellipse_at_top_right,rgba(248,113,113,0.14),transparent_55%),linear-gradient(180deg,rgba(255,255,255,0.05),rgba(255,255,255,0.02))]",
+  international:
+    "bg-[radial-gradient(ellipse_at_top,rgba(20,184,166,0.14),transparent_58%),linear-gradient(180deg,rgba(255,255,255,0.05),rgba(255,255,255,0.02))]",
 };
 
 const regionAccent = {
   europe: "text-indigo-300",
   "united-states": "text-red-300",
+  international: "text-teal-300",
 };
 
 export function RegionPortalCard({

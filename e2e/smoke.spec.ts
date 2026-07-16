@@ -26,6 +26,7 @@ const publicRoutes: Route[] = [
   { path: "/en/ai-regulation/europe", expect: "Europe" },
   { path: "/en/ai-regulation/europe/france", expect: "France" },
   { path: "/en/ai-regulation/united-states", expect: "United States" },
+  { path: "/en/ai-regulation/international", expect: "International" },
   { path: "/en/news", expect: "news" },
   { path: "/en/research", expect: "research" },
   { path: "/en/ai-regulation/europe/ai-act/calendar", expect: "calendar" },
