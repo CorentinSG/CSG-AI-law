@@ -4,11 +4,11 @@ import { notFound } from "next/navigation";
 import { ArrowRight, PenLine } from "lucide-react";
 
 import { getPublicResearchEntries } from "@/content/research";
-import {
-  ArticleCarousel,
-  type ArticleCarouselItem,
-} from "@/components/site/article-carousel";
 import { MotionReveal } from "@/components/site/motion-reveal";
+import {
+  ResearchExplorer,
+  type ResearchNote,
+} from "@/components/site/research-explorer";
 import { SiteShell } from "@/components/site/shell";
 import { isLocale } from "@/lib/i18n/config";
 import { getDictionary } from "../dictionaries";
@@ -33,14 +33,14 @@ export default async function ResearchPage({
     (e) => e.status === "published",
   );
 
-  const carouselItems: ArticleCarouselItem[] = published.map((entry) => ({
-    id: entry.slug,
+  const notes: ResearchNote[] = published.map((entry) => ({
+    slug: entry.slug,
     title: entry.title,
-    description: entry.summary,
-    href: `/${lang}/research/${entry.slug}`,
-    image: entry.image,
+    summary: entry.summary,
     category: entry.category,
-    meta: entry.readingTime,
+    tags: entry.tags,
+    jurisdiction: entry.jurisdiction,
+    readingTime: entry.readingTime,
   }));
 
   return (
@@ -56,22 +56,20 @@ export default async function ResearchPage({
         <p className="max-w-2xl text-lg leading-8 text-zinc-600">{t.intro}</p>
       </MotionReveal>
 
-      {/* ── Published articles ───────────────────────────────── */}
-      {carouselItems.length > 0 ? (
-        <section className="-mx-6 space-y-6 border-t border-black/6 pt-16 md:-mx-10 lg:-mx-16">
-          <div className="px-6 md:px-10 lg:px-16">
-            <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-zinc-400">
-              {t.publishedLabel}
-            </p>
-          </div>
-          <ArticleCarousel items={carouselItems} readLabel={t.readLabel} />
+      {/* ── Published notes — searchable & filterable ─────────── */}
+      {notes.length > 0 ? (
+        <section className="space-y-6 border-t border-black/6 pt-16">
+          <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-zinc-400">
+            {t.publishedLabel}
+          </p>
+          <ResearchExplorer notes={notes} lang={lang} />
         </section>
       ) : null}
 
       {/* Forthcoming notes are intentionally not shown publicly — they stay in
           the registry for the admin side only. */}
 
-      {carouselItems.length === 0 ? (
+      {notes.length === 0 ? (
         <MotionReveal>
           <section className="border-t border-black/6 pt-16">
             <div className="flex flex-col items-center gap-8 rounded-[2.5rem] border border-black/6 bg-zinc-50/60 px-8 py-20 text-center">
