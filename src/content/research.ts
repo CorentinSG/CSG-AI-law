@@ -159,7 +159,9 @@ export const researchEntries: ResearchEntry[] = [
     subtitle:
       "Why AI compliance now depends on reading statutes, supervisory guidance, and governance frameworks together rather than in isolation.",
     author,
-    status: "published",
+    // Demo/seed note — kept in the registry but unpublished so only authored
+    // notes appear publicly.
+    status: "draft",
     category: "AI Regulation",
     tags: [
       "AI regulation",
@@ -226,7 +228,9 @@ export const researchEntries: ResearchEntry[] = [
     subtitle:
       "Non-binding frameworks frequently become the operational language of AI governance long before formal law answers every question.",
     author,
-    status: "published",
+    // Demo/seed note — kept in the registry but unpublished so only authored
+    // notes appear publicly.
+    status: "draft",
     category: "Soft Law & Standards",
     tags: [
       "NIST AI RMF",

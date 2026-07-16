@@ -11,7 +11,7 @@ describe("research content registry", () => {
   it("exposes published and forthcoming entries publicly but hides drafts", () => {
     const entries = getPublicResearchEntries();
 
-    expect(entries.length).toBeGreaterThanOrEqual(6);
+    expect(entries.length).toBeGreaterThanOrEqual(5);
     expect(entries.some((entry) => entry.status === "draft")).toBe(false);
     expect(entries.some((entry) => entry.status === "forthcoming")).toBe(true);
     expect(entries.some((entry) => entry.status === "published")).toBe(true);
