@@ -38,7 +38,8 @@ Each agent edits only its own rows. Status vocabulary: `CLAIMED` · `WIP` · `BL
 | T-EU-OFFICIAL-WAVE-3 | Codex | MERGED | `main` @ `4fbab00` | `scripts/backfill-eu-official-wave3.ts`, `src/agents/ai-regulation/dataSteward.test.ts`, `package.json` | `backfill-eu-official-wave3.ts`, `dataSteward.test.ts`, `SourceReference`, community "Data Repository and Pagination", community "Scan Pipeline", community "Data Quality Assessment" | 2026-07-15 |
 | T-EU-OFFICIAL-WAVE-4 | Codex | MERGED | `main` @ `0ae9d4b` | `scripts/backfill-eu-official-wave4.ts`, `package.json` | `backfill-eu-official-wave4.ts`, `SourceReference`, community "Data Repository and Pagination", community "Scan Pipeline" | 2026-07-15 |
 | T-EU-OFFICIAL-WAVE-5 | Codex | MERGED | `main` @ `d31686b` | `scripts/backfill-eu-official-wave5.ts`, `package.json` | `backfill-eu-official-wave5.ts`, `SourceReference`, community "Data Repository and Pagination", community "Scan Pipeline" | 2026-07-15 |
-| T-EU-OFFICIAL-WAVE-6 | Codex | DONE-LOCAL | `main` @ working tree | `scripts/backfill-eu-official-wave6.ts`, `package.json` | `backfill-eu-official-wave6.ts`, `SourceReference`, community "Data Repository and Pagination", community "Scan Pipeline" | 2026-07-15 |
+| T-EU-OFFICIAL-WAVE-6 | Codex | MERGED | `main` @ `4df13d9` | `scripts/backfill-eu-official-wave6.ts`, `package.json` | `backfill-eu-official-wave6.ts`, `SourceReference`, community "Data Repository and Pagination", community "Scan Pipeline" | 2026-07-15 |
+| T-EU-DEPTH-WAVE-7 | Codex | DONE-LOCAL | `main` @ working tree | `scripts/backfill-eu-depth-wave7.ts`, `package.json` | `backfill-eu-depth-wave7.ts`, `SourceReference`, community "Data Repository and Pagination", community "Scan Pipeline" | 2026-07-15 |
 | T-NEWS-BACKFILL-INTEGRITY | Codex | DONE-LOCAL | `ops/t-ops9-ux` @ working tree | `src/content/ai-regulation/news.ts`, `src/lib/news-backfill.ts`, `scripts/backfill-news-items.ts`, `src/db/seed/seed-profiles.ts`, related tests | `buildNewsItemFromUpdate()`, `backfillNewsItemsFromUpdates()`, `buildLegalDatabaseIntegrityReport()`, community "News and Regulation Admin", community "DB Repository Layer" | 2026-06-22 |
 | T-INGESTION-RUNTIME | Codex | DONE-LOCAL | `ops/t-ops9-ux` @ working tree | `src/agents/ingestion/**`, `scrapling_worker/**`, `src/agents/ai-regulation/agentApiCapabilities.ts` | `scraplingExtract()`, `firecrawlService.ts`, `listAgentApiCapabilities()`, community "Data Ingestion Pipeline", community "Scrapling Extraction Service", community "Agent API Capabilities" | 2026-06-22 |
 | T-BATCH-REVIEW-UI (P2b) | Claude Code | DONE-LOCAL | `ops/t-ops9-ux` @ `0f2809d` | `src/app/admin/ai-regulation/review/**`, `src/app/admin/ai-regulation/actions.ts`, `src/app/admin/page.tsx` | `listPrioritizedReviewQueue()`, `batchTransitionReviewStatus()`, `bulkUpdateReviewStatus`, community "Admin Review and Summaries" | 2026-06-21 |
@@ -62,6 +63,14 @@ YYYY-MM-DD · <Agent> · <TASK-ID> · <STATUS>
 ```
 
 ## Current status
+
+2026-07-15 - Codex - T-EU-DEPTH-WAVE-7 - DONE-LOCAL
+- Intent:        Start the real depth phase by adding official regulator enforcement/guidance entries for AI, biometrics, generative AI, GDPR, and LLMs rather than more baseline country architecture.
+- Files:         `scripts/backfill-eu-depth-wave7.ts`, `package.json`, `AI_TASKS.md`.
+- Graph anchors: `backfill-eu-depth-wave7.ts`, `SourceReference`, community "Data Repository and Pagination", community "Scan Pipeline".
+- Verification:  Added dry-run-first `npm run backfill:eu-depth-wave7`; dry-run selected 8 official entries; live Supabase created 8 `published` updates with tag `eu-depth-wave7` for France=1, Italy=1, Spain=1, Netherlands=1, European Union=1, Ireland=1, Belgium=1, Sweden=1; DB recount confirms count=8 and all `published`, split `Enforcement action`=4 and `Agency guidance`=4; `npm test` PASS (115 files / 649 tests); `npm run typecheck` PASS; `npm run lint` PASS with one pre-existing `<img>` warning in `src/components/site/article-carousel.tsx`; `npm run build` PASS with temporary non-default admin env vars for local verification.
+- Branch/commit: `main` @ working tree.
+- Next:          Continue depth wave 8 with official court judgments, DPA decisions, competition/consumer authorities, employment/public-sector AI decisions, and serious corroborated legal news; avoid duplicating baseline/authority-designation entries.
 
 2026-07-15 - Codex - T-EU-OFFICIAL-WAVE-6 - DONE-LOCAL
 - Intent:        Complete the next EU official-source enrichment pass for Estonia, Romania, Slovenia, and Sweden, focusing on public-sector AI governance, AI Act authority models, sandbox/guidance, and national implementation law.
