@@ -88,6 +88,7 @@ Official sources control legal authority. Discovery/tracker/media sources genera
 - Official confirmation required before converting discovery items into authoritative legal conclusions
 - GDELT rate limiting: surface honestly as non-fatal constraint, not as "no news exists"
 - Unresolved discovery-only items must not be presented publicly as settled law
+- LOCUS-v1 (`https://huggingface.co/datasets/davidyinyan/LOCUS-v1`) is U.S.-only local-law discovery corpus material, not official legal authority. LOCUS hits may become private `DiscoveryLead` records only, with `requiresOfficialSource=true` in reviewer metadata and `publicVisibilityAllowed=false`; conversion requires accessible official municipal/county text, verified jurisdiction/date/citation/pinpoint, AI relevance, and admin review.
 
 ---
 

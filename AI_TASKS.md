@@ -42,7 +42,8 @@ Each agent edits only its own rows. Status vocabulary: `CLAIMED` · `WIP` · `BL
 | T-EU-DEPTH-WAVE-7 | Codex | MERGED | `main` @ `8ca3ecd` | `scripts/backfill-eu-depth-wave7.ts`, `package.json` | `backfill-eu-depth-wave7.ts`, `SourceReference`, community "Data Repository and Pagination", community "Scan Pipeline" | 2026-07-15 |
 | T-EU-DEPTH-WAVE-8 | Codex | MERGED | `main` @ `7c6bc28` | `scripts/backfill-eu-depth-wave8.ts`, `package.json` | `backfill-eu-depth-wave8.ts`, `SourceReference`, community "Data Repository and Pagination", community "Scan Pipeline" | 2026-07-15 |
 | T-CRON-AUTH-CI | Codex | MERGED | `main` @ `230c8e3` | `src/lib/cron-auth.test.ts` | `getCronAuthStatus()`, community "Admin Authentication" | 2026-07-15 |
-| T-REVIEW-BACKLOG-REDUCTION | Codex | DONE-LOCAL | `main` @ working tree | `scripts/reduce-review-backlog.ts`, `package.json` | `evaluatePublicationEligibility()`, `updateRepository.updateReviewStatus()`, community "Admin Review and Summaries", community "DB Repository Layer" | 2026-07-15 |
+| T-REVIEW-BACKLOG-REDUCTION | Codex | MERGED | `main` @ `9df039e` | `scripts/reduce-review-backlog.ts`, `package.json` | `evaluatePublicationEligibility()`, `updateRepository.updateReviewStatus()`, community "Admin Review and Summaries", community "DB Repository Layer" | 2026-07-15 |
+| T-US-LOCUS-DISCOVERY | Codex | DONE-LOCAL | `main` @ working tree | `src/agents/ai-regulation/usLocusDiscovery.ts`, `src/agents/ai-regulation/usLocusDiscovery.test.ts`, `README.md`, `PROJECT_LOGBOOK.md`, `AI_AGENT_MASTER_CONTEXT.md`, `docs/superpowers/plans/2026-07-15-locus-us-discovery-corpus.md` | `buildLocusDiscoveryLead()`, `DiscoveryLead`, community "Scan Pipeline", community "DB Repository Layer" | 2026-07-15 |
 | T-NEWS-BACKFILL-INTEGRITY | Codex | DONE-LOCAL | `ops/t-ops9-ux` @ working tree | `src/content/ai-regulation/news.ts`, `src/lib/news-backfill.ts`, `scripts/backfill-news-items.ts`, `src/db/seed/seed-profiles.ts`, related tests | `buildNewsItemFromUpdate()`, `backfillNewsItemsFromUpdates()`, `buildLegalDatabaseIntegrityReport()`, community "News and Regulation Admin", community "DB Repository Layer" | 2026-06-22 |
 | T-INGESTION-RUNTIME | Codex | DONE-LOCAL | `ops/t-ops9-ux` @ working tree | `src/agents/ingestion/**`, `scrapling_worker/**`, `src/agents/ai-regulation/agentApiCapabilities.ts` | `scraplingExtract()`, `firecrawlService.ts`, `listAgentApiCapabilities()`, community "Data Ingestion Pipeline", community "Scrapling Extraction Service", community "Agent API Capabilities" | 2026-06-22 |
 | T-BATCH-REVIEW-UI (P2b) | Claude Code | DONE-LOCAL | `ops/t-ops9-ux` @ `0f2809d` | `src/app/admin/ai-regulation/review/**`, `src/app/admin/ai-regulation/actions.ts`, `src/app/admin/page.tsx` | `listPrioritizedReviewQueue()`, `batchTransitionReviewStatus()`, `bulkUpdateReviewStatus`, community "Admin Review and Summaries" | 2026-06-21 |
@@ -66,6 +67,14 @@ YYYY-MM-DD · <Agent> · <TASK-ID> · <STATUS>
 ```
 
 ## Current status
+
+2026-07-15 - Codex - T-US-LOCUS-DISCOVERY - DONE-LOCAL
+- Intent:        Add LOCUS-v1 as an optional U.S. local AI-law external discovery corpus only, with hard guardrails against treating it as official legal authority or publishing LOCUS-derived items.
+- Files:         `src/agents/ai-regulation/usLocusDiscovery.ts`, `src/agents/ai-regulation/usLocusDiscovery.test.ts`, `README.md`, `PROJECT_LOGBOOK.md`, `AI_AGENT_MASTER_CONTEXT.md`, `docs/superpowers/plans/2026-07-15-locus-us-discovery-corpus.md`, `AI_TASKS.md`.
+- Graph anchors: `buildLocusDiscoveryLead()`, `DiscoveryLead`, community "Scan Pipeline", community "DB Repository Layer".
+- Verification:  Added inactive discovery-source registration `src-us-locus-v1`, LOCUS topic detection, confidence scoring, reviewer-note metadata, and `DiscoveryLeadInput` builder; tests assert non-AI rows are rejected, LOCUS leads are private/admin-only, `requiresOfficialSource=true`, `publicVisibilityAllowed=false`, no verified legal authority/public item is created from LOCUS alone, and AI-infrastructure data centers only match when explicitly AI-related; `npm test -- src/agents/ai-regulation/usLocusDiscovery.test.ts` PASS (5 tests); `npm run typecheck` PASS.
+- Branch/commit: `main` @ working tree.
+- Next:          Optional future runtime can stream/sample LOCUS rows into `buildLocusDiscoveryLead()` and save only private `discovery_leads`; conversion to legal database still requires official municipal/county source verification and admin review.
 
 2026-07-15 - Codex - T-REVIEW-BACKLOG-REDUCTION - DONE-LOCAL
 - Intent:        Reduce the `needs_review` backlog by auto-publishing only items that already satisfy the official-source/citation eligibility gate, without weakening publication controls.
