@@ -65,6 +65,12 @@ export function isDiscoveryOnlySource(
   return getDiscoverySourcePolicy(source) !== null;
 }
 
+export function isMediaDiscoverySource(
+  source: Pick<RegulationSource, "config"> | null | undefined,
+) {
+  return getDiscoverySourcePolicy(source)?.sourceType === "media_discovery_source";
+}
+
 export function extractDiscoveryLeadMetadata(
   rawItem: Pick<RawRegulatoryItem, "rawTitle" | "rawUrl" | "detectedAt" | "rawMetadata">,
 ): DiscoveryLeadMetadata | null {

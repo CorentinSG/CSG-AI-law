@@ -8,7 +8,10 @@ import type {
   RawRegulatoryItem,
   RegulationSource,
 } from "@/agents/ai-regulation/types";
-import { isDiscoveryOnlySource } from "@/agents/ai-regulation/utils/discovery";
+import {
+  isDiscoveryOnlySource,
+  isMediaDiscoverySource,
+} from "@/agents/ai-regulation/utils/discovery";
 import { extractVerificationMetadata } from "@/agents/ai-regulation/verification";
 import { slugify } from "@/lib/utils";
 import {
@@ -101,20 +104,27 @@ type NewsVerificationLabelInput = Pick<
 
 function sourceTypeFor(source: RegulationSource | null): AiLawNewsSourceType {
   if (!source) return "official_source";
-  if (isDiscoverySource(source)) return "informal_discovery_source";
   const configured = getAiLawNewsSourceConfigByName(source.name);
+  if (isMediaDiscoverySource(source)) {
+    return "legal_regulatory_press";
+  }
+  if (isDiscoverySource(source)) return "informal_discovery_source";
   return configured?.sourceType ?? "official_source";
 }
 
 function reliabilityFor(source: RegulationSource | null): AiLawNewsSourceReliability {
   if (!source) return "official_authority";
-  if (isDiscoverySource(source)) return "informal_discovery";
   const configured = getAiLawNewsSourceConfigByName(source.name);
+  if (isMediaDiscoverySource(source)) {
+    return "reputable_secondary";
+  }
+  if (isDiscoverySource(source)) return "informal_discovery";
   return configured?.reliabilityLevel ?? "official_authority";
 }
 
 function isDiscoverySource(source: RegulationSource | null) {
   if (!source) return false;
+  if (isMediaDiscoverySource(source)) return false;
   return isDiscoveryOnlySource(source) || /\bdiscovery only\b/i.test(source.name);
 }
 
@@ -125,6 +135,7 @@ function isInternalOnlyUpdate(update: AiRegulatoryUpdate) {
 function verificationStatusFor(input: {
   update: AiRegulatoryUpdate;
   source: RegulationSource | null;
+  sourceType: AiLawNewsSourceType;
   citationEligible: boolean;
   officialSourceFound: boolean;
   corroboratingSources: SourceReference[];
@@ -135,6 +146,9 @@ function verificationStatusFor(input: {
   if (input.corroboratingSources.length > 0) {
     return "corroborated";
   }
+  if (input.sourceType === "legal_regulatory_press") {
+    return input.officialSourceFound ? "official_source_found" : "media_reported";
+  }
   if (isDiscoverySource(input.source)) {
     return input.officialSourceFound ? "needs_review" : "discovery_only";
   }
@@ -142,15 +156,21 @@ function verificationStatusFor(input: {
 }
 
 const LEGAL_NEWS_DEVELOPMENT_TYPES = new Set([
+  "Statute",
+  "Bill",
   "Binding law",
   "Regulation",
+  "Proposed rule",
+  "Final rule",
+  "Executive order",
   "Agency guidance",
   "Enforcement action",
-  "Court decision",
-  "Case law",
-  "Legislative proposal",
-  "Consultation",
-  "Policy",
+  "Public consultation",
+  "Policy report",
+  "Standards document",
+  "International treaty",
+  "Code of practice",
+  "Government announcement",
 ]);
 
 function hasLegalNewsSignals(input: {
@@ -199,11 +219,14 @@ function isNewsPublicBySourceQuality(input: {
   }
 
   if (input.sourceReliability === "reputable_secondary") {
+    const intrinsicallyLegalDevelopment = LEGAL_NEWS_DEVELOPMENT_TYPES.has(
+      input.update.developmentType,
+    );
     return (
-      input.citationEligible &&
       legalSignals &&
-      input.update.confidenceLevel !== "low" &&
-      input.update.importanceLevel !== "low"
+      (intrinsicallyLegalDevelopment ||
+        (input.update.confidenceLevel !== "low" &&
+          input.update.importanceLevel !== "low"))
     );
   }
 
@@ -232,6 +255,7 @@ export function buildNewsItemFromUpdate(input: {
     citationAssessment.primaryOfficialSource?.url ??
     null;
   const eventDate = input.update.publicationDate;
+  const sourceType = sourceTypeFor(input.source);
   const sourceReliability = reliabilityFor(input.source);
   const corroboratingSources = sourceReferences.filter(
     (reference) =>
@@ -240,13 +264,12 @@ export function buildNewsItemFromUpdate(input: {
   );
   const publicBySourceQuality = isNewsPublicBySourceQuality({
     update: input.update,
-    sourceType: sourceTypeFor(input.source),
+    sourceType,
     sourceReliability,
     officialSourceFound,
     citationEligible: citationAssessment.publicationEligible,
     corroboratingSources,
   });
-  const sourceType = sourceTypeFor(input.source);
 
   return {
     id: `news-${input.update.id}`,
@@ -276,6 +299,7 @@ export function buildNewsItemFromUpdate(input: {
     verificationStatus: verificationStatusFor({
       update: input.update,
       source: input.source,
+      sourceType,
       citationEligible: citationAssessment.publicationEligible,
       officialSourceFound,
       corroboratingSources,

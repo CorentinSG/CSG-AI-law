@@ -157,6 +157,93 @@ describe("AI Law News", () => {
     expect(item.reviewerNotes).toContain("Automatically public");
   });
 
+  it("publishes reputable media discovery to the live feed without treating it as legal authority", () => {
+    const item = buildNewsItemFromUpdate({
+      update: update({
+        sourceId: "news-france-newsapi-discovery",
+        sourceName: "France AI legal news discovery (NewsAPI)",
+        sourceUrl: "https://www.reuters.com/legal/example",
+        status: "needs_review",
+        reviewedBy: null,
+        reviewedAt: null,
+        publishedAt: null,
+        legalArea: "Data protection",
+        developmentType: "Enforcement action",
+        importanceLevel: "high",
+        confidenceLevel: "medium",
+        tags: ["AI legal news", "data protection", "enforcement"],
+      }),
+      rawItem: rawItem({
+        rawMetadata: {
+          sourceReferences: [
+            {
+              sourceRole: "discovery",
+              title: "France AI legal enforcement reported by Reuters",
+              institution: "Reuters",
+              url: "https://www.reuters.com/legal/example",
+              canonicalUrl: "https://www.reuters.com/legal/example",
+              sourceType: "media_source",
+              authorityType: "Enforcement action",
+              publicationDate: "2026-05-01",
+              retrievedAt: "2026-05-02T00:00:00.000Z",
+              lastVerifiedAt: null,
+              reliabilityLevel: "medium",
+              verificationStatus: "needs_official_source",
+            },
+          ],
+        },
+      }),
+      source: officialSource({
+        id: "news-france-newsapi-discovery",
+        name: "France AI legal news discovery (NewsAPI)",
+        sourceUrl: "https://newsapi.org/v2/everything",
+        sourceType: "media_source",
+        config: { sourceCategory: "media_discovery_source" },
+        reliabilityLevel: "medium",
+      }),
+    });
+
+    expect(item.sourceType).toBe("legal_regulatory_press");
+    expect(item.sourceReliability).toBe("reputable_secondary");
+    expect(item.verificationStatus).toBe("media_reported");
+    expect(item.publicVisibilityStatus).toBe("public");
+    expect(item.officialSourceFound).toBe(false);
+    expect(item.relatedMonitorItemId).toBe("upd-1");
+  });
+
+  it("treats reported bills from reputable media as live legal news even before official-source conversion", () => {
+    const item = buildNewsItemFromUpdate({
+      update: update({
+        sourceId: "news-ireland-gdelt-corroboration",
+        sourceName: "Ireland AI legal news corroboration (GDELT)",
+        sourceUrl: "https://www.irishtimes.com/example",
+        status: "needs_review",
+        reviewedBy: null,
+        reviewedAt: null,
+        publishedAt: null,
+        legalArea: "Other",
+        developmentType: "Bill",
+        importanceLevel: "low",
+        confidenceLevel: "low",
+        tags: ["proposed-law", "AI regulation", "Ireland"],
+      }),
+      rawItem: rawItem({ rawMetadata: {} }),
+      source: officialSource({
+        id: "news-ireland-gdelt-corroboration",
+        name: "Ireland AI legal news corroboration (GDELT)",
+        sourceUrl: "https://api.gdeltproject.org/api/v2/doc/doc",
+        sourceType: "media_source",
+        config: { sourceCategory: "media_discovery_source" },
+        reliabilityLevel: "medium",
+      }),
+    });
+
+    expect(item.verificationStatus).toBe("media_reported");
+    expect(item.publicVisibilityStatus).toBe("public");
+    expect(item.officialSourceFound).toBe(false);
+    expect(item.officialSourceUrl).toBeNull();
+  });
+
   it("flags missing publication dates as requiring verification", () => {
     const item = buildNewsItemFromUpdate({
       update: update({ publicationDate: null }),
@@ -204,7 +291,7 @@ describe("AI Law News", () => {
         reviewedAt: null,
         publishedAt: null,
         legalArea: "AI governance",
-        developmentType: "Policy report",
+        developmentType: "Other official regulatory development",
         importanceLevel: "low",
         confidenceLevel: "low",
         tags: ["product"],
