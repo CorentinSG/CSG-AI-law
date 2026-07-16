@@ -36,6 +36,7 @@ Each agent edits only its own rows. Status vocabulary: `CLAIMED` · `WIP` · `BL
 | T-OFFICIAL-SOURCE-AUTOPUBLISH-PILOTS | Codex | MERGED | `main` @ `b67fa42` | `scripts/backfill-pilot-country-deep-entries.ts` | `evaluatePublicationEligibility()`, `updateRepository.updateReviewStatus()`, community "DB Repository Layer", community "Scan Pipeline" | 2026-07-15 |
 | T-EU-DEEP-ENTRIES-WAVE-2 | Codex | MERGED | `main` @ `be880ec` | `scripts/backfill-pilot-country-deep-entries.ts`, `package.json` | `backfill-pilot-country-deep-entries.ts`, `SourceReference`, community "Data Repository and Pagination", community "Scan Pipeline" | 2026-07-15 |
 | T-EU-OFFICIAL-WAVE-3 | Codex | MERGED | `main` @ `4fbab00` | `scripts/backfill-eu-official-wave3.ts`, `src/agents/ai-regulation/dataSteward.test.ts`, `package.json` | `backfill-eu-official-wave3.ts`, `dataSteward.test.ts`, `SourceReference`, community "Data Repository and Pagination", community "Scan Pipeline", community "Data Quality Assessment" | 2026-07-15 |
+| T-EU-OFFICIAL-WAVE-4 | Codex | DONE-LOCAL | `main` @ working tree | `scripts/backfill-eu-official-wave4.ts`, `package.json` | `backfill-eu-official-wave4.ts`, `SourceReference`, community "Data Repository and Pagination", community "Scan Pipeline" | 2026-07-15 |
 | T-NEWS-BACKFILL-INTEGRITY | Codex | DONE-LOCAL | `ops/t-ops9-ux` @ working tree | `src/content/ai-regulation/news.ts`, `src/lib/news-backfill.ts`, `scripts/backfill-news-items.ts`, `src/db/seed/seed-profiles.ts`, related tests | `buildNewsItemFromUpdate()`, `backfillNewsItemsFromUpdates()`, `buildLegalDatabaseIntegrityReport()`, community "News and Regulation Admin", community "DB Repository Layer" | 2026-06-22 |
 | T-INGESTION-RUNTIME | Codex | DONE-LOCAL | `ops/t-ops9-ux` @ working tree | `src/agents/ingestion/**`, `scrapling_worker/**`, `src/agents/ai-regulation/agentApiCapabilities.ts` | `scraplingExtract()`, `firecrawlService.ts`, `listAgentApiCapabilities()`, community "Data Ingestion Pipeline", community "Scrapling Extraction Service", community "Agent API Capabilities" | 2026-06-22 |
 | T-BATCH-REVIEW-UI (P2b) | Claude Code | DONE-LOCAL | `ops/t-ops9-ux` @ `0f2809d` | `src/app/admin/ai-regulation/review/**`, `src/app/admin/ai-regulation/actions.ts`, `src/app/admin/page.tsx` | `listPrioritizedReviewQueue()`, `batchTransitionReviewStatus()`, `bulkUpdateReviewStatus`, community "Admin Review and Summaries" | 2026-06-21 |
@@ -59,6 +60,14 @@ YYYY-MM-DD · <Agent> · <TASK-ID> · <STATUS>
 ```
 
 ## Current status
+
+2026-07-15 - Codex - T-EU-OFFICIAL-WAVE-4 - DONE-LOCAL
+- Intent:        Continue country-by-country EU legal database deepening with official AI Act authority, implementation, sandbox, and AI-literacy sources for weak country profiles.
+- Files:         `scripts/backfill-eu-official-wave4.ts`, `package.json`, `AI_TASKS.md`.
+- Graph anchors: `backfill-eu-official-wave4.ts`, `SourceReference`, community "Data Repository and Pagination", community "Scan Pipeline".
+- Verification:  Added dry-run-first `npm run backfill:eu-official-wave4`; dry-run selected 9 official entries; live Supabase created 9 `published` updates with tag `eu-official-wave4` for Greece=1, Hungary=1, Latvia=1, Lithuania=1, Luxembourg=1, Malta=1, Portugal=1, Slovakia=2; DB recount confirms count=9 and all `published`; `npm test` PASS (115 files / 649 tests); `npm run typecheck` PASS; `npm run lint` PASS with one pre-existing `<img>` warning in `src/components/site/article-carousel.tsx`; `npm run build` PASS with temporary non-default admin env vars for local verification.
+- Branch/commit: `main` @ working tree.
+- Next:          Continue a wave 5 focused on remaining shallow EU depth gaps and case-law/administrative-decision layers, especially Czechia, Cyprus, Estonia, Romania, Slovenia, Sweden, Austria, Belgium, Ireland, and Netherlands where official sources exist but decision/case-law layers are still thin.
 
 2026-07-15 - Codex - T-EU-OFFICIAL-WAVE-3 - MERGED
 - Intent:        Add official-source implementation, sandbox, authority, and timeline entries for weak EU country databases without requiring admin review for official sources.
