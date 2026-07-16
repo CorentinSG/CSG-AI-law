@@ -100,18 +100,20 @@ export default async function HomePage({
               <p className="mt-6 max-w-md text-base leading-7 text-white/65">
                 {home.aboutBody}
               </p>
-              <div className="mt-8 flex gap-6">
+              <div className="mt-8 flex flex-wrap gap-3">
                 <Link
                   href={`/${lang}/research`}
-                  className="font-mono text-[11px] uppercase tracking-[0.22em] text-white/70 underline decoration-white/15 underline-offset-4 transition hover:text-white"
+                  className="group inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-5 py-2.5 text-sm font-medium text-white/80 transition-all duration-200 hover:-translate-y-0.5 hover:border-white/35 hover:bg-white/15"
                 >
                   {home.readNotes}
+                  <ArrowUpRight className="size-3.5 transition-transform duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
                 </Link>
                 <Link
                   href={`/${lang}/contact`}
-                  className="font-mono text-[11px] uppercase tracking-[0.22em] text-white/70 underline decoration-white/15 underline-offset-4 transition hover:text-white"
+                  className="group inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-5 py-2.5 text-sm font-medium text-white/80 transition-all duration-200 hover:-translate-y-0.5 hover:border-white/35 hover:bg-white/15"
                 >
                   {home.contact}
+                  <ArrowUpRight className="size-3.5 transition-transform duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
                 </Link>
               </div>
             </MotionReveal>
@@ -144,17 +146,22 @@ export default async function HomePage({
               {home.exploreEyebrow}
             </p>
           </MotionReveal>
-          <MotionStagger className="grid gap-px bg-white/8 sm:grid-cols-3" stagger={0.1}>
+          <MotionStagger className="grid gap-4 sm:grid-cols-3" stagger={0.1}>
             {home.entryPoints.map((entry, i) => {
               const Icon = ENTRY_ICONS[i];
               return (
                 <MotionStaggerItem key={entry.label}>
                   <Link
                     href={`/${lang}${ENTRY_HREFS[i]}`}
-                    className="group flex flex-col justify-between gap-10 bg-[#080808] p-8 transition-colors duration-300 hover:bg-white/[0.03]"
+                    className="group relative flex flex-col justify-between gap-10 overflow-hidden rounded-2xl border border-white/10 bg-white/5 p-8 backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:border-white/25 hover:shadow-[0_20px_60px_rgba(0,0,0,0.3)]"
                   >
+                    {/* Hover gradient shimmer */}
+                    <div
+                      className="pointer-events-none absolute inset-0 bg-gradient-to-br from-white/5 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+                      aria-hidden="true"
+                    />
                     <div className="flex items-start justify-between">
-                      <Icon className="size-5 text-white/40 transition-colors duration-300 group-hover:text-accent-strong" />
+                      <Icon className="size-8 text-white/20 transition-colors duration-300 group-hover:text-accent/60" />
                       <ArrowUpRight className="size-4 text-white/15 transition-all duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:text-white/50" />
                     </div>
                     <div>

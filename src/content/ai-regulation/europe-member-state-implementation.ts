@@ -1434,7 +1434,482 @@ const dutchAiConsultation: CountrySourceRecord = {
     "Official Dutch government announcement stating on 20 April 2026 that the proposal for the AI Regulation implementing act was opened for internet consultation. This supports a consultation-or-draft-identified label.",
 };
 
+// --- Bulgarian sources ---
+
+const bulgariaCpdp: CountrySourceRecord = {
+  label: "Bulgarian Commission for Personal Data Protection official site",
+  url: "https://cpdp.bg/en/",
+  institution: "Commission for Personal Data Protection",
+  sourceType: "regulator",
+  official: true,
+  public: true,
+  runtimeAccessible: true,
+  responseStatus: 200,
+  lastCheckedDate: "2026-07-15T00:00:00.000Z",
+  parserStatus: "candidate_for_monitoring",
+  recommendation: "manual_review",
+  note:
+    "Official Bulgarian data-protection authority site. CPDP is a verified national regulator for data protection and AI-related privacy issues, but this source does not by itself designate a Bulgarian AI Act competent authority.",
+};
+
+const bulgariaAiWatchStrategy: CountrySourceRecord = {
+  label: "European Commission AI Watch Bulgaria strategy report",
+  url: "https://ai-watch.ec.europa.eu/countries/bulgaria/bulgaria-ai-strategy-report_en",
+  institution: "European Commission AI Watch",
+  sourceType: "policy",
+  official: true,
+  public: true,
+  runtimeAccessible: true,
+  responseStatus: 200,
+  lastCheckedDate: "2026-07-15T00:00:00.000Z",
+  parserStatus: "candidate_for_monitoring",
+  recommendation: "manual_review",
+  note:
+    "Official European Commission AI Watch country report summarising Bulgaria's AI strategy and policy initiatives for the 2020-2030 period.",
+};
+
+const bulgariaAiConcept2030: CountrySourceRecord = {
+  label: "Concept for the Development of Artificial Intelligence in Bulgaria until 2030",
+  url: "https://www.mtc.government.bg/sites/default/files/conceptforthedevelopmentofaiinbulgariauntil2030.pdf",
+  institution: "Ministry of Transport, Information Technology and Communications",
+  sourceType: "policy",
+  official: true,
+  public: true,
+  runtimeAccessible: true,
+  responseStatus: 200,
+  publicationDate: "2020-10-01",
+  lastCheckedDate: "2026-07-15T00:00:00.000Z",
+  parserStatus: "manual_reference",
+  recommendation: "manual_review",
+  note:
+    "Official Bulgarian government AI policy concept through 2030. This is a strategy/soft-law source, not a binding AI Act implementation measure.",
+};
+
+function createMonitoredInstitutionProfile(input: {
+  countryCode: string;
+  countryName: string;
+  slug: string;
+  dataProtectionAuthority: string;
+  dpaUrl: string;
+  governmentSourceLabel: string;
+  governmentSourceUrl: string;
+  governmentInstitution: string;
+  governmentSourceType?: CountrySourceRecord["sourceType"];
+  relevantMinistriesOrAgencies: string[];
+  checkedAt?: string;
+}): EuropeCountryProfile {
+  const checkedAt = input.checkedAt ?? "2026-07-15T00:00:00.000Z";
+  const dpaSource: CountrySourceRecord = {
+    label: `${input.dataProtectionAuthority} official site`,
+    url: input.dpaUrl,
+    institution: input.dataProtectionAuthority,
+    sourceType: "regulator",
+    official: true,
+    public: true,
+    runtimeAccessible: true,
+    responseStatus: 200,
+    lastCheckedDate: checkedAt,
+    parserStatus: "candidate_for_monitoring",
+    recommendation: "manual_review",
+    note:
+      `Official ${input.countryName} data-protection authority source relevant to AI, data protection, and automated-decision oversight. This source does not by itself verify a final AI Act competent-authority designation.`,
+  };
+  const governmentSource: CountrySourceRecord = {
+    label: input.governmentSourceLabel,
+    url: input.governmentSourceUrl,
+    institution: input.governmentInstitution,
+    sourceType: input.governmentSourceType ?? "government",
+    official: true,
+    public: true,
+    runtimeAccessible: true,
+    responseStatus: 200,
+    lastCheckedDate: checkedAt,
+    parserStatus: "candidate_for_monitoring",
+    recommendation: "manual_review",
+    note:
+      `Official ${input.countryName} government or public legal-policy source used as a national implementation monitoring anchor. Treat as an implementation-context source unless it expressly identifies a final AI Act designation.`,
+  };
+
+  return {
+    countryCode: input.countryCode,
+    countryName: input.countryName,
+    slug: input.slug,
+    region: "Europe",
+    euMemberState: true,
+    implementationStatus: "implementation_in_progress",
+    implementationStatusLabel:
+      europeImplementationStatusTaxonomy.implementation_in_progress.label,
+    implementationStatusDescription:
+      europeImplementationStatusTaxonomy.implementation_in_progress.shortExplanation,
+    implementationConfidence: "low",
+    aiActImplementationNotes:
+      `${input.countryName} is an EU member state to which the EU AI Act applies directly. Official sources verify a national data-protection authority and at least one government or official public implementation-context source relevant to AI governance. This profile does not yet verify a final national AI Act implementation act, competent-authority designation, market-surveillance authority, or notifying authority.`,
+    nationalImplementationMeasures: [],
+    nationalCompetentAuthorities: [],
+    marketSurveillanceAuthorities: [],
+    notifyingAuthorities: [],
+    dataProtectionAuthority: input.dataProtectionAuthority,
+    relevantMinistriesOrAgencies: input.relevantMinistriesOrAgencies,
+    nationalAIRegulationSources: [dpaSource, governmentSource],
+    nationalAIRegulationNotes:
+      `${input.countryName} now has verified official monitoring anchors: ${input.dataProtectionAuthority} and ${input.governmentInstitution}. These sources support a conservative implementation-in-progress label but do not prove final AI Act authority designations.`,
+    nationalCaseLawSources: [],
+    nationalCaseLawNotes:
+      `No ${input.countryName}-specific AI case-law source has been verified into this baseline in this phase.`,
+    nationalSoftLawSources:
+      governmentSource.sourceType === "policy" || governmentSource.sourceType === "soft_law"
+        ? [governmentSource]
+        : [],
+    nationalSoftLawNotes:
+      governmentSource.sourceType === "policy" || governmentSource.sourceType === "soft_law"
+        ? "The verified layer includes official policy or guidance material; binding national AI Act implementation instruments remain under review."
+        : "No separate national AI soft-law or guidance source has been verified into this baseline in this phase.",
+    latestRelevantUpdates: [],
+    officialSourceUrls: [dpaSource.url, governmentSource.url],
+    sourceReferences: [
+      sourceReferenceFromCountrySource(dpaSource),
+      sourceReferenceFromCountrySource(governmentSource, "supporting"),
+    ],
+    citationQualityStatus: "partial",
+    sourceVerificationStatus: "partially_verified",
+    lastReviewedDate: checkedAt,
+    missingSourceWarnings: [
+      `No specific ${input.countryName} AI Act implementation act verified.`,
+      "No competent-authority designation instrument verified.",
+      "No market-surveillance or notifying authority verified.",
+      `No country-specific AI case-law source verified.`,
+    ],
+    editorialNotes: [
+      `Do not describe ${input.dataProtectionAuthority} as an AI Act competent authority unless a final official designation instrument is verified.`,
+      "Official monitoring anchors are present, but the implementation map is still incomplete.",
+      `Absence of a verified designation here does not mean absence of ${input.countryName} regulatory work.`,
+    ],
+    publicSummary:
+      `${input.countryName} is included in the EU AI baseline with verified official monitoring anchors. The EU AI Act applies directly, and national data-protection/government sources are now connected for monitoring. Final national AI Act authority designations remain under review.`,
+  };
+}
+
 const firstWaveProfiles: EuropeCountryProfile[] = [
+  {
+    countryCode: "BG",
+    countryName: "Bulgaria",
+    slug: "bulgaria",
+    region: "Europe",
+    euMemberState: true,
+    implementationStatus: "implementation_in_progress",
+    implementationStatusLabel:
+      europeImplementationStatusTaxonomy.implementation_in_progress.label,
+    implementationStatusDescription:
+      europeImplementationStatusTaxonomy.implementation_in_progress.shortExplanation,
+    implementationConfidence: "low",
+    aiActImplementationNotes:
+      "Bulgaria is an EU member state to which the EU AI Act applies directly. Official sources verify a national AI strategy/policy baseline through the Concept for the Development of Artificial Intelligence in Bulgaria until 2030 and the European Commission AI Watch country report. The Bulgarian Commission for Personal Data Protection is a verified national data-protection authority relevant to AI/privacy oversight. This baseline does not yet verify a final Bulgarian AI Act implementation act, competent-authority designation, market-surveillance authority, or notifying authority.",
+    nationalImplementationMeasures: [
+      "Official AI policy baseline: Concept for the Development of Artificial Intelligence in Bulgaria until 2030.",
+      "European Commission AI Watch country report summarises Bulgaria's AI strategy and policy initiatives for 2020-2030.",
+    ],
+    nationalCompetentAuthorities: [],
+    marketSurveillanceAuthorities: [],
+    notifyingAuthorities: [],
+    dataProtectionAuthority: "Commission for Personal Data Protection",
+    relevantMinistriesOrAgencies: [
+      "Commission for Personal Data Protection",
+      "Ministry of Transport, Information Technology and Communications",
+    ],
+    nationalAIRegulationSources: [
+      bulgariaCpdp,
+      bulgariaAiWatchStrategy,
+      bulgariaAiConcept2030,
+    ],
+    nationalAIRegulationNotes:
+      "Bulgaria now has verified official institutional and policy anchors for the baseline: CPDP for data-protection and AI/privacy oversight, the European Commission AI Watch country report, and the official Bulgarian AI Concept until 2030. These sources support an implementation-in-progress label, but they do not verify final AI Act authority designations.",
+    nationalCaseLawSources: [],
+    nationalCaseLawNotes:
+      "No Bulgaria-specific AI case-law source has been verified into this baseline in this phase.",
+    nationalSoftLawSources: [bulgariaAiWatchStrategy, bulgariaAiConcept2030],
+    nationalSoftLawNotes:
+      "The verified Bulgaria layer currently consists mainly of AI strategy and policy material. Binding national AI Act implementation instruments remain under review.",
+    latestRelevantUpdates: [],
+    officialSourceUrls: [
+      bulgariaCpdp.url,
+      bulgariaAiWatchStrategy.url,
+      bulgariaAiConcept2030.url,
+    ],
+    sourceReferences: [
+      sourceReferenceFromCountrySource(bulgariaCpdp),
+      sourceReferenceFromCountrySource(bulgariaAiWatchStrategy, "supporting"),
+      sourceReferenceFromCountrySource(bulgariaAiConcept2030, "supporting"),
+    ],
+    citationQualityStatus: "partial",
+    sourceVerificationStatus: "partially_verified",
+    lastReviewedDate: "2026-07-15T00:00:00.000Z",
+    missingSourceWarnings: [
+      "No specific Bulgarian AI Act implementation act verified.",
+      "No competent-authority designation instrument verified.",
+      "No market-surveillance or notifying authority verified.",
+      "No country-specific AI case-law source verified.",
+    ],
+    editorialNotes: [
+      "Do not describe CPDP as a Bulgarian AI Act competent authority unless a final official designation instrument is verified.",
+      "The AI Concept and AI Watch report are policy/strategy sources and should not be treated as binding AI Act implementation law.",
+      "Absence of a verified designation here does not mean absence of Bulgarian regulatory work.",
+    ],
+    publicSummary:
+      "Bulgaria is included in the EU AI baseline with verified official policy and institutional anchors. The EU AI Act applies directly, CPDP is the national data-protection authority relevant to AI/privacy oversight, and Bulgaria has an official AI strategy/policy baseline through 2030. Final national AI Act authority designations remain under review.",
+  },
+  createMonitoredInstitutionProfile({
+    countryCode: "HR",
+    countryName: "Croatia",
+    slug: "croatia",
+    dataProtectionAuthority: "Croatian Personal Data Protection Agency",
+    dpaUrl: "https://azop.hr/",
+    governmentSourceLabel:
+      "Croatian Ministry of Justice, Public Administration and Digital Transformation official site",
+    governmentSourceUrl: "https://mpudt.gov.hr/",
+    governmentInstitution:
+      "Ministry of Justice, Public Administration and Digital Transformation",
+    relevantMinistriesOrAgencies: [
+      "Croatian Personal Data Protection Agency",
+      "Ministry of Justice, Public Administration and Digital Transformation",
+    ],
+  }),
+  createMonitoredInstitutionProfile({
+    countryCode: "CY",
+    countryName: "Cyprus",
+    slug: "cyprus",
+    dataProtectionAuthority: "Commissioner for Personal Data Protection",
+    dpaUrl: "https://www.dataprotection.gov.cy/dataprotection/dataprotection.nsf",
+    governmentSourceLabel:
+      "Cyprus Deputy Ministry page on Regulation (EU) 2024/1689 establishing harmonised rules on artificial intelligence",
+    governmentSourceUrl:
+      "https://www.gov.cy/dmrid/en/uncategorized/regulation-eu-2024-1689-establishing-harmonised-rules-on-artificial-intelligence-ai-act/",
+    governmentInstitution:
+      "Deputy Ministry of Research, Innovation and Digital Policy",
+    governmentSourceType: "policy",
+    relevantMinistriesOrAgencies: [
+      "Commissioner for Personal Data Protection",
+      "Deputy Ministry of Research, Innovation and Digital Policy",
+    ],
+  }),
+  createMonitoredInstitutionProfile({
+    countryCode: "CZ",
+    countryName: "Czechia",
+    slug: "czechia",
+    dataProtectionAuthority: "Office for Personal Data Protection",
+    dpaUrl: "https://uoou.gov.cz/en",
+    governmentSourceLabel:
+      "Ministry of Industry and Trade press release on draft artificial intelligence law",
+    governmentSourceUrl:
+      "https://mpo.gov.cz/en/guidepost/for-the-media/press-releases/the-ministry-of-industry-and-trade-has-prepared-a-draft-law-on-artificial-intelligence----289865/",
+    governmentInstitution: "Ministry of Industry and Trade",
+    governmentSourceType: "government",
+    relevantMinistriesOrAgencies: [
+      "Office for Personal Data Protection",
+      "Ministry of Industry and Trade",
+    ],
+  }),
+  createMonitoredInstitutionProfile({
+    countryCode: "DK",
+    countryName: "Denmark",
+    slug: "denmark",
+    dataProtectionAuthority: "Danish Data Protection Agency",
+    dpaUrl: "https://www.datatilsynet.dk/english",
+    governmentSourceLabel:
+      "Danish Agency for Digital Government AI guides announcement",
+    governmentSourceUrl:
+      "https://en.digst.dk/news/news-archive/2024/maj/the-agency-for-digital-government-publishes-ai-guides/",
+    governmentInstitution: "Agency for Digital Government",
+    governmentSourceType: "soft_law",
+    relevantMinistriesOrAgencies: [
+      "Danish Data Protection Agency",
+      "Agency for Digital Government",
+    ],
+  }),
+  createMonitoredInstitutionProfile({
+    countryCode: "EE",
+    countryName: "Estonia",
+    slug: "estonia",
+    dataProtectionAuthority: "Estonian Data Protection Inspectorate",
+    dpaUrl: "https://www.aki.ee/en",
+    governmentSourceLabel: "Estonia Kratid AI initiative",
+    governmentSourceUrl: "https://www.kratid.ee/en",
+    governmentInstitution: "Government of Estonia / Kratid initiative",
+    governmentSourceType: "policy",
+    relevantMinistriesOrAgencies: [
+      "Estonian Data Protection Inspectorate",
+      "Government of Estonia / Kratid initiative",
+    ],
+  }),
+  createMonitoredInstitutionProfile({
+    countryCode: "FI",
+    countryName: "Finland",
+    slug: "finland",
+    dataProtectionAuthority: "Office of the Data Protection Ombudsman",
+    dpaUrl: "https://tietosuoja.fi/en/ai-systems-and-data-protection",
+    governmentSourceLabel: "Traficom EU Artificial Intelligence Act materials",
+    governmentSourceUrl:
+      "https://traficom.fi/en/ai-regulation/about-eu-artificial-intelligence-act",
+    governmentInstitution: "Finnish Transport and Communications Agency Traficom",
+    governmentSourceType: "policy",
+    relevantMinistriesOrAgencies: [
+      "Office of the Data Protection Ombudsman",
+      "Finnish Transport and Communications Agency Traficom",
+    ],
+  }),
+  createMonitoredInstitutionProfile({
+    countryCode: "GR",
+    countryName: "Greece",
+    slug: "greece",
+    dataProtectionAuthority: "Hellenic Data Protection Authority",
+    dpaUrl: "https://www.dpa.gr/en",
+    governmentSourceLabel: "Greek National Codification Portal",
+    governmentSourceUrl: "https://gslegal.gov.gr/en/national-codification-portal/",
+    governmentInstitution: "General Secretariat of Legal and Parliamentary Affairs",
+    governmentSourceType: "legislation",
+    relevantMinistriesOrAgencies: [
+      "Hellenic Data Protection Authority",
+      "General Secretariat of Legal and Parliamentary Affairs",
+    ],
+  }),
+  createMonitoredInstitutionProfile({
+    countryCode: "HU",
+    countryName: "Hungary",
+    slug: "hungary",
+    dataProtectionAuthority:
+      "Hungarian National Authority for Data Protection and Freedom of Information",
+    dpaUrl: "https://www.naih.hu/",
+    governmentSourceLabel: "Hungarian National Legislation Database",
+    governmentSourceUrl: "https://njt.jog.gov.hu/",
+    governmentInstitution: "National Legislation Database",
+    governmentSourceType: "legislation",
+    relevantMinistriesOrAgencies: [
+      "Hungarian National Authority for Data Protection and Freedom of Information",
+      "National Legislation Database",
+    ],
+  }),
+  createMonitoredInstitutionProfile({
+    countryCode: "LV",
+    countryName: "Latvia",
+    slug: "latvia",
+    dataProtectionAuthority: "Data State Inspectorate",
+    dpaUrl: "https://www.dvi.gov.lv/en",
+    governmentSourceLabel: "Likumi.lv official legislation database",
+    governmentSourceUrl: "https://likumi.lv/",
+    governmentInstitution: "Official publisher of the Republic of Latvia",
+    governmentSourceType: "legislation",
+    relevantMinistriesOrAgencies: [
+      "Data State Inspectorate",
+      "Official publisher of the Republic of Latvia",
+    ],
+  }),
+  createMonitoredInstitutionProfile({
+    countryCode: "LT",
+    countryName: "Lithuania",
+    slug: "lithuania",
+    dataProtectionAuthority: "State Data Protection Inspectorate",
+    dpaUrl: "https://vdai.lrv.lt/en/",
+    governmentSourceLabel: "Lithuanian Register of Legal Acts",
+    governmentSourceUrl: "https://www.e-tar.lt/portal/en/index",
+    governmentInstitution: "Register of Legal Acts",
+    governmentSourceType: "legislation",
+    relevantMinistriesOrAgencies: [
+      "State Data Protection Inspectorate",
+      "Register of Legal Acts",
+    ],
+  }),
+  createMonitoredInstitutionProfile({
+    countryCode: "LU",
+    countryName: "Luxembourg",
+    slug: "luxembourg",
+    dataProtectionAuthority: "National Commission for Data Protection",
+    dpaUrl: "https://cnpd.public.lu/en.html",
+    governmentSourceLabel: "Legilux official legal portal",
+    governmentSourceUrl: "https://legilux.public.lu/",
+    governmentInstitution: "Legilux",
+    governmentSourceType: "legislation",
+    relevantMinistriesOrAgencies: [
+      "National Commission for Data Protection",
+      "Legilux",
+    ],
+  }),
+  createMonitoredInstitutionProfile({
+    countryCode: "MT",
+    countryName: "Malta",
+    slug: "malta",
+    dataProtectionAuthority: "Information and Data Protection Commissioner",
+    dpaUrl: "https://idpc.org.mt/",
+    governmentSourceLabel: "Legislation Malta",
+    governmentSourceUrl: "https://legislation.mt/",
+    governmentInstitution: "Legislation Malta",
+    governmentSourceType: "legislation",
+    relevantMinistriesOrAgencies: [
+      "Information and Data Protection Commissioner",
+      "Legislation Malta",
+    ],
+  }),
+  createMonitoredInstitutionProfile({
+    countryCode: "PT",
+    countryName: "Portugal",
+    slug: "portugal",
+    dataProtectionAuthority: "National Data Protection Commission",
+    dpaUrl: "https://www.cnpd.pt/",
+    governmentSourceLabel: "Diario da Republica official legal portal",
+    governmentSourceUrl: "https://diariodarepublica.pt/",
+    governmentInstitution: "Diario da Republica",
+    governmentSourceType: "legislation",
+    relevantMinistriesOrAgencies: [
+      "National Data Protection Commission",
+      "Diario da Republica",
+    ],
+  }),
+  createMonitoredInstitutionProfile({
+    countryCode: "RO",
+    countryName: "Romania",
+    slug: "romania",
+    dataProtectionAuthority:
+      "National Supervisory Authority for Personal Data Processing",
+    dpaUrl: "https://www.dataprotection.ro/",
+    governmentSourceLabel: "Romanian national AI strategy 2024-2027",
+    governmentSourceUrl:
+      "https://www.research.gov.ro/programe-nationale/strategia-nationala-in-domeniul-inteligentei-artificiale-2024-2027/",
+    governmentInstitution: "Romanian Ministry of Research, Innovation and Digitalisation",
+    governmentSourceType: "policy",
+    relevantMinistriesOrAgencies: [
+      "National Supervisory Authority for Personal Data Processing",
+      "Ministry of Research, Innovation and Digitalisation",
+    ],
+  }),
+  createMonitoredInstitutionProfile({
+    countryCode: "SK",
+    countryName: "Slovakia",
+    slug: "slovakia",
+    dataProtectionAuthority: "Office for Personal Data Protection",
+    dpaUrl: "https://dataprotection.gov.sk/uoou/en",
+    governmentSourceLabel: "Slov-lex official legislation portal",
+    governmentSourceUrl: "https://www.slov-lex.sk/",
+    governmentInstitution: "Slov-lex",
+    governmentSourceType: "legislation",
+    relevantMinistriesOrAgencies: [
+      "Office for Personal Data Protection",
+      "Slov-lex",
+    ],
+  }),
+  createMonitoredInstitutionProfile({
+    countryCode: "SI",
+    countryName: "Slovenia",
+    slug: "slovenia",
+    dataProtectionAuthority: "Information Commissioner",
+    dpaUrl: "https://www.ip-rs.si/en",
+    governmentSourceLabel: "Slovenian national AI ecosystem",
+    governmentSourceUrl:
+      "https://www.gov.si/teme/nacionalni-ekosistem-za-umetno-inteligenco/",
+    governmentInstitution: "Government of Slovenia",
+    governmentSourceType: "policy",
+    relevantMinistriesOrAgencies: [
+      "Information Commissioner",
+      "Government of Slovenia",
+    ],
+  }),
   {
     countryCode: "FR",
     countryName: "France",

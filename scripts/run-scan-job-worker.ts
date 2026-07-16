@@ -5,6 +5,7 @@ loadScriptEnv();
 import { hostname } from "node:os";
 
 import { drainQueuedScanJobs } from "@/agents/ai-regulation/processors/scanJobs";
+import { updateRepository } from "@/agents/ai-regulation/processors/updateRepository";
 import {
   acquireScanWorkerLease,
   clearScanWorkerStopRequest,
@@ -15,8 +16,11 @@ import {
   writeScanWorkerStatus,
   type ScanWorkerStatus,
 } from "@/agents/ai-regulation/processors/scanWorkerRuntime";
+import type { ScanJob } from "@/agents/ai-regulation/governance";
 import { getRepositoryMode } from "@/db/repository";
 import { env } from "@/lib/env";
+
+const WORKER_HEARTBEAT_TRIGGER = "worker_heartbeat";
 
 function sleep(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -28,6 +32,7 @@ async function main() {
   let cycle = 0;
   let idleCycles = 0;
   let stopRequested = false;
+  let heartbeatJob: ScanJob | null = null;
 
   const writeStatus = async (
     state: ScanWorkerStatus["state"],
@@ -55,6 +60,53 @@ async function main() {
     }
   };
 
+  const writePersistentHeartbeat = async (
+    state: ScanWorkerStatus["state"],
+    extras?: Record<string, unknown>,
+  ) => {
+    const heartbeatAt = new Date().toISOString();
+    const resultSummary = {
+      workerHeartbeatAt: heartbeatAt,
+      workerHeartbeatTimeoutMs: Math.max(
+        config.pollMs + config.heartbeatTimeoutMs,
+        config.pollMs * 2,
+      ),
+      workerId: config.workerId,
+      hostname: hostname(),
+      pid: process.pid,
+      state,
+      cycle,
+      idleCycles,
+      startedAt,
+      dataMode: getRepositoryMode(),
+      aiEnabled: env.AI_ENABLE_PROCESSING,
+      ...extras,
+    };
+
+    if (heartbeatJob) {
+      heartbeatJob = await updateRepository.updateScanJob(heartbeatJob.id, {
+        status: "succeeded",
+        startedAt,
+        finishedAt: heartbeatAt,
+        errorMessage: null,
+        resultSummary,
+      });
+      return heartbeatJob;
+    }
+
+    heartbeatJob = await updateRepository.createScanJob({
+      sourceId: null,
+      trigger: WORKER_HEARTBEAT_TRIGGER,
+      requestedBy: config.workerId,
+      status: "succeeded",
+      startedAt,
+      finishedAt: heartbeatAt,
+      resultSummary,
+      errorMessage: null,
+    });
+    return heartbeatJob;
+  };
+
   process.once("SIGINT", () => requestStop("SIGINT"));
   process.once("SIGTERM", () => requestStop("SIGTERM"));
 
@@ -67,6 +119,7 @@ async function main() {
   );
 
   await writeStatus("starting");
+  await writePersistentHeartbeat("starting");
 
   try {
     while (true) {
@@ -117,6 +170,9 @@ async function main() {
       await writeStatus(didWork ? "running" : "idle", {
         lastSummary: summary as Record<string, unknown>,
       });
+      await writePersistentHeartbeat(didWork ? "running" : "idle", {
+        lastSummary: summary as Record<string, unknown>,
+      });
 
       if (config.idleExitAfter > 0 && idleCycles >= config.idleExitAfter) {
         console.log(
@@ -134,8 +190,12 @@ async function main() {
     }
 
     await writeStatus("stopped");
+    await writePersistentHeartbeat("stopped");
   } catch (error) {
     await writeStatus("failed", {
+      lastError: error instanceof Error ? error.message : "Unknown error",
+    });
+    await writePersistentHeartbeat("failed", {
       lastError: error instanceof Error ? error.message : "Unknown error",
     });
     throw error;

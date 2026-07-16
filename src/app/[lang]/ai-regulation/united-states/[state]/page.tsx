@@ -16,7 +16,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   getUsStateAiLawProfileBySlug,
   getUsStateAiLawProfiles,
-  usStateAiLawStatusTaxonomy,
 } from "@/content/ai-regulation/us-state-ai-law-baseline";
 import { env } from "@/lib/env";
 import { formatDisplayDate } from "@/lib/utils";
@@ -104,7 +103,6 @@ export default async function UsStatePage({
         item.title.toLowerCase().includes(profile.stateName.toLowerCase()),
     )
     .slice(0, 5);
-  const statusMeta = usStateAiLawStatusTaxonomy[profile.aiLawStatus];
 
   return (
     <SiteShell className="space-y-10">
@@ -143,7 +141,6 @@ export default async function UsStatePage({
                 <p className="font-display text-2xl font-medium uppercase tracking-[-0.04em] text-zinc-950">
                   {profile.aiLawStatusLabel}
                 </p>
-                <p className="text-sm leading-7 text-zinc-700">{profile.aiLawStatusDescription}</p>
               </CardContent>
             </Card>
           </MotionStaggerItem>
@@ -156,7 +153,6 @@ export default async function UsStatePage({
                 <p className="font-display text-2xl font-medium uppercase tracking-[-0.04em] text-zinc-950">
                   {profile.confidenceLevel}
                 </p>
-                <p className="text-sm leading-7 text-zinc-700">{statusMeta.sourceRequirements}</p>
               </CardContent>
             </Card>
           </MotionStaggerItem>
@@ -169,8 +165,8 @@ export default async function UsStatePage({
                 <p className="font-display text-2xl font-medium uppercase tracking-[-0.04em] text-zinc-950">
                   {formatDisplayDate(profile.lastReviewedDate)}
                 </p>
-                <p className="text-sm leading-7 text-zinc-700">
-                  Citation quality: {profile.citationQualityStatus.replaceAll("_", " ")}.
+                <p className="truncate font-mono text-[10px] uppercase tracking-[0.18em] text-zinc-500">
+                  {profile.citationQualityStatus.replaceAll("_", " ")}
                 </p>
               </CardContent>
             </Card>

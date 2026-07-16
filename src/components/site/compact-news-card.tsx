@@ -20,6 +20,13 @@ function VerificationDot({ status }: { status: string }) {
   return <span className={`inline-block h-2 w-2 shrink-0 rounded-full ${color}`} />;
 }
 
+// Left border accent by region for at-a-glance geographic identification
+function getRegionBorderClass(region: string): string {
+  if (region === "Europe" || region.startsWith("EU")) return "border-l-blue-500";
+  if (region === "United States" || region === "North America") return "border-l-emerald-500";
+  return "border-l-zinc-600";
+}
+
 interface CompactNewsCardProps {
   item: AiLawNewsItem;
   /** When true, display the card horizontally (default); false = compact vertical */
@@ -33,7 +40,7 @@ export function CompactNewsCard({ item, horizontal = true }: CompactNewsCardProp
 
   if (horizontal) {
     return (
-      <article className="group flex gap-4 rounded-[1.6rem] border border-black/6 bg-white/90 p-4 shadow-[0_8px_24px_rgba(15,15,15,0.04)] transition hover:-translate-y-0.5 hover:shadow-[0_14px_40px_rgba(15,15,15,0.07)]">
+      <article className={`group flex gap-4 rounded-[1.6rem] border border-black/6 bg-white/90 p-4 shadow-[0_8px_24px_rgba(15,15,15,0.04)] transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_14px_40px_rgba(15,15,15,0.07)] border-l-2 ${getRegionBorderClass(item.region)}`}>
         {/* Optional thumbnail */}
         {hasImage ? (
           <div className="relative h-[72px] w-[96px] shrink-0 overflow-hidden rounded-[0.9rem] bg-zinc-100">
@@ -90,7 +97,7 @@ export function CompactNewsCard({ item, horizontal = true }: CompactNewsCardProp
 
   // Compact vertical (for denser layouts)
   return (
-    <article className="rounded-[1.4rem] border border-black/6 bg-white/90 p-4 shadow-[0_6px_18px_rgba(15,15,15,0.04)] transition duration-300 hover:-translate-y-0.5 hover:shadow-[0_12px_32px_rgba(15,15,15,0.07)]">
+    <article className={`rounded-[1.4rem] border border-black/6 bg-white/90 p-4 shadow-[0_6px_18px_rgba(15,15,15,0.04)] transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_12px_32px_rgba(15,15,15,0.07)] border-l-2 ${getRegionBorderClass(item.region)}`}>
       <div className="flex items-center gap-2">
         <VerificationDot status={item.verificationStatus} />
         <p className="font-mono text-[9px] uppercase tracking-[0.2em] text-zinc-400">

@@ -51,6 +51,18 @@ describe("jurisdiction legal database timeline", () => {
     expect(classifyTimelineAuthority(update({ developmentType: "Enforcement action", tags: ["court"] }))).toBe("case_law_and_decisions");
   });
 
+  it("does not treat authority-designation gaps as case-law decisions", () => {
+    expect(
+      classifyTimelineAuthority(
+        update({
+          developmentType: "Other official regulatory development",
+          authorityType: "Governance framework",
+          tags: ["authority-designation-gap", "country-baseline"],
+        }),
+      ),
+    ).toBe("soft_law");
+  });
+
   it("builds a local timeline from the central legal database", () => {
     const snapshot = buildJurisdictionLegalDatabaseSnapshot({
       jurisdiction: "New York",

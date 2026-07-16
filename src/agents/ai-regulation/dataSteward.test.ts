@@ -149,7 +149,11 @@ describe("data stewardship", () => {
     const diagnostics = buildEuropeCoverageDiagnostics(now);
     expect(diagnostics.some((entry) => entry.entityType === "country")).toBe(true);
     expect(diagnostics.some((entry) => entry.entityType === "timeline")).toBe(true);
-    expect(diagnostics.some((entry) => entry.sourceCount === 0)).toBe(true);
+    expect(
+      diagnostics
+        .filter((entry) => entry.entityType === "country")
+        .every((entry) => entry.sourceCount > 0),
+    ).toBe(true);
   });
 
   it("keeps every U.S. state and D.C. visible to coverage diagnostics", () => {
