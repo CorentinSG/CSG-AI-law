@@ -273,7 +273,9 @@ function buildRawItem(entry: DeepEntryDraft): RawRegulatoryItemInput {
       entryFamily: entry.family,
       sourceReferences: [sourceReferenceFor(entry.source, entry.profile)],
       officialSourceUrls: [entry.source.url],
-      publicationPolicy: "admin_review_required",
+      publicationPolicy: entry.source.official
+        ? "auto_publish_official_source"
+        : "admin_review_required",
       traceability: {
         sourceId: SOURCE_ID,
         sourceName: SOURCE_NAME,
@@ -342,10 +344,10 @@ function buildUpdate(entry: DeepEntryDraft, rawItemIdValue: string): RegulatoryU
       `authority:${entry.authorityType}`,
       `source-type:${entry.source.sourceType}`,
     ],
-    status: "needs_review",
-    reviewedBy: null,
-    reviewedAt: null,
-    publishedAt: null,
+    status: entry.source.official ? "published" : "needs_review",
+    reviewedBy: entry.source.official ? "system:auto-official-source" : null,
+    reviewedAt: entry.source.official ? DETECTED_AT : null,
+    publishedAt: entry.source.official ? DETECTED_AT : null,
   };
 }
 
