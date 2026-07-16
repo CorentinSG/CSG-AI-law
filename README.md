@@ -1665,6 +1665,38 @@ The admin UI marks these as:
 
 and the workflow blocks direct approval/publication from this source.
 
+### U.S. LOCUS local-law discovery corpus
+
+LOCUS-v1 may be registered as an optional external research corpus for U.S. local AI-law discovery only.
+
+- corpus: `LOCUS-v1`
+- URL: `https://huggingface.co/datasets/davidyinyan/LOCUS-v1`
+- scope: U.S. city/county/local ordinance discovery
+- authority level: research corpus, non-official
+- publication allowed: no
+- verified legal authority: no
+- full dataset import into the legal database: no
+
+LOCUS can be used to surface possible local-law leads involving:
+
+- facial recognition
+- automated decision systems
+- algorithmic decision-making
+- AI procurement
+- predictive policing
+- surveillance technology
+- biometric systems
+- automated license plate readers
+- autonomous delivery robots
+- smart city systems
+- tenant screening algorithms
+- employment screening algorithms
+- AI-infrastructure data centers
+
+LOCUS-derived hits must be stored only as admin-only discovery leads. A LOCUS lead must include corpus source, city/county, state, text excerpt, topic, confidence score, detected terms, LOCUS metadata, any candidate official municipal-code URL, verification status, citation quality, `requiresOfficialSource=true`, and `publicVisibilityAllowed=false`.
+
+LOCUS-derived leads must not be converted into verified legal database items unless an official municipal/county ordinance source is found, accessible, and verified against the LOCUS text; jurisdiction, date, citation, and pinpoint are verified; the provision is classified as AI-related; and admin review remains possible. LOCUS alone is never sufficient legal authority.
+
 As of the latest verification pass from the scan runtime:
 
 - `src-council-europe-ai` remains inactive because the official endpoint returned `403`
