@@ -247,6 +247,91 @@ describe("buildHealthSnapshot", () => {
     });
   });
 
+  it("reports an idle live worker from the persistent worker heartbeat sentinel", async () => {
+    mocks.updateRepository.getScanJobs.mockResolvedValueOnce([
+      makeJob({
+        id: "job-worker-heartbeat",
+        trigger: "worker_heartbeat",
+        requestedBy: "railway-worker-1",
+        status: "succeeded",
+        startedAt: "2026-06-18T09:00:00.000Z",
+        finishedAt: "2026-06-18T10:04:40.000Z",
+        updatedAt: "2026-06-18T10:04:40.000Z",
+        resultSummary: {
+          workerHeartbeatAt: "2026-06-18T10:04:40.000Z",
+          workerHeartbeatTimeoutMs: 90_000,
+          state: "idle",
+          workerId: "railway-worker-1",
+        },
+      }),
+      makeJob({
+        id: "job-old-scan",
+        status: "succeeded",
+        finishedAt: "2026-06-18T09:00:00.000Z",
+        updatedAt: "2026-06-18T09:00:00.000Z",
+        resultSummary: {
+          scanProfile: "official_legal_scan",
+        },
+      }),
+    ]);
+    const { buildHealthSnapshot } = await import("@/lib/health");
+
+    const snapshot = await buildHealthSnapshot({
+      access: "authenticated",
+      now: new Date("2026-06-18T10:05:00.000Z"),
+    });
+
+    expect(snapshot.worker).toMatchObject({
+      state: "idle",
+      alive: true,
+      heartbeatAt: "2026-06-18T10:04:40.000Z",
+      heartbeatAgeMs: 20_000,
+      lastActivityAt: "2026-06-18T10:04:40.000Z",
+      lastActivityAgeMs: 20_000,
+      runningJobs: 0,
+    });
+    expect(snapshot.scans.byProfile).toEqual({
+      official_legal_scan: {
+        newestSuccessfulScanAt: "2026-06-18T09:00:00.000Z",
+        newestSuccessfulScanAgeMs: 3_900_000,
+      },
+    });
+  });
+
+  it("does not treat a stopped worker heartbeat sentinel as alive", async () => {
+    mocks.updateRepository.getScanJobs.mockResolvedValueOnce([
+      makeJob({
+        id: "job-worker-heartbeat-stopped",
+        trigger: "worker_heartbeat",
+        requestedBy: "railway-worker-1",
+        status: "succeeded",
+        startedAt: "2026-06-18T09:00:00.000Z",
+        finishedAt: "2026-06-18T10:04:50.000Z",
+        updatedAt: "2026-06-18T10:04:50.000Z",
+        resultSummary: {
+          workerHeartbeatAt: "2026-06-18T10:04:50.000Z",
+          workerHeartbeatTimeoutMs: 90_000,
+          state: "stopped",
+          workerId: "railway-worker-1",
+        },
+      }),
+    ]);
+    const { buildHealthSnapshot } = await import("@/lib/health");
+
+    const snapshot = await buildHealthSnapshot({
+      access: "authenticated",
+      now: new Date("2026-06-18T10:05:00.000Z"),
+    });
+
+    expect(snapshot.worker).toMatchObject({
+      state: "unknown",
+      alive: false,
+      heartbeatAt: "2026-06-18T10:04:50.000Z",
+      heartbeatAgeMs: 10_000,
+      runningJobs: 0,
+    });
+  });
+
   it("does not treat a stale running lease as active or alive", async () => {
     mocks.updateRepository.getScanJobs.mockResolvedValueOnce([
       makeJob({

@@ -57,6 +57,7 @@ const MAX_RECENT_JOBS = 100;
 const MAX_REVIEW_ITEMS = 500;
 const RECENT_IDLE_WORKER_ACTIVITY_MS = 15 * 60 * 1000;
 const DEFAULT_WORKER_HEARTBEAT_TIMEOUT_MS = 45_000;
+const WORKER_HEARTBEAT_TRIGGER = "worker_heartbeat";
 
 function toTimestamp(value: string | null | undefined) {
   if (!value) return null;
@@ -82,6 +83,27 @@ function getExplicitScanProfile(job: ScanJob) {
 function getLeaseHeartbeatAt(job: ScanJob) {
   const value = job.resultSummary?.leaseHeartbeatAt;
   return typeof value === "string" ? value : null;
+}
+
+function isWorkerHeartbeatJob(job: ScanJob) {
+  return job.trigger === WORKER_HEARTBEAT_TRIGGER;
+}
+
+function getWorkerHeartbeatAt(job: ScanJob) {
+  const value = job.resultSummary?.workerHeartbeatAt;
+  return typeof value === "string" ? value : null;
+}
+
+function getWorkerHeartbeatState(job: ScanJob) {
+  const value = job.resultSummary?.state;
+  return typeof value === "string" ? value : null;
+}
+
+function getWorkerHeartbeatTimeoutMs(job: ScanJob) {
+  const value = job.resultSummary?.workerHeartbeatTimeoutMs;
+  return typeof value === "number" && Number.isFinite(value) && value > 0
+    ? value
+    : DEFAULT_WORKER_HEARTBEAT_TIMEOUT_MS;
 }
 
 function getLeaseHeartbeatTimeoutMs(job: ScanJob) {
@@ -153,8 +175,9 @@ function getCommitSha() {
 }
 
 function buildScanSummary(sources: RegulationSource[], jobs: ScanJob[], now: number) {
+  const realScanJobs = jobs.filter((job) => !isWorkerHeartbeatJob(job));
   const successfulSourceScans = sources.map((source) => source.lastSuccessfulScanAt);
-  const successfulJobFinishes = jobs
+  const successfulJobFinishes = realScanJobs
     .filter((job) => job.status === "succeeded")
     .map((job) => job.finishedAt);
   const newestSuccessfulScanAt = findNewestIso([
@@ -163,7 +186,7 @@ function buildScanSummary(sources: RegulationSource[], jobs: ScanJob[], now: num
   ]);
 
   const byProfile: HealthSnapshot["scans"]["byProfile"] = {};
-  for (const job of jobs) {
+  for (const job of realScanJobs) {
     if (job.status !== "succeeded") continue;
     const profile = getScanProfile(job);
     const existing = byProfile[profile]?.newestSuccessfulScanAt ?? null;
@@ -182,20 +205,48 @@ function buildScanSummary(sources: RegulationSource[], jobs: ScanJob[], now: num
 }
 
 function buildWorkerSummary(jobs: ScanJob[], now: number) {
-  const runningJobs = jobs.filter((job) => job.status === "running");
+  const workerHeartbeatJobs = jobs.filter(isWorkerHeartbeatJob);
+  const heartbeatJob = workerHeartbeatJobs
+    .map((job) => ({
+      job,
+      heartbeatAt: getWorkerHeartbeatAt(job) ?? job.updatedAt,
+      heartbeatTimeoutMs: getWorkerHeartbeatTimeoutMs(job),
+      state: getWorkerHeartbeatState(job),
+    }))
+    .sort(
+      (a, b) =>
+        (toTimestamp(b.heartbeatAt) ?? -Infinity) -
+        (toTimestamp(a.heartbeatAt) ?? -Infinity),
+    )[0];
+  const runningJobs = jobs.filter(
+    (job) => job.status === "running" && !isWorkerHeartbeatJob(job),
+  );
   const heartbeatAt = findNewestIso(runningJobs.map(getLeaseHeartbeatAt));
+  const workerHeartbeatAt = heartbeatJob?.heartbeatAt ?? null;
+  const workerHeartbeatAgeMs = ageMs(workerHeartbeatAt, now);
+  const heartbeatStateIsLive =
+    heartbeatJob?.state !== "stopped" && heartbeatJob?.state !== "failed";
+  const hasFreshWorkerHeartbeat =
+    heartbeatStateIsLive &&
+    workerHeartbeatAgeMs !== null &&
+    workerHeartbeatAgeMs <= (heartbeatJob?.heartbeatTimeoutMs ?? DEFAULT_WORKER_HEARTBEAT_TIMEOUT_MS);
   const activeRunningActivityAt = findNewestIso(
     runningJobs.map((job) => getRunningWorkerActivityAt(job, now)),
   );
   const finishedActivityAt = findNewestIso(
     jobs
-      .filter((job) => job.status !== "running")
+      .filter((job) => job.status !== "running" && !isWorkerHeartbeatJob(job))
       .map((job) => job.finishedAt),
   );
   const lastActivityAt = findNewestIso([activeRunningActivityAt, finishedActivityAt]);
+  const workerLastActivityAt = findNewestIso([workerHeartbeatAt, lastActivityAt]);
   const lastActivityAgeMs = ageMs(lastActivityAt, now);
   const state: HealthSnapshot["worker"]["state"] =
-    activeRunningActivityAt
+    hasFreshWorkerHeartbeat
+      ? runningJobs.length > 0
+        ? "active"
+        : "idle"
+      : activeRunningActivityAt
       ? "active"
       : lastActivityAt
         ? "idle"
@@ -203,14 +254,15 @@ function buildWorkerSummary(jobs: ScanJob[], now: number) {
   return {
     state,
     alive:
+      hasFreshWorkerHeartbeat ||
       state === "active" ||
       (state === "idle" &&
         lastActivityAgeMs !== null &&
         lastActivityAgeMs <= RECENT_IDLE_WORKER_ACTIVITY_MS),
-    heartbeatAgeMs: ageMs(heartbeatAt, now),
-    heartbeatAt,
-    lastActivityAgeMs,
-    lastActivityAt,
+    heartbeatAgeMs: ageMs(findNewestIso([heartbeatAt, workerHeartbeatAt]), now),
+    heartbeatAt: findNewestIso([heartbeatAt, workerHeartbeatAt]),
+    lastActivityAgeMs: ageMs(workerLastActivityAt, now),
+    lastActivityAt: workerLastActivityAt,
     runningJobs: runningJobs.length,
   };
 }
@@ -219,6 +271,7 @@ function buildCoverageSummary(jobs: ScanJob[]): HealthSnapshot["coverage"] {
   const newestJobByProfile = new Map<string, ScanJob>();
 
   for (const job of jobs) {
+    if (isWorkerHeartbeatJob(job)) continue;
     if (job.status !== "succeeded" && job.status !== "partial_success") {
       continue;
     }
