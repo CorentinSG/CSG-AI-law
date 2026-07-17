@@ -29,6 +29,7 @@
     "backfill:eu-depth-wave9": "tsx scripts/backfill-eu-depth-wave9.ts",
     "backfill:pilot-country-deep-entries": "tsx scripts/backfill-pilot-country-deep-entries.ts",
     "review:reduce-backlog": "tsx scripts/reduce-review-backlog.ts",
+    "ops:eu-monitoring-reliability": "tsx scripts/improve-eu-monitoring-reliability.ts",
     "scan:france-official-legal": "tsx scripts/run-france-official-legal-scan.ts",
     "scan:france-legal-news": "tsx scripts/run-france-legal-news-scan.ts",
     "scan:france-verification": "tsx scripts/run-france-verification-scan.ts",

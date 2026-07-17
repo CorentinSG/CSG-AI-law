@@ -979,7 +979,7 @@ export const regulationSourcesSeed: RegulationSource[] = [
     jurisdiction: "Spain",
     region: "Europe",
     country: "Spain",
-    sourceUrl: "https://www.aesia.gob.es/en",
+    sourceUrl: "https://aesia.digital.gob.es/en/es",
     sourceType: "static_page",
     scanFrequency: "weekly",
     active: true,
