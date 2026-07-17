@@ -111,7 +111,33 @@ Set `sourceVerificationStatus: "verified_official_sources_present"` and `missing
 
 `npm run seed:country-intelligence` upserted 27 country profiles and 136 country sources. `npm run ops:eu-monitoring-reliability -- --dry-run --limit=8` confirms Austria, Belgium, Bulgaria, Croatia, Cyprus, Czechia, Denmark, and Estonia all have `blockers: []`, `hasVerifiedProfile: true`, and `missingSourceWarnings: []`.
 
-### Task 4: Handoff
+### Task 4: Finland, Greece, Hungary, Latvia Source-Depth Upgrade
+
+**Files:**
+- Modify: `src/content/ai-regulation/europe-member-state-implementation.ts`
+- Test: `src/content/ai-regulation/europe-country-profiles.test.ts`
+
+**Interfaces:**
+- Consumes: `createMonitoredInstitutionProfile()`, `CountrySourceRecord`, `sourceReferenceFromCountrySource()`.
+- Produces: verified official-source country profiles with attached case-law monitoring anchors and AI Act implementation context.
+
+- [x] **Step 1: Add official sources**
+
+Added:
+- Finland: Finnish Government AI Act supervision press release and Finlex case-law/legal-information database.
+- Greece: Special Secretariat of AI/Data Governance resources and Areios Pagos/Supreme Court rulings anchor.
+- Hungary: NAIH EU digital legislation page with AI Act implementation designations and Curia case-law portal.
+- Latvia: eTiesas anonymised decisions database and Supreme Court case-law archive.
+
+- [x] **Step 2: Lift blockers where official-source baseline is sufficient**
+
+Set `sourceVerificationStatus: "verified_official_sources_present"` and `missingSourceWarnings: []` for Finland, Greece, Hungary, and Latvia. Hungary also records the NAIH-stated AI Act authority functions: National Economy Minister for market-supervision/single-contact-point tasks and National Accreditation Authority for notifying-authority tasks.
+
+- [x] **Step 3: Propagate to Supabase and verify readiness**
+
+`npm run seed:country-intelligence` upserted 27 country profiles and 144 country sources. `npm run ops:eu-monitoring-reliability -- --dry-run --limit=16` confirms AT/BE/BG/HR/CY/CZ/DK/EE/FI/GR/HU/LV all have `blockers: []`, `hasVerifiedProfile: true`, and `missingSourceWarnings: []`.
+
+### Task 5: Handoff
 
 **Files:**
 - Modify: `AI_TASKS.md`

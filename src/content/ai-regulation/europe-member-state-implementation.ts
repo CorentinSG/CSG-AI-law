@@ -1740,6 +1740,142 @@ const estonianCourtsJudicialDecisions: CountrySourceRecord = {
     "Official Estonian Courts page explaining that public judicial decisions are accessible through Riigi Teataja in administrative, misdemeanour, civil, and criminal cases after enforcement where publication restrictions do not apply.",
 };
 
+const finlandGovernmentAiSupervision: CountrySourceRecord = {
+  label: "Finnish Government press release on national AI Act supervision",
+  url: "https://valtioneuvosto.fi/en/-/1410877/national-supervision-of-eu-artificial-intelligence-act-to-begin-laws-on-powers-of-authorities-to-take-effect-at-start-of-the-year",
+  institution: "Finnish Government / Ministry of Economic Affairs and Employment",
+  sourceType: "government",
+  official: true,
+  public: true,
+  runtimeAccessible: true,
+  responseStatus: 200,
+  publicationDate: "2025-12-22",
+  lastCheckedDate: "2026-07-17T00:00:00.000Z",
+  parserStatus: "candidate_for_monitoring",
+  recommendation: "manual_review",
+  note:
+    "Official Finnish Government press release stating that acts regulating national authorities supervising the EU AI Act enter into force on 1 January 2026, and describing market-surveillance and fundamental-rights supervision roles.",
+};
+
+const finlandFinlexCaseLaw: CountrySourceRecord = {
+  label: "Finlex legal information and case-law database",
+  url: "https://www.finlex.fi/en",
+  institution: "Ministry of Justice of Finland / Legal Register Centre",
+  sourceType: "court",
+  official: true,
+  public: true,
+  runtimeAccessible: true,
+  responseStatus: 200,
+  publicationDate: null,
+  lastCheckedDate: "2026-07-17T00:00:00.000Z",
+  parserStatus: "candidate_for_monitoring",
+  recommendation: "manual_review",
+  note:
+    "Official Finnish legal-information database owned by the Ministry of Justice. Finlex includes case law from Finnish courts over several decades and is attached as Finland's national case-law monitoring source.",
+};
+
+const greeceAiGovResources: CountrySourceRecord = {
+  label: "Special Secretariat of Artificial Intelligence and Data Governance resources",
+  url: "https://ai.gov.gr/en/resources/",
+  institution: "Special Secretariat of Artificial Intelligence and Data Governance",
+  sourceType: "government",
+  official: true,
+  public: true,
+  runtimeAccessible: true,
+  responseStatus: 200,
+  publicationDate: null,
+  lastCheckedDate: "2026-07-17T00:00:00.000Z",
+  parserStatus: "candidate_for_monitoring",
+  recommendation: "manual_review",
+  note:
+    "Official Greek AI/Data Governance resources page listing EU digital legislation and national legislation relevant to AI and digital governance. It is an implementation-context source, not a final AI Act authority designation.",
+};
+
+const greeceAreiosPagosCaseLaw: CountrySourceRecord = {
+  label: "Areios Pagos Supreme Court of Greece rulings",
+  url: "https://www.areiospagos.gr/en/INDEX.htm",
+  institution: "Supreme Court of Greece",
+  sourceType: "court",
+  official: true,
+  public: true,
+  runtimeAccessible: true,
+  responseStatus: 200,
+  publicationDate: null,
+  lastCheckedDate: "2026-07-17T00:00:00.000Z",
+  parserStatus: "candidate_for_monitoring",
+  recommendation: "manual_review",
+  note:
+    "Official English landing page of the Supreme Court of Greece with links to court rulings and all rulings by year. Attached as a national case-law monitoring anchor pending deeper AI-specific decision selection.",
+};
+
+const hungaryNaihEuDigitalLegislation: CountrySourceRecord = {
+  label: "NAIH EU digital legislation page with AI Act implementation notes",
+  url: "https://www.naih.hu/data-protection/eu-digital-legislation",
+  institution: "Hungarian National Authority for Data Protection and Freedom of Information",
+  sourceType: "regulator",
+  official: true,
+  public: true,
+  runtimeAccessible: true,
+  responseStatus: 200,
+  publicationDate: null,
+  lastCheckedDate: "2026-07-17T00:00:00.000Z",
+  parserStatus: "candidate_for_monitoring",
+  recommendation: "manual_review",
+  note:
+    "Official NAIH page explaining Hungary's EU digital legislation implementation. It states that Act LXXV of 2025 and Government Decree 344/2025 establish the AI Act institutional framework, with the National Economy Minister as market-supervision authority and single contact point, and the National Accreditation Authority as notifying authority.",
+};
+
+const hungaryCuriaCaseLaw: CountrySourceRecord = {
+  label: "Curia of Hungary decisions and case-law information",
+  url: "https://kuria-birosag.hu/en",
+  institution: "Curia of Hungary",
+  sourceType: "court",
+  official: true,
+  public: true,
+  runtimeAccessible: true,
+  responseStatus: 200,
+  publicationDate: null,
+  lastCheckedDate: "2026-07-17T00:00:00.000Z",
+  parserStatus: "candidate_for_monitoring",
+  recommendation: "manual_review",
+  note:
+    "Official Curia of Hungary portal used as a national high-court/case-law monitoring anchor. A Curia press item describes the Collection of Court Decisions as an official database operated for Hungarian court decisions.",
+};
+
+const latviaETiesasCaseLaw: CountrySourceRecord = {
+  label: "Latvian courts eTiesas anonymised decisions database",
+  url: "https://manas.tiesas.lv/eTiesasMvc/nolemumi",
+  institution: "Latvian Courts",
+  sourceType: "court",
+  official: true,
+  public: true,
+  runtimeAccessible: true,
+  responseStatus: 200,
+  publicationDate: null,
+  lastCheckedDate: "2026-07-17T00:00:00.000Z",
+  parserStatus: "candidate_for_monitoring",
+  recommendation: "manual_review",
+  note:
+    "Official Latvian courts e-services page for selecting anonymised decisions, full decisions, and jurisprudence, including ECLI fields and court filters. Attached as Latvia's national case-law monitoring source.",
+};
+
+const latviaSupremeCourtCaseLawArchive: CountrySourceRecord = {
+  label: "Supreme Court of Latvia case-law decision archive",
+  url: "https://www.at.gov.lv/en/tiesu-prakse/judikaturas-nolemumu-arhivs",
+  institution: "Supreme Court of Latvia",
+  sourceType: "court",
+  official: true,
+  public: true,
+  runtimeAccessible: true,
+  responseStatus: 200,
+  publicationDate: null,
+  lastCheckedDate: "2026-07-17T00:00:00.000Z",
+  parserStatus: "manual_reference",
+  recommendation: "manual_review",
+  note:
+    "Official Supreme Court of Latvia case-law archive. The Supreme Court explains that Senate rulings can be found on the Supreme Court website and the Latvian courts portal.",
+};
+
 function createMonitoredInstitutionProfile(input: {
   countryCode: string;
   countryName: string;
@@ -2113,7 +2249,25 @@ const firstWaveProfiles: EuropeCountryProfile[] = [
     relevantMinistriesOrAgencies: [
       "Office of the Data Protection Ombudsman",
       "Finnish Transport and Communications Agency Traficom",
+      "Ministry of Economic Affairs and Employment",
     ],
+    additionalRegulationSources: [finlandGovernmentAiSupervision],
+    caseLawSources: [finlandFinlexCaseLaw],
+    implementationMeasures: [
+      "Finnish Government press release states that acts regulating national authorities supervising the EU AI Act enter into force on 1 January 2026.",
+    ],
+    sourceVerificationStatus: "verified_official_sources_present",
+    missingSourceWarnings: [],
+    nationalAIRegulationNotes:
+      "Finland has verified official AI Act implementation/supervision anchors through Traficom materials and the Finnish Government press release on national AI Act supervision. Final authority-by-authority mapping should remain tied to the enacted acts and detailed official authority materials.",
+    nationalCaseLawNotes:
+      "Finlex is attached as Finland's official legal-information and case-law database, covering decisions of Finnish courts over several decades. No Finnish AI Act-specific decision has been individually selected into this profile yet.",
+    editorialNotes: [
+      "The Finnish Government source verifies the national supervision framework entering into force on 1 January 2026, but the detailed authority matrix still needs pinpointing before public copy describes it as exhaustive.",
+      "No Finnish AI Act-specific case-law item has been selected yet; Finlex is attached as the national case-law monitoring source.",
+    ],
+    publicSummary:
+      "Finland is included with verified official AI Act supervision, Traficom, data-protection, and Finlex case-law anchors. The national supervision framework is tracked as entering into force on 1 January 2026, while detailed authority mapping remains under review.",
   }),
   createMonitoredInstitutionProfile({
     countryCode: "GR",
@@ -2128,7 +2282,20 @@ const firstWaveProfiles: EuropeCountryProfile[] = [
     relevantMinistriesOrAgencies: [
       "Hellenic Data Protection Authority",
       "General Secretariat of Legal and Parliamentary Affairs",
+      "Special Secretariat of Artificial Intelligence and Data Governance",
     ],
+    additionalRegulationSources: [greeceAiGovResources],
+    caseLawSources: [greeceAreiosPagosCaseLaw],
+    sourceVerificationStatus: "verified_official_sources_present",
+    missingSourceWarnings: [],
+    nationalCaseLawNotes:
+      "The Supreme Court of Greece rulings page is attached as a national case-law monitoring source. No Greek AI Act-specific decision has been individually selected into this profile yet.",
+    editorialNotes: [
+      "Greek AI/Data Governance resources and codification sources are verified official anchors, but no final AI Act competent-authority, market-surveillance, or notifying-authority designation has been verified from a binding national instrument.",
+      "No Greek AI Act-specific case-law item has been selected yet; Areios Pagos is attached as a high-court monitoring anchor.",
+    ],
+    publicSummary:
+      "Greece is included with verified official AI/Data Governance, codification, data-protection, and Supreme Court case-law anchors. Final AI Act authority designations remain under review.",
   }),
   createMonitoredInstitutionProfile({
     countryCode: "HU",
@@ -2144,7 +2311,30 @@ const firstWaveProfiles: EuropeCountryProfile[] = [
     relevantMinistriesOrAgencies: [
       "Hungarian National Authority for Data Protection and Freedom of Information",
       "National Legislation Database",
+      "National Economy Minister",
+      "National Accreditation Authority",
     ],
+    additionalRegulationSources: [hungaryNaihEuDigitalLegislation],
+    caseLawSources: [hungaryCuriaCaseLaw],
+    implementationMeasures: [
+      "NAIH states that Act LXXV of 2025 and Government Decree 344/2025 establish Hungary's AI Act institutional framework.",
+      "NAIH states that the National Economy Minister performs the AI Act market-supervision authority and single contact point tasks, and that the National Accreditation Authority performs notifying-authority tasks.",
+    ],
+    competentAuthorities: ["National Economy Minister"],
+    marketSurveillanceAuthorities: ["National Economy Minister"],
+    notifyingAuthorities: ["National Accreditation Authority"],
+    sourceVerificationStatus: "verified_official_sources_present",
+    missingSourceWarnings: [],
+    nationalAIRegulationNotes:
+      "Hungary has a verified official AI Act institutional-framework source through NAIH. Based on NAIH's summary of Act LXXV of 2025 and Government Decree 344/2025, the National Economy Minister is tracked for market-supervision/single-contact-point tasks and the National Accreditation Authority for notifying-authority tasks.",
+    nationalCaseLawNotes:
+      "The Curia of Hungary portal is attached as a national high-court/case-law monitoring anchor. No Hungarian AI Act-specific decision has been individually selected into this profile yet.",
+    editorialNotes: [
+      "Keep Hungarian authority labels tied to the NAIH source and underlying Act LXXV of 2025 / Government Decree 344/2025; do not expand them beyond the AI Act functions stated there.",
+      "No Hungarian AI Act-specific case-law item has been selected yet; the Curia portal is attached as the case-law monitoring source.",
+    ],
+    publicSummary:
+      "Hungary is included with verified official AI Act institutional-framework, legislation, data-protection, and case-law anchors. NAIH identifies the National Economy Minister for AI Act market-supervision/single-contact-point tasks and the National Accreditation Authority for notifying-authority tasks.",
   }),
   createMonitoredInstitutionProfile({
     countryCode: "LV",
@@ -2159,7 +2349,20 @@ const firstWaveProfiles: EuropeCountryProfile[] = [
     relevantMinistriesOrAgencies: [
       "Data State Inspectorate",
       "Official publisher of the Republic of Latvia",
+      "Latvian Courts",
+      "Supreme Court of Latvia",
     ],
+    caseLawSources: [latviaETiesasCaseLaw, latviaSupremeCourtCaseLawArchive],
+    sourceVerificationStatus: "verified_official_sources_present",
+    missingSourceWarnings: [],
+    nationalCaseLawNotes:
+      "Latvia's eTiesas anonymised decisions database and Supreme Court case-law archive are attached as national case-law monitoring anchors. No Latvian AI Act-specific decision has been individually selected into this profile yet.",
+    editorialNotes: [
+      "Latvia has verified legislation and case-law monitoring anchors, but no final AI Act competent-authority, market-surveillance, or notifying-authority designation has been verified from a binding national instrument.",
+      "No Latvian AI Act-specific case-law item has been selected yet; eTiesas and the Supreme Court archive are attached as monitoring sources.",
+    ],
+    publicSummary:
+      "Latvia is included with verified official legislation, data-protection, courts, and Supreme Court case-law anchors. Final AI Act authority designations remain under review.",
   }),
   createMonitoredInstitutionProfile({
     countryCode: "LT",
