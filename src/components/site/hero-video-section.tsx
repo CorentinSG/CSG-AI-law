@@ -25,15 +25,24 @@ export function HeroVideoSection({
         <ShaderAnimation />
       </div>
 
-      {/* Portrait — right 46%, full height */}
-      <div className="pointer-events-none absolute inset-y-0 right-0 z-[1] hidden w-[46%] lg:block">
+      {/* Portrait — right 38%, tucked below the nav so the menu bar stays clean.
+          The container itself is masked so the photo's rectangular crop
+          dissolves into the scene instead of being painted over with black
+          (which would occlude the shader and read as a seam). */}
+      <div
+        className="pointer-events-none absolute bottom-0 right-0 top-24 z-[1] hidden w-[38%] lg:block"
+        style={{
+          WebkitMaskImage:
+            "linear-gradient(to right, transparent 0%, black 32%), linear-gradient(to bottom, transparent 0%, black 22%, black 88%, transparent 100%)",
+          WebkitMaskComposite: "source-in",
+          maskImage:
+            "linear-gradient(to right, transparent 0%, black 32%), linear-gradient(to bottom, transparent 0%, black 22%, black 88%, transparent 100%)",
+          maskComposite: "intersect",
+        }}
+      >
         <ProfilePortrait priority large side className="h-full" />
-        {/* left fade — strong, covers shader seam */}
-        <div className="absolute inset-y-0 left-0 w-4/5 bg-gradient-to-r from-black via-black/65 to-transparent" />
-        {/* top fade */}
-        <div className="absolute inset-x-0 top-0 h-36 bg-gradient-to-b from-black to-transparent" />
-        {/* bottom fade */}
-        <div className="absolute inset-x-0 bottom-0 h-44 bg-gradient-to-t from-black to-transparent" />
+        {/* quiet darkening so the photo's light studio background sits in the theme */}
+        <div className="absolute inset-0 bg-black/35" />
       </div>
 
       {/* Foreground */}
