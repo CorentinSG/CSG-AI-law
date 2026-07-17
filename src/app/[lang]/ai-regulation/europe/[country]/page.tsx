@@ -28,6 +28,12 @@ import {
   getEuropeCountryProfiles,
 } from "@/content/ai-regulation/europe-country-profiles";
 import { BreadcrumbNav } from "@/components/site/breadcrumb-nav";
+import {
+  CountryConsoleHero,
+  CountryLedger,
+  GapRows,
+  SignalStrip,
+} from "@/components/site/country-console";
 import { HubScrollNav } from "@/components/site/hub-scroll-nav";
 import { ImplementationProgressBar } from "@/components/site/implementation-progress-bar";
 import { ConfidenceBadge, ImplementationBadge } from "@/components/site/legal-status-badge";
@@ -158,6 +164,9 @@ export default async function EuropeCountryPage({
     ]);
   const franceSnapshot =
     profile.slug === "france" ? getFranceAiIntelligenceSnapshot() : null;
+  // Country Console pilot (DESIGN.md §6): France runs the unified console
+  // layout; other countries keep the legacy layout until rollout.
+  const isCountryConsole = profile.slug === "france" && franceSnapshot !== null;
   const germanySnapshot =
     profile.slug === "germany" ? getGermanyAiIntelligenceSnapshot() : null;
   const spainSnapshot =
@@ -249,6 +258,29 @@ export default async function EuropeCountryPage({
             { label: profile.countryName, href: `/ai-regulation/europe/${profile.slug}` },
           ]}
         />
+        </MotionReveal>
+
+        {isCountryConsole && franceSnapshot ? (
+          <CountryConsoleHero
+            region="europe"
+            code="FR"
+            name={profile.countryName}
+            implementationStatus={profile.implementationStatus}
+            implementationConfidence={profile.implementationConfidence}
+            gaugeLabel="EU AI Act implementation"
+            lastReviewed={formatDisplayDate(profile.lastReviewedDate)}
+            stats={[
+              { value: franceLiveData?.items.length ?? 0, label: "Live signals" },
+              { value: franceSnapshot.authorityMap.length, label: "Authority signals" },
+              { value: franceSnapshot.verifiedDecisions.length, label: "Verified decisions" },
+              { value: countryUpdates.length, label: "Published entries" },
+            ]}
+          />
+        ) : null}
+
+        {!isCountryConsole ? (
+        <>
+        <MotionReveal>
         <div className="flex flex-wrap items-start gap-3">
           <SectionHeading
             eyebrow="Country profile"
@@ -327,6 +359,8 @@ export default async function EuropeCountryPage({
           </Card>
           </MotionStaggerItem>
         </MotionStagger>
+        </>
+        ) : null}
       </section>
 
       <HubScrollNav
@@ -1915,11 +1949,10 @@ export default async function EuropeCountryPage({
           <SectionHeading
             eyebrow="France live legal intelligence"
             title="Monitoring French AI law now"
-            description="This France-only panel surfaces recent official and reviewed French AI-law developments visible to the public layer, with dates, source attribution, and verification signals shown directly."
           />
           <LiveLegalIntelligencePanel
             title="France AI legal developments"
-            description="France live monitoring prioritises CNIL and other official French legal or institutional sources. The architecture is built for frequent refresh, but only lightweight approved sources should be treated as near-real-time candidates."
+            description="Official French sources — CNIL first — refreshed continuously."
             regionLabel="France"
             items={franceLiveData.items.map((entry) => entry.item)}
             lastCheckedAt={franceLiveData.lastCheckedAt}
@@ -1928,234 +1961,98 @@ export default async function EuropeCountryPage({
               franceLiveData.items.map((entry) => [entry.item.id, entry.currentness.freshnessLabel]),
             )}
           />
-          <Card className="rounded-[1.8rem] border-black/6 bg-white shadow-[0_14px_40px_rgba(15,15,15,0.04)]">
-            <CardContent className="grid gap-4 p-6 md:grid-cols-3">
-              <div>
-                <p className="font-mono text-[11px] uppercase tracking-[0.24em] text-zinc-500">
-                  Live target
-                </p>
-                <p className="mt-2 text-sm leading-7 text-zinc-700">
-                  {franceLiveData.schedulerGuidance.liveTarget}
-                </p>
-              </div>
-              <div>
-                <p className="font-mono text-[11px] uppercase tracking-[0.24em] text-zinc-500">
-                  Safe fallback
-                </p>
-                <p className="mt-2 text-sm leading-7 text-zinc-700">
-                  {franceLiveData.schedulerGuidance.safeFallback}
-                </p>
-              </div>
-              <div>
-                <p className="font-mono text-[11px] uppercase tracking-[0.24em] text-zinc-500">
-                  Monitoring note
-                </p>
-                <p className="mt-2 text-sm leading-7 text-zinc-700">
-                  CNIL is the current lightweight France live source. Heavier legal-text and judicial sources remain on a slower cadence to preserve source respect and parser reliability.
-                </p>
-              </div>
-            </CardContent>
-          </Card>
-          <div className="grid gap-4 md:grid-cols-4">
-            <IntelligenceSignal
-              label="Breaking"
-              value={String(franceLiveData.summary.breakingSignals)}
-              note="Very recent France legal signals that deserve immediate attention."
-              tone="positive"
-            />
-            <IntelligenceSignal
-              label="Current"
-              value={String(franceLiveData.summary.currentSignals)}
-              note="Recently published or detected France signals that still read as current."
-              tone="informative"
-            />
-            <IntelligenceSignal
-              label="High urgency"
-              value={String(franceLiveData.summary.highUrgencySignals)}
-              note="France items that combine legal weight with a strong need for prompt review."
-              tone="informative"
-            />
-            <IntelligenceSignal
-              label="Watch / stale"
-              value={String(
-                franceLiveData.summary.watchSignals + franceLiveData.summary.staleSignals,
-              )}
-              note="France signals that remain useful but should be refreshed, revisited, or deprioritised soon."
-              tone="warning"
-            />
-          </div>
-          <Card className="rounded-[1.8rem] border-black/6 bg-white shadow-[0_14px_40px_rgba(15,15,15,0.04)]">
-            <CardContent className="grid gap-4 p-6 md:grid-cols-3">
-              <div>
-                <p className="font-mono text-[11px] uppercase tracking-[0.24em] text-zinc-500">
-                  Official-like signals
-                </p>
-                <p className="mt-2 text-2xl text-zinc-950">{franceLiveData.summary.officialLike}</p>
-                <p className="mt-2 text-sm leading-7 text-zinc-700">
-                  Public France items backed by an official source or an official-like verification posture.
-                </p>
-              </div>
-              <div>
-                <p className="font-mono text-[11px] uppercase tracking-[0.24em] text-zinc-500">
-                  Hard law + decisions
-                </p>
-                <p className="mt-2 text-2xl text-zinc-950">
-                  {franceLiveData.summary.hardLawSignals +
-                    franceLiveData.summary.caseLawSignals +
-                    franceLiveData.summary.enforcementSignals}
-                </p>
-                <p className="mt-2 text-sm leading-7 text-zinc-700">
-                  These signals are the most likely to affect obligations, litigation posture, or enforcement expectations.
-                </p>
-              </div>
-              <div>
-                <p className="font-mono text-[11px] uppercase tracking-[0.24em] text-zinc-500">
-                  Awaiting official source
-                </p>
-                <p className="mt-2 text-2xl text-zinc-950">
-                  {franceLiveData.summary.awaitingOfficialSource}
-                </p>
-                <p className="mt-2 text-sm leading-7 text-zinc-700">
-                  Discovery or partially verified France signals remain clearly marked until stronger official confirmation is found.
-                </p>
-              </div>
-            </CardContent>
-          </Card>
+          <SignalStrip
+            primary={[
+              { value: franceLiveData.summary.breakingSignals, label: "Breaking", tone: "positive" },
+              { value: franceLiveData.summary.currentSignals, label: "Current" },
+              { value: franceLiveData.summary.highUrgencySignals, label: "High urgency" },
+              {
+                value: franceLiveData.summary.watchSignals + franceLiveData.summary.staleSignals,
+                label: "Watch / stale",
+                tone: "warn",
+              },
+            ]}
+            secondary={[
+              { value: franceLiveData.summary.officialLike, label: "official-source" },
+              {
+                value:
+                  franceLiveData.summary.hardLawSignals +
+                  franceLiveData.summary.caseLawSignals +
+                  franceLiveData.summary.enforcementSignals,
+                label: "hard law & decisions",
+              },
+              { value: franceLiveData.summary.awaitingOfficialSource, label: "awaiting official source" },
+            ]}
+          />
         </section>
       ) : null}
 
       {profile.slug === "france" && franceSnapshot ? (
-        <section className="space-y-6">
+        <section className="space-y-8">
           <SectionHeading
             eyebrow="France legal architecture"
-            title="What is settled, what is moving, and what still needs verification"
-            description="This France-only layer separates direct authority signals, verified decisions, current official milestones, and unresolved verification gaps so the legal posture stays readable."
+            title="Settled, moving, and to verify"
           />
           <div className="grid gap-6 lg:grid-cols-[1.08fr_0.92fr]">
-            <Card className="rounded-[1.9rem] border-black/6 bg-white shadow-[0_18px_50px_rgba(15,15,15,0.04)]">
-              <CardHeader>
-                <CardTitle>France authority map</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {franceSnapshot.authorityMap.map((entry) => (
-                  <div
-                    key={entry.id}
-                    className="rounded-[1.4rem] border border-black/6 bg-zinc-50/80 p-4"
-                  >
-                    <div className="flex flex-wrap items-center gap-2">
-                      <span className="rounded-full border border-black/8 bg-white px-2.5 py-1 text-[10px] uppercase tracking-[0.22em] text-zinc-700">
-                        {entry.category.replaceAll("_", " ")}
-                      </span>
-                      <span className="rounded-full border border-sky-200 bg-sky-50 px-2.5 py-1 text-[10px] uppercase tracking-[0.22em] text-sky-900">
-                        {entry.statusLabel.replaceAll("_", " ")}
-                      </span>
-                    </div>
-                    <p className="mt-3 font-medium text-zinc-950">{entry.title}</p>
-                    <p className="mt-2 text-sm leading-7 text-zinc-700">{entry.note}</p>
-                    <p className="mt-2 text-xs uppercase tracking-[0.2em] text-zinc-500">
-                      {entry.publicationDate ? formatDisplayDate(entry.publicationDate) : "Date under review"} / {entry.sourceLabel}
-                    </p>
-                    <a
-                      href={entry.sourceUrl}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="mt-2 block text-sm text-zinc-800 underline decoration-black/15 underline-offset-4"
-                    >
-                      Official source
-                    </a>
-                  </div>
-                ))}
-              </CardContent>
-            </Card>
-
-            <Card className="rounded-[1.9rem] border-black/6 bg-white shadow-[0_18px_50px_rgba(15,15,15,0.04)]">
-              <CardHeader>
-                <CardTitle>What still needs verification</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {franceSnapshot.verificationGaps.map((gap) => (
-                  <div
-                    key={gap.id}
-                    className="rounded-[1.4rem] border border-amber-200 bg-amber-50/80 p-4"
-                  >
-                    <p className="font-medium text-amber-950">{gap.title}</p>
-                    <p className="mt-1 text-xs uppercase tracking-[0.2em] text-amber-700">
-                      {gap.severity} priority
-                    </p>
-                    <p className="mt-2 text-sm leading-7 text-amber-900">{gap.note}</p>
-                  </div>
-                ))}
-              </CardContent>
-            </Card>
+            <div className="space-y-3">
+              <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-accent-strong">
+                Authority map
+              </p>
+              <CountryLedger
+                entries={franceSnapshot.authorityMap.map((entry) => ({
+                  id: entry.id,
+                  chips: [
+                    { label: entry.category.replaceAll("_", " ") },
+                    { label: entry.statusLabel.replaceAll("_", " "), tone: "info" as const },
+                  ],
+                  title: entry.title,
+                  note: entry.note,
+                  meta: `${entry.publicationDate ? formatDisplayDate(entry.publicationDate) : "Date under review"} · ${entry.sourceLabel}`,
+                  href: entry.sourceUrl,
+                }))}
+              />
+            </div>
+            <div className="space-y-3">
+              <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-amber-300">
+                Needs verification
+              </p>
+              <GapRows gaps={franceSnapshot.verificationGaps} />
+            </div>
           </div>
-
-          <div className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
-            <Card className="rounded-[1.9rem] border-black/6 bg-white shadow-[0_18px_50px_rgba(15,15,15,0.04)]">
-              <CardHeader>
-                <CardTitle>France AI legal timeline</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {franceSnapshot.timeline.map((entry) => (
-                  <div
-                    key={entry.id}
-                    className="rounded-[1.4rem] border border-black/6 bg-zinc-50/80 p-4"
-                  >
-                    <p className="text-xs uppercase tracking-[0.22em] text-zinc-500">
-                      {formatDisplayDate(entry.date)} / {entry.category.replaceAll("_", " ")}
-                    </p>
-                    <p className="mt-2 font-medium text-zinc-950">{entry.title}</p>
-                    <p className="mt-2 text-sm leading-7 text-zinc-700">{entry.note}</p>
-                    <p className="mt-2 text-xs uppercase tracking-[0.2em] text-zinc-500">
-                      {entry.sourceLabel}
-                    </p>
-                    <a
-                      href={entry.sourceUrl}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="mt-2 block text-sm text-zinc-800 underline decoration-black/15 underline-offset-4"
-                    >
-                      Official source
-                    </a>
-                  </div>
-                ))}
-              </CardContent>
-            </Card>
-
-            <Card className="rounded-[1.9rem] border-black/6 bg-white shadow-[0_18px_50px_rgba(15,15,15,0.04)]">
-              <CardHeader>
-                <CardTitle>Verified decisions and acts</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {franceSnapshot.verifiedDecisions.map((entry) => (
-                  <div
-                    key={entry.id}
-                    className="rounded-[1.4rem] border border-black/6 bg-zinc-50/80 p-4"
-                  >
-                    <div className="flex flex-wrap items-center gap-2">
-                      <span className="rounded-full border border-black/8 bg-white px-2.5 py-1 text-[10px] uppercase tracking-[0.22em] text-zinc-700">
-                        {entry.authorityType.replaceAll("_", " ")}
-                      </span>
-                      <span className="rounded-full border border-black/8 bg-white px-2.5 py-1 text-[10px] uppercase tracking-[0.22em] text-zinc-700">
-                        {entry.docketOrCaseNumber}
-                      </span>
-                    </div>
-                    <p className="mt-3 font-medium text-zinc-950">{entry.title}</p>
-                    <p className="mt-2 text-sm leading-7 text-zinc-700">{entry.shortSummary}</p>
-                    <p className="mt-2 text-xs uppercase tracking-[0.2em] text-zinc-500">
-                      {entry.courtOrAuthority} / {entry.date ? formatDisplayDate(entry.date) : "Date under review"}
-                    </p>
-                    <a
-                      href={entry.officialSourceUrl ?? "#"}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="mt-2 block text-sm text-zinc-800 underline decoration-black/15 underline-offset-4"
-                    >
-                      Official source
-                    </a>
-                  </div>
-                ))}
-              </CardContent>
-            </Card>
+          <div className="grid gap-6 lg:grid-cols-2">
+            <div className="space-y-3">
+              <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-accent-strong">
+                Legal timeline
+              </p>
+              <CountryLedger
+                entries={franceSnapshot.timeline.map((entry) => ({
+                  id: entry.id,
+                  chips: [{ label: entry.category.replaceAll("_", " ") }],
+                  title: entry.title,
+                  note: entry.note,
+                  meta: `${formatDisplayDate(entry.date)} · ${entry.sourceLabel}`,
+                  href: entry.sourceUrl,
+                }))}
+              />
+            </div>
+            <div className="space-y-3">
+              <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-accent-strong">
+                Verified decisions &amp; acts
+              </p>
+              <CountryLedger
+                entries={franceSnapshot.verifiedDecisions.map((entry) => ({
+                  id: entry.id,
+                  chips: [
+                    { label: entry.authorityType.replaceAll("_", " "), tone: "gold" as const },
+                    ...(entry.docketOrCaseNumber ? [{ label: entry.docketOrCaseNumber }] : []),
+                  ],
+                  title: entry.title,
+                  note: entry.shortSummary,
+                  meta: `${entry.courtOrAuthority} · ${entry.date ? formatDisplayDate(entry.date) : "Date under review"}`,
+                  href: entry.officialSourceUrl ?? undefined,
+                }))}
+              />
+            </div>
           </div>
         </section>
       ) : null}

@@ -175,7 +175,34 @@ A hybrid: the page is flat and matte; **glass panels** float above it with soft,
 ### Signature: The Sheen Surface
 A `premium-sheen` class sweeps a soft light band across a glass surface on hover (skewed, 0.85s ease-out, disabled under reduced-motion). Reserved for the few hero-level cards (AI Law Hub, primary entry points) — the one piece of "delight" the Quiet Terminal permits.
 
-## 6. Do's and Don'ts
+## 6. Country & State Pages — "The Country Console"
+
+Every jurisdiction page (EU country, U.S. state) uses one shared visual system.
+Only the data changes; the layout, components, and motion never do. These pages
+were historically the most text-saturated surfaces of the site — the principles
+below exist to keep them glanceable.
+
+### Principles
+1. **One glance = legal posture.** The hero is a console header: jurisdiction
+   roundel (mono code, regional tint), display name, the implementation gauge,
+   and 3–4 count-up stats. No introductory paragraph.
+2. **Numbers carry no essays.** Signal counts render as compact stat tiles —
+   number + worded label only. If a label needs a footnote to be understood,
+   rewrite the label, don't add the footnote.
+3. **No ops copy in public.** Scheduler cadence, fallbacks, parser notes, and
+   monitoring internals belong to the admin surface, never to country pages.
+4. **Rows, not cards-of-paragraphs.** Authority maps, timelines, and decisions
+   are animated ledger rows: category + worded-status chips, title, one mono
+   meta line (date · source), source arrow. Long notes are collapsed by
+   default and unfold on hover/focus.
+5. **Uniformity is the feature.** A reader who learned France can read Sweden.
+   New per-country content must fit the shared components — never a bespoke
+   layout per country.
+6. **Motion budget:** count-up stats, gauge sweep on load, staggered row
+   entrance, hover unfold, live pulse on the monitoring kicker. All with
+   reduced-motion fallbacks.
+
+## 7. Do's and Don'ts
 
 ### Do:
 - **Do** keep Signal Gold (`#9a6b1f`) to ≤10% of any screen — kickers, focus rings, a few marks.
