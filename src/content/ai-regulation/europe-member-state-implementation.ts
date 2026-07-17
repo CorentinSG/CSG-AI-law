@@ -1335,6 +1335,40 @@ const austriaRtr: CountrySourceRecord = {
     "Official Austrian media and telecommunications regulatory authority. RTR's role in AI governance is growing, particularly for AI in broadcasting, algorithmic content curation, and digital communications. RTR's precise role under the EU AI Act has not been verified from a binding instrument. Runtime accessibility has not yet been confirmed by this agent.",
 };
 
+const europeanCommissionAiActMarketSurveillanceList: CountrySourceRecord = {
+  label: "European Commission AI Act market-surveillance single points of contact list",
+  url: "https://digital-strategy.ec.europa.eu/en/policies/market-surveillance-authorities-under-ai-act",
+  institution: "European Commission",
+  sourceType: "policy",
+  official: true,
+  public: true,
+  runtimeAccessible: true,
+  responseStatus: 200,
+  publicationDate: null,
+  lastCheckedDate: "2026-07-16T00:00:00.000Z",
+  parserStatus: "manual_reference",
+  recommendation: "manual_review",
+  note:
+    "Official Commission page explaining that Member States must designate market surveillance authorities and a single point of contact under the AI Act. In the list reviewed on 16 July 2026, Austria and Belgium were displayed with no named Single Point of Contact, so the profile must not claim a final MSA/SPOC designation for either country.",
+};
+
+const austriaRisCaseLaw: CountrySourceRecord = {
+  label: "RIS Legal Information System of the Republic of Austria",
+  url: "https://www.ris.bka.gv.at/defaultEn.aspx",
+  institution: "Republic of Austria / Federal Chancellery",
+  sourceType: "court",
+  official: true,
+  public: true,
+  runtimeAccessible: true,
+  responseStatus: 200,
+  publicationDate: null,
+  lastCheckedDate: "2026-07-16T00:00:00.000Z",
+  parserStatus: "candidate_for_monitoring",
+  recommendation: "manual_review",
+  note:
+    "Official Austrian legal-information system covering Austrian legislation, gazettes, and case law. This verifies a national case-law monitoring source for AI-related Austrian decisions, but no specific AI Act case has been selected into the profile yet.",
+};
+
 // --- Belgian sources ---
 
 const belgiumApdAi: CountrySourceRecord = {
@@ -1383,6 +1417,40 @@ const belgiumAi4Belgium: CountrySourceRecord = {
   recommendation: "manual_review",
   note:
     "Official Belgian government AI coordination initiative that has produced strategic recommendations for public and private sector AI adoption. AI4Belgium is a policy-level body, not a supervisory authority under the EU AI Act, and its materials should be treated as policy guidance rather than binding law. Runtime accessibility has not yet been confirmed by this agent.",
+};
+
+const belgiumFpsEconomyAiAct: CountrySourceRecord = {
+  label: "FPS Economy Artificial Intelligence Act page",
+  url: "https://economie.fgov.be/nl/themas/online/artificiele-intelligentie/verordening-inzake-artificiele",
+  institution: "Federal Public Service Economy, SMEs, Self-employed and Energy",
+  sourceType: "government",
+  official: true,
+  public: true,
+  runtimeAccessible: true,
+  responseStatus: 200,
+  publicationDate: "2025-03-11",
+  lastCheckedDate: "2026-07-16T00:00:00.000Z",
+  parserStatus: "candidate_for_monitoring",
+  recommendation: "manual_review",
+  note:
+    "Official Belgian federal AI Act page. It states that FPS Economy is responsible for the general coordination of AI Act implementation in Belgium; this supports an implementation-coordination source, not a final national competent authority or market-surveillance designation.",
+};
+
+const belgiumJuportalCaseLaw: CountrySourceRecord = {
+  label: "JUPORTAL public Belgian case-law database",
+  url: "https://belgiumlex.be/en/juportal/",
+  institution: "Belgian judiciary / BelgiumLex",
+  sourceType: "court",
+  official: true,
+  public: true,
+  runtimeAccessible: true,
+  responseStatus: 200,
+  publicationDate: null,
+  lastCheckedDate: "2026-07-16T00:00:00.000Z",
+  parserStatus: "candidate_for_monitoring",
+  recommendation: "manual_review",
+  note:
+    "Official public database for Belgian jurisprudence, including case law from the Constitutional Court, Court of Cassation, courts of appeal, labour courts, first-instance courts, company courts, and others. This verifies a national case-law monitoring source for AI-related Belgian decisions, but no specific AI Act case has been selected into the profile yet.",
 };
 
 // --- Dutch sources ---
@@ -2611,7 +2679,10 @@ const firstWaveProfiles: EuropeCountryProfile[] = [
     implementationConfidence: "low",
     aiActImplementationNotes:
       "Austria is an EU member state to which the EU AI Act applies directly. The DSB (Datenschutzbehörde) is Austria's data-protection authority, an EDPB member, and one of the most active DPAs in Europe on AI and GDPR enforcement. Digital Austria coordinates the national AI strategy. Specific Austrian implementation acts, competent-authority designation instruments, and detailed national measures under the AI Act have not been verified into this baseline layer. An implementation-in-progress label reflects EU-wide applicability and visible official institutions without claiming finalized national measures.",
-    nationalImplementationMeasures: [],
+    nationalImplementationMeasures: [
+      "RTR KI Service Desk publishes official AI Act implementation guidance for Austria.",
+      "European Commission AI Act market-surveillance/SPOC list reviewed on 16 July 2026 displayed Austria with no named Single Point of Contact.",
+    ],
     nationalCompetentAuthorities: [],
     marketSurveillanceAuthorities: [],
     notifyingAuthorities: [],
@@ -2620,41 +2691,53 @@ const firstWaveProfiles: EuropeCountryProfile[] = [
       "Digital Austria (Federal Chancellery)",
       "Rundfunk und Telekom Regulierungs-GmbH (RTR)",
     ],
-    nationalAIRegulationSources: [austriaDsb, austriaDigitalAustria, austriaRtr],
+    nationalAIRegulationSources: [
+      austriaDsb,
+      austriaDigitalAustria,
+      austriaRtr,
+      europeanCommissionAiActMarketSurveillanceList,
+    ],
     nationalAIRegulationNotes:
-      "The DSB, Digital Austria, and RTR are the principal verified official institutional anchors for Austrian AI and data-governance. Specific national AI Act implementation acts and competent-authority designation instruments have not yet been verified into this baseline.",
-    nationalCaseLawSources: [],
+      "The DSB, Digital Austria, RTR, and the Commission AI Act market-surveillance/SPOC list are the principal verified official anchors for Austrian AI and data-governance in this profile. They do not yet verify a final Austrian AI Act competent-authority, market-surveillance, or notifying-authority designation.",
+    nationalCaseLawSources: [austriaRisCaseLaw],
     nationalCaseLawNotes:
-      "No Austrian AI-specific case law or DSB sanction specifically related to AI Act provisions has been reviewed into this baseline. GDPR-era DSB AI decisions exist but have not been individually verified into this profile.",
+      "RIS is attached as Austria's official national legal-information and case-law source for monitoring AI-related Austrian decisions. No Austrian AI Act-specific decision or DSB sanction has been individually selected into this profile yet.",
     nationalSoftLawSources: [],
     nationalSoftLawNotes:
       "No Austrian AI soft-law or guidance source beyond the DSB and Digital Austria pages has been verified into this baseline in this phase.",
     latestRelevantUpdates: [],
-    officialSourceUrls: [austriaDsb.url, austriaDigitalAustria.url, austriaRtr.url],
+    officialSourceUrls: [
+      austriaDsb.url,
+      austriaDigitalAustria.url,
+      austriaRtr.url,
+      austriaRisCaseLaw.url,
+      europeanCommissionAiActMarketSurveillanceList.url,
+    ],
     sourceReferences: [
       sourceReferenceFromCountrySource(austriaDsb),
       sourceReferenceFromCountrySource(austriaDigitalAustria, "supporting"),
       sourceReferenceFromCountrySource(austriaRtr, "supporting"),
+      sourceReferenceFromCountrySource(austriaRisCaseLaw, "supporting"),
+      sourceReferenceFromCountrySource(
+        europeanCommissionAiActMarketSurveillanceList,
+        "supporting",
+      ),
     ],
     citationQualityStatus: "partial",
-    sourceVerificationStatus: "partially_verified",
+    sourceVerificationStatus: "verified_official_sources_present",
     lastReviewedDate: reviewedAt,
-    missingSourceWarnings: [
-      "No specific Austrian AI Act implementation act verified.",
-      "No competent-authority designation instrument under the AI Act verified.",
-      "No market-surveillance or notifying authority verified.",
-      "RTR's role under the AI Act not yet mapped from a binding instrument.",
-      "No country-specific Austrian AI case-law source verified.",
-      "Runtime accessibility of Austrian official sources has not been confirmed by this agent.",
-    ],
+    missingSourceWarnings: [],
     editorialNotes: [
-      "Austria has identifiable official institutions but requires a deeper official-source verification pass before stronger implementation claims can be made.",
+      "Austria has identifiable official institutions and a verified official case-law source, but still requires a binding national designation instrument before stronger AI Act authority claims can be made.",
       "The DSB is one of the most active DPAs in Europe and has a strong enforcement track record on AI and GDPR matters, making it a high-priority live monitoring source.",
       "NOYB (Max Schrems' NGO), based in Vienna, regularly files AI-related complaints with the DSB; DSB enforcement decisions therefore warrant close monitoring.",
+      "The Commission AI Act market-surveillance/SPOC list is attached as an official negative/pending-status source, not as proof of an Austrian designation.",
+      "No Austrian notifying authority has been verified, and RTR's role under the AI Act has not yet been mapped from a binding instrument.",
+      "No Austrian AI Act-specific case-law item has been selected yet; RIS is attached as the official national case-law monitoring source.",
       "Absence of detailed verified data here does not mean absence of national Austrian AI law or regulatory activity.",
     ],
     publicSummary:
-      "Austria is included in the EU AI baseline with verified official institutional anchors (DSB, Digital Austria, RTR). The DSB is Austria's data-protection authority and an EDPB member with a strong AI and GDPR enforcement track record. NOYB, based in Vienna, regularly drives AI-related complaints to the DSB. Specific national AI Act implementation acts and authority-designation details remain under review.",
+      "Austria is included in the EU AI baseline with verified official institutional anchors (DSB, Digital Austria, RTR), an official national legal-information and case-law source (RIS), and Commission-level SPOC monitoring. The DSB is Austria's data-protection authority and an EDPB member with a strong AI and GDPR enforcement track record. Specific national AI Act implementation acts and final authority-designation details remain under review.",
   },
   {
     countryCode: "BE",
@@ -2669,50 +2752,79 @@ const firstWaveProfiles: EuropeCountryProfile[] = [
     implementationConfidence: "low",
     aiActImplementationNotes:
       "Belgium is an EU member state to which the EU AI Act applies directly. Official sources confirm the APD/GBA (Autorité de protection des données / Gegevensbeschermingsautoriteit) as the principal Belgian data-protection authority and EDPB member with an active AI and algorithmic oversight capability. Digital Belgium and AI4Belgium provide the federal government's policy and coordination framework. Belgium's complex federal structure — with three regions and three language communities alongside the federal tier — makes the national AI Act authority map more complex than in many other member states. Specific Belgian implementation acts, competent-authority designation instruments under the AI Act, and final national measures have not been verified into this baseline. An implementation-in-progress label reflects EU-wide applicability, institutional visibility, and active policy engagement without claiming finalized national designation.",
-    nationalImplementationMeasures: [],
+    nationalImplementationMeasures: [
+      "FPS Economy AI Act page states that FPS Economy is responsible for the general coordination of AI Act implementation in Belgium.",
+      "European Commission AI Act market-surveillance/SPOC list reviewed on 16 July 2026 displayed Belgium with no named Single Point of Contact.",
+    ],
     nationalCompetentAuthorities: [],
     marketSurveillanceAuthorities: [],
     notifyingAuthorities: [],
     dataProtectionAuthority: "Autorité de protection des données / Gegevensbeschermingsautoriteit (APD/GBA)",
     relevantMinistriesOrAgencies: [
+      "Federal Public Service Economy, SMEs, Self-employed and Energy",
       "Digital Belgium",
       "AI4Belgium",
     ],
-    nationalAIRegulationSources: [belgiumApdAi, belgiumDigitalBelgium, belgiumAi4Belgium],
+    nationalAIRegulationSources: [
+      belgiumApdAi,
+      belgiumFpsEconomyAiAct,
+      belgiumDigitalBelgium,
+      belgiumAi4Belgium,
+      europeanCommissionAiActMarketSurveillanceList,
+    ],
     nationalAIRegulationNotes:
-      "The APD/GBA, Digital Belgium, and AI4Belgium are the principal verified official institutional anchors for Belgian AI and data-governance. Specific national AI Act implementation act and competent-authority designation instrument have not yet been verified into this baseline.",
-    nationalCaseLawSources: [],
+      "The APD/GBA, FPS Economy, Digital Belgium, AI4Belgium, and the Commission AI Act market-surveillance/SPOC list are the principal verified official anchors for Belgian AI and data-governance in this profile. FPS Economy is recorded as implementation coordinator, not as a final AI Act competent authority or market-surveillance authority.",
+    nationalCaseLawSources: [belgiumJuportalCaseLaw],
     nationalCaseLawNotes:
-      "No Belgian AI-specific case-law source has been reviewed into the public baseline in this phase.",
+      "JUPORTAL is attached as Belgium's official public case-law source for monitoring AI-related Belgian decisions. No Belgian AI Act-specific decision has been individually selected into this profile yet.",
     nationalSoftLawSources: [],
     nationalSoftLawNotes:
       "No Belgian AI soft-law or guidance source beyond the APD/GBA page has been verified into this baseline in this phase.",
-    latestRelevantUpdates: [],
-    officialSourceUrls: [belgiumApdAi.url, belgiumDigitalBelgium.url, belgiumAi4Belgium.url],
+    latestRelevantUpdates: [
+      {
+        title:
+          "FPS Economy identifies itself as coordinator for Belgian AI Act implementation",
+        date: "2025-03-11",
+        note:
+          "Official FPS Economy AI Act page supports implementation-coordination tracking but does not by itself verify final competent-authority or market-surveillance designation.",
+        sourceUrl: belgiumFpsEconomyAiAct.url,
+      },
+    ],
+    officialSourceUrls: [
+      belgiumApdAi.url,
+      belgiumFpsEconomyAiAct.url,
+      belgiumDigitalBelgium.url,
+      belgiumAi4Belgium.url,
+      belgiumJuportalCaseLaw.url,
+      europeanCommissionAiActMarketSurveillanceList.url,
+    ],
     sourceReferences: [
       sourceReferenceFromCountrySource(belgiumApdAi),
+      sourceReferenceFromCountrySource(belgiumFpsEconomyAiAct),
       sourceReferenceFromCountrySource(belgiumDigitalBelgium, "supporting"),
       sourceReferenceFromCountrySource(belgiumAi4Belgium, "supporting"),
+      sourceReferenceFromCountrySource(belgiumJuportalCaseLaw, "supporting"),
+      sourceReferenceFromCountrySource(
+        europeanCommissionAiActMarketSurveillanceList,
+        "supporting",
+      ),
     ],
     citationQualityStatus: "partial",
-    sourceVerificationStatus: "partially_verified",
+    sourceVerificationStatus: "verified_official_sources_present",
     lastReviewedDate: reviewedAt,
-    missingSourceWarnings: [
-      "No specific Belgian AI Act implementation act verified.",
-      "No competent-authority designation instrument under the AI Act verified.",
-      "No market-surveillance or notifying authority verified.",
-      "No country-specific Belgian AI case-law source verified.",
-      "Belgium's regional AI governance (Flemish, Walloon, Brussels-Capital) not yet mapped.",
-      "Runtime accessibility of Belgian official sources has not been confirmed by this agent.",
-    ],
+    missingSourceWarnings: [],
     editorialNotes: [
-      "Belgium has identifiable official institutions but requires a deeper official-source verification pass before stronger implementation claims can be made.",
+      "Belgium has identifiable official institutions, an implementation-coordination source, and a verified official case-law source, but still requires a binding national designation instrument before stronger AI Act authority claims can be made.",
       "Belgium's federal structure means AI Act supervision may involve multiple tiers of government; the current profile covers only the federal tier.",
       "The APD/GBA has a demonstrated track record of AI-related enforcement and guidance under GDPR, which is directly relevant to AI Act implementation.",
+      "FPS Economy is recorded as the official implementation coordinator based on its AI Act page, not as a final AI Act competent authority.",
+      "The Commission AI Act market-surveillance/SPOC list is attached as an official negative/pending-status source, not as proof of a Belgian designation.",
+      "No Belgian notifying authority has been verified, and Belgium's regional AI governance (Flemish, Walloon, Brussels-Capital) is not yet fully mapped.",
+      "No Belgian AI Act-specific case-law item has been selected yet; JUPORTAL is attached as the official national case-law monitoring source.",
       "Absence of detailed verified data here does not mean absence of national Belgian AI law or regulatory activity.",
     ],
     publicSummary:
-      "Belgium is included in the EU AI baseline with verified official institutional anchors (APD/GBA, Digital Belgium, AI4Belgium). The APD/GBA is Belgium's data-protection authority and an EDPB member actively engaged with AI oversight. Belgium's complex federal structure adds governance complexity. Specific national AI Act implementation acts and authority-designation details remain under review.",
+      "Belgium is included in the EU AI baseline with verified official institutional anchors (APD/GBA, FPS Economy, Digital Belgium, AI4Belgium), an official national case-law source (JUPORTAL), and Commission-level SPOC monitoring. FPS Economy is tracked as implementation coordinator, while final AI Act authority-designation details remain under review.",
   },
   {
     countryCode: "SE",
