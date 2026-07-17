@@ -48,7 +48,7 @@ export const euManagerNeeds: RegionalManagerNeeds = {
     noAdminInterventionForOfficialSourcePublication: true,
     noAdminInterventionForSeriousOrCorroboratedLegalNews: true,
     missingCredentialEscalation:
-      "Escalate missing NEWSAPI_API_KEY, LEGIFRANCE_PISTE_CLIENT_ID/SECRET, or JUDILIBRE_API_KEYID only when the affected jurisdiction would materially benefit from that API.",
+      "Escalate missing NEWSAPI_API_KEY, PISTE OAuth credentials, or JUDILIBRE_API_KEYID only when the affected jurisdiction would materially benefit from that API.",
   },
   databaseInstructions: {
     centralBackendStore: "ai_regulatory_updates",

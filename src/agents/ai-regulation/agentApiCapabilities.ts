@@ -46,14 +46,37 @@ function getCourtListenerEnvVars(rawEnv: AgentApiCapabilityEnv) {
   return ["COURTLISTENER_API_KEY", "COURTLISTENER_API_TOKEN"];
 }
 
+function getJudilibreEnvVars(rawEnv: AgentApiCapabilityEnv) {
+  if (hasEnv("JUDILIBRE_API_KEYID", rawEnv)) return ["JUDILIBRE_API_KEYID"];
+  if (
+    hasAllEnv(
+      ["LEGIFRANCE_PISTE_CLIENT_ID", "LEGIFRANCE_PISTE_CLIENT_SECRET"],
+      rawEnv,
+    )
+  ) {
+    return ["LEGIFRANCE_PISTE_CLIENT_ID", "LEGIFRANCE_PISTE_CLIENT_SECRET"];
+  }
+  return [
+    "JUDILIBRE_API_KEYID",
+    "LEGIFRANCE_PISTE_CLIENT_ID",
+    "LEGIFRANCE_PISTE_CLIENT_SECRET",
+  ];
+}
+
 export function listAgentApiCapabilities(
   rawEnv: AgentApiCapabilityEnv = process.env,
 ): AgentApiCapability[] {
   const newsApiReady = hasEnv("NEWSAPI_API_KEY", rawEnv);
-  const judilibreReady = hasEnv("JUDILIBRE_API_KEYID", rawEnv);
+  const judilibreReady =
+    hasEnv("JUDILIBRE_API_KEYID", rawEnv) ||
+    hasAllEnv(
+      ["LEGIFRANCE_PISTE_CLIENT_ID", "LEGIFRANCE_PISTE_CLIENT_SECRET"],
+      rawEnv,
+    );
   const courtListenerReady =
     hasEnv("COURTLISTENER_API_KEY", rawEnv) || hasEnv("COURTLISTENER_API_TOKEN", rawEnv);
   const courtListenerEnvVars = getCourtListenerEnvVars(rawEnv);
+  const judilibreEnvVars = getJudilibreEnvVars(rawEnv);
   const firecrawlReady = hasEnv("FIRECRAWL_API_KEY", rawEnv);
   const scraplingReady = hasEnv("SCRAPLING_WORKER_URL", rawEnv);
   const legalDataHunterReady =
@@ -179,13 +202,13 @@ export function listAgentApiCapabilities(
       status: judilibreReady ? "available" : "needs_user_setup",
       uses: ["case_law_discovery", "official_legal_database", "source_health"],
       regions: ["Europe"],
-      envVars: ["JUDILIBRE_API_KEYID"],
+      envVars: judilibreEnvVars,
       implementedProvider: "judilibre",
       userAction: judilibreReady
         ? undefined
-        : "Request/configure a Judilibre API KeyId and set JUDILIBRE_API_KEYID to strengthen French case-law monitoring.",
+        : "Request/configure a Judilibre API KeyId or reuse PISTE OAuth credentials by setting LEGIFRANCE_PISTE_CLIENT_ID plus LEGIFRANCE_PISTE_CLIENT_SECRET.",
       notes:
-        "Official French case-law API. Use for decisions and jurisprudence; relevance and citation checks still apply.",
+        "Official French case-law API. Uses JUDILIBRE_API_KEYID when present, otherwise falls back to PISTE OAuth credentials; relevance and citation checks still apply.",
     }),
     enrich({
       id: "courtlistener-recap",

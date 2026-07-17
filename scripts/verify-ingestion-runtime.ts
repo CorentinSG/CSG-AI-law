@@ -25,6 +25,7 @@ const JUDILIBRE_PROBE_URL =
   "https://api.piste.gouv.fr/cassation/judilibre/v1.0/search?query=intelligence%20artificielle&page_size=1";
 const COURTLISTENER_PROBE_URL =
   "https://www.courtlistener.com/api/rest/v4/search/?q=%22artificial%20intelligence%22&type=o&order_by=dateFiled%20desc";
+const PISTE_OAUTH_TOKEN_URL = "https://oauth.piste.gouv.fr/api/oauth/token";
 const MIN_FIRECRAWL_MARKDOWN_CHARS = 40;
 const MIN_FIRECRAWL_DISTINCT_CONTENT_CHARS = 20;
 
@@ -190,11 +191,45 @@ async function verifyNewsApi(): Promise<ProviderProbeResult> {
 }
 
 async function verifyJudilibre(): Promise<ProviderProbeResult> {
-  return runConfiguredProbe("judilibre", Boolean(process.env.JUDILIBRE_API_KEYID?.trim()), async () => {
+  const keyId = process.env.JUDILIBRE_API_KEYID?.trim();
+  const pisteClientId = process.env.LEGIFRANCE_PISTE_CLIENT_ID?.trim();
+  const pisteClientSecret = process.env.LEGIFRANCE_PISTE_CLIENT_SECRET?.trim();
+  const configured = Boolean(keyId || (pisteClientId && pisteClientSecret));
+
+  return runConfiguredProbe("judilibre", configured, async () => {
+    let headers: HeadersInit;
+    if (keyId) {
+      headers = { KeyId: keyId };
+    } else {
+      const tokenResponse = await fetch(PISTE_OAUTH_TOKEN_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+          Accept: "application/json",
+        },
+        body: new URLSearchParams({
+          grant_type: "client_credentials",
+          client_id: pisteClientId!,
+          client_secret: pisteClientSecret!,
+          scope: "openid",
+        }),
+        signal: AbortSignal.timeout(15_000),
+      });
+
+      if (!tokenResponse.ok) {
+        throw new Error(`PISTE OAuth HTTP ${tokenResponse.status}`);
+      }
+
+      const tokenJson = (await tokenResponse.json()) as { access_token?: string };
+      if (!tokenJson.access_token) {
+        throw new Error("PISTE OAuth response did not include an access token");
+      }
+
+      headers = { Authorization: `Bearer ${tokenJson.access_token}` };
+    }
+
     const response = await fetch(JUDILIBRE_PROBE_URL, {
-      headers: {
-        KeyId: process.env.JUDILIBRE_API_KEYID!,
-      },
+      headers,
       signal: AbortSignal.timeout(15_000),
     });
 

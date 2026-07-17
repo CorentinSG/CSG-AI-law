@@ -375,7 +375,7 @@ France live API layer now also includes first-class connector support for:
 Current operational posture:
 
 - `CNIL RSS` remains the strongest lightweight official France live source
-- `Judilibre API` is implemented as an official case-law connector, but it requires a configured `JUDILIBRE_API_KEYID`
+- `Judilibre API` is implemented as an official case-law connector; it uses `JUDILIBRE_API_KEYID` when present, or falls back to the same `LEGIFRANCE_PISTE_CLIENT_ID` / `LEGIFRANCE_PISTE_CLIENT_SECRET` OAuth credentials used for PISTE-backed Legifrance
 - `NewsAPI` is implemented as a fast discovery connector, but it requires a configured `NEWSAPI_API_KEY`
 - `France AI legal major press (NewsAPI)` is implemented as a dedicated metadata-only discovery lane restricted to large newspaper and policy-press domains
 - `GDELT` is implemented as a fast discovery connector and can be queried without credentials, but runtime rate limiting may occur and must be surfaced honestly

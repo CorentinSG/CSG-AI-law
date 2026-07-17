@@ -186,7 +186,7 @@ describe("ApiConnector", () => {
   it("maps Judilibre decisions when a KeyId is available", async () => {
     process.env.JUDILIBRE_API_KEYID = "test-key-id";
     resetEnvForTests();
-    vi.spyOn(globalThis, "fetch").mockResolvedValue(
+    const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue(
       new Response(
         JSON.stringify({
           results: [
@@ -220,6 +220,59 @@ describe("ApiConnector", () => {
 
     expect(result.items).toHaveLength(1);
     expect(result.items[0]?.metadata?.number).toBe("24-10.001");
+    const headers = fetchMock.mock.calls[0]?.[1]?.headers as Headers;
+    expect(headers.get("KeyId")).toBe("test-key-id");
+  });
+
+  it("maps Judilibre decisions with PISTE OAuth credentials when a KeyId is absent", async () => {
+    process.env.LEGIFRANCE_PISTE_CLIENT_ID = "test-client";
+    process.env.LEGIFRANCE_PISTE_CLIENT_SECRET = "test-secret";
+    resetEnvForTests();
+    const fetchMock = vi
+      .spyOn(globalThis, "fetch")
+      .mockResolvedValueOnce(
+        new Response(JSON.stringify({ access_token: "test-token" }), {
+          status: 200,
+          headers: { "Content-Type": "application/json" },
+        }),
+      )
+      .mockResolvedValueOnce(
+        new Response(
+          JSON.stringify({
+            results: [
+              {
+                id: "decision-1",
+                title: "Decision relative a l'intelligence artificielle",
+                summary: "Resume de la decision.",
+                number: "24-10.001",
+                formation: "Chambre sociale",
+                jurisdiction: "Cour de cassation",
+                date: "2026-05-20",
+                files: [{ type: "text/html", url: "https://example.test/decision-1" }],
+              },
+            ],
+          }),
+          { status: 200, headers: { "Content-Type": "application/json" } },
+        ),
+      );
+
+    const connector = new ApiConnector();
+    const result = await connector.scan(
+      makeSource({
+        id: "src-fr-judilibre-ai",
+        name: "Judilibre AI-related decisions",
+        sourceUrl:
+          "https://api.piste.gouv.fr/cassation/judilibre/v1.0/search?query=intelligence%20artificielle",
+        config: { apiProvider: "judilibre" },
+        sourceType: "court_database",
+      }),
+    );
+
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    const headers = fetchMock.mock.calls[1]?.[1]?.headers as Headers;
+    expect(headers.get("Authorization")).toBe("Bearer test-token");
+    expect(result.items).toHaveLength(1);
+    expect(result.items[0]?.metadata?.provider).toBe("judilibre");
   });
 
   it("returns a non-fatal warning when Judilibre rejects the request", async () => {

@@ -14,6 +14,8 @@ Last synchronized: 2026-06-20 (Cowork A–F hardening: HTTP security headers, ti
 - **Graphify graph**: 3270 nodes / 8562 edges / 192 LLM-named communities; auto-rebuild via git hooks (post-commit, post-checkout); query via `graphify`/`py -m graphify`; graph stored in `graphify-out/` (gitignored)
 - **T-OPS9-UX**: WIP on `ops/t-ops9-ux` — Spline dead-deps removal + not-found.tsx + loading.tsx skeletons pending
 
+- **2026-07-16 ops note**: CourtListener token is configured on Vercel/Railway main worker. PISTE credentials are configured too; Judilibre now accepts either direct `JUDILIBRE_API_KEYID` or PISTE OAuth fallback through `LEGIFRANCE_PISTE_CLIENT_ID/SECRET`. Do not print secrets in docs or handoffs.
+
 **Previous state (2026-06-10, preserved for reference):**
 - Test suite: 402 tests | lint | typecheck | build — all green
 - **Production deployment**: site live at https://csg-ai-law.vercel.app — GitHub repo CorentinSG/CSG-AI-law (private); Vercel project csg-ai-law; Framework Preset: Next.js; env vars set: APP_DATA_MODE=supabase, NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY, SUPABASE_SERVICE_ROLE_KEY, ADMIN_AUTH_SECRET, CRON_SECRET, INGESTION_SECRET, FIRECRAWL_API_KEY, AI_ENABLE_PROCESSING=false; SCRAPLING_WORKER_URL not yet set

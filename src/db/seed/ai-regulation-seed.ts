@@ -758,7 +758,7 @@ export const regulationSourcesSeed: RegulationSource[] = [
     active: true,
     lastScannedAt: "2026-05-23T10:15:00.000Z",
     notes:
-      "Official Judilibre API search for French judicial decisions related to artificial intelligence. Access requires prior PISTE enrollment and a KeyId header; if credentials are absent, the connector must report the limitation honestly.",
+      "Official Judilibre API search for French judicial decisions related to artificial intelligence. Access requires prior PISTE enrollment; the connector prefers a direct KeyId when present and otherwise uses PISTE OAuth credentials. If credentials are absent, the connector must report the limitation honestly.",
     reliabilityLevel: "high",
     preferredExtractionMethod: "api",
     config: {

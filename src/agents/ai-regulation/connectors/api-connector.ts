@@ -563,17 +563,25 @@ async function scanGdelt(source: RegulationSource): Promise<ConnectorScanResult>
 }
 
 async function scanJudilibre(source: RegulationSource): Promise<ConnectorScanResult> {
-  if (!env.JUDILIBRE_API_KEYID) {
+  const keyId = env.JUDILIBRE_API_KEYID;
+  const pisteClientId = env.LEGIFRANCE_PISTE_CLIENT_ID;
+  const pisteClientSecret = env.LEGIFRANCE_PISTE_CLIENT_SECRET;
+
+  if (!keyId && (!pisteClientId || !pisteClientSecret)) {
     return buildMissingCredentialResult(
-      "JUDILIBRE_API_KEYID is not configured, so the Judilibre API cannot be queried from this runtime.",
+      "Judilibre credentials are not configured. Set JUDILIBRE_API_KEYID or LEGIFRANCE_PISTE_CLIENT_ID/SECRET so the official Judilibre API can be queried from this runtime.",
     );
   }
 
   let response: Response;
   let json: unknown;
   try {
+    const headers: Record<string, string> = keyId
+      ? { KeyId: keyId }
+      : { Authorization: `Bearer ${await fetchPisteAccessToken(pisteClientId!, pisteClientSecret!)}` };
     const result = await requestJson<JudilibreResponse>(source, {
-      KeyId: env.JUDILIBRE_API_KEYID,
+      ...headers,
+      Accept: "application/json",
     });
     if (result.notModified) {
       return {

@@ -56,7 +56,11 @@ describe("agent API capabilities", () => {
         expect.objectContaining({
           id: "judilibre-api",
           status: "needs_user_setup",
-          envVars: ["JUDILIBRE_API_KEYID"],
+          envVars: [
+            "JUDILIBRE_API_KEYID",
+            "LEGIFRANCE_PISTE_CLIENT_ID",
+            "LEGIFRANCE_PISTE_CLIENT_SECRET",
+          ],
         }),
         expect.objectContaining({
           id: "legal-data-hunter",
@@ -119,6 +123,32 @@ describe("agent API capabilities", () => {
 
     expect(capability?.status).toBe("available");
     expect(capability?.configuredEnvVars).toEqual(["COURTLISTENER_API_TOKEN"]);
+    expect(capability?.missingEnvVars).toEqual([]);
+  });
+
+  it("accepts PISTE OAuth credentials for Judilibre when a KeyId is absent", () => {
+    const capability = listAgentApiCapabilities({
+      LEGIFRANCE_PISTE_CLIENT_ID: "client-id",
+      LEGIFRANCE_PISTE_CLIENT_SECRET: "client-secret",
+    }).find((item) => item.id === "judilibre-api");
+
+    expect(capability?.status).toBe("available");
+    expect(capability?.configuredEnvVars).toEqual([
+      "LEGIFRANCE_PISTE_CLIENT_ID",
+      "LEGIFRANCE_PISTE_CLIENT_SECRET",
+    ]);
+    expect(capability?.missingEnvVars).toEqual([]);
+  });
+
+  it("keeps Judilibre KeyId as the preferred direct credential when both modes exist", () => {
+    const capability = listAgentApiCapabilities({
+      JUDILIBRE_API_KEYID: "judilibre-key",
+      LEGIFRANCE_PISTE_CLIENT_ID: "client-id",
+      LEGIFRANCE_PISTE_CLIENT_SECRET: "client-secret",
+    }).find((item) => item.id === "judilibre-api");
+
+    expect(capability?.status).toBe("available");
+    expect(capability?.configuredEnvVars).toEqual(["JUDILIBRE_API_KEYID"]);
     expect(capability?.missingEnvVars).toEqual([]);
   });
 
