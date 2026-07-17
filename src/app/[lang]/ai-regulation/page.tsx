@@ -240,11 +240,11 @@ export default async function AiRegulationPage({
             )}
           </section>
 
-          {/* --- Section 2: Region portals — Europe + US --- */}
+          {/* --- Section 2: Region portals — two territories + the transnational layer --- */}
           <section className="space-y-4">
             <SectionHeading
               eyebrow="Regional intelligence"
-              title="Europe, United States, and International"
+              title="Two territories, one transnational layer"
             />
             <MotionStagger className="grid gap-5 lg:grid-cols-3" stagger={0.12}>
               <MotionStaggerItem>
@@ -277,15 +277,15 @@ export default async function AiRegulationPage({
                 <RegionPortalCard
                   region="international"
                   title="International"
+                  kickerLabel="Transnational layer"
                   description="ISO/IEC, OECD, UNESCO, IEEE, and cross-border AI governance instruments."
                   href="/ai-regulation/international"
                   liveLabel="International news"
                   liveCount={internationalNewsCount}
                   dbCount={internationalDatabaseCount}
-                  highlights={internationalAiStandardsBaseline.map((entry) => ({
-                    label: entry.institution,
-                    href: "/standards",
-                  }))}
+                  highlights={[...new Set(internationalAiStandardsBaseline.map((e) => e.institution))].map(
+                    (institution) => ({ label: institution, href: "/standards" }),
+                  )}
                   isLive
                 />
               </MotionStaggerItem>
