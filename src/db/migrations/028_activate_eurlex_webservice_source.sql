@@ -41,7 +41,7 @@ insert into public.regulation_sources (
   '{
     "apiProvider": "eurlex",
     "expertQuery": "TI ~ \"artificial intelligence\" OR TI ~ \"AI Act\" OR TE ~ \"artificial intelligence\" OR TE ~ \"AI Act\" OR TE ~ \"biometric identification\"",
-    "searchLanguage": "EN",
+    "searchLanguage": "en",
     "maxItems": 12,
     "authorityTypeHint": "Official EU legal database",
     "editorialNotes": [

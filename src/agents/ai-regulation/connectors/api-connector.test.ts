@@ -479,6 +479,7 @@ describe("ApiConnector", () => {
       'PasswordText">test-password</wsse:Password>',
     );
     expect(String(requestInit?.body)).toContain("<elx:expertQuery>TI=&quot;AI Act&quot;</elx:expertQuery>");
+    expect(String(requestInit?.body)).toContain("<elx:searchLanguage>en</elx:searchLanguage>");
     expect(String(requestInit?.body)).toContain("<elx:excludeAllConsleg>true</elx:excludeAllConsleg>");
     expect(String(requestInit?.body)).toContain("<elx:limitToLatestConsleg>false</elx:limitToLatestConsleg>");
     expect(result.items).toHaveLength(1);

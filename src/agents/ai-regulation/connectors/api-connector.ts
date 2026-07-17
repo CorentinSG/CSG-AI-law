@@ -577,9 +577,9 @@ function getEurLexQuery(source: RegulationSource) {
 function getEurLexSearchLanguage(source: RegulationSource) {
   const configured = source.config?.searchLanguage ?? source.config?.language;
   if (typeof configured === "string" && /^[A-Z]{2}$/i.test(configured)) {
-    return configured.toUpperCase();
+    return configured.toLowerCase();
   }
-  return "EN";
+  return "en";
 }
 
 function buildEurLexSoapEnvelope(input: {
