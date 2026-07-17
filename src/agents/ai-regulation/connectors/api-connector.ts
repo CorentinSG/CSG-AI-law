@@ -658,6 +658,17 @@ function buildEurLexUrl(reference: string | null, resultXml: string, source: Reg
   return source.sourceUrl;
 }
 
+function extractEurLexFault(xml: string) {
+  return (
+    firstXmlElementText(xml, "faultstring") ??
+    firstXmlElementText(xml, "Reason") ??
+    firstXmlElementText(xml, "Text") ??
+    firstXmlElementText(xml, "message") ??
+    firstXmlElementText(xml, "Fault") ??
+    null
+  );
+}
+
 async function scanEurLex(source: RegulationSource): Promise<ConnectorScanResult> {
   if (!env.EURLEX_USERNAME || !env.EURLEX_PASSWORD) {
     return buildMissingCredentialResult(
@@ -688,12 +699,17 @@ async function scanEurLex(source: RegulationSource): Promise<ConnectorScanResult
       next: { revalidate: 0 },
     });
     xml = await response.text();
-    if (!response.ok) {
-      throw new Error(`EUR-Lex SOAP request failed with ${response.status}`);
-    }
-    const fault = firstXmlElementText(xml, "Fault") ?? firstXmlElementText(xml, "faultstring");
+    const fault = extractEurLexFault(xml);
     if (fault) {
       throw new Error(`EUR-Lex SOAP fault: ${fault}`);
+    }
+    if (!response.ok) {
+      const responseHint = stripXmlTags(xml).slice(0, 280);
+      throw new Error(
+        `EUR-Lex SOAP request failed with ${response.status}${
+          responseHint ? `: ${responseHint}` : ""
+        }`,
+      );
     }
   } catch (error) {
     const message = error instanceof Error ? error.message : "EUR-Lex SOAP request failed";
