@@ -1,9 +1,12 @@
 import Link from "next/link";
+import { ArrowUpRight } from "lucide-react";
 
 interface RegionPortalCardProps {
   region: "europe" | "united-states" | "international";
   title: string;
-  description: string;
+  /** Kept in the API for callers, but no longer rendered — the card stays
+   *  minimal: kicker, title, one stat line, a few chips. */
+  description?: string;
   href: string;
   liveLabel?: string;
   liveCount?: number;
@@ -36,80 +39,68 @@ const regionAccent = {
 export function RegionPortalCard({
   region,
   title,
-  description,
   href,
-  liveLabel,
   liveCount,
   dbCount,
   highlights,
   isLive = true,
   kickerLabel,
 }: RegionPortalCardProps) {
+  const stats = [
+    liveCount !== undefined ? `${liveCount} news` : null,
+    dbCount !== undefined ? `${dbCount} entries` : null,
+  ].filter(Boolean);
+
   return (
     <Link
       href={href}
-      className={`group block rounded-[2.2rem] border border-black/6 p-7 shadow-[0_22px_60px_rgba(15,15,15,0.05)] transition duration-300 hover:-translate-y-0.5 hover:shadow-[0_30px_80px_rgba(15,15,15,0.08)] ${regionGradients[region]}`}
+      className={`group flex h-full flex-col gap-5 rounded-[2.2rem] border border-white/10 p-7 transition duration-300 hover:-translate-y-1 hover:border-white/20 hover:shadow-[0_30px_80px_rgba(0,0,0,0.45)] ${regionGradients[region]}`}
     >
-      {/* Header */}
-      <div className="flex items-start justify-between gap-4">
-        <div className="space-y-2">
-          <div className="flex items-center gap-2">
-            {isLive ? (
-              <span className="relative flex h-2.5 w-2.5">
-                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-60" />
-                <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-emerald-500" />
-              </span>
-            ) : null}
-            <p className={`font-mono text-[10px] uppercase tracking-[0.28em] ${regionAccent[region]}`}>
-              {kickerLabel ?? (isLive ? "Live monitoring" : "Monitoring")}
-            </p>
-          </div>
-          <p className="font-display text-2xl font-medium uppercase tracking-[-0.04em] text-zinc-950 md:text-3xl">
-            {title}
+      {/* Kicker + trailing arrow */}
+      <div className="flex items-center justify-between gap-4">
+        <div className="flex items-center gap-2">
+          {isLive ? (
+            <span className="relative flex h-2 w-2">
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-60" />
+              <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
+            </span>
+          ) : null}
+          <p className={`font-mono text-[10px] uppercase tracking-[0.28em] ${regionAccent[region]}`}>
+            {kickerLabel ?? (isLive ? "Live monitoring" : "Monitoring")}
           </p>
         </div>
-        <span className="mt-1 shrink-0 rounded-full border border-black/8 bg-white px-3 py-1.5 text-xs uppercase tracking-[0.14em] text-zinc-600 transition group-hover:border-black/15 group-hover:bg-zinc-50">
-          Open hub →
-        </span>
+        <ArrowUpRight
+          aria-hidden
+          className="size-4 shrink-0 text-white/25 transition-all duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:text-white/70"
+        />
       </div>
 
-      {/* Description */}
-      <p className="mt-4 text-sm leading-7 text-zinc-700">{description}</p>
-
-      {/* Stats */}
-      <div className="mt-5 flex flex-wrap gap-3">
-        {liveCount !== undefined ? (
-          <div className="rounded-[1.2rem] border border-black/6 bg-white/80 px-4 py-2.5">
-            <p className="font-mono text-[9px] uppercase tracking-[0.24em] text-zinc-500">
-              {liveLabel ?? "Legal news"}
-            </p>
-            <p className="mt-1 text-sm font-medium text-zinc-950">{liveCount} items</p>
-          </div>
-        ) : null}
-        {dbCount !== undefined ? (
-          <div className="rounded-[1.2rem] border border-black/6 bg-white/80 px-4 py-2.5">
-            <p className="font-mono text-[9px] uppercase tracking-[0.24em] text-zinc-500">
-              Published
-            </p>
-            <p className="mt-1 text-sm font-medium text-zinc-950">{dbCount} entries</p>
-          </div>
+      {/* Title + one quiet stat line */}
+      <div className="space-y-2">
+        <p className="font-display text-2xl font-medium uppercase tracking-[-0.04em] text-zinc-950 md:text-3xl">
+          {title}
+        </p>
+        {stats.length > 0 ? (
+          <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-zinc-500">
+            {stats.join(" · ")}
+          </p>
         ) : null}
       </div>
 
-      {/* Country/state chips */}
+      {/* A few destination chips */}
       {highlights.length > 0 ? (
-        <div className="mt-4 flex flex-wrap gap-1.5">
-          {highlights.slice(0, 6).map((h) => (
+        <div className="mt-auto flex flex-wrap gap-1.5 pt-1">
+          {highlights.slice(0, 4).map((h) => (
             <span
               key={h.label}
-              className="rounded-full border border-black/6 bg-white/70 px-2.5 py-1 text-xs uppercase tracking-[0.14em] text-zinc-600"
+              className="rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.14em] text-zinc-600"
             >
               {h.label}
             </span>
           ))}
-          {highlights.length > 6 ? (
-            <span className="rounded-full border border-black/6 bg-white/70 px-2.5 py-1 text-xs text-zinc-400">
-              +{highlights.length - 6} more
+          {highlights.length > 4 ? (
+            <span className="rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-1 font-mono text-[10px] text-zinc-400">
+              +{highlights.length - 4}
             </span>
           ) : null}
         </div>
