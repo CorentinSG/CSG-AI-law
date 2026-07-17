@@ -10,6 +10,9 @@ interface RegionPortalCardProps {
   dbCount?: number;
   highlights: { label: string; href: string }[];
   isLive?: boolean;
+  /** Kicker text override — e.g. "Transnational layer" for the international
+   *  portal, which is a cross-cutting layer rather than a third territory. */
+  kickerLabel?: string;
 }
 
 // Dark frosted glass with a faint regional tint. The site renders on a near-black
@@ -40,6 +43,7 @@ export function RegionPortalCard({
   dbCount,
   highlights,
   isLive = true,
+  kickerLabel,
 }: RegionPortalCardProps) {
   return (
     <Link
@@ -57,7 +61,7 @@ export function RegionPortalCard({
               </span>
             ) : null}
             <p className={`font-mono text-[10px] uppercase tracking-[0.28em] ${regionAccent[region]}`}>
-              {isLive ? "Live monitoring" : "Monitoring"}
+              {kickerLabel ?? (isLive ? "Live monitoring" : "Monitoring")}
             </p>
           </div>
           <p className="font-display text-2xl font-medium uppercase tracking-[-0.04em] text-zinc-950 md:text-3xl">

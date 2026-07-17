@@ -89,23 +89,28 @@ export default async function InternationalAiRegulationPage({
     <SiteShell className="space-y-12">
       <MotionReveal className="flex items-start justify-between gap-4">
         <div>
-          <p className="mb-2 font-mono text-[10px] uppercase tracking-[0.34em] text-zinc-500">
-            {fr ? "Hub international" : "International hub"}
-          </p>
+          <div className="mb-3 flex flex-wrap items-center gap-2.5">
+            <p className="font-mono text-[10px] uppercase tracking-[0.34em] text-zinc-500">
+              {fr ? "Hub international" : "International hub"}
+            </p>
+            <span className="rounded-full border border-teal-300/25 bg-teal-400/[0.08] px-2.5 py-0.5 font-mono text-[9px] uppercase tracking-[0.18em] text-teal-300">
+              {fr ? "Couche transnationale" : "Transnational layer"}
+            </span>
+          </div>
           <h1 className="font-display text-7xl font-medium uppercase leading-none tracking-[-0.05em] text-zinc-950">
             International
           </h1>
           <p className="mt-3 max-w-lg text-sm leading-7 text-zinc-500">
             {fr
-              ? "Standards ISO/IEC, principes OCDE, UNESCO, IEEE et instruments transnationaux qui structurent la gouvernance de l'IA."
-              : "ISO/IEC standards, OECD principles, UNESCO, IEEE, and cross-border instruments shaping AI governance."}
+              ? "Standards ISO/IEC, principes OCDE, UNESCO, IEEE et instruments transnationaux qui structurent la gouvernance de l'IA — au-dessus des juridictions nationales."
+              : "ISO/IEC standards, OECD principles, UNESCO, IEEE, and cross-border instruments shaping AI governance — above national jurisdictions."}
           </p>
         </div>
         <Link
           href={localeHref(lang, "/ai-regulation")}
           className="mt-2 shrink-0 font-mono text-[10px] uppercase tracking-[0.22em] text-zinc-500 underline decoration-black/15 underline-offset-4 transition-colors hover:text-zinc-900"
         >
-          {fr ? "Overview ->" : "Overview ->"}
+          {fr ? "Overview →" : "Overview →"}
         </Link>
       </MotionReveal>
 
@@ -162,10 +167,10 @@ export default async function InternationalAiRegulationPage({
         </MotionReveal>
 
         <MotionReveal delay={0.12}>
-          <Card className="h-full rounded-[2rem] border-black/6 bg-white/90 shadow-[0_18px_50px_rgba(15,15,15,0.04)]">
+          <Card className="h-full rounded-[2rem] border-white/10 bg-[radial-gradient(ellipse_at_top,rgba(20,184,166,0.12),transparent_58%),linear-gradient(180deg,rgba(255,255,255,0.05),rgba(255,255,255,0.02))] shadow-[0_18px_50px_rgba(0,0,0,0.35)]">
             <CardContent className="flex h-full flex-col justify-between gap-7 p-7">
               <div className="space-y-3">
-                <p className="font-mono text-[10px] uppercase tracking-[0.28em] text-zinc-500">
+                <p className="font-mono text-[10px] uppercase tracking-[0.28em] text-teal-300">
                   {fr ? "Corpus suivi" : "Tracked corpus"}
                 </p>
                 <p className="font-display text-4xl font-medium uppercase leading-none tracking-[-0.05em] text-zinc-950">
@@ -173,15 +178,15 @@ export default async function InternationalAiRegulationPage({
                 </p>
                 <p className="text-sm leading-7 text-zinc-500">
                   {fr
-                    ? "Une couche internationale distincte du droit contraignant national ou regional."
-                    : "An international layer kept distinct from national or regional binding law."}
+                    ? "Une couche internationale distincte du droit contraignant national ou régional — jamais présentée comme du droit dur par défaut."
+                    : "An international layer kept distinct from national or regional binding law — never presented as hard law by default."}
                 </p>
               </div>
               <div className="flex flex-wrap gap-2">
-                {["ISO/IEC", "OECD", "UNESCO", "IEEE"].map((label) => (
+                {["ISO/IEC", "OECD", "UNESCO", "IEEE", "G7/GPAI"].map((label) => (
                   <span
                     key={label}
-                    className="rounded-full border border-black/8 bg-zinc-50 px-3 py-1.5 text-xs uppercase tracking-[0.16em] text-zinc-700"
+                    className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5 font-mono text-[10px] uppercase tracking-[0.16em] text-zinc-700"
                   >
                     {label}
                   </span>
@@ -216,12 +221,20 @@ export default async function InternationalAiRegulationPage({
               eyebrow={fr ? "Base juridique" : "Legal database"}
               title={fr ? "Entrees internationales publiees" : "Published international entries"}
             />
-            <Link
-              href={localeHref(lang, "/standards")}
-              className="shrink-0 font-mono text-[10px] uppercase tracking-[0.2em] text-zinc-500 underline decoration-black/15 underline-offset-4 hover:text-zinc-800"
-            >
-              {fr ? "Standards ->" : "Standards ->"}
-            </Link>
+            <div className="flex shrink-0 items-center gap-4">
+              <Link
+                href={localeHref(lang, "/standards")}
+                className="font-mono text-[10px] uppercase tracking-[0.2em] text-zinc-500 underline decoration-black/15 underline-offset-4 hover:text-zinc-800"
+              >
+                {fr ? "Standards →" : "Standards →"}
+              </Link>
+              <Link
+                href={localeHref(lang, "/ai-regulation/methodology")}
+                className="font-mono text-[10px] uppercase tracking-[0.2em] text-zinc-500 underline decoration-black/15 underline-offset-4 hover:text-zinc-800"
+              >
+                {fr ? "Méthodologie →" : "Methodology →"}
+              </Link>
+            </div>
           </div>
         </MotionReveal>
 
