@@ -85,6 +85,7 @@ export function listAgentApiCapabilities(
     ["LEGIFRANCE_PISTE_CLIENT_ID", "LEGIFRANCE_PISTE_CLIENT_SECRET"],
     rawEnv,
   );
+  const eurLexReady = hasAllEnv(["EURLEX_USERNAME", "EURLEX_PASSWORD"], rawEnv);
 
   const enrich = (
     capability: Omit<
@@ -167,6 +168,20 @@ export function listAgentApiCapabilities(
       implementedProvider: "federal_register",
       notes:
         "No key required. Official US federal rulemaking source suitable for automatic database publication when AI/legal relevance is verified.",
+    }),
+    enrich({
+      id: "eurlex-webservice",
+      label: "EUR-Lex SOAP webservice",
+      status: eurLexReady ? "available" : "needs_user_setup",
+      uses: ["official_legal_database", "source_health"],
+      regions: ["Europe"],
+      envVars: ["EURLEX_USERNAME", "EURLEX_PASSWORD"],
+      implementedProvider: "eurlex",
+      userAction: eurLexReady
+        ? undefined
+        : "Set EURLEX_USERNAME and EURLEX_PASSWORD in Vercel/Railway so EU official legal database searches can use the native EUR-Lex SOAP webservice.",
+      notes:
+        "Official EU legal-database search channel. Use for discovery of EU instruments and lawmaking materials; binding status, instrument form, and pinpoint citations still require normal legal-database checks.",
     }),
     enrich({
       id: "newsapi",

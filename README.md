@@ -387,6 +387,8 @@ Current operational posture:
 - the current Supabase-backed scheduled runtime may still surface some provider-level failures directly in scan logs when upstream APIs reject requests; this should be treated as an honest operational constraint, not hidden as success
 - the France live runtime is now hardened so that `NewsAPI`, `GDELT`, `Judilibre`, and `Legifrance` degrade into explicit warning states and `zeroResultsReason` messages instead of crashing scans when credentials are missing, invalid, rate-limited, blocked, or challenged
 
+EU official legal-database monitoring also includes `EUR-Lex SOAP webservice` via `apiProvider: "eurlex"` on `src-eur-lex-ai`. It requires `EURLEX_USERNAME` and `EURLEX_PASSWORD` in runtime env. EUR-Lex results are official EU legal database records, but the pipeline still checks instrument form, binding status, CELEX reference, date, and pinpoint citation before legal-database reliance; broad EUR-Lex corpora must not be imported wholesale.
+
 ### Spain continuous monitoring layer
 
 Spain now also has a dedicated continuous-monitoring layer built around:

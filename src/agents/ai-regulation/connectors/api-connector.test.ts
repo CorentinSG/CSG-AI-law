@@ -35,6 +35,8 @@ afterEach(() => {
   delete process.env.LEGAL_DATA_HUNTER_MCP_URL;
   delete process.env.LEGAL_DATA_HUNTER_API_KEY;
   delete process.env.LEGAL_RESEARCH_MCP_URL;
+  delete process.env.EURLEX_USERNAME;
+  delete process.env.EURLEX_PASSWORD;
   delete process.env.LEGIFRANCE_PISTE_CLIENT_ID;
   delete process.env.LEGIFRANCE_PISTE_CLIENT_SECRET;
   process.env.ADMIN_AUTH_SECRET = "test-admin-secret-1234567890";
@@ -399,6 +401,86 @@ describe("ApiConnector", () => {
     expect(result.warnings[0]).toContain(
       "Legifrance official DILA/PISTE API could not be queried safely",
     );
+  });
+
+  it("degrades honestly when EUR-Lex webservice credentials are missing", async () => {
+    const connector = new ApiConnector();
+    const result = await connector.scan(
+      makeSource({
+        id: "src-eur-lex-ai",
+        name: "EUR-Lex AI webservice search",
+        jurisdiction: "European Union",
+        region: "Europe",
+        country: "European Union",
+        sourceUrl: "https://eur-lex.europa.eu/EURLexWebService",
+        config: { apiProvider: "eurlex" },
+        sourceType: "legislative_database",
+      }),
+    );
+
+    expect(result.items).toHaveLength(0);
+    expect(result.errors).toHaveLength(0);
+    expect(result.zeroResultsReason).toContain("EURLEX_USERNAME/EURLEX_PASSWORD");
+  });
+
+  it("queries EUR-Lex SOAP webservice and maps official results", async () => {
+    process.env.EURLEX_USERNAME = "test-user";
+    process.env.EURLEX_PASSWORD = "test-password";
+    resetEnvForTests();
+    const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue(
+      new Response(
+        `<?xml version="1.0" encoding="UTF-8"?>
+        <soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope">
+          <soap:Body>
+            <searchResults xmlns="http://eur-lex.europa.eu/search">
+              <numhits>1</numhits>
+              <totalhits>1</totalhits>
+              <page>1</page>
+              <language>EN</language>
+              <result>
+                <reference>32024R1689</reference>
+                <rank>1</rank>
+                <document_link type="html">https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32024R1689</document_link>
+                <content>
+                  <title>Regulation (EU) 2024/1689 laying down harmonised rules on artificial intelligence</title>
+                  <date_document>2024-06-13</date_document>
+                </content>
+              </result>
+            </searchResults>
+          </soap:Body>
+        </soap:Envelope>`,
+        { status: 200, headers: { "Content-Type": "application/soap+xml" } },
+      ) as Response,
+    );
+
+    const connector = new ApiConnector();
+    const result = await connector.scan(
+      makeSource({
+        id: "src-eur-lex-ai",
+        name: "EUR-Lex AI webservice search",
+        jurisdiction: "European Union",
+        region: "Europe",
+        country: "European Union",
+        sourceUrl: "https://eur-lex.europa.eu/EURLexWebService",
+        config: {
+          apiProvider: "eurlex",
+          expertQuery: 'TI="AI Act"',
+          searchLanguage: "EN",
+          maxItems: 5,
+        },
+        sourceType: "legislative_database",
+      }),
+    );
+
+    const [, requestInit] = fetchMock.mock.calls[0] ?? [];
+    expect(requestInit?.method).toBe("POST");
+    expect(String(requestInit?.body)).toContain("<wsse:Username>test-user</wsse:Username>");
+    expect(String(requestInit?.body)).toContain("<elx:expertQuery>TI=&quot;AI Act&quot;</elx:expertQuery>");
+    expect(result.items).toHaveLength(1);
+    expect(result.items[0]?.title).toContain("harmonised rules on artificial intelligence");
+    expect(result.items[0]?.url).toContain("CELEX:32024R1689");
+    expect(result.items[0]?.metadata?.provider).toBe("eurlex");
+    expect(result.items[0]?.metadata?.reference).toBe("32024R1689");
   });
 
   it("degrades honestly when CourtListener credentials are missing", async () => {

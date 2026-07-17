@@ -131,11 +131,13 @@ type ApiProvider =
   | "federal_register"
   | "newsapi"
   | "gdelt"
+  | "eurlex"
   | "judilibre"
   | "legifrance"
   | "courtlistener"
   | "legal_data_hunter";
 
+const EURLEX_WEBSERVICE_URL = "https://eur-lex.europa.eu/EURLexWebService";
 const PISTE_OAUTH_TOKEN_URL = "https://oauth.piste.gouv.fr/api/oauth/token";
 const PISTE_SANDBOX_OAUTH_TOKEN_URL = "https://sandbox-oauth.piste.gouv.fr/api/oauth/token";
 
@@ -198,6 +200,7 @@ function getApiProvider(source: RegulationSource): ApiProvider {
     configured === "federal_register" ||
     configured === "newsapi" ||
     configured === "gdelt" ||
+    configured === "eurlex" ||
     configured === "judilibre" ||
     configured === "legifrance" ||
     configured === "courtlistener" ||
@@ -563,6 +566,181 @@ async function scanGdelt(source: RegulationSource): Promise<ConnectorScanResult>
   };
 }
 
+function getEurLexQuery(source: RegulationSource) {
+  const configured = source.config?.expertQuery ?? source.config?.query ?? source.config?.searchText;
+  if (typeof configured === "string" && configured.trim().length > 0) {
+    return configured.trim();
+  }
+  return 'TXT="artificial intelligence" OR TI="artificial intelligence" OR TXT="AI Act" OR TI="AI Act"';
+}
+
+function getEurLexSearchLanguage(source: RegulationSource) {
+  const configured = source.config?.searchLanguage ?? source.config?.language;
+  if (typeof configured === "string" && /^[A-Z]{2}$/i.test(configured)) {
+    return configured.toUpperCase();
+  }
+  return "EN";
+}
+
+function buildEurLexSoapEnvelope(input: {
+  username: string;
+  password: string;
+  expertQuery: string;
+  pageSize: number;
+  searchLanguage: string;
+}) {
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope" xmlns:elx="http://eur-lex.europa.eu/search" xmlns:wsse="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd">
+  <soap:Header>
+    <wsse:Security>
+      <wsse:UsernameToken>
+        <wsse:Username>${escapeXml(input.username)}</wsse:Username>
+        <wsse:Password>${escapeXml(input.password)}</wsse:Password>
+      </wsse:UsernameToken>
+    </wsse:Security>
+  </soap:Header>
+  <soap:Body>
+    <elx:searchRequest>
+      <elx:expertQuery>${escapeXml(input.expertQuery)}</elx:expertQuery>
+      <elx:page>1</elx:page>
+      <elx:pageSize>${input.pageSize}</elx:pageSize>
+      <elx:searchLanguage>${escapeXml(input.searchLanguage)}</elx:searchLanguage>
+    </elx:searchRequest>
+  </soap:Body>
+</soap:Envelope>`;
+}
+
+function firstXmlElementText(xml: string, localName: string) {
+  const match = new RegExp(
+    `<(?:[\\w-]+:)?${localName}\\b[^>]*>([\\s\\S]*?)</(?:[\\w-]+:)?${localName}>`,
+    "i",
+  ).exec(xml);
+  return match?.[1] ? stripXmlTags(match[1]) : null;
+}
+
+function allXmlElementBlocks(xml: string, localName: string) {
+  const blocks: string[] = [];
+  const pattern = new RegExp(
+    `<(?:[\\w-]+:)?${localName}\\b[^>]*>([\\s\\S]*?)</(?:[\\w-]+:)?${localName}>`,
+    "gi",
+  );
+  let match: RegExpExecArray | null;
+  while ((match = pattern.exec(xml)) !== null) {
+    blocks.push(match[1] ?? "");
+  }
+  return blocks;
+}
+
+function pickEurLexTitle(resultXml: string) {
+  const title =
+    firstXmlElementText(resultXml, "title") ??
+    firstXmlElementText(resultXml, "EXPRESSION_TITLE") ??
+    firstXmlElementText(resultXml, "WORK_TITLE") ??
+    firstXmlElementText(resultXml, "TITLE");
+  return title && title.length > 0 ? title : null;
+}
+
+function pickEurLexDate(resultXml: string) {
+  return (
+    firstXmlElementText(resultXml, "date_document") ??
+    firstXmlElementText(resultXml, "DD") ??
+    firstXmlElementText(resultXml, "DATE_DOCUMENT") ??
+    null
+  );
+}
+
+function buildEurLexUrl(reference: string | null, resultXml: string, source: RegulationSource) {
+  const link = firstXmlElementText(resultXml, "document_link");
+  if (link?.startsWith("http")) return link;
+  if (reference) return `https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:${encodeURIComponent(reference)}`;
+  return source.sourceUrl;
+}
+
+async function scanEurLex(source: RegulationSource): Promise<ConnectorScanResult> {
+  if (!env.EURLEX_USERNAME || !env.EURLEX_PASSWORD) {
+    return buildMissingCredentialResult(
+      "EURLEX_USERNAME/EURLEX_PASSWORD are not configured, so the official EUR-Lex SOAP webservice cannot be queried from this runtime. EUR-Lex RSS/static official lanes remain available as fallback.",
+    );
+  }
+
+  const pageSize = Math.min(getMaxItems(source), 20);
+  const expertQuery = getEurLexQuery(source);
+  const searchLanguage = getEurLexSearchLanguage(source);
+
+  let response: Response;
+  let xml: string;
+  try {
+    response = await fetch(EURLEX_WEBSERVICE_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/soap+xml; charset=utf-8; action=\"https://eur-lex.europa.eu/ws/doQuery\"",
+        Accept: "application/soap+xml, text/xml",
+      },
+      body: buildEurLexSoapEnvelope({
+        username: env.EURLEX_USERNAME,
+        password: env.EURLEX_PASSWORD,
+        expertQuery,
+        pageSize,
+        searchLanguage,
+      }),
+      next: { revalidate: 0 },
+    });
+    xml = await response.text();
+    if (!response.ok) {
+      throw new Error(`EUR-Lex SOAP request failed with ${response.status}`);
+    }
+    const fault = firstXmlElementText(xml, "Fault") ?? firstXmlElementText(xml, "faultstring");
+    if (fault) {
+      throw new Error(`EUR-Lex SOAP fault: ${fault}`);
+    }
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "EUR-Lex SOAP request failed";
+    return buildNonFatalApiConstraintResult(
+      `EUR-Lex official SOAP webservice could not be queried safely in this run: ${message}. EUR-Lex RSS/static official lanes remain the degraded fallback.`,
+    );
+  }
+
+  const results = allXmlElementBlocks(xml, "result").slice(0, pageSize);
+  const items = results
+    .map((resultXml) => {
+      const reference = firstXmlElementText(resultXml, "reference");
+      const title = pickEurLexTitle(resultXml) ?? (reference ? `EUR-Lex document ${reference}` : null);
+      if (!title) return null;
+
+      return buildCandidate(source, {
+        title,
+        url: buildEurLexUrl(reference, resultXml, source),
+        text: [title, reference, stripXmlTags(resultXml)].filter(Boolean).join(" "),
+        publicationDate: pickEurLexDate(resultXml),
+        externalId: reference,
+        metadata: {
+          provider: "eurlex",
+          reference,
+          searchLanguage,
+          expertQuery,
+          authorityType: source.config?.authorityTypeHint ?? "Official EU legal database",
+          sourceCategory: "official_legal_database",
+        },
+      });
+    })
+    .filter((item): item is ExtractedCandidateItem => item !== null);
+
+  return {
+    items,
+    errors: [],
+    warnings:
+      items.length === 0
+        ? ["EUR-Lex SOAP webservice responded successfully but returned zero usable official results."]
+        : [
+            "EUR-Lex SOAP results are official EU legal database records; binding status, instrument form, and pinpoint citation still require normal legal-database checks.",
+          ],
+    responseStatus: response.status,
+    itemsFetched: items.length,
+    zeroResultsReason:
+      items.length === 0 ? "The EUR-Lex SOAP webservice returned zero usable matching items." : null,
+  };
+}
+
 async function scanJudilibre(source: RegulationSource): Promise<ConnectorScanResult> {
   const keyId = env.JUDILIBRE_API_KEYID;
   const pisteClientId = env.LEGIFRANCE_PISTE_CLIENT_ID;
@@ -690,6 +868,28 @@ async function requestPisteAccessToken(
   }
 
   return json.access_token;
+}
+
+function escapeXml(value: string) {
+  return value
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&apos;");
+}
+
+function decodeXmlEntities(value: string) {
+  return value
+    .replaceAll("&lt;", "<")
+    .replaceAll("&gt;", ">")
+    .replaceAll("&quot;", '"')
+    .replaceAll("&apos;", "'")
+    .replaceAll("&amp;", "&");
+}
+
+function stripXmlTags(value: string) {
+  return normalizeWhitespace(decodeXmlEntities(value.replace(/<[^>]+>/g, " ")));
 }
 
 async function fetchPisteAccessToken(clientId: string, clientSecret: string) {
@@ -1046,6 +1246,8 @@ export class ApiConnector implements SourceConnector {
         return scanNewsApi(source);
       case "gdelt":
         return scanGdelt(source);
+      case "eurlex":
+        return scanEurLex(source);
       case "judilibre":
         return scanJudilibre(source);
       case "legifrance":

@@ -22,6 +22,12 @@ const rawEnvSchema = z.object({
   LEGAL_DATA_HUNTER_MCP_URL: z.string().url().optional(),
   LEGAL_DATA_HUNTER_API_KEY: z.string().min(1).optional(),
   LEGAL_RESEARCH_MCP_URL: z.string().url().optional(),
+  // EUR-Lex official SOAP webservice. Optional: when absent the EUR-Lex
+  // connector degrades honestly to RSS/static official EUR-Lex lanes.
+  EURLEX_USERNAME: z.string().min(1).optional(),
+  EURLEX_PASSWORD: z.string().min(1).optional(),
+  EUR_LEX_USERNAME: z.string().min(1).optional(),
+  EUR_LEX_PASSWORD: z.string().min(1).optional(),
   // Legifrance via official DILA/PISTE API (T-RT3B). OAuth2 client-credentials
   // pair from PISTE enrollment; when absent the connector degrades honestly.
   LEGIFRANCE_PISTE_CLIENT_ID: z.string().min(1).optional(),
@@ -77,6 +83,12 @@ export interface AppEnv {
   LEGAL_DATA_HUNTER_MCP_URL?: string;
   LEGAL_DATA_HUNTER_API_KEY?: string;
   LEGAL_RESEARCH_MCP_URL?: string;
+  /** EUR-Lex SOAP webservice username. EUR_LEX_USERNAME is accepted as an alias. */
+  EURLEX_USERNAME?: string;
+  /** EUR-Lex SOAP webservice password. EUR_LEX_PASSWORD is accepted as an alias. */
+  EURLEX_PASSWORD?: string;
+  EUR_LEX_USERNAME?: string;
+  EUR_LEX_PASSWORD?: string;
   /** Legifrance/PISTE OAuth2 client id — enables the official DILA API path (T-RT3B) */
   LEGIFRANCE_PISTE_CLIENT_ID?: string;
   /** Legifrance/PISTE OAuth2 client secret — required alongside the client id (T-RT3B) */
@@ -131,6 +143,10 @@ function buildEnv(): AppEnv {
     LEGAL_DATA_HUNTER_MCP_URL: process.env.LEGAL_DATA_HUNTER_MCP_URL,
     LEGAL_DATA_HUNTER_API_KEY: process.env.LEGAL_DATA_HUNTER_API_KEY,
     LEGAL_RESEARCH_MCP_URL: process.env.LEGAL_RESEARCH_MCP_URL,
+    EURLEX_USERNAME: process.env.EURLEX_USERNAME,
+    EURLEX_PASSWORD: process.env.EURLEX_PASSWORD,
+    EUR_LEX_USERNAME: process.env.EUR_LEX_USERNAME,
+    EUR_LEX_PASSWORD: process.env.EUR_LEX_PASSWORD,
     LEGIFRANCE_PISTE_CLIENT_ID: process.env.LEGIFRANCE_PISTE_CLIENT_ID,
     LEGIFRANCE_PISTE_CLIENT_SECRET: process.env.LEGIFRANCE_PISTE_CLIENT_SECRET,
     OPENAI_MODEL: process.env.OPENAI_MODEL ?? "gpt-4.1-mini",
@@ -236,6 +252,8 @@ function buildEnv(): AppEnv {
     parsed.AI_ENABLE_PROCESSING ?? parsed.AI_PROCESSING_ENABLED;
   const courtListenerApiKey =
     parsed.COURTLISTENER_API_KEY ?? parsed.COURTLISTENER_API_TOKEN;
+  const eurLexUsername = parsed.EURLEX_USERNAME ?? parsed.EUR_LEX_USERNAME;
+  const eurLexPassword = parsed.EURLEX_PASSWORD ?? parsed.EUR_LEX_PASSWORD;
 
   return {
     ...parsed,
@@ -243,6 +261,8 @@ function buildEnv(): AppEnv {
     AI_PROCESSING_ENABLED: aiProcessingEnabled,
     AI_ENABLE_PROCESSING: aiProcessingEnabled,
     COURTLISTENER_API_KEY: courtListenerApiKey,
+    EURLEX_USERNAME: eurLexUsername,
+    EURLEX_PASSWORD: eurLexPassword,
     ADMIN_AUTH_SECRET: parsed.ADMIN_AUTH_SECRET,
   };
 }
