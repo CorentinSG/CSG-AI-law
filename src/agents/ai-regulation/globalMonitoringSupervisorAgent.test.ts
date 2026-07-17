@@ -7,7 +7,7 @@ import {
 } from "@/agents/ai-regulation/globalMonitoringSupervisorAgent";
 
 describe("global monitoring supervisor agent", () => {
-  it("registers EU, US, and design under the boss supervisor", () => {
+  it("registers EU, US, International, and design under the boss supervisor", () => {
     const registry = listGlobalMonitoringAgents();
 
     expect(globalMonitoringSupervisorAgent.id).toBe("global-monitoring-supervisor");
@@ -15,6 +15,7 @@ describe("global monitoring supervisor agent", () => {
     expect(registry.regionalSupervisors.map((agent) => agent.id)).toEqual([
       "eu-monitoring-supervisor",
       "us-monitoring-supervisor",
+      "international-monitoring-supervisor",
     ]);
     expect(registry.crossFunctionalAgents).toEqual([designMonitoringAgent]);
   });
@@ -27,9 +28,13 @@ describe("global monitoring supervisor agent", () => {
     const usSupervisor = registry.regionalSupervisors.find(
       (agent) => agent.id === "us-monitoring-supervisor",
     );
+    const internationalSupervisor = registry.regionalSupervisors.find(
+      (agent) => agent.id === "international-monitoring-supervisor",
+    );
 
     expect(euSupervisor?.managedAgents).toHaveLength(28);
     expect(usSupervisor?.managedAgents).toHaveLength(52);
+    expect(internationalSupervisor?.managedAgents).toHaveLength(10);
   });
 
   it("requires supervisors to audit child coverage for news, databases, hard law, soft law, and decisions", () => {

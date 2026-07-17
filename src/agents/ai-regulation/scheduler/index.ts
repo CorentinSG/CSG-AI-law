@@ -2,9 +2,10 @@ import { listEuMonitoringAgents } from "@/agents/ai-regulation/euMonitoringSuper
 import { queueScanJob } from "@/agents/ai-regulation/processors/scanJobs";
 import type { ScanTrigger } from "@/agents/ai-regulation/processors/pipeline";
 import type { ScanProfileId } from "@/agents/ai-regulation/scanProfiles";
+import { internationalMonitoringSourceRegistry } from "@/agents/ai-regulation/internationalNewsSources";
 import { listUsMonitoringAgents } from "@/agents/ai-regulation/usMonitoringSupervisorAgent";
 
-export type CentralSchedulerRegion = "eu" | "us";
+export type CentralSchedulerRegion = "eu" | "us" | "international";
 
 export interface CentralSchedulerPlanItem {
   id: string;
@@ -22,6 +23,7 @@ export interface CentralSchedulerPlan {
   totalAgents: number;
   euAgents: number;
   usAgents: number;
+  internationalAgents: number;
   items: CentralSchedulerPlanItem[];
 }
 
@@ -67,6 +69,27 @@ const US_SCAN_ITEMS = [
   },
 ] as const;
 
+const INTERNATIONAL_SCAN_ITEMS = [
+  {
+    id: "international-official",
+    label: "International official governance sweep",
+    scanProfile: "international_official_legal_scan",
+    cadence: "daily",
+  },
+  {
+    id: "international-live-news",
+    label: "International legal-news discovery sweep",
+    scanProfile: "international_live_news_scan",
+    cadence: "live",
+  },
+  {
+    id: "international-verification",
+    label: "International recurring verification sweep",
+    scanProfile: "international_verification_scan",
+    cadence: "hourly",
+  },
+] as const;
+
 export const scheduler = {
   recommendedCron: "*/15 * * * *",
   description:
@@ -77,7 +100,12 @@ function planItemsForRegion(
   region: CentralSchedulerRegion,
   agentIds: string[],
 ): CentralSchedulerPlanItem[] {
-  const definitions = region === "eu" ? EU_SCAN_ITEMS : US_SCAN_ITEMS;
+  const definitions =
+    region === "eu"
+      ? EU_SCAN_ITEMS
+      : region === "us"
+        ? US_SCAN_ITEMS
+        : INTERNATIONAL_SCAN_ITEMS;
   return definitions.map((definition) => ({
     ...definition,
     region,
@@ -89,15 +117,20 @@ function planItemsForRegion(
 export function buildCentralMonitoringSchedule(): CentralSchedulerPlan {
   const euAgentIds = listEuMonitoringAgents().map((agent) => agent.id);
   const usAgentIds = listUsMonitoringAgents().map((agent) => agent.id);
+  const internationalAgentIds = internationalMonitoringSourceRegistry.map(
+    (source) => source.sourceId,
+  );
 
   return {
     ...scheduler,
-    totalAgents: euAgentIds.length + usAgentIds.length,
+    totalAgents: euAgentIds.length + usAgentIds.length + internationalAgentIds.length,
     euAgents: euAgentIds.length,
     usAgents: usAgentIds.length,
+    internationalAgents: internationalAgentIds.length,
     items: [
       ...planItemsForRegion("eu", euAgentIds),
       ...planItemsForRegion("us", usAgentIds),
+      ...planItemsForRegion("international", internationalAgentIds),
     ],
   };
 }
@@ -108,7 +141,7 @@ export async function enqueueCentralMonitoringSchedule(options?: {
   regions?: CentralSchedulerRegion[];
   cadences?: Array<CentralSchedulerPlanItem["cadence"]>;
 }) {
-  const selectedRegions = new Set(options?.regions ?? ["eu", "us"]);
+  const selectedRegions = new Set(options?.regions ?? ["eu", "us", "international"]);
   const selectedCadences = options?.cadences ? new Set(options.cadences) : null;
   const trigger = options?.trigger ?? "scheduled";
   const requestedBy = options?.requestedBy ?? "central-monitoring-scheduler";

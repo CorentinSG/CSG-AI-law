@@ -11,6 +11,7 @@ import { getItalyAgentSourceIds } from "@/agents/ai-regulation/italyNewsSources"
 import { getSpainAgentSourceIds } from "@/agents/ai-regulation/spainNewsSources";
 import { getAustriaAgentSourceIds } from "@/agents/ai-regulation/austriaNewsSources";
 import { getBelgiumAgentSourceIds } from "@/agents/ai-regulation/belgiumNewsSources";
+import { getInternationalAgentSourceIds } from "@/agents/ai-regulation/internationalNewsSources";
 import type { RegulationSource } from "@/agents/ai-regulation/types";
 
 function createSource(overrides: Partial<RegulationSource>): RegulationSource {
@@ -171,6 +172,46 @@ describe("scan profiles", () => {
       expect.arrayContaining(
         euOfficialIds.filter((id) => sources.some((source) => source.id === id)),
       ),
+    );
+  });
+
+  it("keeps International official scans limited to transnational governance and standards sources", () => {
+    const internationalOfficialIds = getInternationalAgentSourceIds(
+      "international_official_legal_scan",
+    );
+    const sources = [
+      createSource({ id: "src-oecd-ai", region: "International", country: "International", jurisdiction: "OECD" }),
+      createSource({ id: "src-unesco-ai-ethics", region: "International", country: "International", jurisdiction: "UNESCO" }),
+      createSource({ id: "src-iso-42001", region: "International", country: "International", jurisdiction: "ISO" }),
+      createSource({ id: "src-international-newsapi-ai", region: "International", country: "International", jurisdiction: "International", sourceType: "media_source" }),
+      createSource({ id: "src-eu-ai-office", region: "Europe", country: "European Union", jurisdiction: "European Union" }),
+    ];
+
+    expect(
+      selectSourcesForScanProfile(sources, "international_official_legal_scan").map(
+        (source) => source.id,
+      ),
+    ).toEqual(
+      internationalOfficialIds.filter((id) => sources.some((source) => source.id === id)),
+    );
+  });
+
+  it("keeps International live scans on global discovery/news feeds", () => {
+    const internationalLiveIds = getInternationalAgentSourceIds("international_live_news_scan");
+    const sources = [
+      createSource({ id: "src-oecd-ai", region: "International", country: "International", jurisdiction: "OECD" }),
+      createSource({ id: "src-international-newsapi-ai", region: "International", country: "International", jurisdiction: "International", sourceType: "media_source" }),
+      createSource({ id: "src-international-gdelt-ai", region: "International", country: "International", jurisdiction: "International", sourceType: "discovery_source" }),
+      createSource({ id: "src-unesco-ai-ethics", region: "International", country: "International", jurisdiction: "UNESCO" }),
+      createSource({ id: "src-eu-newsapi-ai", region: "Europe", country: "European Union", jurisdiction: "European Union", sourceType: "media_source" }),
+    ];
+
+    expect(
+      selectSourcesForScanProfile(sources, "international_live_news_scan").map(
+        (source) => source.id,
+      ),
+    ).toEqual(
+      internationalLiveIds.filter((id) => sources.some((source) => source.id === id)),
     );
   });
 

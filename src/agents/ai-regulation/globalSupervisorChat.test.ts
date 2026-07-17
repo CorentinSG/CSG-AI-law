@@ -27,8 +27,9 @@ describe("global supervisor chat", () => {
         counts: {
           eu: 28,
           us: 52,
+          international: 10,
           design: 1,
-          totalManaged: 81,
+          totalManaged: 91,
         },
       },
     });
@@ -44,6 +45,7 @@ describe("global supervisor chat", () => {
         regionalSupervisors: [
           { id: "eu-monitoring-supervisor" },
           { id: "us-monitoring-supervisor" },
+          { id: "international-monitoring-supervisor" },
         ],
       },
     });

@@ -8,6 +8,11 @@ import {
   usMonitoringSupervisorManager,
   runUsMonitoringSupervisorAgent,
 } from "@/agents/ai-regulation/usMonitoringSupervisorAgent";
+import {
+  internationalMonitoringSupervisorManager,
+  listInternationalMonitoringAgents,
+  runInternationalMonitoringSupervisorAgent,
+} from "@/agents/ai-regulation/internationalLegalNewsAgent";
 import { supervisorMonitoringMandate } from "@/agents/ai-regulation/monitoringAgentMandate";
 import {
   listAgentApiCapabilities,
@@ -49,6 +54,11 @@ export function listGlobalMonitoringAgents() {
         mandate: supervisorMonitoringMandate,
         managedAgents: listUsMonitoringAgents(),
       },
+      {
+        ...internationalMonitoringSupervisorManager,
+        mandate: supervisorMonitoringMandate,
+        managedAgents: listInternationalMonitoringAgents(),
+      },
     ],
     crossFunctionalAgents: [designMonitoringAgent],
     apiCapabilities: listAgentApiCapabilities(),
@@ -59,9 +69,9 @@ export function listGlobalMonitoringAgents() {
 export async function runGlobalMonitoringSupervisorAgent(options?: {
   trigger?: ScanTrigger;
   profile?: GenericCountryAgentProfileId;
-  regions?: Array<"eu" | "us">;
+  regions?: Array<"eu" | "us" | "international">;
 }) {
-  const selectedRegions = new Set(options?.regions ?? ["eu", "us"]);
+  const selectedRegions = new Set(options?.regions ?? ["eu", "us", "international"]);
   const trigger = options?.trigger ?? "scheduled_local_test";
   const profile = options?.profile ?? "live_news_scan";
   const results = [];
@@ -92,6 +102,22 @@ export async function runGlobalMonitoringSupervisorAgent(options?: {
     } catch (error) {
       results.push({
         agentId: "us-monitoring-supervisor",
+        status: "failed" as const,
+        error: error instanceof Error ? error.message : String(error),
+      });
+    }
+  }
+
+  if (selectedRegions.has("international")) {
+    try {
+      results.push({
+        agentId: "international-monitoring-supervisor",
+        status: "succeeded" as const,
+        result: await runInternationalMonitoringSupervisorAgent({ trigger }),
+      });
+    } catch (error) {
+      results.push({
+        agentId: "international-monitoring-supervisor",
         status: "failed" as const,
         error: error instanceof Error ? error.message : String(error),
       });

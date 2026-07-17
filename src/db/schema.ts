@@ -109,6 +109,11 @@ export const jurisdictions = [
   "Canada",
   "OECD",
   "Council of Europe",
+  "UNESCO",
+  "United Nations",
+  "WIPO",
+  "ISO",
+  "IEEE",
   "International",
 ] as const;
 

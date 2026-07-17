@@ -9,6 +9,7 @@ import { getBelgiumAgentSourceIds, isBelgiumMonitoringSource, type BelgiumAgentP
 import { getAustriaAgentSourceIds, isAustriaMonitoringSource, type AustriaAgentProfileId } from "@/agents/ai-regulation/austriaNewsSources";
 import { getSwedenAgentSourceIds, isSwedenMonitoringSource, type SwedenAgentProfileId } from "@/agents/ai-regulation/swedenNewsSources";
 import { getIrelandAgentSourceIds, isIrelandMonitoringSource, type IrelandAgentProfileId } from "@/agents/ai-regulation/irelandNewsSources";
+import { getInternationalAgentSourceIds, isInternationalMonitoringSource, type InternationalAgentProfileId } from "@/agents/ai-regulation/internationalNewsSources";
 
 export const scanProfileIds = [
   "official_baseline_scan",
@@ -45,6 +46,9 @@ export const scanProfileIds = [
   "ireland_official_legal_scan",
   "ireland_live_news_scan",
   "ireland_verification_scan",
+  "international_official_legal_scan",
+  "international_live_news_scan",
+  "international_verification_scan",
 ] as const;
 
 export type ScanProfileId = (typeof scanProfileIds)[number];
@@ -90,7 +94,10 @@ export interface ScanProfileDefinition {
     | "sweden_verification_only"
     | "ireland_official_only"
     | "ireland_live_only"
-    | "ireland_verification_only";
+    | "ireland_verification_only"
+    | "international_official_only"
+    | "international_live_only"
+    | "international_verification_only";
   runsRecurringVerification: boolean;
   // Optional filter applied to sources during the recurring verification pass.
   // Replaces the hard-coded country switch in pipeline.ts (C2 optimisation).
@@ -444,6 +451,37 @@ export const scanProfiles: Record<ScanProfileId, ScanProfileDefinition> = {
     verificationFilter: isIrelandMonitoringSource,
     verificationLimit: 60,
   },
+  international_official_legal_scan: {
+    id: "international_official_legal_scan",
+    label: "International official governance scan",
+    description:
+      "Dedicated International baseline scan across official transnational governance, soft-law, IP-policy, and standards-body sources.",
+    targetInterval: "daily on Vercel Hobby, hourly or better on higher scheduler capability",
+    sourceStrategy: "international_official_only",
+    runsRecurringVerification: false,
+  },
+  international_live_news_scan: {
+    id: "international_live_news_scan",
+    label: "International live news scan",
+    description:
+      "Dedicated International live-discovery loop for global AI-law and governance reporting across serious media/discovery APIs.",
+    targetInterval: "every 5 minutes when supported, otherwise daily on Vercel Hobby or hourly on a higher scheduler",
+    sourceStrategy: "international_live_only",
+    runsRecurringVerification: true,
+    verificationFilter: isInternationalMonitoringSource,
+    verificationLimit: 30,
+  },
+  international_verification_scan: {
+    id: "international_verification_scan",
+    label: "International verification scan",
+    description:
+      "Dedicated International recurring verification pass for unresolved transnational AI governance leads and official-source confirmation checks.",
+    targetInterval: "hourly when safe, otherwise daily on Vercel Hobby",
+    sourceStrategy: "international_verification_only",
+    runsRecurringVerification: true,
+    verificationFilter: isInternationalMonitoringSource,
+    verificationLimit: 60,
+  },
 };
 
 function getFranceProfileSourceIds(profileId: FranceAgentProfileId) {
@@ -484,6 +522,10 @@ function getSwedenProfileSourceIds(profileId: SwedenAgentProfileId) {
 
 function getIrelandProfileSourceIds(profileId: IrelandAgentProfileId) {
   return new Set(getIrelandAgentSourceIds(profileId));
+}
+
+function getInternationalProfileSourceIds(profileId: InternationalAgentProfileId) {
+  return new Set(getInternationalAgentSourceIds(profileId));
 }
 
 function isDiscoveryCategory(source: RegulationSource) {
@@ -625,6 +667,16 @@ export function selectSourcesForScanProfile(
       return sources.filter((source) => irelandIds.has(source.id));
     }
     case "ireland_verification_only":
+      return [];
+    case "international_official_only": {
+      const internationalIds = getInternationalProfileSourceIds("international_official_legal_scan");
+      return sources.filter((source) => internationalIds.has(source.id));
+    }
+    case "international_live_only": {
+      const internationalIds = getInternationalProfileSourceIds("international_live_news_scan");
+      return sources.filter((source) => internationalIds.has(source.id));
+    }
+    case "international_verification_only":
       return [];
     case "all_active":
     default:

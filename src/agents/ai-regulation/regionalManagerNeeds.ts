@@ -1,5 +1,5 @@
 export interface RegionalManagerNeeds {
-  region: "Europe" | "United States";
+  region: "Europe" | "United States" | "International";
   requestedCapabilities: Array<
     | "verified_official_source_inventory"
     | "jurisdiction_specific_news_portfolio"
@@ -83,6 +83,40 @@ export const usManagerNeeds: RegionalManagerNeeds = {
     noAdminInterventionForSeriousOrCorroboratedLegalNews: true,
     missingCredentialEscalation:
       "Escalate missing NEWSAPI_API_KEY for faster legal-news discovery; treat CourtListener/RECAP as a planned future US case-law connector until implemented.",
+  },
+  databaseInstructions: {
+    centralBackendStore: "ai_regulatory_updates",
+    jurisdictionProfileStore: "country_intelligence",
+    timelineSource: "published_and_verified_regulatory_updates",
+    distributionKey: "jurisdiction_country_region",
+    requiredCoverage: ["hard_law", "soft_law", "case_law_and_decisions", "legal_news"],
+  },
+};
+
+export const internationalManagerNeeds: RegionalManagerNeeds = {
+  region: "International",
+  requestedCapabilities: [
+    "verified_official_source_inventory",
+    "jurisdiction_specific_news_portfolio",
+    "central_legal_database_distribution",
+    "local_legal_timeline_generation",
+    "hard_law_soft_law_case_law_classification",
+    "source_health_and_gap_audits",
+    "api_accelerated_monitoring",
+  ],
+  childAgentInstructions: [
+    "Maintain a source-backed international governance profile distinct from Europe and US jurisdictional law.",
+    "Monitor AI-related international soft law, standards, governance frameworks, policy reports, IP policy, and serious legal news.",
+    "Promote official international sources into the durable database as soft law, standards, governance frameworks, or policy reports, not binding national law by default.",
+    "Escalate missing official organization pages, standards-body metadata, international organization reports, or serious legal-news feeds.",
+    "Prefer implemented native APIs and official public metadata sources whenever available; degrade honestly to RSS/static/scraping with visible diagnostics.",
+  ],
+  apiInstructions: {
+    useNativeApisWhenAvailable: true,
+    noAdminInterventionForOfficialSourcePublication: true,
+    noAdminInterventionForSeriousOrCorroboratedLegalNews: true,
+    missingCredentialEscalation:
+      "Escalate missing NEWSAPI_API_KEY only when faster international legal-news discovery is materially needed; official international organization pages should remain monitorable without paid APIs where possible.",
   },
   databaseInstructions: {
     centralBackendStore: "ai_regulatory_updates",

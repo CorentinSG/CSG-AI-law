@@ -13,7 +13,7 @@ export type GlobalSupervisorChatAction =
 export interface GlobalSupervisorChatRequest {
   message?: string;
   action?: GlobalSupervisorChatAction;
-  regions?: Array<"eu" | "us">;
+  regions?: Array<"eu" | "us" | "international">;
   profile?: GenericCountryAgentProfileId;
   dryRun?: boolean;
 }
@@ -37,16 +37,21 @@ function buildSummary() {
   const usSupervisor = registry.regionalSupervisors.find(
     (agent) => agent.id === "us-monitoring-supervisor",
   );
+  const internationalSupervisor = registry.regionalSupervisors.find(
+    (agent) => agent.id === "international-monitoring-supervisor",
+  );
 
   return {
     supervisor: registry.supervisor,
     counts: {
       eu: euSupervisor?.managedAgents.length ?? 0,
       us: usSupervisor?.managedAgents.length ?? 0,
+      international: internationalSupervisor?.managedAgents.length ?? 0,
       design: registry.crossFunctionalAgents.length,
       totalManaged:
         (euSupervisor?.managedAgents.length ?? 0) +
         (usSupervisor?.managedAgents.length ?? 0) +
+        (internationalSupervisor?.managedAgents.length ?? 0) +
         registry.crossFunctionalAgents.length,
     },
     regionalSupervisors: registry.regionalSupervisors.map((agent) => ({

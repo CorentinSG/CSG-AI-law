@@ -10,6 +10,7 @@ Multi-agent project. Always update this file after meaningful changes. Include: 
 
 | Date | Phase | Summary |
 |------|-------|---------|
+| 2026-07-16 | International monitoring backend | Added International monitoring profiles, supervisor integration, central scheduler coverage, and official UNESCO/UN/WIPO/IEEE plus international NewsAPI/GDELT sources |
 | 2026-07-16 | International AI hub | Added `/ai-regulation/international`, linked it from the main AI regulation overview and database-region cards, and exposed the route in sitemap/smoke coverage |
 | 2026-07-16 | International standards coverage | Added an international standards baseline for the public Standards page, including ISO/IEC AI standards, OECD AI Principles, UNESCO AI Ethics Recommendation, and IEEE 7000, with non-binding/incorporation caveats and tests |
 | 2026-07-16 | Judilibre OAuth fallback | Judilibre can now use either a direct `JUDILIBRE_API_KEYID` or the configured PISTE OAuth client credentials already used for Legifrance; runtime verification and capability reporting understand both modes |

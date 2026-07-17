@@ -15,6 +15,7 @@ Last synchronized: 2026-06-20 (Cowork A–F hardening: HTTP security headers, ti
 - **T-OPS9-UX**: WIP on `ops/t-ops9-ux` — Spline dead-deps removal + not-found.tsx + loading.tsx skeletons pending
 
 - **2026-07-16 ops note**: CourtListener token is configured on Vercel/Railway main worker. PISTE credentials are configured too; Judilibre now accepts either direct `JUDILIBRE_API_KEYID` or PISTE OAuth fallback through `LEGIFRANCE_PISTE_CLIENT_ID/SECRET`. Do not print secrets in docs or handoffs.
+- **2026-07-16 International backend note**: International now has dedicated scan profiles, source registry, supervisor/scheduler coverage, and migration `026_international_monitoring_sources.sql` for UNESCO, UN, WIPO, IEEE, international NewsAPI, and international GDELT. Treat this layer as transnational governance/soft law/standards, not binding national law by default.
 
 **Previous state (2026-06-10, preserved for reference):**
 - Test suite: 402 tests | lint | typecheck | build — all green
