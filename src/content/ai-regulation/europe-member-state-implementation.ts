@@ -1553,6 +1553,193 @@ const bulgariaAiConcept2030: CountrySourceRecord = {
     "Official Bulgarian government AI policy concept through 2030. This is a strategy/soft-law source, not a binding AI Act implementation measure.",
 };
 
+const bulgariaCaseLawPortal: CountrySourceRecord = {
+  label: "Bulgarian central web-based interface for case law",
+  url: "https://legalacts.justice.bg/",
+  institution: "Supreme Judicial Council / Ministry of Justice",
+  sourceType: "court",
+  official: true,
+  public: true,
+  runtimeAccessible: true,
+  responseStatus: 200,
+  publicationDate: null,
+  lastCheckedDate: "2026-07-16T00:00:00.000Z",
+  parserStatus: "candidate_for_monitoring",
+  recommendation: "manual_review",
+  note:
+    "Official Bulgarian central web-based interface for published court decisions. The European e-Justice ECLI page identifies this interface as the place where Bulgarian ECLIs are generated for published decisions.",
+};
+
+const croatiaSupraCaseLaw: CountrySourceRecord = {
+  label: "SuPra / Supreme Court of the Republic of Croatia case-law database",
+  url: "https://sudskapraksa.csp.vsrh.hr/",
+  institution: "Supreme Court of the Republic of Croatia",
+  sourceType: "court",
+  official: true,
+  public: true,
+  runtimeAccessible: true,
+  responseStatus: 200,
+  publicationDate: null,
+  lastCheckedDate: "2026-07-16T00:00:00.000Z",
+  parserStatus: "candidate_for_monitoring",
+  recommendation: "manual_review",
+  note:
+    "Official Croatian Supreme Court case-law database. The European e-Justice Portal states that SuPra contains Supreme Court decisions since 1 January 1990 and significant decisions of other Croatian courts.",
+};
+
+const croatiaJudgmentPublicationPortal: CountrySourceRecord = {
+  label: "Croatian Ministry page on anonymisation and publication of judgments",
+  url: "https://mpudt.gov.hr/anonymisation-and-publication-of-judgements/29758",
+  institution: "Ministry of Justice, Public Administration and Digital Transformation",
+  sourceType: "government",
+  official: true,
+  public: true,
+  runtimeAccessible: true,
+  responseStatus: 200,
+  publicationDate: null,
+  lastCheckedDate: "2026-07-16T00:00:00.000Z",
+  parserStatus: "candidate_for_monitoring",
+  recommendation: "manual_review",
+  note:
+    "Official Croatian ministry source describing the public search engine for anonymised judgments and its AI-based anonymisation/publication solution. Useful for Croatian case-law monitoring and legal-tech timeline context.",
+};
+
+const cyprusAiActAuthorityPortal: CountrySourceRecord = {
+  label: "EU AI Act Cyprus authority portal",
+  url: "https://ai.cy/",
+  institution: "Commissioner of Communications of the Republic of Cyprus",
+  sourceType: "regulator",
+  official: true,
+  public: true,
+  runtimeAccessible: true,
+  responseStatus: 200,
+  publicationDate: null,
+  lastCheckedDate: "2026-07-16T00:00:00.000Z",
+  parserStatus: "candidate_for_monitoring",
+  recommendation: "manual_review",
+  note:
+    "Official Cyprus AI Act portal. The Commission AI Act Service Desk lists the Commissioner of Communications as Cyprus notifying authority, market surveillance authority, and national Single Point of Contact for the AI Act.",
+};
+
+const cyprusCyLawCaseLaw: CountrySourceRecord = {
+  label: "CyLaw Cyprus legal information and case-law database",
+  url: "https://cylaw.org/advanced-en.html",
+  institution: "CyLaw / Cyprus legal information service",
+  sourceType: "court",
+  official: true,
+  public: true,
+  runtimeAccessible: true,
+  responseStatus: 200,
+  publicationDate: null,
+  lastCheckedDate: "2026-07-16T00:00:00.000Z",
+  parserStatus: "candidate_for_monitoring",
+  recommendation: "manual_review",
+  note:
+    "Free Cyprus legal information and case-law database. N-Lex notes that CyLaw contains Supreme Court and second-instance Family Court judgments since 1997 and that access is free.",
+};
+
+const czechDigitalCzechiaAiAct: CountrySourceRecord = {
+  label: "Digital Czechia AI Act information page",
+  url: "https://digitalnicesko.gov.cz/",
+  institution: "Digital Czechia",
+  sourceType: "government",
+  official: true,
+  public: true,
+  runtimeAccessible: true,
+  responseStatus: 200,
+  publicationDate: null,
+  lastCheckedDate: "2026-07-16T00:00:00.000Z",
+  parserStatus: "candidate_for_monitoring",
+  recommendation: "manual_review",
+  note:
+    "Official Czechia digital-government source listed by the Commission AI Act Service Desk as providing AI Act information, including regulatory framework, high-risk systems, and regulatory sandboxes.",
+};
+
+const czechConstitutionalCourtDecisions: CountrySourceRecord = {
+  label: "Constitutional Court of Czechia decisions database",
+  url: "https://www.usoud.cz/en/decisions",
+  institution: "Constitutional Court of Czechia",
+  sourceType: "court",
+  official: true,
+  public: true,
+  runtimeAccessible: true,
+  responseStatus: 200,
+  publicationDate: null,
+  lastCheckedDate: "2026-07-16T00:00:00.000Z",
+  parserStatus: "candidate_for_monitoring",
+  recommendation: "manual_review",
+  note:
+    "Official Constitutional Court decisions page for Czechia. Used as a national case-law monitoring anchor pending deeper AI-specific case selection.",
+};
+
+const denmarkAiActAgencyPage: CountrySourceRecord = {
+  label: "Danish Agency for Digital Government AI Act information",
+  url: "https://digst.dk/",
+  institution: "Agency for Digital Government",
+  sourceType: "government",
+  official: true,
+  public: true,
+  runtimeAccessible: true,
+  responseStatus: 200,
+  publicationDate: null,
+  lastCheckedDate: "2026-07-16T00:00:00.000Z",
+  parserStatus: "candidate_for_monitoring",
+  recommendation: "manual_review",
+  note:
+    "Official Danish Agency for Digital Government anchor listed by the Commission AI Act Service Desk as providing information about the AI Act and its development.",
+};
+
+const denmarkDomsdatabasenCaseLaw: CountrySourceRecord = {
+  label: "Domsdatabasen Danish judgment database",
+  url: "https://domsdatabasen.dk/",
+  institution: "Danish Courts",
+  sourceType: "court",
+  official: true,
+  public: true,
+  runtimeAccessible: true,
+  responseStatus: 200,
+  publicationDate: null,
+  lastCheckedDate: "2026-07-16T00:00:00.000Z",
+  parserStatus: "candidate_for_monitoring",
+  recommendation: "manual_review",
+  note:
+    "Official Danish Courts judgment database. The database has published judgments since January 2022 and is used as Denmark's national case-law monitoring anchor.",
+};
+
+const estoniaRiigiTeatajaCaseLaw: CountrySourceRecord = {
+  label: "Riigi Teataja official legislation and judicial decisions portal",
+  url: "https://www.riigiteataja.ee/en/",
+  institution: "Ministry of Justice of Estonia",
+  sourceType: "court",
+  official: true,
+  public: true,
+  runtimeAccessible: true,
+  responseStatus: 200,
+  publicationDate: null,
+  lastCheckedDate: "2026-07-16T00:00:00.000Z",
+  parserStatus: "candidate_for_monitoring",
+  recommendation: "manual_review",
+  note:
+    "Official Estonian State Gazette portal. The Estonian Courts site states that public judicial decisions are accessible in the electronic Riigi Teataja.",
+};
+
+const estonianCourtsJudicialDecisions: CountrySourceRecord = {
+  label: "Estonian Courts judicial decisions information page",
+  url: "https://www.kohus.ee/en/node/4055",
+  institution: "Estonian Courts",
+  sourceType: "court",
+  official: true,
+  public: true,
+  runtimeAccessible: true,
+  responseStatus: 200,
+  publicationDate: null,
+  lastCheckedDate: "2026-07-16T00:00:00.000Z",
+  parserStatus: "manual_reference",
+  recommendation: "manual_review",
+  note:
+    "Official Estonian Courts page explaining that public judicial decisions are accessible through Riigi Teataja in administrative, misdemeanour, civil, and criminal cases after enforcement where publication restrictions do not apply.",
+};
+
 function createMonitoredInstitutionProfile(input: {
   countryCode: string;
   countryName: string;
@@ -1565,6 +1752,18 @@ function createMonitoredInstitutionProfile(input: {
   governmentSourceType?: CountrySourceRecord["sourceType"];
   relevantMinistriesOrAgencies: string[];
   checkedAt?: string;
+  additionalRegulationSources?: CountrySourceRecord[];
+  caseLawSources?: CountrySourceRecord[];
+  implementationMeasures?: string[];
+  competentAuthorities?: string[];
+  marketSurveillanceAuthorities?: string[];
+  notifyingAuthorities?: string[];
+  sourceVerificationStatus?: EuropeCountryProfile["sourceVerificationStatus"];
+  missingSourceWarnings?: string[];
+  editorialNotes?: string[];
+  nationalAIRegulationNotes?: string;
+  nationalCaseLawNotes?: string;
+  publicSummary?: string;
 }): EuropeCountryProfile {
   const checkedAt = input.checkedAt ?? "2026-07-15T00:00:00.000Z";
   const dpaSource: CountrySourceRecord = {
@@ -1612,18 +1811,26 @@ function createMonitoredInstitutionProfile(input: {
     implementationConfidence: "low",
     aiActImplementationNotes:
       `${input.countryName} is an EU member state to which the EU AI Act applies directly. Official sources verify a national data-protection authority and at least one government or official public implementation-context source relevant to AI governance. This profile does not yet verify a final national AI Act implementation act, competent-authority designation, market-surveillance authority, or notifying authority.`,
-    nationalImplementationMeasures: [],
-    nationalCompetentAuthorities: [],
-    marketSurveillanceAuthorities: [],
-    notifyingAuthorities: [],
+    nationalImplementationMeasures: input.implementationMeasures ?? [],
+    nationalCompetentAuthorities: input.competentAuthorities ?? [],
+    marketSurveillanceAuthorities: input.marketSurveillanceAuthorities ?? [],
+    notifyingAuthorities: input.notifyingAuthorities ?? [],
     dataProtectionAuthority: input.dataProtectionAuthority,
     relevantMinistriesOrAgencies: input.relevantMinistriesOrAgencies,
-    nationalAIRegulationSources: [dpaSource, governmentSource],
+    nationalAIRegulationSources: [
+      dpaSource,
+      governmentSource,
+      ...(input.additionalRegulationSources ?? []),
+    ],
     nationalAIRegulationNotes:
+      input.nationalAIRegulationNotes ??
       `${input.countryName} now has verified official monitoring anchors: ${input.dataProtectionAuthority} and ${input.governmentInstitution}. These sources support a conservative implementation-in-progress label but do not prove final AI Act authority designations.`,
-    nationalCaseLawSources: [],
+    nationalCaseLawSources: input.caseLawSources ?? [],
     nationalCaseLawNotes:
-      `No ${input.countryName}-specific AI case-law source has been verified into this baseline in this phase.`,
+      input.nationalCaseLawNotes ??
+      (input.caseLawSources?.length
+        ? `${input.countryName} now has a verified national case-law monitoring source. No AI Act-specific decision has been individually selected into this profile yet.`
+        : `No ${input.countryName}-specific AI case-law source has been verified into this baseline in this phase.`),
     nationalSoftLawSources:
       governmentSource.sourceType === "policy" || governmentSource.sourceType === "soft_law"
         ? [governmentSource]
@@ -1633,26 +1840,43 @@ function createMonitoredInstitutionProfile(input: {
         ? "The verified layer includes official policy or guidance material; binding national AI Act implementation instruments remain under review."
         : "No separate national AI soft-law or guidance source has been verified into this baseline in this phase.",
     latestRelevantUpdates: [],
-    officialSourceUrls: [dpaSource.url, governmentSource.url],
+    officialSourceUrls: [
+      dpaSource.url,
+      governmentSource.url,
+      ...(input.additionalRegulationSources ?? []).map((source) => source.url),
+      ...(input.caseLawSources ?? []).map((source) => source.url),
+    ],
     sourceReferences: [
       sourceReferenceFromCountrySource(dpaSource),
       sourceReferenceFromCountrySource(governmentSource, "supporting"),
+      ...(input.additionalRegulationSources ?? []).map((source) =>
+        sourceReferenceFromCountrySource(source, "supporting"),
+      ),
+      ...(input.caseLawSources ?? []).map((source) =>
+        sourceReferenceFromCountrySource(source, "supporting"),
+      ),
     ],
     citationQualityStatus: "partial",
-    sourceVerificationStatus: "partially_verified",
+    sourceVerificationStatus: input.sourceVerificationStatus ?? "partially_verified",
     lastReviewedDate: checkedAt,
-    missingSourceWarnings: [
-      `No specific ${input.countryName} AI Act implementation act verified.`,
-      "No competent-authority designation instrument verified.",
-      "No market-surveillance or notifying authority verified.",
-      `No country-specific AI case-law source verified.`,
-    ],
+    missingSourceWarnings:
+      input.missingSourceWarnings ??
+      [
+        `No specific ${input.countryName} AI Act implementation act verified.`,
+        "No competent-authority designation instrument verified.",
+        "No market-surveillance or notifying authority verified.",
+        ...(input.caseLawSources?.length
+          ? []
+          : [`No country-specific AI case-law source verified.`]),
+      ],
     editorialNotes: [
       `Do not describe ${input.dataProtectionAuthority} as an AI Act competent authority unless a final official designation instrument is verified.`,
       "Official monitoring anchors are present, but the implementation map is still incomplete.",
       `Absence of a verified designation here does not mean absence of ${input.countryName} regulatory work.`,
+      ...(input.editorialNotes ?? []),
     ],
     publicSummary:
+      input.publicSummary ??
       `${input.countryName} is included in the EU AI baseline with verified official monitoring anchors. The EU AI Act applies directly, and national data-protection/government sources are now connected for monitoring. Final national AI Act authority designations remain under review.`,
   };
 }
@@ -1691,9 +1915,9 @@ const firstWaveProfiles: EuropeCountryProfile[] = [
     ],
     nationalAIRegulationNotes:
       "Bulgaria now has verified official institutional and policy anchors for the baseline: CPDP for data-protection and AI/privacy oversight, the European Commission AI Watch country report, and the official Bulgarian AI Concept until 2030. These sources support an implementation-in-progress label, but they do not verify final AI Act authority designations.",
-    nationalCaseLawSources: [],
+    nationalCaseLawSources: [bulgariaCaseLawPortal],
     nationalCaseLawNotes:
-      "No Bulgaria-specific AI case-law source has been verified into this baseline in this phase.",
+      "The Bulgarian central web-based interface for case law is attached as the official national case-law monitoring source. No Bulgarian AI Act-specific decision has been individually selected into this profile yet.",
     nationalSoftLawSources: [bulgariaAiWatchStrategy, bulgariaAiConcept2030],
     nationalSoftLawNotes:
       "The verified Bulgaria layer currently consists mainly of AI strategy and policy material. Binding national AI Act implementation instruments remain under review.",
@@ -1702,28 +1926,27 @@ const firstWaveProfiles: EuropeCountryProfile[] = [
       bulgariaCpdp.url,
       bulgariaAiWatchStrategy.url,
       bulgariaAiConcept2030.url,
+      bulgariaCaseLawPortal.url,
     ],
     sourceReferences: [
       sourceReferenceFromCountrySource(bulgariaCpdp),
       sourceReferenceFromCountrySource(bulgariaAiWatchStrategy, "supporting"),
       sourceReferenceFromCountrySource(bulgariaAiConcept2030, "supporting"),
+      sourceReferenceFromCountrySource(bulgariaCaseLawPortal, "supporting"),
     ],
     citationQualityStatus: "partial",
-    sourceVerificationStatus: "partially_verified",
+    sourceVerificationStatus: "verified_official_sources_present",
     lastReviewedDate: "2026-07-15T00:00:00.000Z",
-    missingSourceWarnings: [
-      "No specific Bulgarian AI Act implementation act verified.",
-      "No competent-authority designation instrument verified.",
-      "No market-surveillance or notifying authority verified.",
-      "No country-specific AI case-law source verified.",
-    ],
+    missingSourceWarnings: [],
     editorialNotes: [
       "Do not describe CPDP as a Bulgarian AI Act competent authority unless a final official designation instrument is verified.",
       "The AI Concept and AI Watch report are policy/strategy sources and should not be treated as binding AI Act implementation law.",
+      "No Bulgarian AI Act notifying authority or market-surveillance authority has been verified from a binding designation instrument.",
+      "No Bulgarian AI Act-specific case-law item has been selected yet; the central case-law portal is attached as the official national case-law monitoring source.",
       "Absence of a verified designation here does not mean absence of Bulgarian regulatory work.",
     ],
     publicSummary:
-      "Bulgaria is included in the EU AI baseline with verified official policy and institutional anchors. The EU AI Act applies directly, CPDP is the national data-protection authority relevant to AI/privacy oversight, and Bulgaria has an official AI strategy/policy baseline through 2030. Final national AI Act authority designations remain under review.",
+      "Bulgaria is included in the EU AI baseline with verified official policy, institutional, and case-law anchors. The EU AI Act applies directly, CPDP is the national data-protection authority relevant to AI/privacy oversight, and Bulgaria has an official AI strategy/policy baseline through 2030. Final national AI Act authority designations remain under review.",
   },
   createMonitoredInstitutionProfile({
     countryCode: "HR",
@@ -1740,6 +1963,18 @@ const firstWaveProfiles: EuropeCountryProfile[] = [
       "Croatian Personal Data Protection Agency",
       "Ministry of Justice, Public Administration and Digital Transformation",
     ],
+    additionalRegulationSources: [croatiaJudgmentPublicationPortal],
+    caseLawSources: [croatiaSupraCaseLaw],
+    sourceVerificationStatus: "verified_official_sources_present",
+    missingSourceWarnings: [],
+    nationalCaseLawNotes:
+      "SuPra is attached as Croatia's official Supreme Court case-law database, with the ministry judgment-publication page attached as an additional official monitoring source. No Croatian AI Act-specific decision has been individually selected into this profile yet.",
+    editorialNotes: [
+      "No Croatian AI Act competent-authority, market-surveillance, or notifying-authority designation has been verified from a binding national instrument.",
+      "The Croatian judgment-publication page is useful legal-tech context because it describes an AI-based anonymisation and publication workflow for judgments.",
+    ],
+    publicSummary:
+      "Croatia is included with verified official data-protection, ministry, case-law, and judgment-publication anchors. Final AI Act authority designations remain under review, but the national case-law monitoring layer is now connected.",
   }),
   createMonitoredInstitutionProfile({
     countryCode: "CY",
@@ -1755,9 +1990,30 @@ const firstWaveProfiles: EuropeCountryProfile[] = [
       "Deputy Ministry of Research, Innovation and Digital Policy",
     governmentSourceType: "policy",
     relevantMinistriesOrAgencies: [
+      "Commissioner of Communications of the Republic of Cyprus",
       "Commissioner for Personal Data Protection",
       "Deputy Ministry of Research, Innovation and Digital Policy",
     ],
+    additionalRegulationSources: [cyprusAiActAuthorityPortal],
+    caseLawSources: [cyprusCyLawCaseLaw],
+    implementationMeasures: [
+      "Commission AI Act Service Desk lists the Commissioner of Communications of the Republic of Cyprus as notifying authority, market surveillance authority, and national Single Point of Contact for the AI Act.",
+    ],
+    competentAuthorities: ["Commissioner of Communications of the Republic of Cyprus"],
+    marketSurveillanceAuthorities: ["Commissioner of Communications of the Republic of Cyprus"],
+    notifyingAuthorities: ["Commissioner of Communications of the Republic of Cyprus"],
+    sourceVerificationStatus: "verified_official_sources_present",
+    missingSourceWarnings: [],
+    nationalAIRegulationNotes:
+      "Cyprus has a verified AI Act authority anchor: the Commission AI Act Service Desk identifies the Commissioner of Communications as notifying authority, market surveillance authority, and national Single Point of Contact. The Deputy Ministry page remains a government implementation-context source.",
+    nationalCaseLawNotes:
+      "CyLaw is attached as Cyprus's national legal-information and case-law monitoring source. No Cyprus AI Act-specific decision has been individually selected into this profile yet.",
+    editorialNotes: [
+      "Keep the Commissioner of Communications designation tied to the Commission AI Act Service Desk and Cyprus AI Act portal; do not generalise it beyond the AI Act functions stated there.",
+      "No Cyprus AI Act-specific case-law item has been selected yet; CyLaw is attached as the monitoring source.",
+    ],
+    publicSummary:
+      "Cyprus is included with verified official AI Act authority, data-protection, government, and case-law anchors. The Commissioner of Communications is tracked as notifying authority, market surveillance authority, and national Single Point of Contact for the AI Act based on the Commission AI Act Service Desk.",
   }),
   createMonitoredInstitutionProfile({
     countryCode: "CZ",
@@ -1775,6 +2031,18 @@ const firstWaveProfiles: EuropeCountryProfile[] = [
       "Office for Personal Data Protection",
       "Ministry of Industry and Trade",
     ],
+    additionalRegulationSources: [czechDigitalCzechiaAiAct],
+    caseLawSources: [czechConstitutionalCourtDecisions],
+    sourceVerificationStatus: "verified_official_sources_present",
+    missingSourceWarnings: [],
+    nationalCaseLawNotes:
+      "The Constitutional Court decisions page is attached as a Czech national case-law monitoring source. No Czech AI Act-specific decision has been individually selected into this profile yet.",
+    editorialNotes: [
+      "Czechia has official AI Act/draft-law context sources, but final competent-authority, market-surveillance, and notifying-authority designations remain under review.",
+      "No Czech AI Act-specific case-law item has been selected yet; the Constitutional Court decisions page is a monitoring anchor, not a complete all-courts case-law map.",
+    ],
+    publicSummary:
+      "Czechia is included with verified official data-protection, ministry, Digital Czechia AI Act, and case-law anchors. Final AI Act authority designations remain under review.",
   }),
   createMonitoredInstitutionProfile({
     countryCode: "DK",
@@ -1792,6 +2060,18 @@ const firstWaveProfiles: EuropeCountryProfile[] = [
       "Danish Data Protection Agency",
       "Agency for Digital Government",
     ],
+    additionalRegulationSources: [denmarkAiActAgencyPage],
+    caseLawSources: [denmarkDomsdatabasenCaseLaw],
+    sourceVerificationStatus: "verified_official_sources_present",
+    missingSourceWarnings: [],
+    nationalCaseLawNotes:
+      "Domsdatabasen is attached as Denmark's official courts judgment database. No Danish AI Act-specific decision has been individually selected into this profile yet.",
+    editorialNotes: [
+      "Denmark has official Agency for Digital Government AI Act/guidance anchors and an official judgment database, but final AI Act authority designations should remain tied to a binding national law source before being displayed as final.",
+      "No Danish AI Act-specific case-law item has been selected yet; Domsdatabasen is attached as the monitoring source.",
+    ],
+    publicSummary:
+      "Denmark is included with verified official data-protection, Agency for Digital Government, AI Act guidance, and case-law anchors. Final authority-designation details remain under review pending binding-source confirmation.",
   }),
   createMonitoredInstitutionProfile({
     countryCode: "EE",
@@ -1807,6 +2087,17 @@ const firstWaveProfiles: EuropeCountryProfile[] = [
       "Estonian Data Protection Inspectorate",
       "Government of Estonia / Kratid initiative",
     ],
+    caseLawSources: [estoniaRiigiTeatajaCaseLaw, estonianCourtsJudicialDecisions],
+    sourceVerificationStatus: "verified_official_sources_present",
+    missingSourceWarnings: [],
+    nationalCaseLawNotes:
+      "Riigi Teataja and the Estonian Courts judicial-decisions page are attached as official Estonian case-law monitoring anchors. No Estonian AI Act-specific decision has been individually selected into this profile yet.",
+    editorialNotes: [
+      "Estonia has official digital-government and case-law monitoring anchors, but final AI Act competent-authority, market-surveillance, and notifying-authority designations remain under review.",
+      "No Estonian AI Act-specific case-law item has been selected yet; Riigi Teataja is attached as the official publication/search anchor.",
+    ],
+    publicSummary:
+      "Estonia is included with verified official data-protection, digital-government, and case-law anchors. Final AI Act authority designations remain under review.",
   }),
   createMonitoredInstitutionProfile({
     countryCode: "FI",
