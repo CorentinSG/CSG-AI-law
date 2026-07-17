@@ -571,7 +571,7 @@ function getEurLexQuery(source: RegulationSource) {
   if (typeof configured === "string" && configured.trim().length > 0) {
     return configured.trim();
   }
-  return 'TXT="artificial intelligence" OR TI="artificial intelligence" OR TXT="AI Act" OR TI="AI Act"';
+  return 'TI ~ "artificial intelligence" OR TI ~ "AI Act" OR TE ~ "artificial intelligence" OR TE ~ "AI Act"';
 }
 
 function getEurLexSearchLanguage(source: RegulationSource) {
@@ -592,10 +592,10 @@ function buildEurLexSoapEnvelope(input: {
   return `<?xml version="1.0" encoding="UTF-8"?>
 <soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope" xmlns:elx="http://eur-lex.europa.eu/search" xmlns:wsse="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd">
   <soap:Header>
-    <wsse:Security>
-      <wsse:UsernameToken>
+    <wsse:Security soap:mustUnderstand="true">
+      <wsse:UsernameToken xmlns:wsu="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd" wsu:Id="UsernameToken-1">
         <wsse:Username>${escapeXml(input.username)}</wsse:Username>
-        <wsse:Password>${escapeXml(input.password)}</wsse:Password>
+        <wsse:Password Type="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-username-token-profile-1.0#PasswordText">${escapeXml(input.password)}</wsse:Password>
       </wsse:UsernameToken>
     </wsse:Security>
   </soap:Header>
@@ -605,6 +605,8 @@ function buildEurLexSoapEnvelope(input: {
       <elx:page>1</elx:page>
       <elx:pageSize>${input.pageSize}</elx:pageSize>
       <elx:searchLanguage>${escapeXml(input.searchLanguage)}</elx:searchLanguage>
+      <elx:excludeAllConsleg>true</elx:excludeAllConsleg>
+      <elx:limitToLatestConsleg>false</elx:limitToLatestConsleg>
     </elx:searchRequest>
   </soap:Body>
 </soap:Envelope>`;

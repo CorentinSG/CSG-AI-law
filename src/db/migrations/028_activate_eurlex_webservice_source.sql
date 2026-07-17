@@ -40,7 +40,7 @@ insert into public.regulation_sources (
   'api',
   '{
     "apiProvider": "eurlex",
-    "expertQuery": "TXT=\"artificial intelligence\" OR TI=\"artificial intelligence\" OR TXT=\"AI Act\" OR TI=\"AI Act\" OR TXT=\"general-purpose AI\" OR TXT=\"biometric identification\"",
+    "expertQuery": "TI ~ \"artificial intelligence\" OR TI ~ \"AI Act\" OR TE ~ \"artificial intelligence\" OR TE ~ \"AI Act\" OR TE ~ \"biometric identification\"",
     "searchLanguage": "EN",
     "maxItems": 12,
     "authorityTypeHint": "Official EU legal database",

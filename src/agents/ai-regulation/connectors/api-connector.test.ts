@@ -475,7 +475,12 @@ describe("ApiConnector", () => {
     const [, requestInit] = fetchMock.mock.calls[0] ?? [];
     expect(requestInit?.method).toBe("POST");
     expect(String(requestInit?.body)).toContain("<wsse:Username>test-user</wsse:Username>");
+    expect(String(requestInit?.body)).toContain(
+      'PasswordText">test-password</wsse:Password>',
+    );
     expect(String(requestInit?.body)).toContain("<elx:expertQuery>TI=&quot;AI Act&quot;</elx:expertQuery>");
+    expect(String(requestInit?.body)).toContain("<elx:excludeAllConsleg>true</elx:excludeAllConsleg>");
+    expect(String(requestInit?.body)).toContain("<elx:limitToLatestConsleg>false</elx:limitToLatestConsleg>");
     expect(result.items).toHaveLength(1);
     expect(result.items[0]?.title).toContain("harmonised rules on artificial intelligence");
     expect(result.items[0]?.url).toContain("CELEX:32024R1689");
