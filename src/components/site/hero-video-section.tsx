@@ -33,16 +33,16 @@ export function HeroVideoSection({
         className="pointer-events-none absolute bottom-0 right-0 top-24 z-[1] hidden w-[38%] lg:block"
         style={{
           WebkitMaskImage:
-            "linear-gradient(to right, transparent 0%, black 32%), linear-gradient(to bottom, transparent 0%, black 22%, black 88%, transparent 100%)",
+            "linear-gradient(to right, transparent 0%, black 48%), linear-gradient(to bottom, transparent 0%, black 32%, black 82%, transparent 100%)",
           WebkitMaskComposite: "source-in",
           maskImage:
-            "linear-gradient(to right, transparent 0%, black 32%), linear-gradient(to bottom, transparent 0%, black 22%, black 88%, transparent 100%)",
+            "linear-gradient(to right, transparent 0%, black 48%), linear-gradient(to bottom, transparent 0%, black 32%, black 82%, transparent 100%)",
           maskComposite: "intersect",
         }}
       >
         <ProfilePortrait priority large side className="h-full" />
         {/* quiet darkening so the photo's light studio background sits in the theme */}
-        <div className="absolute inset-0 bg-black/35" />
+        <div className="absolute inset-0 bg-black/50" />
       </div>
 
       {/* Foreground */}
