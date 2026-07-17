@@ -137,6 +137,7 @@ type ApiProvider =
   | "legal_data_hunter";
 
 const PISTE_OAUTH_TOKEN_URL = "https://oauth.piste.gouv.fr/api/oauth/token";
+const PISTE_SANDBOX_OAUTH_TOKEN_URL = "https://sandbox-oauth.piste.gouv.fr/api/oauth/token";
 
 const defaultAiTerms = [
   "intelligence artificielle",
@@ -576,10 +577,14 @@ async function scanJudilibre(source: RegulationSource): Promise<ConnectorScanRes
   let response: Response;
   let json: unknown;
   try {
+    const oauth = keyId ? null : await fetchPisteAccessToken(pisteClientId!, pisteClientSecret!);
     const headers: Record<string, string> = keyId
       ? { KeyId: keyId }
-      : { Authorization: `Bearer ${await fetchPisteAccessToken(pisteClientId!, pisteClientSecret!)}` };
-    const result = await requestJson<JudilibreResponse>(source, {
+      : { Authorization: `Bearer ${oauth!.accessToken}` };
+    const requestSource = oauth
+      ? { ...source, sourceUrl: getPisteApiUrl(source.sourceUrl, oauth.environment) }
+      : source;
+    const result = await requestJson<JudilibreResponse>(requestSource, {
       ...headers,
       Accept: "application/json",
     });
@@ -653,7 +658,11 @@ async function scanJudilibre(source: RegulationSource): Promise<ConnectorScanRes
   };
 }
 
-async function fetchPisteAccessToken(clientId: string, clientSecret: string) {
+async function requestPisteAccessToken(
+  tokenUrl: string,
+  clientId: string,
+  clientSecret: string,
+) {
   const body = new URLSearchParams({
     grant_type: "client_credentials",
     client_id: clientId,
@@ -661,7 +670,7 @@ async function fetchPisteAccessToken(clientId: string, clientSecret: string) {
     scope: "openid",
   });
 
-  const response = await fetch(PISTE_OAUTH_TOKEN_URL, {
+  const response = await fetch(tokenUrl, {
     method: "POST",
     headers: {
       "Content-Type": "application/x-www-form-urlencoded",
@@ -681,6 +690,37 @@ async function fetchPisteAccessToken(clientId: string, clientSecret: string) {
   }
 
   return json.access_token;
+}
+
+async function fetchPisteAccessToken(clientId: string, clientSecret: string) {
+  try {
+    return {
+      accessToken: await requestPisteAccessToken(
+        PISTE_OAUTH_TOKEN_URL,
+        clientId,
+        clientSecret,
+      ),
+      environment: "production" as const,
+    };
+  } catch (productionError) {
+    try {
+      return {
+        accessToken: await requestPisteAccessToken(
+          PISTE_SANDBOX_OAUTH_TOKEN_URL,
+          clientId,
+          clientSecret,
+        ),
+        environment: "sandbox" as const,
+      };
+    } catch {
+      throw productionError;
+    }
+  }
+}
+
+function getPisteApiUrl(sourceUrl: string, environment: "production" | "sandbox") {
+  if (environment !== "sandbox") return sourceUrl;
+  return sourceUrl.replace("https://api.piste.gouv.fr/", "https://sandbox-api.piste.gouv.fr/");
 }
 
 function buildLegifranceDocumentUrl(result: LegifranceResult) {
@@ -711,11 +751,11 @@ async function scanLegifrance(source: RegulationSource): Promise<ConnectorScanRe
   let response: Response;
   let json: unknown;
   try {
-    const accessToken = await fetchPisteAccessToken(clientId, clientSecret);
-    response = await fetch(source.sourceUrl, {
+    const oauth = await fetchPisteAccessToken(clientId, clientSecret);
+    response = await fetch(getPisteApiUrl(source.sourceUrl, oauth.environment), {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${accessToken}`,
+        Authorization: `Bearer ${oauth.accessToken}`,
         "Content-Type": "application/json",
         Accept: "application/json",
       },

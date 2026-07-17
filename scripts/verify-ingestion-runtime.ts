@@ -26,6 +26,7 @@ const JUDILIBRE_PROBE_URL =
 const COURTLISTENER_PROBE_URL =
   "https://www.courtlistener.com/api/rest/v4/search/?q=%22artificial%20intelligence%22&type=o&order_by=dateFiled%20desc";
 const PISTE_OAUTH_TOKEN_URL = "https://oauth.piste.gouv.fr/api/oauth/token";
+const PISTE_SANDBOX_OAUTH_TOKEN_URL = "https://sandbox-oauth.piste.gouv.fr/api/oauth/token";
 const MIN_FIRECRAWL_MARKDOWN_CHARS = 40;
 const MIN_FIRECRAWL_DISTINCT_CONTENT_CHARS = 20;
 
@@ -197,24 +198,39 @@ async function verifyJudilibre(): Promise<ProviderProbeResult> {
   const configured = Boolean(keyId || (pisteClientId && pisteClientSecret));
 
   return runConfiguredProbe("judilibre", configured, async () => {
+    let probeUrl = JUDILIBRE_PROBE_URL;
     let headers: HeadersInit;
     if (keyId) {
       headers = { KeyId: keyId };
     } else {
-      const tokenResponse = await fetch(PISTE_OAUTH_TOKEN_URL, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
-          Accept: "application/json",
-        },
-        body: new URLSearchParams({
-          grant_type: "client_credentials",
-          client_id: pisteClientId!,
-          client_secret: pisteClientSecret!,
-          scope: "openid",
-        }),
-        signal: AbortSignal.timeout(15_000),
-      });
+      async function requestToken(tokenUrl: string) {
+        return fetch(tokenUrl, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+            Accept: "application/json",
+          },
+          body: new URLSearchParams({
+            grant_type: "client_credentials",
+            client_id: pisteClientId!,
+            client_secret: pisteClientSecret!,
+            scope: "openid",
+          }),
+          signal: AbortSignal.timeout(15_000),
+        });
+      }
+
+      let tokenResponse = await requestToken(PISTE_OAUTH_TOKEN_URL);
+      if (!tokenResponse.ok) {
+        const sandboxResponse = await requestToken(PISTE_SANDBOX_OAUTH_TOKEN_URL);
+        if (sandboxResponse.ok) {
+          tokenResponse = sandboxResponse;
+          probeUrl = JUDILIBRE_PROBE_URL.replace(
+            "https://api.piste.gouv.fr/",
+            "https://sandbox-api.piste.gouv.fr/",
+          );
+        }
+      }
 
       if (!tokenResponse.ok) {
         throw new Error(`PISTE OAuth HTTP ${tokenResponse.status}`);
@@ -228,7 +244,7 @@ async function verifyJudilibre(): Promise<ProviderProbeResult> {
       headers = { Authorization: `Bearer ${tokenJson.access_token}` };
     }
 
-    const response = await fetch(JUDILIBRE_PROBE_URL, {
+    const response = await fetch(probeUrl, {
       headers,
       signal: AbortSignal.timeout(15_000),
     });

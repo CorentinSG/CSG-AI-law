@@ -720,20 +720,18 @@ export const regulationSourcesSeed: RegulationSource[] = [
     jurisdiction: "France",
     region: "Europe",
     country: "France",
-    sourceUrl: "https://www.legifrance.gouv.fr/search/jorf",
+    sourceUrl: "https://api.piste.gouv.fr/dila/legifrance/lf-engine-app/search",
     sourceType: "legislative_database",
     scanFrequency: "weekly",
     active: true,
     lastScannedAt: "2026-05-23T09:30:00.000Z",
     notes:
-      "Official French legislative database for AI-related decrees, laws, CNIL deliberations published in the JORF, and related governance texts. The official DILA/PISTE API connector (apiProvider 'legifrance') is implemented as the preferred channel; to activate it, set LEGIFRANCE_PISTE_CLIENT_ID/SECRET, switch preferredExtractionMethod to 'api' and sourceUrl to the PISTE lf-engine-app/search endpoint. Until then this source stays on the dedicated scraping parser, which degrades honestly when blocked by a Cloudflare challenge.",
+      "Official French legislative database for AI-related decrees, laws, CNIL deliberations published in the JORF, and related governance texts. The official DILA/PISTE API connector (apiProvider 'legifrance') is the preferred channel when LEGIFRANCE_PISTE_CLIENT_ID/SECRET are configured; it degrades honestly if credentials or upstream access fail.",
     reliabilityLevel: "high",
-    preferredExtractionMethod: "html_static",
+    preferredExtractionMethod: "api",
     config: {
       maxItems: 10,
       authorityTypeHint: "Binding law",
-      // T-RT3B: official channel wiring. Honoured once preferredExtractionMethod
-      // is flipped to "api" and PISTE credentials exist; ignored under html_static.
       apiProvider: "legifrance",
       fond: "JORF",
       searchText: "intelligence artificielle",
