@@ -1,5 +1,6 @@
 import { listEuMonitoringAgents } from "@/agents/ai-regulation/euMonitoringSupervisorAgent";
 import { queueScanJob } from "@/agents/ai-regulation/processors/scanJobs";
+import { updateRepository } from "@/agents/ai-regulation/processors/updateRepository";
 import type { ScanTrigger } from "@/agents/ai-regulation/processors/pipeline";
 import type { ScanProfileId } from "@/agents/ai-regulation/scanProfiles";
 import { internationalMonitoringSourceRegistry } from "@/agents/ai-regulation/internationalNewsSources";
@@ -25,6 +26,13 @@ export interface CentralSchedulerPlan {
   usAgents: number;
   internationalAgents: number;
   items: CentralSchedulerPlanItem[];
+}
+
+export interface CentralSchedulerSkippedJob {
+  itemId: string;
+  scanProfile: ScanProfileId;
+  existingJobId: string;
+  reason: "recent_duplicate";
 }
 
 const EU_SCAN_ITEMS = [
@@ -96,6 +104,8 @@ export const scheduler = {
     "Central scheduler for the AI Regulation Monitor. It queues regional profile sweeps covering all EU and US monitoring agents; a permanent worker should drain the queue.",
 };
 
+const DEFAULT_SCHEDULER_DEDUPE_WINDOW_MS = 10 * 60 * 1000;
+
 function planItemsForRegion(
   region: CentralSchedulerRegion,
   agentIds: string[],
@@ -112,6 +122,40 @@ function planItemsForRegion(
     agentIds,
     agentCount: agentIds.length,
   }));
+}
+
+function timestamp(value: string | null | undefined) {
+  if (!value) return null;
+  const parsed = Date.parse(value);
+  return Number.isNaN(parsed) ? null : parsed;
+}
+
+async function findRecentDuplicateSchedulerJob(
+  item: CentralSchedulerPlanItem,
+  dedupeWindowMs: number,
+  now = Date.now(),
+) {
+  if (dedupeWindowMs <= 0) {
+    return null;
+  }
+
+  const jobs = await updateRepository.getScanJobs(100);
+  return (
+    jobs.find((job) => {
+      if (job.status === "failed") {
+        return false;
+      }
+
+      const scanProfile = job.resultSummary?.scanProfile;
+      const schedulerPlanItemId = job.resultSummary?.schedulerPlanItemId;
+      if (scanProfile !== item.scanProfile || schedulerPlanItemId !== item.id) {
+        return false;
+      }
+
+      const createdAt = timestamp(job.createdAt);
+      return createdAt !== null && now - createdAt <= dedupeWindowMs;
+    }) ?? null
+  );
 }
 
 export function buildCentralMonitoringSchedule(): CentralSchedulerPlan {
@@ -140,12 +184,15 @@ export async function enqueueCentralMonitoringSchedule(options?: {
   requestedBy?: string;
   regions?: CentralSchedulerRegion[];
   cadences?: Array<CentralSchedulerPlanItem["cadence"]>;
+  dedupeWindowMs?: number;
 }) {
   const selectedRegions = new Set(options?.regions ?? ["eu", "us", "international"]);
   const selectedCadences = options?.cadences ? new Set(options.cadences) : null;
   const trigger = options?.trigger ?? "scheduled";
   const requestedBy = options?.requestedBy ?? "central-monitoring-scheduler";
   const plan = buildCentralMonitoringSchedule();
+  const dedupeWindowMs =
+    options?.dedupeWindowMs ?? DEFAULT_SCHEDULER_DEDUPE_WINDOW_MS;
   const selectedItems = plan.items.filter(
     (item) =>
       selectedRegions.has(item.region) &&
@@ -153,7 +200,19 @@ export async function enqueueCentralMonitoringSchedule(options?: {
   );
 
   const queuedJobs = [];
+  const skippedJobs: CentralSchedulerSkippedJob[] = [];
   for (const item of selectedItems) {
+    const duplicate = await findRecentDuplicateSchedulerJob(item, dedupeWindowMs);
+    if (duplicate) {
+      skippedJobs.push({
+        itemId: item.id,
+        scanProfile: item.scanProfile,
+        existingJobId: duplicate.id,
+        reason: "recent_duplicate",
+      });
+      continue;
+    }
+
     queuedJobs.push(
       await queueScanJob({
         trigger,
@@ -175,5 +234,7 @@ export async function enqueueCentralMonitoringSchedule(options?: {
     plan,
     queuedJobs,
     queuedJobCount: queuedJobs.length,
+    skippedJobs,
+    skippedJobCount: skippedJobs.length,
   };
 }

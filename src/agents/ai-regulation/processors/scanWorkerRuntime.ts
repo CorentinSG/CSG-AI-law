@@ -15,6 +15,8 @@ export type ScanWorkerConfig = {
   maxJobsPerCycle: number;
   idleExitAfter: number;
   continueOnError: boolean;
+  schedulerEnabled: boolean;
+  schedulerIntervalMs: number;
   heartbeatIntervalMs: number;
   heartbeatTimeoutMs: number;
   singletonStaleMs: number;
@@ -87,6 +89,14 @@ export function createScanWorkerConfig(
     ),
     idleExitAfter: parseNonNegativeInt(env.SCAN_JOB_WORKER_IDLE_EXIT_AFTER, 0),
     continueOnError: env.SCAN_JOB_WORKER_CONTINUE_ON_ERROR !== "false",
+    schedulerEnabled: env.SCAN_JOB_WORKER_ENABLE_SCHEDULER !== "false",
+    schedulerIntervalMs: Math.max(
+      60_000,
+      parseNonNegativeInt(
+        env.SCAN_JOB_WORKER_SCHEDULER_INTERVAL_MS,
+        15 * 60 * 1000,
+      ),
+    ),
     heartbeatIntervalMs,
     heartbeatTimeoutMs,
     singletonStaleMs,

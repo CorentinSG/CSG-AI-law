@@ -4,6 +4,7 @@ loadScriptEnv();
 
 import { hostname } from "node:os";
 
+import { enqueueCentralMonitoringSchedule } from "@/agents/ai-regulation/scheduler";
 import { drainQueuedScanJobs } from "@/agents/ai-regulation/processors/scanJobs";
 import { updateRepository } from "@/agents/ai-regulation/processors/updateRepository";
 import {
@@ -21,6 +22,9 @@ import { getRepositoryMode } from "@/db/repository";
 import { env } from "@/lib/env";
 
 const WORKER_HEARTBEAT_TRIGGER = "worker_heartbeat";
+const LIVE_SCHEDULER_INTERVAL_MS = 15 * 60 * 1000;
+const HOURLY_SCHEDULER_INTERVAL_MS = 60 * 60 * 1000;
+const DAILY_SCHEDULER_INTERVAL_MS = 24 * 60 * 60 * 1000;
 
 function sleep(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -33,6 +37,8 @@ async function main() {
   let idleCycles = 0;
   let stopRequested = false;
   let heartbeatJob: ScanJob | null = null;
+  const lastSchedulerRunAtByCadence = new Map<string, number>();
+  let lastSchedulerSummary: Record<string, unknown> | null = null;
 
   const writeStatus = async (
     state: ScanWorkerStatus["state"],
@@ -115,7 +121,7 @@ async function main() {
 
   console.log(`[scan-worker] APP_DATA_MODE=${getRepositoryMode()}`);
   console.log(
-    `[scan-worker] workerId=${config.workerId} AI_ENABLE_PROCESSING=${env.AI_ENABLE_PROCESSING} pollMs=${config.pollMs} maxJobsPerCycle=${config.maxJobsPerCycle} idleExitAfter=${config.idleExitAfter} continueOnError=${config.continueOnError} heartbeatIntervalMs=${config.heartbeatIntervalMs} heartbeatTimeoutMs=${config.heartbeatTimeoutMs} singletonStaleMs=${config.singletonStaleMs}`,
+    `[scan-worker] workerId=${config.workerId} AI_ENABLE_PROCESSING=${env.AI_ENABLE_PROCESSING} pollMs=${config.pollMs} maxJobsPerCycle=${config.maxJobsPerCycle} idleExitAfter=${config.idleExitAfter} continueOnError=${config.continueOnError} schedulerEnabled=${config.schedulerEnabled} schedulerIntervalMs=${config.schedulerIntervalMs} heartbeatIntervalMs=${config.heartbeatIntervalMs} heartbeatTimeoutMs=${config.heartbeatTimeoutMs} singletonStaleMs=${config.singletonStaleMs}`,
   );
 
   await writeStatus("starting");
@@ -132,6 +138,54 @@ async function main() {
       }
 
       await refreshScanWorkerLeaseHeartbeat(config);
+
+      if (config.schedulerEnabled) {
+        const now = Date.now();
+        const cadenceRuns = [
+          {
+            cadence: "live" as const,
+            intervalMs: Math.max(config.schedulerIntervalMs, LIVE_SCHEDULER_INTERVAL_MS),
+          },
+          { cadence: "hourly" as const, intervalMs: HOURLY_SCHEDULER_INTERVAL_MS },
+          { cadence: "daily" as const, intervalMs: DAILY_SCHEDULER_INTERVAL_MS },
+        ];
+
+        for (const cadenceRun of cadenceRuns) {
+          const lastRunAt = lastSchedulerRunAtByCadence.get(cadenceRun.cadence) ?? 0;
+          if (now - lastRunAt < cadenceRun.intervalMs) {
+            continue;
+          }
+
+          lastSchedulerRunAtByCadence.set(cadenceRun.cadence, now);
+          try {
+            const schedulerResult = await enqueueCentralMonitoringSchedule({
+              trigger: "scheduled",
+              requestedBy: `${config.workerId}:self-scheduler`,
+              cadences: [cadenceRun.cadence],
+              dedupeWindowMs: cadenceRun.intervalMs,
+            });
+            lastSchedulerSummary = {
+              cadence: cadenceRun.cadence,
+              queuedJobCount: schedulerResult.queuedJobCount,
+              skippedJobCount: schedulerResult.skippedJobCount,
+              totalPlanItems: schedulerResult.plan.items.length,
+            };
+            console.log(
+              `[scan-worker] self-scheduler cadence=${cadenceRun.cadence} queued=${schedulerResult.queuedJobCount} skipped=${schedulerResult.skippedJobCount}`,
+            );
+          } catch (error) {
+            lastSchedulerSummary = {
+              cadence: cadenceRun.cadence,
+              error: error instanceof Error ? error.message : "Unknown scheduler error",
+            };
+            console.error(
+              `[scan-worker] self-scheduler cadence=${cadenceRun.cadence} failed: ${
+                error instanceof Error ? error.message : "Unknown scheduler error"
+              }`,
+            );
+          }
+        }
+      }
 
       const summary = await drainQueuedScanJobs({
         maxJobs: config.maxJobsPerCycle,
@@ -169,9 +223,11 @@ async function main() {
 
       await writeStatus(didWork ? "running" : "idle", {
         lastSummary: summary as Record<string, unknown>,
+        ...(lastSchedulerSummary ? { schedulerSummary: lastSchedulerSummary } : {}),
       });
       await writePersistentHeartbeat(didWork ? "running" : "idle", {
         lastSummary: summary as Record<string, unknown>,
+        ...(lastSchedulerSummary ? { schedulerSummary: lastSchedulerSummary } : {}),
       });
 
       if (config.idleExitAfter > 0 && idleCycles >= config.idleExitAfter) {

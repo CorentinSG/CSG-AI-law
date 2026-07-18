@@ -16,6 +16,7 @@ Last synchronized: 2026-06-20 (Cowork A–F hardening: HTTP security headers, ti
 
 - **2026-07-16 ops note**: CourtListener token is configured on Vercel/Railway main worker. PISTE credentials are configured too; Judilibre now accepts either direct `JUDILIBRE_API_KEYID` or PISTE OAuth fallback through `LEGIFRANCE_PISTE_CLIENT_ID/SECRET`. Do not print secrets in docs or handoffs.
 - **2026-07-17 EUR-Lex ops note**: EUR-Lex SOAP webservice support is implemented as optional `apiProvider: "eurlex"` for `src-eur-lex-ai`; set `EURLEX_USERNAME` and `EURLEX_PASSWORD` only in Vercel/Railway env. Treat results as official EU legal database records, but still verify instrument form, binding status, CELEX/date/pinpoint, and AI relevance before relying on them in the legal database.
+- **2026-07-18 live monitoring ops note**: the central scheduler is now wired both as a Hobby-safe daily fallback at `/api/cron/ai-regulation-central-scheduler` in `vercel.json` and as the primary Railway worker self-scheduler. `scripts/run-scan-job-worker.ts` enqueues EU/US/International sweeps by cadence (`live` every 15m, `hourly` every 1h, `daily` every 24h), with recent non-failed duplicate suppression in `enqueueCentralMonitoringSchedule()`. Operators can tune the live interval with `SCAN_JOB_WORKER_ENABLE_SCHEDULER` and `SCAN_JOB_WORKER_SCHEDULER_INTERVAL_MS`.
 - **2026-07-16 International backend note**: International now has dedicated scan profiles, source registry, supervisor/scheduler coverage, and migration `026_international_monitoring_sources.sql` for UNESCO, UN, WIPO, IEEE, international NewsAPI, and international GDELT. Treat this layer as transnational governance/soft law/standards, not binding national law by default.
 
 **Previous state (2026-06-10, preserved for reference):**
@@ -220,11 +221,12 @@ Updated while job is actively being processed. Stale recovery evaluates latest h
 ### Local worker
 - Script: `scripts/run-scan-job-worker.ts` | Command: `npm run scan:worker-local`
 - Polls queue, drains serially, uses optimistic claim; exits after configurable idle cycles
+- Self-scheduler: enabled by default; enqueues the central EU/US/International monitoring plan by cadence (`live` 15m, `hourly` 1h, `daily` 24h) and relies on scheduler-level duplicate suppression when Vercel cron also fires
 - Runtime helper: `src/agents/ai-regulation/processors/scanWorkerRuntime.ts`
 - Service hardening: singleton lease file, persisted status/heartbeat file, stop-file request support, signal-aware graceful shutdown
 - Helper command: `npm run scan:worker-stop`
-- Env: `SCAN_JOB_WORKER_POLL_MS`, `SCAN_JOB_WORKER_MAX_JOBS_PER_CYCLE`, `SCAN_JOB_WORKER_IDLE_EXIT_AFTER`, `SCAN_JOB_WORKER_CONTINUE_ON_ERROR`, `SCAN_JOB_WORKER_STATE_DIR`, `SCAN_JOB_WORKER_SINGLETON_STALE_MS`
-- **Limitation**: local-process only; not yet a detached production worker (F3)
+- Env: `SCAN_JOB_WORKER_POLL_MS`, `SCAN_JOB_WORKER_MAX_JOBS_PER_CYCLE`, `SCAN_JOB_WORKER_IDLE_EXIT_AFTER`, `SCAN_JOB_WORKER_CONTINUE_ON_ERROR`, `SCAN_JOB_WORKER_ENABLE_SCHEDULER`, `SCAN_JOB_WORKER_SCHEDULER_INTERVAL_MS`, `SCAN_JOB_WORKER_STATE_DIR`, `SCAN_JOB_WORKER_SINGLETON_STALE_MS`
+- Production: Railway Node 22 worker drains Supabase `scan_jobs`; `SCAN_JOB_ROUTE_ENQUEUE_ONLY=true` keeps Vercel routes from inline-draining
 
 ### Cron route pattern
 All country cron routes: GET/POST → `getCronAuthStatus` + `queueAndDrainScanJob`

@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
+import type { ScanJob } from "@/agents/ai-regulation/governance";
 import {
   buildCentralMonitoringSchedule,
   enqueueCentralMonitoringSchedule,
@@ -12,13 +13,22 @@ const { queueScanJob } = vi.hoisted(() => ({
   })),
 }));
 
+const updateRepository = vi.hoisted(() => ({
+  getScanJobs: vi.fn(async (): Promise<ScanJob[]> => []),
+}));
+
 vi.mock("@/agents/ai-regulation/processors/scanJobs", () => ({
   queueScanJob,
+}));
+
+vi.mock("@/agents/ai-regulation/processors/updateRepository", () => ({
+  updateRepository,
 }));
 
 describe("central monitoring scheduler", () => {
   afterEach(() => {
     vi.clearAllMocks();
+    updateRepository.getScanJobs.mockResolvedValue([]);
   });
 
   it("builds a central plan covering every EU, US, and International monitoring agent", () => {
@@ -77,5 +87,44 @@ describe("central monitoring scheduler", () => {
         coveredAgentCount: 10,
       }),
     });
+  });
+
+  it("skips recent duplicate sweeps to keep worker restarts and Vercel cron from piling up jobs", async () => {
+    updateRepository.getScanJobs.mockResolvedValueOnce([
+      {
+        id: "job-existing",
+        sourceId: null,
+        trigger: "scheduled",
+        requestedBy: "central-monitoring-scheduler",
+        status: "succeeded",
+        startedAt: new Date(Date.now() - 60_000).toISOString(),
+        finishedAt: new Date().toISOString(),
+        resultSummary: {
+          scanProfile: "live_news_discovery_scan",
+          schedulerPlanItemId: "us-live-news",
+        },
+        errorMessage: null,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      },
+    ]);
+
+    const result = await enqueueCentralMonitoringSchedule({
+      trigger: "scheduled",
+      requestedBy: "test-scheduler",
+      regions: ["us"],
+      cadences: ["live"],
+    });
+
+    expect(result.queuedJobCount).toBe(0);
+    expect(result.skippedJobCount).toBe(1);
+    expect(result.skippedJobs).toEqual([
+      expect.objectContaining({
+        existingJobId: "job-existing",
+        scanProfile: "live_news_discovery_scan",
+        reason: "recent_duplicate",
+      }),
+    ]);
+    expect(queueScanJob).not.toHaveBeenCalled();
   });
 });

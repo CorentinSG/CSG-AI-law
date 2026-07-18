@@ -3,7 +3,9 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 const enqueueCentralMonitoringSchedule = vi.fn(async () => ({
   plan: { totalAgents: 80, items: [] },
   queuedJobCount: 1,
+  skippedJobCount: 0,
   queuedJobs: [{ id: "job-1" }],
+  skippedJobs: [],
 }));
 const getCronAuthStatus = vi.fn(() => ({ ok: false, reason: "missing_authorization_header" }));
 const getRepositoryMode = vi.fn(() => "supabase");
@@ -65,6 +67,25 @@ describe("central scheduler cron route", () => {
       ok: true,
       queuedJobCount: 1,
       plan: { totalAgents: 80 },
+    });
+  });
+
+  it("accepts International as a central scheduler region", async () => {
+    getCronAuthStatus.mockReturnValueOnce({ ok: true, reason: "authorized" });
+
+    const { GET } = await import("@/app/api/cron/ai-regulation-central-scheduler/route");
+    const response = await GET(
+      new Request(
+        "http://localhost/api/cron/ai-regulation-central-scheduler?regions=international&cadences=live",
+      ),
+    );
+
+    expect(response.status).toBe(200);
+    expect(enqueueCentralMonitoringSchedule).toHaveBeenCalledWith({
+      trigger: "scheduled",
+      requestedBy: "central-monitoring-scheduler",
+      regions: ["international"],
+      cadences: ["live"],
     });
   });
 

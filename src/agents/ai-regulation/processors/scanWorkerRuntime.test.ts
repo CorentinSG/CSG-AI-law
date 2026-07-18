@@ -41,10 +41,26 @@ describe("scanWorkerRuntime", () => {
     expect(config.workerId).toBe("local-worker-42");
     expect(config.heartbeatIntervalMs).toBe(15);
     expect(config.heartbeatTimeoutMs).toBe(50);
+    expect(config.schedulerEnabled).toBe(true);
+    expect(config.schedulerIntervalMs).toBe(15 * 60 * 1000);
     expect(config.stateDir).toContain(path.join(".runtime", "custom-worker"));
     expect(config.leaseFilePath).toContain("worker-lease.json");
     expect(config.statusFilePath).toContain("worker-status.json");
     expect(config.stopFilePath).toContain("worker-stop");
+  });
+
+  it("allows the worker self-scheduler to be tuned or disabled from env", () => {
+    const config = createScanWorkerConfig(
+      {
+        SCAN_JOB_WORKER_ENABLE_SCHEDULER: "false",
+        SCAN_JOB_WORKER_SCHEDULER_INTERVAL_MS: "60000",
+      } as unknown as NodeJS.ProcessEnv,
+      "C:\\repo",
+      42,
+    );
+
+    expect(config.schedulerEnabled).toBe(false);
+    expect(config.schedulerIntervalMs).toBe(60_000);
   });
 
   it("refuses a second fresh worker lease but allows takeover after stale state", async () => {

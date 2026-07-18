@@ -35,7 +35,9 @@ function parseRegions(value: string | null): CentralSchedulerRegion[] | undefine
   const regions = value
     .split(",")
     .map((entry) => entry.trim())
-    .filter((entry): entry is CentralSchedulerRegion => entry === "eu" || entry === "us");
+    .filter((entry): entry is CentralSchedulerRegion =>
+      entry === "eu" || entry === "us" || entry === "international",
+    );
   return regions.length > 0 ? regions : undefined;
 }
 
@@ -74,7 +76,9 @@ async function handleCentralScheduler(request: Request) {
     aiEnabled: env.AI_ENABLE_PROCESSING,
     plan: result.plan,
     queuedJobCount: result.queuedJobCount,
+    skippedJobCount: result.skippedJobCount,
     queuedJobs: result.queuedJobs,
+    skippedJobs: result.skippedJobs,
   });
 }
 
