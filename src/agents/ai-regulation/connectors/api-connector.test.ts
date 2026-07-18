@@ -568,6 +568,62 @@ describe("ApiConnector", () => {
     expect(result.items[0]?.metadata?.documentForm).toBe("Staff working document");
   });
 
+  it("keeps the CELLAR reference when EUR-Lex does not expose a CELEX id", async () => {
+    process.env.EURLEX_USERNAME = "test-user";
+    process.env.EURLEX_PASSWORD = "test-password";
+    resetEnvForTests();
+    vi.spyOn(globalThis, "fetch").mockResolvedValue(
+      new Response(
+        `<soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope">
+          <soap:Body>
+            <searchResults xmlns="http://eur-lex.europa.eu/search">
+              <result>
+                <reference>eng_cellar:af8fa783-65ea-4b87-bca8-f265eea76fd4_en</reference>
+                <rank>1</rank>
+                <document_link type="html">https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=cellar:af8fa783-65ea-4b87-bca8-f265eea76fd4</document_link>
+                <content>
+                  <NOTICE>
+                    <WORK>
+                      <WORK_DATE_DOCUMENT><VALUE>2025-01-22</VALUE></WORK_DATE_DOCUMENT>
+                      <RESOURCE_LEGAL_TYPE><PREFLABEL>Opinion</PREFLABEL></RESOURCE_LEGAL_TYPE>
+                    </WORK>
+                    <EXPRESSION>
+                      <EXPRESSION_TITLE><VALUE>eng Opinion - European Economic and Social Committee - Pro-worker artificial intelligence</VALUE></EXPRESSION_TITLE>
+                    </EXPRESSION>
+                  </NOTICE>
+                </content>
+              </result>
+            </searchResults>
+          </soap:Body>
+        </soap:Envelope>`,
+        { status: 200, headers: { "Content-Type": "application/soap+xml" } },
+      ) as Response,
+    );
+
+    const connector = new ApiConnector();
+    const result = await connector.scan(
+      makeSource({
+        id: "src-eur-lex-ai",
+        name: "EUR-Lex AI webservice search",
+        jurisdiction: "European Union",
+        region: "Europe",
+        country: "European Union",
+        sourceUrl: "https://eur-lex.europa.eu/EURLexWebService",
+        config: { apiProvider: "eurlex", maxItems: 10 },
+        sourceType: "legislative_database",
+      }),
+    );
+
+    expect(result.items).toHaveLength(1);
+    expect(result.items[0]?.metadata?.reference).toBe(
+      "eng_cellar:af8fa783-65ea-4b87-bca8-f265eea76fd4_en",
+    );
+    expect(result.items[0]?.metadata?.celexReference).toBeNull();
+    expect(result.items[0]?.title).toBe(
+      "Opinion - European Economic and Social Committee - Pro-worker artificial intelligence",
+    );
+  });
+
   it("degrades honestly when CourtListener credentials are missing", async () => {
     const connector = new ApiConnector();
     const result = await connector.scan(

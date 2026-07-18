@@ -691,9 +691,9 @@ function pickEurLexCelex(resultXml: string) {
   const value = extractXmlValue(idCelexBlock) ?? extractXmlValue(resourceCelexBlock);
   if (value) return value;
 
-  const celexUri = /CELEX:([0-9A-Z]{5,})/i.exec(resultXml)?.[1];
+  const celexUri = /CELEX:([0-9][0-9A-Z]{5,})/i.exec(resultXml)?.[1];
   if (celexUri) return celexUri.toUpperCase();
-  const celexText = /\b[0-9][0-9A-Z]{4,}\b/.exec(stripXmlTags(resultXml))?.[0];
+  const celexText = /\b[0-9][0-9A-Z]{5,}\b/.exec(stripXmlTags(resultXml))?.[0];
   return celexText ?? null;
 }
 
