@@ -59,6 +59,7 @@ Each agent edits only its own rows. Status vocabulary: `CLAIMED` · `WIP` · `BL
 | T-LEGALAREA-LABOR-SOCIAL | Codex | DONE-LOCAL | `main` @ working tree | `src/db/schema.ts`, `src/db/migrations/029_add_labor_social_law_legal_area.sql`, classifiers/connectors, docs | `legalAreas`, `inferLegalArea()`, `classifyEurLexLegalArea()`, community "DB Repository Layer", community "Scan Pipeline" | 2026-07-18 |
 | T-LABOR-SOCIAL-BASELINE | Codex | DONE-LOCAL | `main` @ working tree | `scripts/backfill-labor-social-law-baseline.ts`, `package.json`, docs | `updateRepository.createRawItem()`, `updateRepository.createUpdate()`, `SourceReference`, community "DB Repository Layer", community "Scan Pipeline" | 2026-07-18 |
 | T-EU-COUNTRY-DOMAIN-BASELINE | Codex | DONE-LOCAL | `main` @ working tree | `scripts/backfill-eu-country-domain-baseline.ts`, `src/db/migrations/030_add_cloud_infrastructure_legal_area.sql`, `src/db/schema.ts`, classifiers/connectors, docs | `legalAreas`, `inferLegalArea()`, `classifyEurLexLegalArea()`, `updateRepository.createRawItem()`, `updateRepository.createUpdate()`, `SourceReference`, community "DB Repository Layer", community "Scan Pipeline" | 2026-07-18 |
+| T-AUSTRIA-NATIONAL-DEPTH | Codex | DONE-LOCAL | `main` @ working tree | `src/content/ai-regulation/austria-national-depth.ts`, `src/content/ai-regulation/austria-national-depth.test.ts`, `scripts/backfill-austria-national-depth.ts`, `package.json`, docs | `austriaNationalDepthEntries`, `updateRepository.createRawItem()`, `updateRepository.createUpdate()`, `SourceReference`, community "DB Repository Layer", community "Scan Pipeline" | 2026-07-18 |
 | T-BATCH-REVIEW-UI (P2b) | Claude Code | DONE-LOCAL | `ops/t-ops9-ux` @ `0f2809d` | `src/app/admin/ai-regulation/review/**`, `src/app/admin/ai-regulation/actions.ts`, `src/app/admin/page.tsx` | `listPrioritizedReviewQueue()`, `batchTransitionReviewStatus()`, `bulkUpdateReviewStatus`, community "Admin Review and Summaries" | 2026-06-21 |
 | T-BUILD-FIX | Claude Code | DONE-LOCAL | `ops/t-ops9-ux` @ `bf0d746` | `src/app/page.tsx`, `src/components/site/update-card.tsx` | `UpdateCard`, community "UI Components and Visual Elements" | 2026-06-21 |
 | T-E2E (P6) | Claude Code | DONE-LOCAL | `ops/t-ops9-ux` @ `aa0346c` | `playwright.config.ts`, `e2e/**`, `vitest.config.ts`, `package.json`, `.gitignore` | n/a (test harness) | 2026-06-21 |
@@ -82,6 +83,14 @@ YYYY-MM-DD · <Agent> · <TASK-ID> · <STATUS>
 ```
 
 ## Current status
+
+2026-07-18 · Codex · T-AUSTRIA-NATIONAL-DEPTH · DONE-LOCAL
+- Intent:        Start the strict country-by-country national-depth pass with Austria, separating verified Austrian national sources from the broader EU country-domain baseline.
+- Files:         `src/content/ai-regulation/austria-national-depth.ts`, `src/content/ai-regulation/austria-national-depth.test.ts`, `scripts/backfill-austria-national-depth.ts`, `package.json`, `PROJECT_LOGBOOK.md`, `AI_AGENT_MASTER_CONTEXT.md`, `AI_TASKS.md`.
+- Graph anchors: `austriaNationalDepthEntries`, `updateRepository.createRawItem()`, `updateRepository.createUpdate()`, `SourceReference`, community "DB Repository Layer", community "Scan Pipeline".
+- Verification:  TDD red PASS (missing module failed as expected); targeted test PASS; dry-run PASS; live Supabase run created/published 7 Austria entries tagged `austria-national-depth`; idempotence replay PASS (`skipped_existing_update` x7); post-run Austria DB check PASS (21 total Austria updates, 7 national-depth, domains covered: AI governance, data protection, cloud/infrastructure, copyright/generative AI, labor/social law, automated decision-making); `npm run typecheck` PASS; `npm run lint` PASS; targeted tests PASS (6); `npm test` PASS (679); preview-env `npm run build` PASS.
+- Branch/commit: `main` @ working tree.
+- Next:          Codex should continue one country at a time using the same pattern. Recommended next countries: Belgium, Bulgaria, Croatia, Cyprus, Czechia, then Denmark. Each country needs its own national module/test/backfill and official-source verification before publication.
 
 2026-07-18 · Codex · T-EU-COUNTRY-DOMAIN-BASELINE · DONE-LOCAL
 - Intent:        Execute point 1 by giving every EU Member State a verified official EU-law country-domain baseline across AI governance, data protection, cloud/infrastructure, copyright/generative AI, labor/social law, and automated-decision case-law.

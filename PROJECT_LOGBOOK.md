@@ -10,6 +10,7 @@ Multi-agent project. Always update this file after meaningful changes. Include: 
 
 | Date | Phase | Summary |
 |------|-------|---------|
+| 2026-07-18 | Austria national legal depth | Started the strict country-by-country pass with Austria: added a tested national-depth corpus and published 7 official-source entries covering RTR AI Act support, AIM AT 2030, DSB GDPR/AI guidance, UrhG section 42h text-and-data mining, Data Strategy/cloud infrastructure, BVwG AMAS labour algorithm case law, and CJEU Dun & Bradstreet Austria |
 | 2026-07-18 | EU country-domain baseline | Added `Cloud and infrastructure` as a first-class legal area and published 162 official EU-law country-domain baseline entries across all 27 EU Member States for AI governance, data protection, cloud/infrastructure, copyright/generative AI, labor/social law, and automated-decision case-law; this is a verified EU layer, not final national completeness |
 | 2026-07-16 | International monitoring backend | Added International monitoring profiles, supervisor integration, central scheduler coverage, and official UNESCO/UN/WIPO/IEEE plus international NewsAPI/GDELT sources |
 | 2026-07-17 | EUR-Lex webservice readiness | Added optional official EUR-Lex SOAP connector, capability reporting, seed/migration activation for `src-eur-lex-ai`, env docs, and tests; credentials must live only in Vercel/Railway env |
