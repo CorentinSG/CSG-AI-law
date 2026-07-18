@@ -58,6 +58,7 @@ Each agent edits only its own rows. Status vocabulary: `CLAIMED` · `WIP` · `BL
 | T-BUILD-FIX | Claude Code | DONE-LOCAL | `ops/t-ops9-ux` @ `bf0d746` | `src/app/page.tsx`, `src/components/site/update-card.tsx` | `UpdateCard`, community "UI Components and Visual Elements" | 2026-06-21 |
 | T-E2E (P6) | Claude Code | DONE-LOCAL | `ops/t-ops9-ux` @ `aa0346c` | `playwright.config.ts`, `e2e/**`, `vitest.config.ts`, `package.json`, `.gitignore` | n/a (test harness) | 2026-06-21 |
 | COWORK-A-F | Cowork (Claude) | DONE-LOCAL | working tree (uncommitted) | none | community "Scan Pipeline", "DB Repository Layer", "Intelligence Hub UI" | 2026-06-20 |
+| T-COUNTRY-CONSOLE-FRANCE-V2 | Claude Code | MERGED | `main` @ `d9a496f` | `src/app/[lang]/ai-regulation/europe/[country]/page.tsx`, `src/components/site/country-console.tsx` | `EuropeCountryPage`, `CountryConsoleHero`, `CountryLedger`, `CorpusExplorer`, community "Intelligence Hub UI" | 2026-07-18 |
 
 - **Graph freshness:** built from `30bc31ca` — in sync with HEAD `30bc31c`. If these diverge, run `py -m graphify update .` before trusting the graph.
 - Move a task to `MERGED` only once it is in `main`; delete its row one entry after it merges (the log keeps the history).
@@ -75,6 +76,14 @@ YYYY-MM-DD · <Agent> · <TASK-ID> · <STATUS>
 ```
 
 ## Current status
+
+2026-07-18 - Claude Code - T-COUNTRY-CONSOLE-FRANCE-V2 - MERGED
+- Intent:        Total France country-page rebuild (user feedback on pilot): early-return standalone Country Console — no text cards, no "Needs verification" section; new `CorpusExplorer` (family pills + link rows) replaces stacked source/reference/notes cards; live signals and published entries become ledger rows; `GapRows` deleted.
+- Files:         `src/app/[lang]/ai-regulation/europe/[country]/page.tsx`, `src/components/site/country-console.tsx`.
+- Graph anchors: `EuropeCountryPage`, `CountryConsoleHero`, `CountryLedger`, `CorpusExplorer`, community "Intelligence Hub UI". (`CorpusExplorer` is new — graph rebuild pending post-commit hook.)
+- Verification:  `npm test` PASS (676), `npm run lint` PASS, `npm run typecheck` PASS, `npm run build` PASS (re-run after rebase onto main @ 57ed8aa); visual check via Playwright (France v2 full page, corpus pill switch, hover notes, Germany legacy intact).
+- Branch/commit: `main` @ `d9a496f` (PR #14 squash).
+- Next:          Claude Code — await user validation of France v2, then roll the console out to the 8 other EU country blocks and US state pages (removes most of the per-country monolith duplication in `page.tsx`).
 
 2026-07-16 - Codex - T-INTERNATIONAL-MONITORING-BACKEND - DONE-LOCAL
 - Intent:        Make International a real backend monitoring lane, not only a visual hub: add dedicated source registry, scan profiles, global supervisor/scheduler coverage, and official transnational sources for UNESCO, UN, WIPO, IEEE plus international NewsAPI/GDELT discovery.
