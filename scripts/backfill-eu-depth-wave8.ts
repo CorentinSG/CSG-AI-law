@@ -110,7 +110,7 @@ const entries: DepthEntry[] = [
     sourceType: "regulator",
     publicationDate: "2021-07-05",
     developmentType: "Enforcement action",
-    legalArea: "Employment",
+    legalArea: "Labor and social law",
     authorityType: "Enforcement action",
     summary:
       "The Italian Garante's Foodinho order found GDPR infringements in rider-data processing, including automated profiling, algorithmic allocation systems, DPIA failures, and Article 22 safeguard gaps.",

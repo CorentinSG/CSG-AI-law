@@ -978,8 +978,10 @@ function parseGlobalPolicyWatchDiscovery(
         legalAreaHint:
           /privacy|data protection|gdpr|dpa/i.test(`${title} ${excerpt}`)
             ? "Data protection"
-            : /employment|workplace/i.test(`${title} ${excerpt}`)
-              ? "Employment"
+            : /employment|workplace|worker|labou?r|platform work|algorithmic management/i.test(
+                  `${title} ${excerpt}`,
+                )
+              ? "Labor and social law"
               : /copyright|generative/i.test(`${title} ${excerpt}`)
                 ? "Copyright and generative AI"
                 : "AI governance",

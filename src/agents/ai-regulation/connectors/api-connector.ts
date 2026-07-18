@@ -753,7 +753,17 @@ function classifyEurLexLegalArea(title: string, text: string): LegalArea {
   if (haystack.includes("financial") || haystack.includes("finance")) return "Financial services";
   if (haystack.includes("liability") || haystack.includes("product safety")) return "Product safety";
   if (haystack.includes("data protection") || haystack.includes("privacy")) return "Data protection";
-  if (haystack.includes("employment") || haystack.includes("worker")) return "Employment";
+  if (
+    haystack.includes("employment") ||
+    haystack.includes("worker") ||
+    haystack.includes("workplace") ||
+    haystack.includes("labour") ||
+    haystack.includes("labor") ||
+    haystack.includes("platform work") ||
+    haystack.includes("algorithmic management")
+  ) {
+    return "Labor and social law";
+  }
   if (haystack.includes("copyright")) return "Copyright and generative AI";
   if (haystack.includes("criminal") || haystack.includes("police")) return "Criminal justice";
   if (haystack.includes("automated decision")) return "Automated decision-making";

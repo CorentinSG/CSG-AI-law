@@ -20,6 +20,12 @@ describe("classification helpers", () => {
     );
   });
 
+  it("infers labor and social law from workplace AI signals", () => {
+    expect(
+      inferLegalArea("Algorithmic management and workplace AI rules for platform workers"),
+    ).toBe("Labor and social law");
+  });
+
   it("infers jurisdiction from source context", () => {
     expect(inferJurisdiction("CNIL AI", "Official France AI guidance")).toBe(
       "France",

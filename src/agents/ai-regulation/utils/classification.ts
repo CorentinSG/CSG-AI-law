@@ -24,7 +24,10 @@ const developmentTypeRules: Array<[RegExp, DevelopmentType]> = [
 const legalAreaRules: Array<[RegExp, LegalArea]> = [
   [/privacy|data protection|gdpr|personal data/i, "Data protection"],
   [/consumer/i, "Consumer protection"],
-  [/employment|workplace|hiring/i, "Employment"],
+  [
+    /employment|workplace|hiring|worker|labou?r|social law|collective bargaining|trade union|platform work|algorithmic management/i,
+    "Labor and social law",
+  ],
   [/financial|bank|credit|securities/i, "Financial services"],
   [/health|medical/i, "Healthcare"],
   [/education|school/i, "Education"],

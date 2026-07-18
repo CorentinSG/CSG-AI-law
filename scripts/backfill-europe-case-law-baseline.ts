@@ -42,7 +42,18 @@ function normalizeDevelopmentType(value: string): DevelopmentType {
 
 function normalizeLegalArea(value: string): LegalArea {
   const lower = value.toLowerCase();
-  if (lower.includes("employment")) return "Employment";
+  if (
+    lower.includes("employment") ||
+    lower.includes("workplace") ||
+    lower.includes("worker") ||
+    lower.includes("labour") ||
+    lower.includes("labor") ||
+    lower.includes("social law") ||
+    lower.includes("platform work") ||
+    lower.includes("algorithmic management")
+  ) {
+    return "Labor and social law";
+  }
   if (lower.includes("health")) return "Healthcare";
   if (lower.includes("education")) return "Education";
   if (lower.includes("biometric") || lower.includes("facial")) {

@@ -56,6 +56,7 @@ Each agent edits only its own rows. Status vocabulary: `CLAIMED` · `WIP` · `BL
 | T-INGESTION-RUNTIME | Codex | DONE-LOCAL | `ops/t-ops9-ux` @ working tree | `src/agents/ingestion/**`, `scrapling_worker/**`, `src/agents/ai-regulation/agentApiCapabilities.ts` | `scraplingExtract()`, `firecrawlService.ts`, `listAgentApiCapabilities()`, community "Data Ingestion Pipeline", community "Scrapling Extraction Service", community "Agent API Capabilities" | 2026-06-22 |
 | T-EU-CASE-LAW-BASELINE | Codex | DONE-LOCAL | `main` @ working tree | `scripts/backfill-europe-case-law-baseline.ts`, `package.json`, docs | `europeAiCaseLawEntries`, `updateRepository.createRawItem()`, `updateRepository.createUpdate()`, `SourceReference`, community "DB Repository Layer", community "Scan Pipeline" | 2026-07-18 |
 | T-EU-AI-ENTERTAINMENT | Codex | DONE-LOCAL | `main` @ working tree | `scripts/backfill-eu-ai-entertainment.ts`, `package.json`, docs | `updateRepository.createRawItem()`, `updateRepository.createUpdate()`, `SourceReference`, community "DB Repository Layer", community "Scan Pipeline" | 2026-07-18 |
+| T-LEGALAREA-LABOR-SOCIAL | Codex | DONE-LOCAL | `main` @ working tree | `src/db/schema.ts`, `src/db/migrations/029_add_labor_social_law_legal_area.sql`, classifiers/connectors, docs | `legalAreas`, `inferLegalArea()`, `classifyEurLexLegalArea()`, community "DB Repository Layer", community "Scan Pipeline" | 2026-07-18 |
 | T-BATCH-REVIEW-UI (P2b) | Claude Code | DONE-LOCAL | `ops/t-ops9-ux` @ `0f2809d` | `src/app/admin/ai-regulation/review/**`, `src/app/admin/ai-regulation/actions.ts`, `src/app/admin/page.tsx` | `listPrioritizedReviewQueue()`, `batchTransitionReviewStatus()`, `bulkUpdateReviewStatus`, community "Admin Review and Summaries" | 2026-06-21 |
 | T-BUILD-FIX | Claude Code | DONE-LOCAL | `ops/t-ops9-ux` @ `bf0d746` | `src/app/page.tsx`, `src/components/site/update-card.tsx` | `UpdateCard`, community "UI Components and Visual Elements" | 2026-06-21 |
 | T-E2E (P6) | Claude Code | DONE-LOCAL | `ops/t-ops9-ux` @ `aa0346c` | `playwright.config.ts`, `e2e/**`, `vitest.config.ts`, `package.json`, `.gitignore` | n/a (test harness) | 2026-06-21 |
@@ -79,6 +80,14 @@ YYYY-MM-DD · <Agent> · <TASK-ID> · <STATUS>
 ```
 
 ## Current status
+
+2026-07-18 · Codex · T-LEGALAREA-LABOR-SOCIAL · DONE-LOCAL
+- Intent:        Add `Labor and social law` as a first-class legal database domain for employment, workplace AI, hiring, workers, platform work, algorithmic management, collective bargaining, and social-law enforcement.
+- Files:         `src/db/schema.ts`, `src/db/migrations/029_add_labor_social_law_legal_area.sql`, `src/agents/ai-regulation/utils/classification.ts`, `src/agents/ai-regulation/utils/classification.test.ts`, `src/agents/ai-regulation/processors/openaiProcessor.ts`, `src/agents/ai-regulation/connectors/api-connector.ts`, `src/agents/ai-regulation/connectors/static-page-connector.ts`, `scripts/backfill-europe-case-law-baseline.ts`, `scripts/backfill-eu-depth-wave8.ts`, docs.
+- Graph anchors: `legalAreas`, `inferLegalArea()`, `classifyEurLexLegalArea()`, `SourceReference`, community "DB Repository Layer", community "Scan Pipeline".
+- Verification:  production Supabase reclassified 19 relevant entries to `Labor and social law` after restoring 2 Irish ministry-name false positives to `AI governance`; `npm run typecheck` PASS; `npm run lint` PASS; targeted tests PASS (15); `npm test` PASS (677); preview-env `npm run build` PASS.
+- Branch/commit: `main` @ working tree.
+- Next:          Codex should use this domain in future country/legal-depth waves for AI employment, workplace surveillance, platform labour, HR scoring, trade-union/collective-bargaining, and worker-management cases.
 
 2026-07-18 · Codex · T-EU-AI-ENTERTAINMENT · DONE-LOCAL
 - Intent:        Enrich the legal database and live-news layer for EU-level AI + entertainment: copyright/generative AI, synthetic-media/deepfake labelling, UGC platform filtering, DSA recommender transparency, creative-sector policy, and reliable sector reaction.
