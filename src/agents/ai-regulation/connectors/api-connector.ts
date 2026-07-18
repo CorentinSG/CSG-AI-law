@@ -754,6 +754,17 @@ function classifyEurLexLegalArea(title: string, text: string): LegalArea {
   if (haystack.includes("liability") || haystack.includes("product safety")) return "Product safety";
   if (haystack.includes("data protection") || haystack.includes("privacy")) return "Data protection";
   if (
+    haystack.includes("cloud") ||
+    haystack.includes("data centre") ||
+    haystack.includes("data center") ||
+    haystack.includes("infrastructure") ||
+    haystack.includes("hosting") ||
+    haystack.includes("compute") ||
+    haystack.includes("edge computing")
+  ) {
+    return "Cloud and infrastructure";
+  }
+  if (
     haystack.includes("employment") ||
     haystack.includes("worker") ||
     haystack.includes("workplace") ||

@@ -85,6 +85,7 @@ const allowedLegalAreas = new Set<string>([
   "Consumer protection",
   "Employment",
   "Labor and social law",
+  "Cloud and infrastructure",
   "Financial services",
   "Healthcare",
   "Education",

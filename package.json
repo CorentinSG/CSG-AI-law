@@ -29,6 +29,7 @@
     "backfill:eu-depth-wave9": "tsx scripts/backfill-eu-depth-wave9.ts",
     "backfill:eu-ai-entertainment": "tsx scripts/backfill-eu-ai-entertainment.ts",
     "backfill:europe-case-law-baseline": "tsx scripts/backfill-europe-case-law-baseline.ts",
+    "backfill:eu-country-domain-baseline": "tsx scripts/backfill-eu-country-domain-baseline.ts",
     "backfill:labor-social-law-baseline": "tsx scripts/backfill-labor-social-law-baseline.ts",
     "backfill:pilot-country-deep-entries": "tsx scripts/backfill-pilot-country-deep-entries.ts",
     "review:reduce-backlog": "tsx scripts/reduce-review-backlog.ts",

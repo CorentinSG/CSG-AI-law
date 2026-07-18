@@ -26,6 +26,12 @@ describe("classification helpers", () => {
     ).toBe("Labor and social law");
   });
 
+  it("infers cloud and infrastructure from compute and hosting signals", () => {
+    expect(inferLegalArea("Cloud hosting and data center infrastructure for AI compute")).toBe(
+      "Cloud and infrastructure",
+    );
+  });
+
   it("infers jurisdiction from source context", () => {
     expect(inferJurisdiction("CNIL AI", "Official France AI guidance")).toBe(
       "France",

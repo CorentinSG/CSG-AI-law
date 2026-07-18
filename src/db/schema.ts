@@ -181,6 +181,7 @@ export const legalAreas = [
   "Consumer protection",
   "Employment",
   "Labor and social law",
+  "Cloud and infrastructure",
   "Financial services",
   "Healthcare",
   "Education",

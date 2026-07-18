@@ -982,9 +982,13 @@ function parseGlobalPolicyWatchDiscovery(
                   `${title} ${excerpt}`,
                 )
               ? "Labor and social law"
-              : /copyright|generative/i.test(`${title} ${excerpt}`)
-                ? "Copyright and generative AI"
-                : "AI governance",
+              : /cloud|data cent(re|er)|infrastructure|hosting|compute|edge computing/i.test(
+                    `${title} ${excerpt}`,
+                  )
+                ? "Cloud and infrastructure"
+                : /copyright|generative/i.test(`${title} ${excerpt}`)
+                  ? "Copyright and generative AI"
+                  : "AI governance",
         metadata: {
           ...metadata,
           contentType: "global_policy_watch_discovery_lead",

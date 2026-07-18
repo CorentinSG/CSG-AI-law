@@ -10,6 +10,7 @@ Multi-agent project. Always update this file after meaningful changes. Include: 
 
 | Date | Phase | Summary |
 |------|-------|---------|
+| 2026-07-18 | EU country-domain baseline | Added `Cloud and infrastructure` as a first-class legal area and published 162 official EU-law country-domain baseline entries across all 27 EU Member States for AI governance, data protection, cloud/infrastructure, copyright/generative AI, labor/social law, and automated-decision case-law; this is a verified EU layer, not final national completeness |
 | 2026-07-16 | International monitoring backend | Added International monitoring profiles, supervisor integration, central scheduler coverage, and official UNESCO/UN/WIPO/IEEE plus international NewsAPI/GDELT sources |
 | 2026-07-17 | EUR-Lex webservice readiness | Added optional official EUR-Lex SOAP connector, capability reporting, seed/migration activation for `src-eur-lex-ai`, env docs, and tests; credentials must live only in Vercel/Railway env |
 | 2026-07-18 | EUR-Lex legal-database quality | Hardened EUR-Lex SOAP extraction with title cleanup, CELEX/CELLAR/date/form metadata, AI/legal filtering, and authority/legal-area/development hints for cleaner official EU database promotion |

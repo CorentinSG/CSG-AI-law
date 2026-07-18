@@ -28,6 +28,7 @@ const legalAreaRules: Array<[RegExp, LegalArea]> = [
     /employment|workplace|hiring|worker|labou?r|social law|collective bargaining|trade union|platform work|algorithmic management/i,
     "Labor and social law",
   ],
+  [/cloud|data centre|data center|infrastructure|hosting|compute|cybersecurity certification|edge computing/i, "Cloud and infrastructure"],
   [/financial|bank|credit|securities/i, "Financial services"],
   [/health|medical/i, "Healthcare"],
   [/education|school/i, "Education"],
