@@ -57,6 +57,7 @@ Each agent edits only its own rows. Status vocabulary: `CLAIMED` · `WIP` · `BL
 | T-EU-CASE-LAW-BASELINE | Codex | DONE-LOCAL | `main` @ working tree | `scripts/backfill-europe-case-law-baseline.ts`, `package.json`, docs | `europeAiCaseLawEntries`, `updateRepository.createRawItem()`, `updateRepository.createUpdate()`, `SourceReference`, community "DB Repository Layer", community "Scan Pipeline" | 2026-07-18 |
 | T-EU-AI-ENTERTAINMENT | Codex | DONE-LOCAL | `main` @ working tree | `scripts/backfill-eu-ai-entertainment.ts`, `package.json`, docs | `updateRepository.createRawItem()`, `updateRepository.createUpdate()`, `SourceReference`, community "DB Repository Layer", community "Scan Pipeline" | 2026-07-18 |
 | T-LEGALAREA-LABOR-SOCIAL | Codex | DONE-LOCAL | `main` @ working tree | `src/db/schema.ts`, `src/db/migrations/029_add_labor_social_law_legal_area.sql`, classifiers/connectors, docs | `legalAreas`, `inferLegalArea()`, `classifyEurLexLegalArea()`, community "DB Repository Layer", community "Scan Pipeline" | 2026-07-18 |
+| T-LABOR-SOCIAL-BASELINE | Codex | DONE-LOCAL | `main` @ working tree | `scripts/backfill-labor-social-law-baseline.ts`, `package.json`, docs | `updateRepository.createRawItem()`, `updateRepository.createUpdate()`, `SourceReference`, community "DB Repository Layer", community "Scan Pipeline" | 2026-07-18 |
 | T-BATCH-REVIEW-UI (P2b) | Claude Code | DONE-LOCAL | `ops/t-ops9-ux` @ `0f2809d` | `src/app/admin/ai-regulation/review/**`, `src/app/admin/ai-regulation/actions.ts`, `src/app/admin/page.tsx` | `listPrioritizedReviewQueue()`, `batchTransitionReviewStatus()`, `bulkUpdateReviewStatus`, community "Admin Review and Summaries" | 2026-06-21 |
 | T-BUILD-FIX | Claude Code | DONE-LOCAL | `ops/t-ops9-ux` @ `bf0d746` | `src/app/page.tsx`, `src/components/site/update-card.tsx` | `UpdateCard`, community "UI Components and Visual Elements" | 2026-06-21 |
 | T-E2E (P6) | Claude Code | DONE-LOCAL | `ops/t-ops9-ux` @ `aa0346c` | `playwright.config.ts`, `e2e/**`, `vitest.config.ts`, `package.json`, `.gitignore` | n/a (test harness) | 2026-06-21 |
@@ -80,6 +81,14 @@ YYYY-MM-DD · <Agent> · <TASK-ID> · <STATUS>
 ```
 
 ## Current status
+
+2026-07-18 · Codex · T-LABOR-SOCIAL-BASELINE · DONE-LOCAL
+- Intent:        Populate the `Labor and social law` legal database domain with verified official/institutional anchors for workplace AI, algorithmic management, platform work, HR AI, and worker rights.
+- Files:         `scripts/backfill-labor-social-law-baseline.ts`, `package.json`, `PROJECT_LOGBOOK.md`, `AI_AGENT_MASTER_CONTEXT.md`.
+- Graph anchors: `updateRepository.createRawItem()`, `updateRepository.createUpdate()`, `SourceReference`, community "DB Repository Layer", community "Scan Pipeline".
+- Verification:  dry-run PASS; live Supabase run created/published 10 entries tagged `labor-social-law-baseline`; idempotence replay PASS (`skipped_existing_update` x10); post-run counts show 967 total updates and 29 `Labor and social law` entries; `npm run typecheck` PASS; `npm run lint` PASS; targeted tests PASS (10); `npm test` PASS (677); preview-env `npm run build` PASS.
+- Branch/commit: `main` @ working tree.
+- Next:          Codex should add national/EU case-law depth next: Spain/Italy/Germany/France workplace-monitoring and platform-work regulator decisions, plus CourtListener/EEOC/FTC U.S. employment-AI enforcement where official sources exist.
 
 2026-07-18 · Codex · T-LEGALAREA-LABOR-SOCIAL · DONE-LOCAL
 - Intent:        Add `Labor and social law` as a first-class legal database domain for employment, workplace AI, hiring, workers, platform work, algorithmic management, collective bargaining, and social-law enforcement.
