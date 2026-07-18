@@ -55,6 +55,7 @@ Each agent edits only its own rows. Status vocabulary: `CLAIMED` · `WIP` · `BL
 | T-NEWS-BACKFILL-INTEGRITY | Codex | DONE-LOCAL | `ops/t-ops9-ux` @ working tree | `src/content/ai-regulation/news.ts`, `src/lib/news-backfill.ts`, `scripts/backfill-news-items.ts`, `src/db/seed/seed-profiles.ts`, related tests | `buildNewsItemFromUpdate()`, `backfillNewsItemsFromUpdates()`, `buildLegalDatabaseIntegrityReport()`, community "News and Regulation Admin", community "DB Repository Layer" | 2026-06-22 |
 | T-INGESTION-RUNTIME | Codex | DONE-LOCAL | `ops/t-ops9-ux` @ working tree | `src/agents/ingestion/**`, `scrapling_worker/**`, `src/agents/ai-regulation/agentApiCapabilities.ts` | `scraplingExtract()`, `firecrawlService.ts`, `listAgentApiCapabilities()`, community "Data Ingestion Pipeline", community "Scrapling Extraction Service", community "Agent API Capabilities" | 2026-06-22 |
 | T-EU-CASE-LAW-BASELINE | Codex | DONE-LOCAL | `main` @ working tree | `scripts/backfill-europe-case-law-baseline.ts`, `package.json`, docs | `europeAiCaseLawEntries`, `updateRepository.createRawItem()`, `updateRepository.createUpdate()`, `SourceReference`, community "DB Repository Layer", community "Scan Pipeline" | 2026-07-18 |
+| T-EU-AI-ENTERTAINMENT | Codex | DONE-LOCAL | `main` @ working tree | `scripts/backfill-eu-ai-entertainment.ts`, `package.json`, docs | `updateRepository.createRawItem()`, `updateRepository.createUpdate()`, `SourceReference`, community "DB Repository Layer", community "Scan Pipeline" | 2026-07-18 |
 | T-BATCH-REVIEW-UI (P2b) | Claude Code | DONE-LOCAL | `ops/t-ops9-ux` @ `0f2809d` | `src/app/admin/ai-regulation/review/**`, `src/app/admin/ai-regulation/actions.ts`, `src/app/admin/page.tsx` | `listPrioritizedReviewQueue()`, `batchTransitionReviewStatus()`, `bulkUpdateReviewStatus`, community "Admin Review and Summaries" | 2026-06-21 |
 | T-BUILD-FIX | Claude Code | DONE-LOCAL | `ops/t-ops9-ux` @ `bf0d746` | `src/app/page.tsx`, `src/components/site/update-card.tsx` | `UpdateCard`, community "UI Components and Visual Elements" | 2026-06-21 |
 | T-E2E (P6) | Claude Code | DONE-LOCAL | `ops/t-ops9-ux` @ `aa0346c` | `playwright.config.ts`, `e2e/**`, `vitest.config.ts`, `package.json`, `.gitignore` | n/a (test harness) | 2026-06-21 |
@@ -78,6 +79,14 @@ YYYY-MM-DD · <Agent> · <TASK-ID> · <STATUS>
 ```
 
 ## Current status
+
+2026-07-18 · Codex · T-EU-AI-ENTERTAINMENT · DONE-LOCAL
+- Intent:        Enrich the legal database and live-news layer for EU-level AI + entertainment: copyright/generative AI, synthetic-media/deepfake labelling, UGC platform filtering, DSA recommender transparency, creative-sector policy, and reliable sector reaction.
+- Files:         `scripts/backfill-eu-ai-entertainment.ts`, `package.json`, `PROJECT_LOGBOOK.md`, `AI_AGENT_MASTER_CONTEXT.md`.
+- Graph anchors: `updateRepository.createRawItem()`, `updateRepository.createUpdate()`, `SourceReference`, community "DB Repository Layer", community "Scan Pipeline".
+- Verification:  dry-run PASS; live Supabase run created/published 16 entries tagged `eu-ai-entertainment`; idempotence replay PASS (`skipped_existing_update` x16); post-run counts show 957 total updates, 16/16 entertainment entries published, authority mix 6 Binding law / 1 Agency guidance / 2 Soft law / 6 Policy report / 1 Other; `npm run typecheck` PASS; `npm run lint` PASS; `npm test` PASS (676); preview-env `npm run build` PASS.
+- Branch/commit: `main` @ working tree.
+- Next:          Codex should continue with deeper official retrieval from EUR-Lex and Curia APIs/search for any newer EU judgments or delegated/implementing acts touching AI, copyright, creative works, media, audiovisual, recommender systems, or synthetic content.
 
 2026-07-18 · Codex · T-EU-CASE-LAW-BASELINE · DONE-LOCAL
 - Intent:        Start turning the legal database from a thin monitoring ledger into a real legal corpus by backfilling official European AI/algorithmic-governance case law and regulator decisions from the curated `europeAiCaseLawEntries` baseline.
