@@ -60,6 +60,7 @@ Each agent edits only its own rows. Status vocabulary: `CLAIMED` · `WIP` · `BL
 | T-E2E (P6) | Claude Code | DONE-LOCAL | `ops/t-ops9-ux` @ `aa0346c` | `playwright.config.ts`, `e2e/**`, `vitest.config.ts`, `package.json`, `.gitignore` | n/a (test harness) | 2026-06-21 |
 | COWORK-A-F | Cowork (Claude) | DONE-LOCAL | working tree (uncommitted) | none | community "Scan Pipeline", "DB Repository Layer", "Intelligence Hub UI" | 2026-06-20 |
 | T-COUNTRY-CONSOLE-FRANCE-V2 | Claude Code | MERGED | `main` @ `d9a496f` | `src/app/[lang]/ai-regulation/europe/[country]/page.tsx`, `src/components/site/country-console.tsx` | `EuropeCountryPage`, `CountryConsoleHero`, `CountryLedger`, `CorpusExplorer`, community "Intelligence Hub UI" | 2026-07-18 |
+| T-LEGALDB-EXPLORER-UX | Claude Code | DONE-LOCAL | `main` @ working tree | `src/components/site/legal-database-explorer.tsx`, `src/app/[lang]/ai-regulation/page.tsx` | `LegalDatabaseExplorer`, `deriveUpdateAuthorityType()`, community "Intelligence Hub UI" | 2026-07-18 |
 
 - **Graph freshness:** built from `30bc31ca` — in sync with HEAD `30bc31c`. If these diverge, run `py -m graphify update .` before trusting the graph.
 - Move a task to `MERGED` only once it is in `main`; delete its row one entry after it merges (the log keeps the history).
@@ -85,6 +86,15 @@ YYYY-MM-DD · <Agent> · <TASK-ID> · <STATUS>
 - Verification:  dry-run backfill PASS; live Supabase run created 15 published official-source entries; post-run counts show 941 total / 647 published / 15 `europe-case-law-baseline` entries; targeted tests PASS; `npm run typecheck` PASS; `npm run lint` PASS; preview-env `npm run build` PASS.
 - Branch/commit: `main` @ working tree.
 - Next:          Codex should continue with official-source backfills by connector/API lane: EUR-Lex instruments, Judilibre French decisions, CourtListener US AI case law, and national official registers. Do not create verified legal-database entries from media/discovery-only corpora without official-source verification.
+
+2026-07-18 · Claude Code · T-LEGALDB-EXPLORER-UX · DONE-LOCAL
+- Intent:        Legal Database tab redesign, v3 "atlas system" after two rounds of user feedback ("organise the data better, be inventive, don't saturate"): two reading modes behind an animated segmented switch — **Jurisdictions** (default): entries aggregated into per-jurisdiction tiles clustered by region, each tile = name + count + a thin stacked authority-spectrum bar (hard-to-soft color mix computed from the data); click a tile → animated drill-down into that jurisdiction's month-grouped expandable ledger with back button. **Timeline**: the global month-grouped ledger. Search is transversal (typing switches to flat results from any mode). Collapsible Filters panel (authority / period / high-signal) shapes both the tiles and the ledgers; quiet one-line color legend under the atlas. Replaces the 8-dropdown FilterBar + giant region cards of the original.
+- Files:         `src/components/site/legal-database-explorer.tsx` (new), `src/app/[lang]/ai-regulation/page.tsx`.
+- Graph anchors: `LegalDatabaseExplorer` (new node — rebuild on commit), `deriveUpdateAuthorityType()`, `getAuthorityPresentation()`, `listPublicUpdatesCursorPage()`, community "Intelligence Hub UI".
+- Verification:  `npm test` PASS (676), `npm run lint` PASS, `npm run typecheck` PASS. SSR HTML verified (mode switch, jurisdiction tiles incl. European Union, atlas = zero expanded rows by default, page weight 174 KB vs 363 KB for the card version). `npm run build` PASS on v1; v2/v3 are component-level only. Live interaction not verifiable this session — the Browser pane hangs on the Suspense fallback under machine memory saturation (curl serves the full page in ~1 s, zero console errors); v1 pill/search/expand state logic was DOM-verified live and is reused.
+- Branch/commit: `main` @ working tree (uncommitted).
+- Next:          User to eyeball the atlas in their own browser before commit (explicitly asked not to commit yet). News view still uses FilterBar unchanged. (Entry re-added after a concurrent session's AI_TASKS rewrite dropped the original.)
+
 2026-07-18 - Claude Code - T-COUNTRY-CONSOLE-FRANCE-V2 - MERGED
 - Intent:        Total France country-page rebuild (user feedback on pilot): early-return standalone Country Console — no text cards, no "Needs verification" section; new `CorpusExplorer` (family pills + link rows) replaces stacked source/reference/notes cards; live signals and published entries become ledger rows; `GapRows` deleted.
 - Files:         `src/app/[lang]/ai-regulation/europe/[country]/page.tsx`, `src/components/site/country-console.tsx`.

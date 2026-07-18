@@ -2,8 +2,16 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 import { updateRepository } from "@/agents/ai-regulation/processors/updateRepository";
+import {
+  deriveUpdateAuthorityType,
+  getAuthorityPresentation,
+} from "@/agents/ai-regulation/utils/authority";
 import { CompactNewsCard } from "@/components/site/compact-news-card";
 import { FilterBar } from "@/components/site/filter-bar";
+import {
+  LegalDatabaseExplorer,
+  type ExplorerEntry,
+} from "@/components/site/legal-database-explorer";
 import { IntelligenceHubTabs } from "@/components/site/intelligence-hub-tabs";
 import { IntelligenceSignal } from "@/components/site/intelligence-signal";
 import { MotionStagger, MotionStaggerItem } from "@/components/site/motion-stagger";
@@ -37,17 +45,6 @@ export const metadata: Metadata = {
 // forces per-request rendering — `revalidate` would have no effect here.
 export const dynamic = "force-dynamic";
 
-const databaseFilters = [
-  { key: "jurisdiction", label: "Jurisdiction" },
-  { key: "region", label: "Region" },
-  { key: "legalArea", label: "Legal area" },
-  { key: "developmentType", label: "Development type" },
-  { key: "importanceLevel", label: "Importance" },
-  { key: "publicationDate", label: "Date" },
-  { key: "tag", label: "Tag" },
-  { key: "sourceName", label: "Source" },
-];
-
 const newsFilters = [
   { key: "region", label: "Region" },
   { key: "jurisdiction", label: "Jurisdiction" },
@@ -59,6 +56,10 @@ const newsFilters = [
 ];
 
 const pageSize = 18;
+// The database view loads a larger page: filtering and search run instantly
+// client-side inside LegalDatabaseExplorer, so one request should cover most
+// of the published set. The cursor "load more" link handles the tail.
+const databasePageSize = 96;
 
 type HubView = "overview" | "news" | "database";
 
@@ -88,12 +89,6 @@ function isInternationalSignal(input: {
   return /\b(international|global|oecd|unesco|iso|iec|ieee|council of europe|standards?)\b/.test(
     haystack,
   );
-}
-
-// Uses listDistinctFilterValues() — fetches only lightweight filter columns
-// instead of loading all public updates into memory (B1 optimisation).
-async function collectDatabaseOptions() {
-  return updateRepository.listDistinctFilterValues("public");
 }
 
 async function getPublicNewsItems(afterCursor: import("@/lib/pagination").CursorPosition | null) {
@@ -136,12 +131,11 @@ export default async function AiRegulationPage({
   const afterCursor = parseCursorParam(params.after);
   const dbAfterCursor = parseCursorParam(params.dbafter);
 
-  const [updatesPage, databaseOptions, newsPage] = await Promise.all([
+  const [updatesPage, newsPage] = await Promise.all([
     updateRepository.listPublicUpdatesCursorPage(params as RegulatoryUpdateFilters, {
-      limit: pageSize,
+      limit: activeView === "database" ? databasePageSize : pageSize,
       after: dbAfterCursor,
     }),
-    collectDatabaseOptions(),
     getPublicNewsItems(afterCursor),
   ]);
 
@@ -181,6 +175,38 @@ export default async function AiRegulationPage({
   ).length;
   const internationalNewsCount = newsPage.items.filter(isInternationalSignal).length;
   const internationalDatabaseCount = updatesPage.items.filter(isInternationalSignal).length;
+
+  // Slim, serializable projection for the client-side database explorer.
+  const explorerEntries: ExplorerEntry[] = updates.map((update) => {
+    const authorityType = deriveUpdateAuthorityType(update);
+    return {
+      id: update.id,
+      href: `/ai-regulation/${update.id}`,
+      title: update.title,
+      summary: update.oneSentenceSummary,
+      region: update.region,
+      country: update.country ?? "",
+      jurisdiction: update.jurisdiction,
+      legalArea: update.legalArea,
+      authorityType,
+      authorityLabel: getAuthorityPresentation(authorityType).label,
+      importance: update.importanceLevel,
+      date: update.publicationDate,
+      sourceName: update.sourceName,
+      sourceUrl: update.sourceUrl,
+    };
+  });
+
+  const regionHubs = [
+    { label: "Europe", kicker: "EU framework · member states", href: "/ai-regulation/europe" },
+    { label: "United States", kicker: "Federal · state layers", href: "/ai-regulation/united-states" },
+    { label: "International", kicker: "Standards · global governance", href: "/ai-regulation/international" },
+  ];
+
+  const dbLoadMoreHref = updatesPage.nextCursor
+    ? `/ai-regulation?view=database&dbafter=${encodeURIComponent(encodeCursor(updatesPage.nextCursor))}`
+    : null;
+  const todayIso = new Date().toISOString().slice(0, 10);
 
   return (
     <SiteShell className="space-y-10">
@@ -432,147 +458,29 @@ export default async function AiRegulationPage({
 
       {activeView === "database" ? (
         <>
-          <section className="space-y-6">
-            <SectionHeading
-              eyebrow="Structured legal database"
-              title="The AI law database"
-            />
-            <div className="grid gap-6 lg:grid-cols-3">
-              <Card className="rounded-[2rem] border-black/6 bg-white/90 shadow-[0_18px_50px_rgba(15,15,15,0.04)]">
-                <CardContent className="space-y-5 p-7">
-                  <div className="flex items-start justify-between gap-4">
-                    <div>
-                      <p className="font-mono text-[11px] uppercase tracking-[0.28em] text-zinc-600">
-                        Europe
-                      </p>
-                      <p className="mt-3 font-display text-3xl font-medium uppercase tracking-[-0.05em] text-zinc-950">
-                        EU framework and Member State profiles
-                      </p>
-                    </div>
-                    <Link
-                      href="/ai-regulation/europe"
-                      className="text-sm uppercase tracking-[0.16em] text-zinc-800 underline decoration-black/15 underline-offset-4"
-                    >
-                      Europe hub
-                    </Link>
-                  </div>
-                  <div className="flex flex-wrap gap-2">
-                    {europeProfiles.map((profile) => (
-                      <Link
-                        key={profile.slug}
-                        href={`/ai-regulation/europe/${profile.slug}`}
-                        className="rounded-full border border-black/8 bg-zinc-50 px-3 py-1.5 text-xs uppercase tracking-[0.16em] text-zinc-700 transition hover:bg-zinc-100"
-                      >
-                        {profile.countryName}
-                      </Link>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card className="rounded-[2rem] border-black/6 bg-white/90 shadow-[0_18px_50px_rgba(15,15,15,0.04)]">
-                <CardContent className="space-y-5 p-7">
-                  <div className="flex items-start justify-between gap-4">
-                    <div>
-                      <p className="font-mono text-[11px] uppercase tracking-[0.28em] text-zinc-600">
-                        United States
-                      </p>
-                      <p className="mt-3 font-display text-3xl font-medium uppercase tracking-[-0.05em] text-zinc-950">
-                        Federal layer and state-by-state subparts
-                      </p>
-                    </div>
-                    <Link
-                      href="/ai-regulation/united-states"
-                      className="text-sm uppercase tracking-[0.16em] text-zinc-800 underline decoration-black/15 underline-offset-4"
-                    >
-                      U.S. hub
-                    </Link>
-                  </div>
-                  <div className="flex flex-wrap gap-2">
-                    {usProfiles.map((profile) => (
-                      <Link
-                        key={profile.slug}
-                        href={`/ai-regulation/united-states/${profile.slug}`}
-                        className="rounded-full border border-black/8 bg-zinc-50 px-3 py-1.5 text-xs uppercase tracking-[0.16em] text-zinc-700 transition hover:bg-zinc-100"
-                      >
-                        {profile.stateName}
-                      </Link>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card className="rounded-[2rem] border-black/6 bg-white/90 shadow-[0_18px_50px_rgba(15,15,15,0.04)]">
-                <CardContent className="space-y-5 p-7">
-                  <div className="flex items-start justify-between gap-4">
-                    <div>
-                      <p className="font-mono text-[11px] uppercase tracking-[0.28em] text-zinc-600">
-                        International
-                      </p>
-                      <p className="mt-3 font-display text-3xl font-medium uppercase tracking-[-0.05em] text-zinc-950">
-                        Standards, soft law, and global governance
-                      </p>
-                    </div>
-                    <Link
-                      href="/ai-regulation/international"
-                      className="text-sm uppercase tracking-[0.16em] text-zinc-800 underline decoration-black/15 underline-offset-4"
-                    >
-                      Intl hub
-                    </Link>
-                  </div>
-                  <div className="flex flex-wrap gap-2">
-                    {internationalAiStandardsBaseline.slice(0, 8).map((entry) => (
-                      <Link
-                        key={entry.id}
-                        href="/standards"
-                        className="rounded-full border border-black/8 bg-zinc-50 px-3 py-1.5 text-xs uppercase tracking-[0.16em] text-zinc-700 transition hover:bg-zinc-100"
-                      >
-                        {entry.institution}
-                      </Link>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          </section>
-
-          <FilterBar
-            searchParams={params}
-            options={databaseOptions}
-            basePath="/ai-regulation"
-            filters={databaseFilters}
-            persistentParams={{ view: "database" }}
+          <SectionHeading
+            eyebrow="Structured legal database"
+            title="The AI law database"
+            description="Search and filter source-verified entries across Europe, the United States, and the transnational layer — instantly."
           />
 
           {updates.length > 0 ? (
-            <Card className="rounded-[2rem] border-black/6 bg-white/70 shadow-[0_18px_50px_rgba(15,15,15,0.04)]">
-              <CardContent className="grid gap-6 p-6 md:grid-cols-2 xl:grid-cols-3">
-                {updates.map((update) => (
-                  <UpdateCard
-                    key={update.id}
-                    update={update}
-                    href={`/ai-regulation/${update.id}`}
-                  />
-                ))}
-              </CardContent>
-            </Card>
+            <LegalDatabaseExplorer
+              entries={explorerEntries}
+              regionHubs={regionHubs}
+              loadMoreHref={dbLoadMoreHref}
+              todayIso={todayIso}
+            />
           ) : (
             <EmptyFilterState
               resetHref="/ai-regulation?view=database"
-              hasActiveFilters={hasActiveFilterParams(params, databaseFilters.map((f) => f.key))}
+              hasActiveFilters={Boolean(dbAfterCursor)}
               title={!dbAfterCursor ? "No published database entries yet" : undefined}
               body={!dbAfterCursor
                 ? "The structured legal database stays intentionally empty until an entry is source-verified and published."
                 : undefined}
             />
           )}
-
-          <CursorPaginationControls
-            basePath="/ai-regulation"
-            searchParams={params}
-            nextCursorEncoded={updatesPage.nextCursor ? encodeCursor(updatesPage.nextCursor) : null}
-            cursorParamKey="dbafter"
-          />
         </>
       ) : null}
     </SiteShell>
