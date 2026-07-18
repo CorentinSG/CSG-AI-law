@@ -54,6 +54,7 @@ Each agent edits only its own rows. Status vocabulary: `CLAIMED` · `WIP` · `BL
 | T-INTERNATIONAL-MONITORING-BACKEND | Codex | DONE-LOCAL | `main` @ committed | `src/agents/ai-regulation/international*.ts`, `src/agents/ai-regulation/scanProfiles.ts`, `src/agents/ai-regulation/scheduler/**`, `src/db/seed/ai-regulation-seed.ts`, migration 026, docs/tests | `internationalMonitoringSourceRegistry`, `buildCentralMonitoringSchedule()`, `selectSourcesForScanProfile()`, community "Scan Pipeline", community "DB Repository Layer" | 2026-07-16 |
 | T-NEWS-BACKFILL-INTEGRITY | Codex | DONE-LOCAL | `ops/t-ops9-ux` @ working tree | `src/content/ai-regulation/news.ts`, `src/lib/news-backfill.ts`, `scripts/backfill-news-items.ts`, `src/db/seed/seed-profiles.ts`, related tests | `buildNewsItemFromUpdate()`, `backfillNewsItemsFromUpdates()`, `buildLegalDatabaseIntegrityReport()`, community "News and Regulation Admin", community "DB Repository Layer" | 2026-06-22 |
 | T-INGESTION-RUNTIME | Codex | DONE-LOCAL | `ops/t-ops9-ux` @ working tree | `src/agents/ingestion/**`, `scrapling_worker/**`, `src/agents/ai-regulation/agentApiCapabilities.ts` | `scraplingExtract()`, `firecrawlService.ts`, `listAgentApiCapabilities()`, community "Data Ingestion Pipeline", community "Scrapling Extraction Service", community "Agent API Capabilities" | 2026-06-22 |
+| T-EU-CASE-LAW-BASELINE | Codex | DONE-LOCAL | `main` @ working tree | `scripts/backfill-europe-case-law-baseline.ts`, `package.json`, docs | `europeAiCaseLawEntries`, `updateRepository.createRawItem()`, `updateRepository.createUpdate()`, `SourceReference`, community "DB Repository Layer", community "Scan Pipeline" | 2026-07-18 |
 | T-BATCH-REVIEW-UI (P2b) | Claude Code | DONE-LOCAL | `ops/t-ops9-ux` @ `0f2809d` | `src/app/admin/ai-regulation/review/**`, `src/app/admin/ai-regulation/actions.ts`, `src/app/admin/page.tsx` | `listPrioritizedReviewQueue()`, `batchTransitionReviewStatus()`, `bulkUpdateReviewStatus`, community "Admin Review and Summaries" | 2026-06-21 |
 | T-BUILD-FIX | Claude Code | DONE-LOCAL | `ops/t-ops9-ux` @ `bf0d746` | `src/app/page.tsx`, `src/components/site/update-card.tsx` | `UpdateCard`, community "UI Components and Visual Elements" | 2026-06-21 |
 | T-E2E (P6) | Claude Code | DONE-LOCAL | `ops/t-ops9-ux` @ `aa0346c` | `playwright.config.ts`, `e2e/**`, `vitest.config.ts`, `package.json`, `.gitignore` | n/a (test harness) | 2026-06-21 |
@@ -77,6 +78,13 @@ YYYY-MM-DD · <Agent> · <TASK-ID> · <STATUS>
 
 ## Current status
 
+2026-07-18 · Codex · T-EU-CASE-LAW-BASELINE · DONE-LOCAL
+- Intent:        Start turning the legal database from a thin monitoring ledger into a real legal corpus by backfilling official European AI/algorithmic-governance case law and regulator decisions from the curated `europeAiCaseLawEntries` baseline.
+- Files:         `scripts/backfill-europe-case-law-baseline.ts`, `package.json`, `PROJECT_LOGBOOK.md`, `AI_AGENT_MASTER_CONTEXT.md`.
+- Graph anchors: `europeAiCaseLawEntries`, `updateRepository.createRawItem()`, `updateRepository.createUpdate()`, `SourceReference`, community "DB Repository Layer", community "Scan Pipeline".
+- Verification:  dry-run backfill PASS; live Supabase run created 15 published official-source entries; post-run counts show 941 total / 647 published / 15 `europe-case-law-baseline` entries; targeted tests PASS; `npm run typecheck` PASS; `npm run lint` PASS; preview-env `npm run build` PASS.
+- Branch/commit: `main` @ working tree.
+- Next:          Codex should continue with official-source backfills by connector/API lane: EUR-Lex instruments, Judilibre French decisions, CourtListener US AI case law, and national official registers. Do not create verified legal-database entries from media/discovery-only corpora without official-source verification.
 2026-07-18 - Claude Code - T-COUNTRY-CONSOLE-FRANCE-V2 - MERGED
 - Intent:        Total France country-page rebuild (user feedback on pilot): early-return standalone Country Console — no text cards, no "Needs verification" section; new `CorpusExplorer` (family pills + link rows) replaces stacked source/reference/notes cards; live signals and published entries become ledger rows; `GapRows` deleted.
 - Files:         `src/app/[lang]/ai-regulation/europe/[country]/page.tsx`, `src/components/site/country-console.tsx`.
