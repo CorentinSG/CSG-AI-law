@@ -8,6 +8,7 @@ import {
 } from "@/agents/ai-regulation/connectors/connector-utils";
 import type { ExtractedCandidateItem, RegulationSource } from "@/agents/ai-regulation/types";
 import { env } from "@/lib/env";
+import type { AuthorityType, DevelopmentType, LegalArea } from "@/db/schema";
 
 interface FederalRegisterDocument {
   title?: string;
@@ -302,6 +303,9 @@ function buildCandidate(
     text: string;
     publicationDate?: string | null;
     externalId?: string | null;
+    developmentTypeHint?: DevelopmentType;
+    legalAreaHint?: LegalArea;
+    authorityTypeHint?: AuthorityType;
     metadata?: Record<string, unknown>;
   },
 ): ExtractedCandidateItem {
@@ -321,6 +325,9 @@ function buildCandidate(
     sourceName: source.name,
     sourceId: source.id,
     jurisdictionHint: source.jurisdiction,
+    developmentTypeHint: input.developmentTypeHint,
+    legalAreaHint: input.legalAreaHint,
+    authorityTypeHint: input.authorityTypeHint,
     metadata: {
       ...(input.metadata ?? {}),
       contentType: "api_document",
@@ -571,7 +578,7 @@ function getEurLexQuery(source: RegulationSource) {
   if (typeof configured === "string" && configured.trim().length > 0) {
     return configured.trim();
   }
-  return 'TI ~ "artificial intelligence" OR TI ~ "AI Act" OR TE ~ "artificial intelligence" OR TE ~ "AI Act"';
+  return 'TI ~ "artificial intelligence" OR TI ~ "AI Act" OR TI ~ "biometric identification" OR (TE ~ "artificial intelligence" AND (TI ~ "regulation" OR TI ~ "directive" OR TI ~ "decision" OR TI ~ "opinion" OR TI ~ "recommendation" OR TI ~ "impact assessment"))';
 }
 
 function getEurLexSearchLanguage(source: RegulationSource) {
@@ -639,16 +646,16 @@ function pickEurLexTitle(resultXml: string) {
     firstXmlElementText(resultXml, "EXPRESSION_TITLE") ??
     firstXmlElementText(resultXml, "WORK_TITLE") ??
     firstXmlElementText(resultXml, "TITLE");
-  return title && title.length > 0 ? title : null;
+  return title && title.length > 0 ? normalizeEurLexTitle(title) : null;
 }
 
 function pickEurLexDate(resultXml: string) {
-  return (
+  const workDateBlock = allXmlElementBlocks(resultXml, "WORK_DATE_DOCUMENT")[0];
+  return extractXmlValue(workDateBlock) ??
     firstXmlElementText(resultXml, "date_document") ??
     firstXmlElementText(resultXml, "DD") ??
     firstXmlElementText(resultXml, "DATE_DOCUMENT") ??
-    null
-  );
+    null;
 }
 
 function buildEurLexUrl(reference: string | null, resultXml: string, source: RegulationSource) {
@@ -667,6 +674,93 @@ function extractEurLexFault(xml: string) {
     firstXmlElementText(xml, "Fault") ??
     null
   );
+}
+
+function extractXmlValue(xml: string | undefined) {
+  if (!xml) return null;
+  return firstXmlElementText(xml, "VALUE") ?? firstXmlElementText(xml, "value");
+}
+
+function normalizeEurLexTitle(title: string) {
+  return normalizeWhitespace(title.replace(/^(?:[a-z]{2}|[a-z]{3})\s+/i, ""));
+}
+
+function pickEurLexCelex(resultXml: string) {
+  const idCelexBlock = allXmlElementBlocks(resultXml, "ID_CELEX")[0];
+  const resourceCelexBlock = allXmlElementBlocks(resultXml, "RESOURCE_LEGAL_ID_CELEX")[0];
+  const value = extractXmlValue(idCelexBlock) ?? extractXmlValue(resourceCelexBlock);
+  if (value) return value;
+
+  const celexUri = /CELEX:([0-9A-Z]{5,})/i.exec(resultXml)?.[1];
+  if (celexUri) return celexUri.toUpperCase();
+  const celexText = /\b[0-9][0-9A-Z]{4,}\b/.exec(stripXmlTags(resultXml))?.[0];
+  return celexText ?? null;
+}
+
+function pickEurLexDocumentForm(resultXml: string, title: string) {
+  const typeBlocks = [
+    ...allXmlElementBlocks(resultXml, "RESOURCE_LEGAL_TYPE"),
+    ...allXmlElementBlocks(resultXml, "MANIFESTATION_TYPE"),
+    ...allXmlElementBlocks(resultXml, "DOSSIER_TYPE_REFERENCE"),
+  ];
+  const fromXml = typeBlocks
+    .map((block) => firstXmlElementText(block, "PREFLABEL") ?? firstXmlElementText(block, "VALUE"))
+    .find((value) => value && value.length > 0);
+  if (fromXml) return fromXml;
+
+  const normalized = title.toLowerCase();
+  if (normalized.includes("staff working document")) return "Staff working document";
+  if (normalized.includes("proposal for a regulation")) return "Proposal for a regulation";
+  if (normalized.includes("proposal for a directive")) return "Proposal for a directive";
+  if (normalized.includes("regulation (eu)")) return "Regulation";
+  if (normalized.includes("directive (eu)")) return "Directive";
+  if (normalized.includes("decision (eu)")) return "Decision";
+  if (normalized.includes("opinion")) return "Opinion";
+  if (normalized.includes("resolution")) return "Resolution";
+  if (normalized.includes("recommendation")) return "Recommendation";
+  return null;
+}
+
+function classifyEurLexAuthorityAndDevelopment(
+  form: string | null,
+  title: string,
+): { authorityTypeHint: AuthorityType; developmentTypeHint: DevelopmentType } {
+  const haystack = `${form ?? ""} ${title}`.toLowerCase();
+  if (haystack.includes("staff working document") || haystack.includes("impact assessment")) {
+    return { authorityTypeHint: "Policy report", developmentTypeHint: "Policy report" };
+  }
+  if (haystack.includes("proposal for a regulation") || haystack.includes("proposal for a directive")) {
+    return { authorityTypeHint: "Proposed law", developmentTypeHint: "Proposed rule" };
+  }
+  if (haystack.includes("regulation")) {
+    return { authorityTypeHint: "Binding law", developmentTypeHint: "Regulation" };
+  }
+  if (haystack.includes("directive")) {
+    return { authorityTypeHint: "Binding law", developmentTypeHint: "Regulation" };
+  }
+  if (haystack.includes("decision")) {
+    return { authorityTypeHint: "Binding law", developmentTypeHint: "Other official regulatory development" };
+  }
+  if (haystack.includes("opinion") || haystack.includes("recommendation") || haystack.includes("resolution")) {
+    return { authorityTypeHint: "Soft law", developmentTypeHint: "Agency guidance" };
+  }
+  return { authorityTypeHint: "Other", developmentTypeHint: "Other official regulatory development" };
+}
+
+function classifyEurLexLegalArea(title: string, text: string): LegalArea {
+  const haystack = `${title} ${text}`.toLowerCase();
+  if (haystack.includes("biometric")) return "Biometric identification";
+  if (haystack.includes("financial") || haystack.includes("finance")) return "Financial services";
+  if (haystack.includes("liability") || haystack.includes("product safety")) return "Product safety";
+  if (haystack.includes("data protection") || haystack.includes("privacy")) return "Data protection";
+  if (haystack.includes("employment") || haystack.includes("worker")) return "Employment";
+  if (haystack.includes("copyright")) return "Copyright and generative AI";
+  if (haystack.includes("criminal") || haystack.includes("police")) return "Criminal justice";
+  if (haystack.includes("automated decision")) return "Automated decision-making";
+  if (haystack.includes("artificial intelligence") || haystack.includes(" ai act") || haystack.includes(" ai ")) {
+    return "AI governance";
+  }
+  return "Other";
 }
 
 async function scanEurLex(source: RegulationSource): Promise<ConnectorScanResult> {
@@ -721,22 +815,46 @@ async function scanEurLex(source: RegulationSource): Promise<ConnectorScanResult
   const results = allXmlElementBlocks(xml, "result").slice(0, pageSize);
   const items = results
     .map((resultXml) => {
-      const reference = firstXmlElementText(resultXml, "reference");
-      const title = pickEurLexTitle(resultXml) ?? (reference ? `EUR-Lex document ${reference}` : null);
+      const cellarReference = firstXmlElementText(resultXml, "reference");
+      const title = pickEurLexTitle(resultXml) ?? (cellarReference ? `EUR-Lex document ${cellarReference}` : null);
       if (!title) return null;
+      const strippedResult = stripXmlTags(resultXml);
+      if (
+        !isLikelyAiLegalSignal(source, {
+          text: [title, strippedResult].join(" "),
+          url: buildEurLexUrl(cellarReference, resultXml, source),
+        })
+      ) {
+        return null;
+      }
+
+      const celexReference = pickEurLexCelex(resultXml);
+      const reference = celexReference ?? cellarReference;
+      const documentForm = pickEurLexDocumentForm(resultXml, title);
+      const { authorityTypeHint, developmentTypeHint } =
+        classifyEurLexAuthorityAndDevelopment(documentForm, title);
+      const legalAreaHint = classifyEurLexLegalArea(title, strippedResult);
 
       return buildCandidate(source, {
         title,
         url: buildEurLexUrl(reference, resultXml, source),
-        text: [title, reference, stripXmlTags(resultXml)].filter(Boolean).join(" "),
+        text: [title, reference, strippedResult].filter(Boolean).join(" "),
         publicationDate: pickEurLexDate(resultXml),
         externalId: reference,
+        developmentTypeHint,
+        legalAreaHint,
+        authorityTypeHint,
         metadata: {
           provider: "eurlex",
           reference,
+          cellarReference,
+          celexReference,
+          documentForm,
           searchLanguage,
           expertQuery,
-          authorityType: source.config?.authorityTypeHint ?? "Official EU legal database",
+          authorityType: authorityTypeHint,
+          developmentType: developmentTypeHint,
+          legalArea: legalAreaHint,
           sourceCategory: "official_legal_database",
         },
       });

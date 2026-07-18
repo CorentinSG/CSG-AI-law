@@ -489,6 +489,85 @@ describe("ApiConnector", () => {
     expect(result.items[0]?.metadata?.reference).toBe("32024R1689");
   });
 
+  it("normalizes EUR-Lex SOAP metadata into legal-database hints", async () => {
+    process.env.EURLEX_USERNAME = "test-user";
+    process.env.EURLEX_PASSWORD = "test-password";
+    resetEnvForTests();
+    vi.spyOn(globalThis, "fetch").mockResolvedValue(
+      new Response(
+        `<?xml version="1.0" encoding="UTF-8"?>
+        <soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope">
+          <soap:Body>
+            <searchResults xmlns="http://eur-lex.europa.eu/search">
+              <result>
+                <reference>eng_cellar:e56373d1-a424-11eb-9585-01aa75ed71a1_en</reference>
+                <rank>1</rank>
+                <document_link type="pdf">https://eur-lex.europa.eu/legal-content/EN/TXT/PDF/?uri=cellar:e56373d1-a424-11eb-9585-01aa75ed71a1</document_link>
+                <content>
+                  <NOTICE>
+                    <WORK>
+                      <ID_CELEX>
+                        <VALUE>52021SC0084</VALUE>
+                      </ID_CELEX>
+                      <WORK_DATE_DOCUMENT>
+                        <VALUE>2021-04-21</VALUE>
+                      </WORK_DATE_DOCUMENT>
+                      <RESOURCE_LEGAL_TYPE>
+                        <PREFLABEL>Staff working document</PREFLABEL>
+                      </RESOURCE_LEGAL_TYPE>
+                    </WORK>
+                    <EXPRESSION>
+                      <EXPRESSION_TITLE>
+                        <VALUE>en COMMISSION STAFF WORKING DOCUMENT IMPACT ASSESSMENT Accompanying the Proposal for a Regulation laying down harmonised rules on artificial intelligence</VALUE>
+                      </EXPRESSION_TITLE>
+                    </EXPRESSION>
+                  </NOTICE>
+                </content>
+              </result>
+              <result>
+                <reference>32023D0936</reference>
+                <rank>2</rank>
+                <document_link type="html">https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32023D0936</document_link>
+                <content>
+                  <title>Decision (EU) 2023/936 on a European Year of Skills</title>
+                </content>
+              </result>
+            </searchResults>
+          </soap:Body>
+        </soap:Envelope>`,
+        { status: 200, headers: { "Content-Type": "application/soap+xml" } },
+      ) as Response,
+    );
+
+    const connector = new ApiConnector();
+    const result = await connector.scan(
+      makeSource({
+        id: "src-eur-lex-ai",
+        name: "EUR-Lex AI webservice search",
+        jurisdiction: "European Union",
+        region: "Europe",
+        country: "European Union",
+        sourceUrl: "https://eur-lex.europa.eu/EURLexWebService",
+        config: { apiProvider: "eurlex", maxItems: 10 },
+        sourceType: "legislative_database",
+      }),
+    );
+
+    expect(result.items).toHaveLength(1);
+    expect(result.items[0]?.title).toBe(
+      "COMMISSION STAFF WORKING DOCUMENT IMPACT ASSESSMENT Accompanying the Proposal for a Regulation laying down harmonised rules on artificial intelligence",
+    );
+    expect(result.items[0]?.metadata?.reference).toBe("52021SC0084");
+    expect(result.items[0]?.metadata?.cellarReference).toBe(
+      "eng_cellar:e56373d1-a424-11eb-9585-01aa75ed71a1_en",
+    );
+    expect(result.items[0]?.publicationDate).toBe("2021-04-21");
+    expect(result.items[0]?.authorityTypeHint).toBe("Policy report");
+    expect(result.items[0]?.developmentTypeHint).toBe("Policy report");
+    expect(result.items[0]?.legalAreaHint).toBe("AI governance");
+    expect(result.items[0]?.metadata?.documentForm).toBe("Staff working document");
+  });
+
   it("degrades honestly when CourtListener credentials are missing", async () => {
     const connector = new ApiConnector();
     const result = await connector.scan(

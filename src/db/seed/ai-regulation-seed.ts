@@ -2562,7 +2562,7 @@ export const regulationSourcesSeed: RegulationSource[] = [
     config: {
       apiProvider: "eurlex",
       expertQuery:
-        'TI ~ "artificial intelligence" OR TI ~ "AI Act" OR TE ~ "artificial intelligence" OR TE ~ "AI Act" OR TE ~ "biometric identification"',
+        'TI ~ "artificial intelligence" OR TI ~ "AI Act" OR TI ~ "biometric identification" OR (TE ~ "artificial intelligence" AND (TI ~ "regulation" OR TI ~ "directive" OR TI ~ "decision" OR TI ~ "opinion" OR TI ~ "recommendation" OR TI ~ "impact assessment"))',
       searchLanguage: "en",
       maxItems: 12,
       authorityTypeHint: "Official EU legal database",
