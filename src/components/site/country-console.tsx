@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { animate, motion, useReducedMotion } from "framer-motion";
+import Link from "next/link";
+import { AnimatePresence, animate, motion, useReducedMotion } from "framer-motion";
 import { ArrowUpRight } from "lucide-react";
 
 import { ImplementationProgressBar } from "@/components/site/implementation-progress-bar";
@@ -256,15 +257,25 @@ export function CountryLedger({ entries }: { entries: LedgerEntry[] }) {
               {entry.title}
             </h3>
             {entry.href ? (
-              <a
-                href={entry.href}
-                target="_blank"
-                rel="noreferrer"
-                aria-label={`${entry.title} — official source`}
-                className="shrink-0 rounded-full border border-white/10 p-1.5 text-white/45 transition-all duration-300 hover:border-accent-strong/40 hover:text-accent-strong group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
-              >
-                <ArrowUpRight className="size-3.5" />
-              </a>
+              entry.href.startsWith("/") ? (
+                <Link
+                  href={entry.href}
+                  aria-label={entry.title}
+                  className="shrink-0 rounded-full border border-white/10 p-1.5 text-white/45 transition-all duration-300 hover:border-accent-strong/40 hover:text-accent-strong group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
+                >
+                  <ArrowUpRight className="size-3.5" />
+                </Link>
+              ) : (
+                <a
+                  href={entry.href}
+                  target="_blank"
+                  rel="noreferrer"
+                  aria-label={`${entry.title} — official source`}
+                  className="shrink-0 rounded-full border border-white/10 p-1.5 text-white/45 transition-all duration-300 hover:border-accent-strong/40 hover:text-accent-strong group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
+                >
+                  <ArrowUpRight className="size-3.5" />
+                </a>
+              )
             ) : null}
           </div>
           {entry.note ? (
@@ -283,39 +294,98 @@ export function CountryLedger({ entries }: { entries: LedgerEntry[] }) {
   );
 }
 
-// ─── Verification gaps: worded severity, collapsed notes ────────────────────
+// ─── Corpus explorer: the whole verified source corpus behind pill filters ──
+// Replaces the old stacked source/reference cards: one interactive block,
+// family pills with a spring indicator, link rows with collapsed notes.
 
-export function GapRows({
-  gaps,
-}: {
-  gaps: { id: string; title: string; severity: string; note: string }[];
-}) {
+export interface CorpusFamily {
+  id: string;
+  label: string;
+  items: { label: string; institution: string; url: string; note?: string }[];
+}
+
+export function CorpusExplorer({ families }: { families: CorpusFamily[] }) {
   const reduce = useReducedMotion() ?? false;
+  const populated = families.filter((f) => f.items.length > 0);
+  const [active, setActive] = useState(populated[0]?.id ?? "");
+  const current = populated.find((f) => f.id === active) ?? populated[0];
+
+  if (!current) return null;
 
   return (
-    <div className="divide-y divide-amber-300/10 rounded-[1.8rem] border border-amber-300/20 bg-amber-400/[0.04]">
-      {gaps.map((gap, idx) => (
-        <motion.article
-          key={gap.id}
-          initial={reduce ? false : { opacity: 0, y: 12 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, amount: 0.25 }}
-          transition={{ duration: 0.4, ease, delay: reduce ? 0 : Math.min(idx * 0.05, 0.3) }}
-          className="group px-5 py-4"
-        >
-          <div className="flex items-start justify-between gap-3">
-            <h3 className="min-w-0 text-sm font-medium leading-6 text-zinc-950">{gap.title}</h3>
-            <span className={`shrink-0 rounded-full border px-2.5 py-0.5 font-mono text-[9px] uppercase tracking-[0.16em] ${CHIP_TONE.warn}`}>
-              {gap.severity} priority
-            </span>
-          </div>
-          <div className="grid grid-rows-[0fr] transition-[grid-template-rows] duration-500 group-focus-within:grid-rows-[1fr] group-hover:grid-rows-[1fr]">
-            <p className="min-h-0 overflow-hidden text-sm leading-6 text-zinc-600 opacity-0 transition-opacity duration-500 group-focus-within:opacity-100 group-hover:opacity-100">
-              {gap.note}
-            </p>
-          </div>
-        </motion.article>
-      ))}
+    <div className="space-y-4">
+      <div className="flex flex-wrap items-center gap-1.5">
+        {populated.map((family) => {
+          const isActive = family.id === current.id;
+          return (
+            <button
+              key={family.id}
+              type="button"
+              onClick={() => setActive(family.id)}
+              aria-pressed={isActive}
+              className={[
+                "relative rounded-full px-3.5 py-1.5 font-mono text-[10px] uppercase tracking-[0.14em] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-strong focus-visible:ring-offset-2 focus-visible:ring-offset-[#0a0a0a]",
+                isActive ? "text-accent-strong" : "text-white/50 hover:text-white/85",
+              ].join(" ")}
+            >
+              {isActive ? (
+                <motion.span
+                  layoutId="corpus-family-pill"
+                  aria-hidden
+                  transition={reduce ? { duration: 0 } : { type: "spring", stiffness: 420, damping: 34 }}
+                  className="absolute inset-0 rounded-full border border-accent-strong/40 bg-accent/10"
+                />
+              ) : (
+                <span aria-hidden className="absolute inset-0 rounded-full border border-white/8" />
+              )}
+              <span className="relative">
+                {family.label} <span className="text-white/40">{family.items.length}</span>
+              </span>
+            </button>
+          );
+        })}
+      </div>
+
+      <div className="divide-y divide-white/8 rounded-[1.8rem] border border-white/8 bg-white/[0.02]">
+        <AnimatePresence mode="popLayout" initial={false}>
+          {current.items.map((item, idx) => (
+            <motion.article
+              key={`${current.id}-${item.url}`}
+              layout={!reduce}
+              initial={reduce ? false : { opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={reduce ? undefined : { opacity: 0, transition: { duration: 0.15 } }}
+              transition={{ duration: 0.35, ease, delay: reduce ? 0 : Math.min(idx * 0.03, 0.25) }}
+              className="group px-5 py-3.5 transition-colors hover:bg-white/[0.02] first:rounded-t-[1.8rem] last:rounded-b-[1.8rem]"
+            >
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <h3 className="text-[14.5px] font-medium leading-6 text-zinc-950">{item.label}</h3>
+                  <p className="mt-0.5 font-mono text-[9.5px] uppercase tracking-[0.16em] text-zinc-500">
+                    {item.institution}
+                  </p>
+                </div>
+                <a
+                  href={item.url}
+                  target="_blank"
+                  rel="noreferrer"
+                  aria-label={`${item.label} — official source`}
+                  className="shrink-0 rounded-full border border-white/10 p-1.5 text-white/45 transition-all duration-300 hover:border-accent-strong/40 hover:text-accent-strong group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
+                >
+                  <ArrowUpRight className="size-3.5" />
+                </a>
+              </div>
+              {item.note ? (
+                <div className="grid grid-rows-[0fr] transition-[grid-template-rows] duration-500 group-focus-within:grid-rows-[1fr] group-hover:grid-rows-[1fr]">
+                  <p className="min-h-0 overflow-hidden text-sm leading-6 text-zinc-600 opacity-0 transition-opacity duration-500 group-focus-within:opacity-100 group-hover:opacity-100">
+                    {item.note}
+                  </p>
+                </div>
+              ) : null}
+            </motion.article>
+          ))}
+        </AnimatePresence>
+      </div>
     </div>
   );
 }
