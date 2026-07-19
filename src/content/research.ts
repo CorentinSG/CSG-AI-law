@@ -53,6 +53,93 @@ export type ResearchEntry = {
 const author = "Corentin Saint-Girons";
 export const researchEntries: ResearchEntry[] = [
   {
+    slug: "generative-ai-access-to-justice-pro-se",
+    title:
+      "Generative AI, Self-Representation, and the Distance Between Access to Courts and Access to Justice",
+    subtitle:
+      "A new study on 2.8 million federal civil filings suggests AI is helping more people reach the courthouse — without necessarily helping them prevail once inside.",
+    author,
+    status: "published",
+    category: "Access to Justice",
+    tags: [
+      "Access to Justice",
+      "Pro se litigation",
+      "Generative AI",
+      "Federal courts",
+      "Legal aid",
+    ],
+    jurisdiction: "United States / Federal",
+    readingTime: "5 min read",
+    summary:
+      "Generative AI may be lowering the barrier to entering the justice system, but a study of federal civil filings shows AI-assisted pro se complaints are more polished and yet more likely to be dismissed — raising the question of whether we are expanding access to justice or merely access to filing.",
+    abstract:
+      "Generative AI may be improving access to courts. But is it improving access to justice? A new paper analyzing roughly 2.8 million federal civil filings from 2008 to 2025 finds a sharp rise in self-representation and signs of AI-assisted drafting — yet no corresponding improvement in outcomes. Access to legal drafting is not the same as access to a legal remedy.",
+    image: "/images/research/pro-se-generative-ai.png",
+    publishedAt: "2026-07-19",
+    featured: true,
+    relatedSlugs: [
+      "white-collar-revolution-law-firms-ai",
+      "ai-regulation-access-to-justice",
+      "ai-legal-ethics-early-questions-lawyers",
+    ],
+    body: [
+      {
+        heading: "Access to courts is not access to justice",
+        paragraphs: [
+          "Generative AI may be improving access to courts. But is it improving access to justice?",
+          "A new paper, The New Pro Se: Generative AI and the Surge in Federal Civil Self-Representation, analyzed approximately 2.8 million federal civil filings from 2008 to 2025.",
+        ],
+      },
+      {
+        heading: "The findings are striking",
+        paragraphs: [
+          "The data points to a measurable shift in both the volume and the appearance of self-represented litigation after generative AI became widely available.",
+        ],
+        bullets: [
+          "The share of federal civil cases filed by self-represented plaintiffs increased from 11.33% before widespread GenAI access to 16.94% afterward — an increase of almost 50%.",
+          "Among post-GenAI non-form complaints, approximately 13.9% showed drafting patterns consistent with AI assistance.",
+          "Those complaints were generally more polished and contained more legal citations.",
+        ],
+      },
+      {
+        heading: "Better-looking pleadings did not produce better outcomes",
+        paragraphs: [
+          "AI-flagged complaints had a higher dismissal rate — 61.1% compared with 53.6% — were more likely to end at an early procedural stage, and showed no advantage in win rates.",
+          "This highlights a critical distinction: access to legal drafting is not the same as access to a legal remedy.",
+        ],
+      },
+      {
+        heading: "What AI can and cannot do",
+        paragraphs: [
+          "Generative AI can help someone organize their story, identify legal concepts, and produce a document that looks like a formal complaint.",
+          "But it cannot automatically create jurisdiction, establish sufficient facts, preserve a claim within the statute of limitations, produce admissible evidence, or transform a genuine grievance into a legally viable cause of action.",
+          "The study does not prove that GenAI caused the increase in self-representation. However, it provides significant evidence that the rise of public AI tools is associated with changes in both the volume and appearance of pro se litigation.",
+        ],
+      },
+      {
+        heading: "An opportunity and an institutional challenge",
+        paragraphs: [
+          "For individuals who cannot afford a lawyer, AI may make the courthouse more accessible. For courts, however, increasingly polished but legally deficient filings may require more time to review, understand, and dismiss.",
+          "The solution should not be to prevent self-represented litigants from using AI. It should be to develop better guided tools, stronger legal-aid systems, effective court triage, and meaningful opportunities for human legal review.",
+        ],
+      },
+      {
+        heading: "Access to filing, or access to justice?",
+        paragraphs: [
+          "AI may be lowering the barrier to entering the justice system. The next challenge is ensuring that it also helps people navigate that system effectively.",
+          "Are we expanding access to justice — or merely access to filing?",
+        ],
+      },
+    ],
+    references: [
+      {
+        label:
+          "The New Pro Se: Generative AI and the Surge in Federal Civil Self-Representation",
+        note: "Study analyzing ~2.8 million federal civil filings (2008–2025).",
+      },
+    ],
+  },
+  {
     slug: "white-collar-revolution-law-firms-ai",
     title:
       "The White Collar Revolution: The Transformation of Law Firms in the Age of Artificial Intelligence",
@@ -76,7 +163,6 @@ export const researchEntries: ResearchEntry[] = [
       "For decades, law firms have operated under a model that appeared both stable and self reinforcing. Artificial intelligence, particularly large language models, is not simply accelerating legal work — it is changing the nature of that work, and with it the economic foundations of legal practice.",
     image: "/images/research/white-collar-revolution.png",
     publishedAt: "2026-07-16",
-    featured: true,
     relatedSlugs: [
       "emerging-architecture-ai-regulation",
       "legal-intelligence-systems-future-regulatory-monitoring",

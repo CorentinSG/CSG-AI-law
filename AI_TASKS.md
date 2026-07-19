@@ -60,6 +60,11 @@ Each agent edits only its own rows. Status vocabulary: `CLAIMED` · `WIP` · `BL
 | T-LABOR-SOCIAL-BASELINE | Codex | DONE-LOCAL | `main` @ working tree | `scripts/backfill-labor-social-law-baseline.ts`, `package.json`, docs | `updateRepository.createRawItem()`, `updateRepository.createUpdate()`, `SourceReference`, community "DB Repository Layer", community "Scan Pipeline" | 2026-07-18 |
 | T-EU-COUNTRY-DOMAIN-BASELINE | Codex | DONE-LOCAL | `main` @ working tree | `scripts/backfill-eu-country-domain-baseline.ts`, `src/db/migrations/030_add_cloud_infrastructure_legal_area.sql`, `src/db/schema.ts`, classifiers/connectors, docs | `legalAreas`, `inferLegalArea()`, `classifyEurLexLegalArea()`, `updateRepository.createRawItem()`, `updateRepository.createUpdate()`, `SourceReference`, community "DB Repository Layer", community "Scan Pipeline" | 2026-07-18 |
 | T-AUSTRIA-NATIONAL-DEPTH | Codex | DONE-LOCAL | `main` @ working tree | `src/content/ai-regulation/austria-national-depth.ts`, `src/content/ai-regulation/austria-national-depth.test.ts`, `scripts/backfill-austria-national-depth.ts`, `package.json`, docs | `austriaNationalDepthEntries`, `updateRepository.createRawItem()`, `updateRepository.createUpdate()`, `SourceReference`, community "DB Repository Layer", community "Scan Pipeline" | 2026-07-18 |
+| T-BELGIUM-NATIONAL-DEPTH | Codex | DONE-LOCAL | `main` @ working tree | `src/content/ai-regulation/belgium-national-depth.ts`, `src/content/ai-regulation/belgium-national-depth.test.ts`, `scripts/backfill-belgium-national-depth.ts`, `package.json`, docs | `belgiumNationalDepthEntries`, `updateRepository.createRawItem()`, `updateRepository.createUpdate()`, `SourceReference`, community "DB Repository Layer", community "Scan Pipeline" | 2026-07-19 |
+| T-BULGARIA-NATIONAL-DEPTH | Codex | DONE-LOCAL | `main` @ working tree | `src/content/ai-regulation/bulgaria-national-depth.ts`, `src/content/ai-regulation/bulgaria-national-depth.test.ts`, `scripts/backfill-bulgaria-national-depth.ts`, `package.json`, docs | `bulgariaNationalDepthEntries`, `updateRepository.createRawItem()`, `updateRepository.createUpdate()`, `SourceReference`, community "DB Repository Layer", community "Scan Pipeline" | 2026-07-19 |
+| T-CROATIA-NATIONAL-DEPTH | Codex | DONE-LOCAL | `main` @ working tree | `src/content/ai-regulation/croatia-national-depth.ts`, `src/content/ai-regulation/croatia-national-depth.test.ts`, `scripts/backfill-croatia-national-depth.ts`, `package.json`, docs | `croatiaNationalDepthEntries`, `updateRepository.createRawItem()`, `updateRepository.createUpdate()`, `SourceReference`, community "DB Repository Layer", community "Scan Pipeline" | 2026-07-19 |
+| T-CYPRUS-NATIONAL-DEPTH | Codex | DONE-LOCAL | `main` @ working tree | `src/content/ai-regulation/cyprus-national-depth.ts`, `src/content/ai-regulation/cyprus-national-depth.test.ts`, `scripts/backfill-cyprus-national-depth.ts`, `package.json`, docs | `cyprusNationalDepthEntries`, `updateRepository.createRawItem()`, `updateRepository.createUpdate()`, `SourceReference`, community "DB Repository Layer", community "Scan Pipeline" | 2026-07-19 |
+| T-CZ-DK-EE-NATIONAL-DEPTH | Codex + subagents | DONE-LOCAL | `main` @ working tree | `src/content/ai-regulation/{czechia,denmark,estonia}-national-depth.ts`, tests, scripts, `package.json`, docs | `czechiaNationalDepthEntries`, `denmarkNationalDepthEntries`, `estoniaNationalDepthEntries`, `updateRepository.createRawItem()`, `updateRepository.createUpdate()`, `SourceReference`, community "DB Repository Layer", community "Scan Pipeline" | 2026-07-19 |
 | T-BATCH-REVIEW-UI (P2b) | Claude Code | DONE-LOCAL | `ops/t-ops9-ux` @ `0f2809d` | `src/app/admin/ai-regulation/review/**`, `src/app/admin/ai-regulation/actions.ts`, `src/app/admin/page.tsx` | `listPrioritizedReviewQueue()`, `batchTransitionReviewStatus()`, `bulkUpdateReviewStatus`, community "Admin Review and Summaries" | 2026-06-21 |
 | T-BUILD-FIX | Claude Code | DONE-LOCAL | `ops/t-ops9-ux` @ `bf0d746` | `src/app/page.tsx`, `src/components/site/update-card.tsx` | `UpdateCard`, community "UI Components and Visual Elements" | 2026-06-21 |
 | T-E2E (P6) | Claude Code | DONE-LOCAL | `ops/t-ops9-ux` @ `aa0346c` | `playwright.config.ts`, `e2e/**`, `vitest.config.ts`, `package.json`, `.gitignore` | n/a (test harness) | 2026-06-21 |
@@ -83,6 +88,54 @@ YYYY-MM-DD · <Agent> · <TASK-ID> · <STATUS>
 ```
 
 ## Current status
+
+2026-07-19 · Claude Code · T-STANDARDS-ATLAS · MERGED
+- Intent:        Bring /standards onto the same atlas system as the Legal Database. Institutions mode (default): institution tiles clustered by region with a stacked binding-status spectrum bar, click → drill-down into that institution's type-grouped expandable ledger; Registry mode: full ledger grouped by authority type; transversal search; single binding filter kept in two-way sync with the interactive hero spectrum.
+- Files:         `src/components/site/standards-explorer.tsx`, `src/components/site/authority-spectrum.tsx`, `src/app/[lang]/standards/page.tsx` (Claude-owned Standards UI — the 3 frontend files only).
+- Graph anchors: `StandardsExplorer`, `AuthoritySpectrum`, community "Intelligence Hub UI".
+- Verification:  `npm test` PASS (676 on this frontend-only tree), `npm run lint` PASS, `npm run typecheck` PASS; SSR HTML verified (Institutions/Registry switch, ISO/IEC tiles). Browser-pane live check blocked by local machine memory saturation (curl serves the page fine).
+- Branch/commit: `main` @ `5cbf801` (frontend committed; this AI_TASKS entry left uncommitted for Codex to fold into his batch).
+- Next:          Codex owns the uncommitted DB backfill batch (Belgium/Bulgaria/Croatia/Cyprus/CZ-DK-EE national depth, New York AI law) + package.json + docs; those are untouched by this commit. Note: Codex's parallel rewrite of `standards-explorer.tsx` was superseded by this Claude-owned version (same atlas concept) — no Codex DB work affected.
+
+2026-07-19 Â· Codex + subagents Â· T-CZ-DK-EE-NATIONAL-DEPTH Â· DONE-LOCAL
+- Intent:        Parallelize the strict country-by-country national-depth pass across Czechia, Denmark and Estonia while keeping each country isolated to its own module/test/backfill.
+- Files:         `src/content/ai-regulation/czechia-national-depth.ts`, `src/content/ai-regulation/czechia-national-depth.test.ts`, `scripts/backfill-czechia-national-depth.ts`, `src/content/ai-regulation/denmark-national-depth.ts`, `src/content/ai-regulation/denmark-national-depth.test.ts`, `scripts/backfill-denmark-national-depth.ts`, `src/content/ai-regulation/estonia-national-depth.ts`, `src/content/ai-regulation/estonia-national-depth.test.ts`, `scripts/backfill-estonia-national-depth.ts`, `package.json`, `PROJECT_LOGBOOK.md`, `AI_AGENT_MASTER_CONTEXT.md`, `AI_TASKS.md`.
+- Graph anchors: `czechiaNationalDepthEntries`, `denmarkNationalDepthEntries`, `estoniaNationalDepthEntries`, `updateRepository.createRawItem()`, `updateRepository.createUpdate()`, `SourceReference`, community "DB Repository Layer", community "Scan Pipeline".
+- Verification:  Subagents completed TDD red/green and dry-run for each country; local targeted tests PASS (3); dry-runs PASS; live Supabase runs created/published 21 entries total (7 each for Czechia, Denmark, Estonia); idempotence replay PASS (`skipped_existing_update` x21); post-run DB check PASS (each country has 7 national-depth entries, all 6 domains covered, all published); targeted country tests PASS (8); `npm run typecheck` PASS; `npm run lint` PASS; `npm test` PASS (686); preview-env `npm run build` PASS.
+- Branch/commit: `main` @ working tree.
+- Next:          Run final verification, then continue with Finland, Greece, Hungary in parallel or sequentially.
+
+2026-07-19 Â· Codex Â· T-CYPRUS-NATIONAL-DEPTH Â· DONE-LOCAL
+- Intent:        Continue the strict country-by-country national-depth pass with Cyprus, adding verified Cypriot national sources beyond the EU country-domain baseline.
+- Files:         `src/content/ai-regulation/cyprus-national-depth.ts`, `src/content/ai-regulation/cyprus-national-depth.test.ts`, `scripts/backfill-cyprus-national-depth.ts`, `package.json`, `PROJECT_LOGBOOK.md`, `AI_AGENT_MASTER_CONTEXT.md`, `AI_TASKS.md`.
+- Graph anchors: `cyprusNationalDepthEntries`, `updateRepository.createRawItem()`, `updateRepository.createUpdate()`, `SourceReference`, community "DB Repository Layer", community "Scan Pipeline".
+- Verification:  TDD red PASS (missing module failed as expected); targeted test PASS; dry-run PASS; live Supabase run created/published 7 Cyprus entries tagged `cyprus-national-depth`; idempotence replay PASS (`skipped_existing_update` x7); post-run Cyprus DB check PASS (18 total Cyprus updates, 7 national-depth, all 6 domains covered, all published); targeted country tests PASS (5); `npm run typecheck` PASS; `npm run lint` PASS; `npm test` PASS (683); preview-env `npm run build` PASS.
+- Branch/commit: `main` @ working tree.
+- Next:          Run final verification, then continue one country at a time. Recommended next countries: Czechia, then Denmark.
+
+2026-07-19 Â· Codex Â· T-CROATIA-NATIONAL-DEPTH Â· DONE-LOCAL
+- Intent:        Continue the strict country-by-country national-depth pass with Croatia, adding verified Croatian national sources beyond the EU country-domain baseline.
+- Files:         `src/content/ai-regulation/croatia-national-depth.ts`, `src/content/ai-regulation/croatia-national-depth.test.ts`, `scripts/backfill-croatia-national-depth.ts`, `package.json`, `PROJECT_LOGBOOK.md`, `AI_AGENT_MASTER_CONTEXT.md`, `AI_TASKS.md`.
+- Graph anchors: `croatiaNationalDepthEntries`, `updateRepository.createRawItem()`, `updateRepository.createUpdate()`, `SourceReference`, community "DB Repository Layer", community "Scan Pipeline".
+- Verification:  TDD red PASS (missing module failed as expected); targeted test PASS; dry-run PASS; live Supabase run created/published 7 Croatia entries tagged `croatia-national-depth`; idempotence replay PASS (`skipped_existing_update` x7); post-run Croatia DB check PASS (17 total Croatia updates, 7 national-depth, all 6 domains covered, all published); targeted country tests PASS (4); `npm run typecheck` PASS; `npm run lint` PASS; `npm test` PASS (682); preview-env `npm run build` PASS.
+- Branch/commit: `main` @ working tree.
+- Next:          Run final verification, then continue one country at a time. Recommended next countries: Cyprus, Czechia, then Denmark.
+
+2026-07-19 Â· Codex Â· T-BULGARIA-NATIONAL-DEPTH Â· DONE-LOCAL
+- Intent:        Continue the strict country-by-country national-depth pass with Bulgaria, adding verified Bulgarian national sources beyond the EU country-domain baseline.
+- Files:         `src/content/ai-regulation/bulgaria-national-depth.ts`, `src/content/ai-regulation/bulgaria-national-depth.test.ts`, `scripts/backfill-bulgaria-national-depth.ts`, `package.json`, `PROJECT_LOGBOOK.md`, `AI_AGENT_MASTER_CONTEXT.md`, `AI_TASKS.md`.
+- Graph anchors: `bulgariaNationalDepthEntries`, `updateRepository.createRawItem()`, `updateRepository.createUpdate()`, `SourceReference`, community "DB Repository Layer", community "Scan Pipeline".
+- Verification:  TDD red PASS (missing module failed as expected); targeted test PASS; dry-run PASS; live Supabase run created/published 7 Bulgaria entries tagged `bulgaria-national-depth`; idempotence replay PASS (`skipped_existing_update` x7); corrected DSM/TDM source URL to official State Gazette `idMat=201485`; post-run Bulgaria DB check PASS (19 total Bulgaria updates, 7 national-depth, all 6 domains covered, all published); `npm run typecheck` PASS; `npm run lint` PASS; `npm test` PASS (681); preview-env `npm run build` PASS.
+- Branch/commit: `main` @ working tree.
+- Next:          Continue one country at a time. Recommended next countries: Croatia, Cyprus, Czechia, then Denmark.
+
+2026-07-19 Â· Codex Â· T-BELGIUM-NATIONAL-DEPTH Â· DONE-LOCAL
+- Intent:        Continue the strict country-by-country national-depth pass with Belgium, adding verified Belgian national sources beyond the EU country-domain baseline.
+- Files:         `src/content/ai-regulation/belgium-national-depth.ts`, `src/content/ai-regulation/belgium-national-depth.test.ts`, `scripts/backfill-belgium-national-depth.ts`, `package.json`, `PROJECT_LOGBOOK.md`, `AI_AGENT_MASTER_CONTEXT.md`, `AI_TASKS.md`.
+- Graph anchors: `belgiumNationalDepthEntries`, `updateRepository.createRawItem()`, `updateRepository.createUpdate()`, `SourceReference`, community "DB Repository Layer", community "Scan Pipeline".
+- Verification:  TDD red PASS (missing module failed as expected); targeted test PASS; dry-run PASS; live Supabase run created/published 7 Belgium entries tagged `belgium-national-depth`; idempotence replay PASS (`skipped_existing_update` x7); post-run Belgium DB check PASS (25 total Belgium updates, 7 national-depth, all 6 domains covered, all published); `npm run typecheck` PASS; `npm run lint` PASS; `npm test` PASS (680); preview-env `npm run build` PASS.
+- Branch/commit: `main` @ working tree.
+- Next:          Run final verification, then continue one country at a time. Recommended next countries: Bulgaria, Croatia, Cyprus, Czechia, then Denmark.
 
 2026-07-18 · Codex · T-AUSTRIA-NATIONAL-DEPTH · DONE-LOCAL
 - Intent:        Start the strict country-by-country national-depth pass with Austria, separating verified Austrian national sources from the broader EU country-domain baseline.
@@ -969,3 +1022,12 @@ Every non-trivial task should have:
 - Success criteria
 - Files likely to change
 - Verification command or explanation if verification is unavailable
+### T-NY-AI-LAW-WATCH (Codex) - New York AI legal-intelligence corpus + live sources
+
+- Status:        DONE-LOCAL / LIVE-SUPABASE
+- Date:          2026-07-19
+- Intent:        Build a New York-specific AI-law watch layer covering NY Courts/Part 161, state and federal AI litigation decisions, Heppner work-product/privilege, NYC Local Law 144/AEDT, NYC OTI/Local Law 35, RAISE Act, NYDFS guidance, and state AI bills.
+- Files:         `src/content/ai-regulation/new-york-ai-law-depth.ts`, `src/content/ai-regulation/new-york-ai-law-depth.test.ts`, `scripts/backfill-new-york-ai-law-depth.ts`, `src/agents/ai-regulation/newYorkAiLawWatch.test.ts`, `src/agents/ai-regulation/usMonitoringAgentDefinitions.ts`, `src/db/seed/ai-regulation-seed.ts`, `docs/agent-ny-reports/*`, design/plan docs.
+- Live data:     Supabase has 48 `published` New York AI Law Watch updates tagged `new-york-ai-law-watch`; 10 New York live sources exist and are active.
+- Notes:         Secondary/commentary work-product comparators remain discovery leads unless a New York primary source is verified. Claude-owned Standards UI files remain untouched.
+- Verification:  Targeted NY tests PASS; dry-run PASS; live write PASS; replay idempotence PASS (`skipped_existing_update` x48); direct DB check confirms 48/48 published + 10 active sources. Full verification follows in current handoff.
