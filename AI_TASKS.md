@@ -90,6 +90,13 @@ YYYY-MM-DD · <Agent> · <TASK-ID> · <STATUS>
 
 ## Current status
 
+2026-07-19 - Claude Code - T-FRANCE-LIVE-EMPTY-FIX - REVIEW
+- Intent:        Production France live-monitoring section rendered empty: `getFranceLiveLegalIntelligenceData()` reads the GLOBAL latest-N public news list (ordered publication_date desc, nulls last) and filters to France afterwards — recent multi-country/international publishing volume evicted France items from the 80-item window (France items with null publication_date sort last and are evicted first). Widened the window to 500 in the France agent + quiet empty-state row on the page instead of an empty box.
+- Files:         `src/agents/ai-regulation/franceLegalNewsAgent.ts` (one call-site), `src/app/[lang]/ai-regulation/europe/[country]/page.tsx`.
+- Graph anchors: `getFranceLiveLegalIntelligenceData()`, `updateRepository.getPublicNewsItems()`, `EuropeCountryPage`, community "Scan Pipeline", community "Intelligence Hub UI".
+- Verification:  `npm test` PASS (689), `npm run lint` PASS, `npm run typecheck` PASS, `npm run build` PASS.
+- Next:          HANDOFF→Codex — proper fix is a country-filtered public news query in the repository layer (e.g. `listNewsItems(limit, scope, { countryOrState })`) used by ALL nine country agents: they share the same `getPublicNewsItems(80)` starvation bug (Germany, Spain, Italy, NL, BE, AT, SE, IE will go empty next). The 500 window in the France agent is a stopgap to revert once the filtered query lands. Combine with the journalistic-sources wiring already handed off.
+
 2026-07-19 - Claude Code - T-COUNTRY-CONSOLE-FRANCE-V3 - REVIEW
 - Intent:        France page reduced to three blocks per user direction: hero, live monitoring, and a searchable legal database (regulation + case law + soft law) with accent-insensitive free-text search, family pill filters, and case-law rows carrying court/date/case number. Architecture/corpus/published sections removed; `CorpusExplorer` and `SignalStrip` deleted (superseded by `CountryLegalDatabase`).
 - Files:         `src/app/[lang]/ai-regulation/europe/[country]/page.tsx`, `src/components/site/country-console.tsx`.

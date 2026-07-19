@@ -347,14 +347,14 @@ export default async function EuropeCountryPage({
           ]}
         />
 
-        {franceLiveData ? (
-          <section id="live" className="scroll-mt-28 space-y-6">
-            <MotionReveal>
-              <SectionHeading
-                eyebrow="Live monitoring"
-                title="French AI law, right now"
-              />
-            </MotionReveal>
+        <section id="live" className="scroll-mt-28 space-y-6">
+          <MotionReveal>
+            <SectionHeading
+              eyebrow="Live monitoring"
+              title="French AI law, right now"
+            />
+          </MotionReveal>
+          {franceLiveData && franceLiveData.items.length > 0 ? (
             <CountryLedger
               entries={franceLiveData.items.map(({ item, currentness }) => ({
                 id: item.id,
@@ -373,8 +373,12 @@ export default async function EuropeCountryPage({
                 href: item.officialSourceUrl ?? item.sourceUrl,
               }))}
             />
-          </section>
-        ) : null}
+          ) : (
+            <p className="rounded-[1.8rem] border border-white/8 bg-white/[0.02] px-5 py-8 text-center font-mono text-[10px] uppercase tracking-[0.2em] text-zinc-500">
+              No live signal right now — monitoring continues
+            </p>
+          )}
+        </section>
 
         <section id="database" className="scroll-mt-28 space-y-6">
           <MotionReveal>
