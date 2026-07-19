@@ -71,6 +71,7 @@ Each agent edits only its own rows. Status vocabulary: `CLAIMED` · `WIP` · `BL
 | COWORK-A-F | Cowork (Claude) | DONE-LOCAL | working tree (uncommitted) | none | community "Scan Pipeline", "DB Repository Layer", "Intelligence Hub UI" | 2026-06-20 |
 | T-COUNTRY-CONSOLE-FRANCE-V2 | Claude Code | MERGED | `main` @ `d9a496f` | `src/app/[lang]/ai-regulation/europe/[country]/page.tsx`, `src/components/site/country-console.tsx` | `EuropeCountryPage`, `CountryConsoleHero`, `CountryLedger`, `CorpusExplorer`, community "Intelligence Hub UI" | 2026-07-18 |
 | T-LEGALDB-EXPLORER-UX | Claude Code | MERGED | `main` @ `fefe433` | `src/components/site/legal-database-explorer.tsx`, `src/app/[lang]/ai-regulation/page.tsx` | `LegalDatabaseExplorer`, `deriveUpdateAuthorityType()`, community "Intelligence Hub UI" | 2026-07-18 |
+| T-COUNTRY-CONSOLE-FRANCE-V3 | Claude Code | REVIEW | `claude/csg-law-design-review-70zota` | `src/app/[lang]/ai-regulation/europe/[country]/page.tsx`, `src/components/site/country-console.tsx` | `EuropeCountryPage`, `CountryConsoleHero`, `CountryLedger`, `CountryLegalDatabase`, community "Intelligence Hub UI" | 2026-07-19 |
 
 - **Graph freshness:** built from `30bc31ca` — in sync with HEAD `30bc31c`. If these diverge, run `py -m graphify update .` before trusting the graph.
 - Move a task to `MERGED` only once it is in `main`; delete its row one entry after it merges (the log keeps the history).
@@ -88,6 +89,14 @@ YYYY-MM-DD · <Agent> · <TASK-ID> · <STATUS>
 ```
 
 ## Current status
+
+2026-07-19 - Claude Code - T-COUNTRY-CONSOLE-FRANCE-V3 - REVIEW
+- Intent:        France page reduced to three blocks per user direction: hero, live monitoring, and a searchable legal database (regulation + case law + soft law) with accent-insensitive free-text search, family pill filters, and case-law rows carrying court/date/case number. Architecture/corpus/published sections removed; `CorpusExplorer` and `SignalStrip` deleted (superseded by `CountryLegalDatabase`).
+- Files:         `src/app/[lang]/ai-regulation/europe/[country]/page.tsx`, `src/components/site/country-console.tsx`.
+- Graph anchors: `EuropeCountryPage`, `CountryLegalDatabase` (new), `CountryLedger`, `CountryConsoleHero`, community "Intelligence Hub UI".
+- Verification:  `npm test` PASS (676), `npm run lint` PASS, `npm run typecheck` PASS, `npm run build` PASS; Playwright visual checks (full page, case-law filter, "parcoursup" search, accent-insensitive "conseil d'etat", Germany legacy 200).
+- Branch/commit: `claude/csg-law-design-review-70zota` (PR pending).
+- Next:          HANDOFF→Codex — user wants the France live-monitoring lane wired to many journalistic/press sources so it is as close to real-time as possible (backend: sources registry, scan profiles, freshness). Frontend rows in `EuropeCountryPage` already render whatever `getFranceLiveLegalIntelligenceData()` returns.
 
 2026-07-19 · Claude Code · T-STANDARDS-ATLAS · MERGED
 - Intent:        Bring /standards onto the same atlas system as the Legal Database. Institutions mode (default): institution tiles clustered by region with a stacked binding-status spectrum bar, click → drill-down into that institution's type-grouped expandable ledger; Registry mode: full ledger grouped by authority type; transversal search; single binding filter kept in two-way sync with the interactive hero spectrum.
