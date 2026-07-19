@@ -64,9 +64,11 @@ describe("EU news source registry", () => {
       expect.arrayContaining(aggressiveMediaIds),
     );
 
-    expect(getEuAgentSourceIds("eu_official_legal_scan")).not.toEqual(
-      expect.arrayContaining(aggressiveMediaIds),
-    );
+    expect(
+      getEuAgentSourceIds("eu_official_legal_scan").filter((sourceId) =>
+        aggressiveMediaIds.includes(sourceId),
+      ),
+    ).toEqual([]);
 
     for (const sourceId of aggressiveMediaIds) {
       const descriptor = getEuSourceDescriptor({
