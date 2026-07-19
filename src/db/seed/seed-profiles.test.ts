@@ -60,6 +60,43 @@ describe("buildSeedDataset", () => {
     ).toBe(true);
   });
 
+  it("seeds aggressive France journalistic discovery sources as non-authority lanes", () => {
+    const dataset = buildSeedDataset("demo");
+    const aggressiveFranceIds = [
+      "src-fr-legal-press-newsapi-ai",
+      "src-fr-tech-policy-newsapi-ai",
+      "src-fr-general-press-newsapi-ai",
+      "src-fr-eu-policy-newsapi-ai",
+      "src-fr-sector-press-newsapi-ai",
+      "src-fr-aggressive-gdelt-ai",
+    ];
+
+    const sources = dataset.sources.filter((source) =>
+      aggressiveFranceIds.includes(source.id),
+    );
+
+    expect(sources.map((source) => source.id).sort()).toEqual(
+      [...aggressiveFranceIds].sort(),
+    );
+    expect(sources.every((source) => source.country === "France")).toBe(true);
+    expect(sources.every((source) => source.jurisdiction === "France")).toBe(true);
+    expect(sources.every((source) => source.active)).toBe(true);
+    expect(
+      sources.every((source) => source.preferredExtractionMethod === "api"),
+    ).toBe(true);
+    expect(
+      sources.every((source) => source.notes.toLowerCase().includes("discovery-only")),
+    ).toBe(true);
+    expect(
+      sources.every(
+        (source) =>
+          !source.notes
+            .toLowerCase()
+            .includes("legal authority without official-source confirmation"),
+      ),
+    ).toBe(false);
+  });
+
   it("builds normalized country intelligence seed records from Europe profiles", () => {
     const dataset = buildSeedDataset("demo");
     expect(dataset.countryIntelligence.length).toBeGreaterThan(0);
