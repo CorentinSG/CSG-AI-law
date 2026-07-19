@@ -325,6 +325,7 @@ export function LegalDatabaseExplorer({
   const [mode, setMode] = useState<Mode>("atlas");
   const [selectedJurisdiction, setSelectedJurisdiction] = useState<string | null>(null);
   const [authority, setAuthority] = useState<AuthorityType | null>(null);
+  const [legalArea, setLegalArea] = useState<string | null>(null);
   const [period, setPeriod] = useState<PeriodKey>("all");
   const [highSignalOnly, setHighSignalOnly] = useState(false);
   const [panelOpen, setPanelOpen] = useState(false);
@@ -333,6 +334,17 @@ export function LegalDatabaseExplorer({
   const authorities = useMemo(() => {
     const present = new Set(entries.map((e) => e.authorityType));
     return authorityOrder.filter((t) => present.has(t));
+  }, [entries]);
+
+  // Legal areas present in the data, most-frequent first (no dead filters).
+  const legalAreas = useMemo(() => {
+    const counts = new Map<string, number>();
+    for (const e of entries) {
+      if (e.legalArea) counts.set(e.legalArea, (counts.get(e.legalArea) ?? 0) + 1);
+    }
+    return Array.from(counts.entries())
+      .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
+      .map(([name]) => name);
   }, [entries]);
 
   // Panel filters (authority / period / high-signal) apply everywhere —
@@ -346,6 +358,7 @@ export function LegalDatabaseExplorer({
     return entries
       .filter((e) => {
         if (authority && e.authorityType !== authority) return false;
+        if (legalArea && e.legalArea !== legalArea) return false;
         if (highSignalOnly && e.importance !== "critical" && e.importance !== "high") {
           return false;
         }
@@ -356,7 +369,7 @@ export function LegalDatabaseExplorer({
         return true;
       })
       .sort((a, b) => (b.date ?? "").localeCompare(a.date ?? ""));
-  }, [entries, authority, period, highSignalOnly, todayIso]);
+  }, [entries, authority, legalArea, period, highSignalOnly, todayIso]);
 
   const searchResults = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -408,12 +421,16 @@ export function LegalDatabaseExplorer({
   );
 
   const panelFilterCount =
-    (authority ? 1 : 0) + (period !== "all" ? 1 : 0) + (highSignalOnly ? 1 : 0);
+    (authority ? 1 : 0) +
+    (legalArea ? 1 : 0) +
+    (period !== "all" ? 1 : 0) +
+    (highSignalOnly ? 1 : 0);
   const hasActiveFilters = query.trim() !== "" || panelFilterCount > 0;
 
   const clearAll = () => {
     setQuery("");
     setAuthority(null);
+    setLegalArea(null);
     setPeriod("all");
     setHighSignalOnly(false);
   };
@@ -576,6 +593,47 @@ export function LegalDatabaseExplorer({
                     </Pill>
                   ))}
                 </div>
+                {legalAreas.length > 1 ? (
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="mr-1 font-mono text-[9px] uppercase tracking-[0.22em] text-zinc-400">
+                      Legal area
+                    </span>
+                    <div className="relative">
+                      <select
+                        value={legalArea ?? "all"}
+                        onChange={(e) =>
+                          setLegalArea(e.target.value === "all" ? null : e.target.value)
+                        }
+                        style={{ colorScheme: "dark" }}
+                        aria-label="Filter by legal area"
+                        className={`cursor-pointer appearance-none rounded-full border py-1.5 pl-3 pr-8 font-mono text-[10px] uppercase tracking-[0.14em] transition-colors duration-200 focus:outline-none ${
+                          legalArea
+                            ? "border-[color:var(--accent-strong)]/60 bg-[color:var(--accent-soft)] text-[color:var(--accent-strong)]"
+                            : "border-white/10 bg-white/[0.03] text-zinc-500 hover:border-white/20 hover:text-zinc-800"
+                        }`}
+                      >
+                        <option value="all" style={{ backgroundColor: "#141418", color: "#e9e9ea" }}>
+                          All areas
+                        </option>
+                        {legalAreas.map((area) => (
+                          <option
+                            key={area}
+                            value={area}
+                            style={{ backgroundColor: "#141418", color: "#f4f4f5" }}
+                          >
+                            {area}
+                          </option>
+                        ))}
+                      </select>
+                      <ChevronDown
+                        aria-hidden
+                        className={`pointer-events-none absolute right-2.5 top-1/2 size-3 -translate-y-1/2 ${
+                          legalArea ? "text-[color:var(--accent-strong)]" : "text-zinc-500"
+                        }`}
+                      />
+                    </div>
+                  </div>
+                ) : null}
                 <div className="flex flex-wrap items-center gap-2">
                   <span className="mr-1 font-mono text-[9px] uppercase tracking-[0.22em] text-zinc-400">
                     Period
