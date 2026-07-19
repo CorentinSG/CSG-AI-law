@@ -29,10 +29,9 @@ import {
 } from "@/content/ai-regulation/europe-country-profiles";
 import { BreadcrumbNav } from "@/components/site/breadcrumb-nav";
 import {
-  CorpusExplorer,
   CountryConsoleHero,
   CountryLedger,
-  SignalStrip,
+  CountryLegalDatabase,
 } from "@/components/site/country-console";
 import { HubScrollNav } from "@/components/site/hub-scroll-nav";
 import { ImplementationProgressBar } from "@/components/site/implementation-progress-bar";
@@ -44,8 +43,6 @@ import { SiteShell } from "@/components/site/shell";
 import { UpdateCard } from "@/components/site/update-card";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { env } from "@/lib/env";
-import { DEFAULT_LOCALE } from "@/lib/i18n/config";
-import { localeHref } from "@/lib/i18n/href";
 import { formatDisplayDate } from "@/lib/utils";
 
 // ISR (T-RT0C): serve from cache, revalidate every 5 min. The F8 country-editor
@@ -250,29 +247,68 @@ export default async function EuropeCountryPage({
     dbCountry?.nationalSoftLawNotes ?? profile.nationalSoftLawNotes;
 
   // ── Country Console (DESIGN.md §6) — France pilot ─────────────────────────
-  // A complete standalone layout: one glance = posture, rows instead of
-  // cards-of-paragraphs, collapsed notes, no ops copy. Other countries keep
-  // the legacy layout below until rollout.
+  // Three blocks only: posture hero, live monitoring, and a searchable legal
+  // database (regulation + case law + soft law). Other countries keep the
+  // legacy layout below until rollout.
   if (isCountryConsole && franceSnapshot) {
-    const corpusFamilies = [
-      { id: "regulation", label: "Regulation", items: nationalAIRegulationSources },
-      { id: "case-law", label: "Case law", items: nationalCaseLawSources },
-      { id: "soft-law", label: "Soft law", items: nationalSoftLawSources },
-    ].map((family) => ({
-      id: family.id,
-      label: family.label,
-      items: family.items.map((source) => ({
-        label: source.label,
+    // Verified decisions carry richer metadata (court, date, case number)
+    // than the case-law source records, so they take precedence; source
+    // records whose URL matches a decision are dropped as duplicates.
+    const decisionUrls = new Set(
+      franceSnapshot.verifiedDecisions
+        .map((decision) => decision.officialSourceUrl)
+        .filter((url): url is string => Boolean(url)),
+    );
+    const databaseFamilies = [
+      { id: "regulation", label: "Regulation" },
+      { id: "case-law", label: "Case law" },
+      { id: "soft-law", label: "Soft law" },
+    ];
+    const databaseEntries = [
+      ...nationalAIRegulationSources.map((source) => ({
+        id: `reg-${source.url}`,
+        family: "regulation",
+        title: source.label,
         institution: source.institution,
-        url: source.url,
         note: source.note,
+        url: source.url,
       })),
-    }));
-
-    const authorityChips = [
-      profile.dataProtectionAuthority,
-      ...profile.relevantMinistriesOrAgencies,
-    ].filter((label): label is string => Boolean(label));
+      ...franceSnapshot.verifiedDecisions.map((decision) => ({
+        id: `dec-${decision.id}`,
+        family: "case-law",
+        title: decision.title,
+        institution: decision.courtOrAuthority,
+        detail:
+          [
+            decision.date ? formatDisplayDate(decision.date) : null,
+            decision.docketOrCaseNumber ? `no. ${decision.docketOrCaseNumber}` : null,
+          ]
+            .filter(Boolean)
+            .join(" · ") || undefined,
+        note: decision.shortSummary,
+        url: decision.officialSourceUrl ?? undefined,
+      })),
+      ...nationalCaseLawSources
+        .filter((source) => !decisionUrls.has(source.url))
+        .map((source) => ({
+          id: `cl-${source.url}`,
+          family: "case-law",
+          title: source.label,
+          institution: source.institution,
+          note: source.note,
+          url: source.url,
+        })),
+      ...nationalSoftLawSources.map((source) => ({
+        id: `soft-${source.url}`,
+        family: "soft-law",
+        title: source.label,
+        institution: source.institution,
+        note: source.note,
+        url: source.url,
+      })),
+    ];
+    const familyCount = (id: string) =>
+      databaseEntries.filter((entry) => entry.family === id).length;
 
     return (
       <SiteShell className="space-y-14">
@@ -296,9 +332,9 @@ export default async function EuropeCountryPage({
             lastReviewed={formatDisplayDate(profile.lastReviewedDate)}
             stats={[
               { value: franceLiveData?.items.length ?? 0, label: "Live signals" },
-              { value: franceSnapshot.authorityMap.length, label: "Authority signals" },
-              { value: franceSnapshot.verifiedDecisions.length, label: "Verified decisions" },
-              { value: profile.officialSourceUrls.length, label: "Official sources" },
+              { value: familyCount("regulation"), label: "Regulation" },
+              { value: familyCount("case-law"), label: "Case law" },
+              { value: familyCount("soft-law"), label: "Soft law" },
             ]}
           />
         </section>
@@ -307,9 +343,7 @@ export default async function EuropeCountryPage({
           sections={[
             { id: "overview", label: "Overview" },
             { id: "live", label: "Live" },
-            { id: "architecture", label: "Architecture" },
-            { id: "corpus", label: "Corpus" },
-            { id: "published", label: "Published" },
+            { id: "database", label: "Database" },
           ]}
         />
 
@@ -339,159 +373,23 @@ export default async function EuropeCountryPage({
                 href: item.officialSourceUrl ?? item.sourceUrl,
               }))}
             />
-            <SignalStrip
-              primary={[
-                { value: franceLiveData.summary.breakingSignals, label: "Breaking", tone: "positive" },
-                { value: franceLiveData.summary.currentSignals, label: "Current" },
-                { value: franceLiveData.summary.highUrgencySignals, label: "High urgency" },
-                {
-                  value: franceLiveData.summary.watchSignals + franceLiveData.summary.staleSignals,
-                  label: "Watch / stale",
-                  tone: "warn",
-                },
-              ]}
-              secondary={[
-                { value: franceLiveData.summary.officialLike, label: "official-source" },
-                {
-                  value:
-                    franceLiveData.summary.hardLawSignals +
-                    franceLiveData.summary.caseLawSignals +
-                    franceLiveData.summary.enforcementSignals,
-                  label: "hard law & decisions",
-                },
-              ]}
-            />
           </section>
         ) : null}
 
-        <section id="architecture" className="scroll-mt-28 space-y-8">
+        <section id="database" className="scroll-mt-28 space-y-6">
           <MotionReveal>
             <SectionHeading
-              eyebrow="Legal architecture"
-              title="Settled and moving"
+              eyebrow="Legal database"
+              title="Search French AI law"
             />
           </MotionReveal>
-          <div className="grid gap-6 lg:grid-cols-2">
-            <div className="space-y-3">
-              <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-accent-strong">
-                Authority map
-              </p>
-              <CountryLedger
-                entries={franceSnapshot.authorityMap.map((entry) => ({
-                  id: entry.id,
-                  chips: [
-                    { label: entry.category.replaceAll("_", " ") },
-                    { label: entry.statusLabel.replaceAll("_", " "), tone: "info" as const },
-                  ],
-                  title: entry.title,
-                  note: entry.note,
-                  meta: `${
-                    entry.publicationDate ? formatDisplayDate(entry.publicationDate) : "Date under review"
-                  } · ${entry.sourceLabel}`,
-                  href: entry.sourceUrl,
-                }))}
-              />
-            </div>
-            <div className="space-y-3">
-              <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-accent-strong">
-                Verified decisions &amp; acts
-              </p>
-              <CountryLedger
-                entries={franceSnapshot.verifiedDecisions.map((entry) => ({
-                  id: entry.id,
-                  chips: [
-                    { label: entry.authorityType.replaceAll("_", " "), tone: "gold" as const },
-                    ...(entry.docketOrCaseNumber ? [{ label: entry.docketOrCaseNumber }] : []),
-                  ],
-                  title: entry.title,
-                  note: entry.shortSummary,
-                  meta: `${entry.courtOrAuthority} · ${
-                    entry.date ? formatDisplayDate(entry.date) : "Date under review"
-                  }`,
-                  href: entry.officialSourceUrl ?? undefined,
-                }))}
-              />
-            </div>
-          </div>
-          <div className="space-y-3">
-            <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-accent-strong">
-              Legal timeline
-            </p>
-            <CountryLedger
-              entries={franceSnapshot.timeline.map((entry) => ({
-                id: entry.id,
-                chips: [{ label: entry.category.replaceAll("_", " ") }],
-                title: entry.title,
-                note: entry.note,
-                meta: `${formatDisplayDate(entry.date)} · ${entry.sourceLabel}`,
-                href: entry.sourceUrl,
-              }))}
-            />
-          </div>
-        </section>
-
-        <section id="corpus" className="scroll-mt-28 space-y-6">
-          <MotionReveal>
-            <SectionHeading
-              eyebrow="Verified corpus"
-              title="Official sources"
+          <MotionReveal delay={0.06}>
+            <CountryLegalDatabase
+              families={databaseFamilies}
+              entries={databaseEntries}
+              searchPlaceholder="Search regulation, case law, guidance…"
             />
           </MotionReveal>
-          <MotionReveal delay={0.05}>
-            <div className="flex flex-wrap gap-1.5">
-              {authorityChips.map((label, idx) => (
-                <span
-                  key={label}
-                  className={
-                    idx === 0
-                      ? "rounded-full border border-accent-strong/30 bg-accent/10 px-3 py-1.5 font-mono text-[10px] uppercase tracking-[0.16em] text-accent-strong"
-                      : "rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5 font-mono text-[10px] uppercase tracking-[0.16em] text-zinc-600"
-                  }
-                >
-                  {label}
-                </span>
-              ))}
-            </div>
-          </MotionReveal>
-          <MotionReveal delay={0.1}>
-            <CorpusExplorer families={corpusFamilies} />
-          </MotionReveal>
-        </section>
-
-        <section id="published" className="scroll-mt-28 space-y-6">
-          <MotionReveal>
-            <SectionHeading
-              eyebrow="Published monitor items"
-              title={`Latest entries for ${profile.countryName}`}
-            />
-          </MotionReveal>
-          {countryUpdates.length > 0 ? (
-            <CountryLedger
-              entries={countryUpdates.slice(0, 6).map((update) => ({
-                id: update.id,
-                chips: [
-                  { label: update.developmentType.replaceAll("_", " ") },
-                  ...(update.importanceLevel === "critical" || update.importanceLevel === "high"
-                    ? [
-                        {
-                          label:
-                            update.importanceLevel === "critical" ? "critical" : "high importance",
-                          tone: "gold" as const,
-                        },
-                      ]
-                    : []),
-                ],
-                title: update.title,
-                note: update.oneSentenceSummary,
-                meta: `${formatDisplayDate(update.publicationDate)} · ${update.legalArea.replaceAll("_", " ")}`,
-                href: localeHref(DEFAULT_LOCALE, `/ai-regulation/${update.id}`),
-              }))}
-            />
-          ) : (
-            <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-zinc-500">
-              No published entry yet — monitoring continues.
-            </p>
-          )}
         </section>
 
         <MotionReveal>
