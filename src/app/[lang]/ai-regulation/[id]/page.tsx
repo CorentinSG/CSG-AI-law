@@ -141,7 +141,7 @@ export default async function LegalUpdateDetailPage({
         <IntelligenceSignal
           label="Citation quality"
           value={citationAssessment.qualityStatus.replaceAll("_", " ")}
-          note="Source references are checked before publication. Entries remain traceable to their sources."
+          note="Each entry links to its official source references and remains traceable to them."
           tone={citationAssessment.qualityStatus === "complete" ? "positive" : "warning"}
         />
         <IntelligenceSignal

@@ -47,7 +47,7 @@ const COPY = {
       { key: "soft", term: "Soft law", body: "Frameworks, recommendations, and policy instruments without direct binding force." },
       { key: "standards", term: "Standards", body: "Technical norms (ISO/IEC, CEN/CENELEC) — binding only where law incorporates them." },
     ] as Row[],
-    checksTitle: "What we check on every item",
+    checksTitle: "How every item is classified",
     checks: [
       { key: "1", term: "1 · Authority", body: "What kind of legal signal is this — binding, proposed, guidance, enforcement, soft law, or standards?" },
       { key: "2", term: "2 · Source trail", body: "Can the claim be traced to a real source? Every public entry links to institution, official URL, and date." },
@@ -88,7 +88,7 @@ const COPY = {
       { key: "soft", term: "Droit souple", body: "Frameworks, recommandations et instruments de politique sans force contraignante directe." },
       { key: "standards", term: "Standards", body: "Normes techniques (ISO/IEC, CEN/CENELEC) — contraignantes seulement si le droit les incorpore." },
     ] as Row[],
-    checksTitle: "Ce que nous vérifions sur chaque élément",
+    checksTitle: "Comment chaque élément est classé",
     checks: [
       { key: "1", term: "1 · Autorité", body: "Quel type de signal juridique : contraignant, proposé, guidance, enforcement, droit souple ou standards ?" },
       { key: "2", term: "2 · Piste de sources", body: "Le fait est-il traçable jusqu'à une source réelle ? Chaque entrée publique renvoie à l'institution, l'URL officielle et la date." },

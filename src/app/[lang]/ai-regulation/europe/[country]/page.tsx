@@ -617,7 +617,7 @@ export default async function EuropeCountryPage({
           <SectionHeading
             eyebrow="Germany live legal intelligence"
             title="Monitoring German AI law now"
-            description="This Germany-only panel surfaces recent official and reviewed German AI-law developments visible to the public layer, with dates, source attribution, and verification signals shown directly."
+            description="This Germany-only panel surfaces recent official German AI-law developments visible to the public layer, with dates, source attribution, and verification signals shown directly."
           />
           <LiveLegalIntelligencePanel
             title="Germany AI legal developments"
@@ -869,7 +869,7 @@ export default async function EuropeCountryPage({
           <SectionHeading
             eyebrow="Netherlands live legal intelligence"
             title="Monitoring Dutch AI law now"
-            description="This Netherlands-only panel surfaces recent official and reviewed Dutch AI-law developments visible to the public layer, with dates, source attribution, and verification signals shown directly."
+            description="This Netherlands-only panel surfaces recent official Dutch AI-law developments visible to the public layer, with dates, source attribution, and verification signals shown directly."
           />
           <LiveLegalIntelligencePanel
             title="Netherlands AI legal developments"
@@ -1127,7 +1127,7 @@ export default async function EuropeCountryPage({
           <SectionHeading
             eyebrow="Belgium live legal intelligence"
             title="Monitoring Belgian AI law now"
-            description="This Belgium-only panel surfaces recent official and reviewed Belgian AI-law developments visible to the public layer, with dates, source attribution, and verification signals shown directly."
+            description="This Belgium-only panel surfaces recent official Belgian AI-law developments visible to the public layer, with dates, source attribution, and verification signals shown directly."
           />
           <LiveLegalIntelligencePanel
             title="Belgium AI legal developments"
@@ -1391,7 +1391,7 @@ export default async function EuropeCountryPage({
           <SectionHeading
             eyebrow="Austria live legal intelligence"
             title="Monitoring Austrian AI law now"
-            description="This Austria-only panel surfaces recent official and reviewed Austrian AI-law developments visible to the public layer, with dates, source attribution, and verification signals shown directly."
+            description="This Austria-only panel surfaces recent official Austrian AI-law developments visible to the public layer, with dates, source attribution, and verification signals shown directly."
           />
           <LiveLegalIntelligencePanel
             title="Austria AI legal developments"
@@ -1655,7 +1655,7 @@ export default async function EuropeCountryPage({
           <SectionHeading
             eyebrow="Sweden live legal intelligence"
             title="Monitoring Swedish AI law now"
-            description="This Sweden-only panel surfaces recent official and reviewed Swedish AI-law developments visible to the public layer, with dates, source attribution, and verification signals shown directly."
+            description="This Sweden-only panel surfaces recent official Swedish AI-law developments visible to the public layer, with dates, source attribution, and verification signals shown directly."
           />
           <LiveLegalIntelligencePanel
             title="Sweden AI legal developments"
@@ -1919,7 +1919,7 @@ export default async function EuropeCountryPage({
           <SectionHeading
             eyebrow="Ireland live legal intelligence"
             title="Monitoring Irish AI law now"
-            description="This Ireland-only panel surfaces recent official and reviewed Irish AI-law developments visible to the public layer, with dates, source attribution, and verification signals shown directly."
+            description="This Ireland-only panel surfaces recent official Irish AI-law developments visible to the public layer, with dates, source attribution, and verification signals shown directly."
           />
           <LiveLegalIntelligencePanel
             title="Ireland AI legal developments"
@@ -2183,7 +2183,7 @@ export default async function EuropeCountryPage({
           <SectionHeading
             eyebrow="Spain live legal intelligence"
             title="Monitoring Spanish AI law now"
-            description="This Spain-only panel surfaces recent official and reviewed Spanish AI-law developments visible to the public layer, with dates, source attribution, and verification signals shown directly."
+            description="This Spain-only panel surfaces recent official Spanish AI-law developments visible to the public layer, with dates, source attribution, and verification signals shown directly."
           />
           <LiveLegalIntelligencePanel
             title="Spain AI legal developments"
@@ -2433,7 +2433,7 @@ export default async function EuropeCountryPage({
           <SectionHeading
             eyebrow="Italy live legal intelligence"
             title="Monitoring Italian AI law now"
-            description="This Italy-only panel surfaces recent official and reviewed Italian AI-law developments visible to the public layer, with dates, source attribution, and verification signals shown directly."
+            description="This Italy-only panel surfaces recent official Italian AI-law developments visible to the public layer, with dates, source attribution, and verification signals shown directly."
           />
           <LiveLegalIntelligencePanel
             title="Italy AI legal developments"
@@ -2934,7 +2934,7 @@ export default async function EuropeCountryPage({
         <SectionHeading
           eyebrow="Published monitor items"
           title={`Latest published entries for ${profile.countryName}`}
-          description="Public monitor entries remain published-only. Country profiles do not expose private drafts or unreviewed content."
+          description="Public monitor entries remain published-only. Country profiles do not expose private drafts or unpublished content."
         />
         <Card className="rounded-[2rem] border-black/6 bg-white/70 shadow-[0_18px_50px_rgba(15,15,15,0.04)]">
           <CardContent className="grid gap-6 p-6 md:grid-cols-2 xl:grid-cols-3">
@@ -2948,7 +2948,7 @@ export default async function EuropeCountryPage({
               ))
             ) : (
               <div className="rounded-[1.6rem] border border-black/6 bg-white p-6 text-sm leading-7 text-zinc-700 xl:col-span-3">
-                No published monitor item is currently available for this country. That does not imply an absence of national activity; it only means nothing has yet been reviewed and published through the existing workflow.
+                No published monitor item is currently available for this country. That does not imply an absence of national activity; it only means nothing has yet been published through the existing workflow.
               </div>
             )}
           </CardContent>
