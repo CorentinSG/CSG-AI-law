@@ -89,6 +89,13 @@ YYYY-MM-DD · <Agent> · <TASK-ID> · <STATUS>
 
 ## Current status
 
+### 2026-07-19 - Codex, EU aggressive legal-news radar
+- Intent: Expand supranational EU AI-law monitoring with aggressive journalistic and Brussels policy discovery lanes while preserving official-only authority rules.
+- Changed: Added Brussels-policy, privacy/AI-governance, tech-regulation, legal/competition, general international press, and broad GDELT EU media lanes across agent registry, seed sources, and public news-source metadata.
+- Guardrails: All media/API lanes remain discovery-only; official EU confirmation or manual review is required before verified legal authority use.
+- Verification: targeted EU/scan-profile/seed/news tests PASS (4 files, 44 tests); `npm test` FAIL due to known unrelated `src/content/research.test.ts` featured-entry assertion (expected `white-collar-revolution-law-firms-ai`, received `generative-ai-access-to-justice-pro-se`); `npm run lint` PASS; `npm run typecheck` PASS; build PASS with local non-default admin credentials plus `APP_DATA_MODE=memory`, `ALLOW_MEMORY_MODE_IN_PRODUCTION=true`, and `ADMIN_AUTH_SECRET` set.
+- Next: Configure/verify `NEWSAPI_API_KEY` in the production worker runtime, monitor GDELT rate limits, and do not describe the EU radar as guaranteed real-time unless the deployed scheduler actually runs the five-minute lane.
+
 ### 2026-07-19 - Codex, France aggressive legal-news radar
 - Intent: Expand France AI-law monitoring with aggressive journalistic discovery lanes while preserving official-only authority rules.
 - Changed: Added legal-specialist, tech-policy, general/economic press, EU-policy, sector-press, and broad GDELT France media lanes across agent registry, seed sources, and public news-source metadata.
