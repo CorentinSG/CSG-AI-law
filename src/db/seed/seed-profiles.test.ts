@@ -96,6 +96,47 @@ describe("buildSeedDataset", () => {
     ).toBe(true);
   });
 
+  it("seeds aggressive EU journalistic discovery sources as non-authority lanes", () => {
+    const dataset = buildSeedDataset("demo");
+    const aggressiveEuIds = [
+      "src-eu-brussels-policy-newsapi-ai",
+      "src-eu-privacy-ai-governance-newsapi-ai",
+      "src-eu-tech-regulation-newsapi-ai",
+      "src-eu-legal-competition-newsapi-ai",
+      "src-eu-general-international-newsapi-ai",
+      "src-eu-aggressive-gdelt-ai",
+    ];
+
+    const sources = dataset.sources.filter((source) =>
+      aggressiveEuIds.includes(source.id),
+    );
+
+    expect(sources.map((source) => source.id).sort()).toEqual(
+      [...aggressiveEuIds].sort(),
+    );
+    expect(sources.every((source) => source.country === "European Union")).toBe(
+      true,
+    );
+    expect(
+      sources.every((source) => source.jurisdiction === "European Union"),
+    ).toBe(true);
+    expect(sources.every((source) => source.region === "Europe")).toBe(true);
+    expect(sources.every((source) => source.active)).toBe(true);
+    expect(
+      sources.every((source) => source.preferredExtractionMethod === "api"),
+    ).toBe(true);
+    expect(
+      sources.every((source) => source.notes.toLowerCase().includes("discovery-only")),
+    ).toBe(true);
+    expect(
+      sources.every((source) =>
+        source.notes
+          .toLowerCase()
+          .includes("legal authority without official-source confirmation"),
+      ),
+    ).toBe(true);
+  });
+
   it("builds normalized country intelligence seed records from Europe profiles", () => {
     const dataset = buildSeedDataset("demo");
     expect(dataset.countryIntelligence.length).toBeGreaterThan(0);
