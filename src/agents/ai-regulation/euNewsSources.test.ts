@@ -49,4 +49,35 @@ describe("EU news source registry", () => {
       ]),
     );
   });
+
+  it("exposes aggressive EU journalistic discovery lanes without making them official", () => {
+    const aggressiveMediaIds = [
+      "src-eu-brussels-policy-newsapi-ai",
+      "src-eu-privacy-ai-governance-newsapi-ai",
+      "src-eu-tech-regulation-newsapi-ai",
+      "src-eu-legal-competition-newsapi-ai",
+      "src-eu-general-international-newsapi-ai",
+      "src-eu-aggressive-gdelt-ai",
+    ];
+
+    expect(getEuAgentSourceIds("eu_live_news_discovery_scan")).toEqual(
+      expect.arrayContaining(aggressiveMediaIds),
+    );
+
+    expect(getEuAgentSourceIds("eu_official_legal_scan")).not.toEqual(
+      expect.arrayContaining(aggressiveMediaIds),
+    );
+
+    for (const sourceId of aggressiveMediaIds) {
+      const descriptor = getEuSourceDescriptor({
+        id: sourceId,
+        name: sourceId,
+        region: "Europe",
+        sourceType: sourceId.endsWith("gdelt-ai") ? "discovery_source" : "media_source",
+      });
+
+      expect(descriptor?.official).toBe(false);
+      expect(descriptor?.sourceAuthorityLevel).toMatch(/media_legal_press|informal_discovery/);
+    }
+  });
 });

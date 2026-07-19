@@ -334,6 +334,60 @@ export const euNewsSourceRegistry: EuNewsSourceDescriptor[] = [
     category: "media",
   },
   {
+    id: "eu-brussels-policy-newsapi",
+    sourceId: "src-eu-brussels-policy-newsapi-ai",
+    name: "EU AI Brussels policy press (NewsAPI)",
+    sourceAuthorityLevel: "media_legal_press",
+    official: false,
+    region: "Europe",
+    category: "media",
+  },
+  {
+    id: "eu-privacy-ai-governance-newsapi",
+    sourceId: "src-eu-privacy-ai-governance-newsapi-ai",
+    name: "EU AI privacy and governance press (NewsAPI)",
+    sourceAuthorityLevel: "media_legal_press",
+    official: false,
+    region: "Europe",
+    category: "media",
+  },
+  {
+    id: "eu-tech-regulation-newsapi",
+    sourceId: "src-eu-tech-regulation-newsapi-ai",
+    name: "EU AI tech regulation press (NewsAPI)",
+    sourceAuthorityLevel: "media_legal_press",
+    official: false,
+    region: "Europe",
+    category: "media",
+  },
+  {
+    id: "eu-legal-competition-newsapi",
+    sourceId: "src-eu-legal-competition-newsapi-ai",
+    name: "EU AI legal and competition press (NewsAPI)",
+    sourceAuthorityLevel: "media_legal_press",
+    official: false,
+    region: "Europe",
+    category: "media",
+  },
+  {
+    id: "eu-general-international-newsapi",
+    sourceId: "src-eu-general-international-newsapi-ai",
+    name: "EU AI general international press (NewsAPI)",
+    sourceAuthorityLevel: "media_legal_press",
+    official: false,
+    region: "Europe",
+    category: "media",
+  },
+  {
+    id: "eu-aggressive-gdelt",
+    sourceId: "src-eu-aggressive-gdelt-ai",
+    name: "EU AI aggressive legal news discovery (GDELT)",
+    sourceAuthorityLevel: "informal_discovery",
+    official: false,
+    region: "Europe",
+    category: "discovery",
+  },
+  {
     id: "eu-gdelt-discovery",
     sourceId: "src-eu-gdelt-ai",
     name: "European AI legal news discovery (GDELT)",
@@ -430,6 +484,8 @@ function descriptorByNormalizedName(name: string) {
   return (
     euNewsSourceRegistry.find(
       (entry) =>
+        entry.sourceId?.toLowerCase() === normalized ||
+        entry.id.toLowerCase() === normalized ||
         entry.name.toLowerCase() === normalized ||
         normalized.includes(entry.name.toLowerCase()) ||
         entry.name.toLowerCase().includes(normalized),
@@ -439,13 +495,17 @@ function descriptorByNormalizedName(name: string) {
 
 export function getEuSourceDescriptor(
   source:
-    | Pick<RegulationSource, "name" | "region" | "sourceType">
+    | (Pick<RegulationSource, "name" | "region" | "sourceType"> &
+        Partial<Pick<RegulationSource, "id">> & { sourceId?: string })
     | null
     | undefined,
 ) {
   if (!source) return null;
 
-  const registryMatch = descriptorByNormalizedName(source.name);
+  const registryMatch =
+    (source.id ? descriptorByNormalizedName(source.id) : null) ??
+    (source.sourceId ? descriptorByNormalizedName(source.sourceId) : null) ??
+    descriptorByNormalizedName(source.name);
   if (registryMatch) {
     return registryMatch;
   }
