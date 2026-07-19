@@ -3,6 +3,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   getFranceAgentSourceIds,
   getFranceSchedulerGuidance,
+  getFranceSourceDescriptor,
   isFranceMonitoringSource,
 } from "@/agents/ai-regulation/franceNewsSources";
 import {
@@ -143,6 +144,36 @@ describe("France legal news agent", () => {
         "src-fr-cour-cassation-ai",
         "src-fr-defenseur-droits-ai",
       ]),
+    );
+  });
+
+  it("exposes aggressive France journalistic discovery lanes without making them official", () => {
+    const aggressiveMediaIds = [
+      "src-fr-legal-press-newsapi-ai",
+      "src-fr-tech-policy-newsapi-ai",
+      "src-fr-general-press-newsapi-ai",
+      "src-fr-eu-policy-newsapi-ai",
+      "src-fr-sector-press-newsapi-ai",
+      "src-fr-aggressive-gdelt-ai",
+    ];
+
+    expect(getFranceAgentSourceIds("france_live_news_scan")).toEqual(
+      expect.arrayContaining(aggressiveMediaIds),
+    );
+
+    for (const sourceId of aggressiveMediaIds) {
+      const descriptor = getFranceSourceDescriptor(sourceId);
+
+      expect(descriptor?.category).toBe("discovery_media_feed");
+      expect(descriptor?.liveMonitoringEligible).toBe(true);
+      expect(descriptor?.baselineEligible).toBe(false);
+      expect(descriptor?.verificationEligible).toBe(false);
+      expect(descriptor?.recommendedCadence).toBe("every_5_minutes_when_supported");
+      expect(descriptor?.freshHours).toBeLessThanOrEqual(3);
+    }
+
+    expect(getFranceAgentSourceIds("france_official_legal_scan")).not.toEqual(
+      expect.arrayContaining(aggressiveMediaIds),
     );
   });
 
