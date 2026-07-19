@@ -38,6 +38,7 @@ yarn-error.log*
 
 # agent harness traces (local debugging artifacts)
 .agent-traces/
+.worktrees/
 
 # dev artifacts and local logs
 *.log
