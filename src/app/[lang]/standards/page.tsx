@@ -124,6 +124,7 @@ export default async function StandardsPage({
         instruments={instruments.length}
         types={typeCount}
         regions={3}
+        bindings={instruments.map((i) => i.binding)}
       />
 
       {/* The inventory — search + pill filters + animated tiles */}
