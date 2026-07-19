@@ -143,6 +143,20 @@ describe("buildSeedDataset", () => {
       sources.every((source) => source.notes.toLowerCase().includes("discovery-only")),
     ).toBe(true);
     expect(
+      sources.every((source) => source.config?.sourceCategory === "media_discovery_source"),
+    ).toBe(true);
+    expect(sources.every((source) => source.config?.metadataOnly === true)).toBe(
+      true,
+    );
+    expect(
+      sources.every((source) => source.config?.manualReviewRequired === true),
+    ).toBe(true);
+    expect(
+      sources.every(
+        (source) => source.config?.officialConfirmationRequired === true,
+      ),
+    ).toBe(true);
+    expect(
       sources.every((source) =>
         source.notes
           .toLowerCase()
