@@ -89,6 +89,13 @@ YYYY-MM-DD · <Agent> · <TASK-ID> · <STATUS>
 
 ## Current status
 
+### 2026-07-19 - Codex, France aggressive legal-news radar
+- Intent: Expand France AI-law monitoring with aggressive journalistic discovery lanes while preserving official-only authority rules.
+- Changed: Added legal-specialist, tech-policy, general/economic press, EU-policy, sector-press, and broad GDELT France media lanes across agent registry, seed sources, and public news-source metadata.
+- Guardrails: All media/API lanes remain discovery-only; official confirmation or manual review is required before verified legal authority use.
+- Verification: targeted France/scan-profile/seed/news tests PASS (4 files, 45 tests); `npm test` FAIL due to pre-existing unrelated `src/content/research.test.ts` featured-entry assertion (expected `white-collar-revolution-law-firms-ai`, received `generative-ai-access-to-justice-pro-se`); `npm run lint` PASS; `npm run typecheck` PASS; required PowerShell build command FAIL after compile because `APP_DATA_MODE` is required in production.
+- Next: Configure/verify `NEWSAPI_API_KEY` in the production worker runtime and monitor GDELT rate limits under the aggressive cadence.
+
 2026-07-19 · Claude Code · T-STANDARDS-ATLAS · MERGED
 - Intent:        Bring /standards onto the same atlas system as the Legal Database. Institutions mode (default): institution tiles clustered by region with a stacked binding-status spectrum bar, click → drill-down into that institution's type-grouped expandable ledger; Registry mode: full ledger grouped by authority type; transversal search; single binding filter kept in two-way sync with the interactive hero spectrum.
 - Files:         `src/components/site/standards-explorer.tsx`, `src/components/site/authority-spectrum.tsx`, `src/app/[lang]/standards/page.tsx` (Claude-owned Standards UI — the 3 frontend files only).
