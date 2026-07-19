@@ -429,6 +429,12 @@ describe("AI Law News", () => {
         "news-official-france-defenseur-droits",
         "news-europe-newsapi-discovery",
         "news-europe-major-press-newsapi",
+        "news-europe-brussels-policy-newsapi",
+        "news-europe-privacy-ai-governance-newsapi",
+        "news-europe-tech-regulation-newsapi",
+        "news-europe-legal-competition-newsapi",
+        "news-europe-general-international-newsapi",
+        "news-europe-aggressive-gdelt",
         "news-europe-gdelt-discovery",
         "news-france-newsapi-discovery",
         "news-france-major-press-newsapi",
@@ -456,6 +462,24 @@ describe("AI Law News", () => {
     expect(aggressiveFranceSources.every((source) => !source.official)).toBe(true);
     expect(
       aggressiveFranceSources.every((source) =>
+        source.notes.toLowerCase().includes("never legal authority"),
+      ),
+    ).toBe(true);
+
+    const aggressiveEuropeSources = aiLawNewsSourceConfigs.filter((source) =>
+      [
+        "news-europe-brussels-policy-newsapi",
+        "news-europe-privacy-ai-governance-newsapi",
+        "news-europe-tech-regulation-newsapi",
+        "news-europe-legal-competition-newsapi",
+        "news-europe-general-international-newsapi",
+        "news-europe-aggressive-gdelt",
+      ].includes(source.id),
+    );
+
+    expect(aggressiveEuropeSources.every((source) => !source.official)).toBe(true);
+    expect(
+      aggressiveEuropeSources.every((source) =>
         source.notes.toLowerCase().includes("never legal authority"),
       ),
     ).toBe(true);
