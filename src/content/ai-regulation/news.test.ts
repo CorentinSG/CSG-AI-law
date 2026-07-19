@@ -478,6 +478,30 @@ describe("AI Law News", () => {
     );
 
     expect(aggressiveEuropeSources.every((source) => !source.official)).toBe(true);
+    expect(aggressiveEuropeSources.every((source) => source.region === "Europe")).toBe(true);
+    expect(aggressiveEuropeSources.every((source) => source.scanFrequency === "hourly")).toBe(true);
+    expect(aggressiveEuropeSources.every((source) => source.active)).toBe(true);
+    expect(aggressiveEuropeSources.every((source) => source.manualOnly === false)).toBe(true);
+    expect(aggressiveEuropeSources.every((source) => source.parserStatus === "ready")).toBe(true);
+    expect(
+      aggressiveEuropeSources
+        .filter((source) => source.id !== "news-europe-aggressive-gdelt")
+        .every(
+          (source) =>
+            source.sourceType === "legal_regulatory_press" &&
+            source.reliabilityLevel === "reputable_secondary" &&
+            source.paywallStatus === "mixed",
+        ),
+    ).toBe(true);
+    expect(
+      aggressiveEuropeSources.find(
+        (source) => source.id === "news-europe-aggressive-gdelt",
+      ),
+    ).toMatchObject({
+      sourceType: "informal_discovery_source",
+      reliabilityLevel: "informal_discovery",
+      paywallStatus: "public",
+    });
     expect(
       aggressiveEuropeSources.every((source) =>
         source.notes.toLowerCase().includes("never legal authority"),
