@@ -2645,6 +2645,9 @@ export const regulationSourcesSeed: RegulationSource[] = [
     config: {
       apiProvider: "newsapi",
       sourceCategory: "media_discovery_source",
+      metadataOnly: true,
+      manualReviewRequired: true,
+      officialConfirmationRequired: true,
       maxItems: 12,
       allowedDomains: ["euractiv.com", "politico.eu", "mlex.com", "contexte.com"],
     },
@@ -2670,6 +2673,9 @@ export const regulationSourcesSeed: RegulationSource[] = [
     config: {
       apiProvider: "newsapi",
       sourceCategory: "media_discovery_source",
+      metadataOnly: true,
+      manualReviewRequired: true,
+      officialConfirmationRequired: true,
       maxItems: 12,
       allowedDomains: ["iapp.org", "techpolicy.press", "fpf.org"],
     },
@@ -2695,6 +2701,9 @@ export const regulationSourcesSeed: RegulationSource[] = [
     config: {
       apiProvider: "newsapi",
       sourceCategory: "media_discovery_source",
+      metadataOnly: true,
+      manualReviewRequired: true,
+      officialConfirmationRequired: true,
       maxItems: 12,
       allowedDomains: [
         "techcrunch.com",
@@ -2725,6 +2734,9 @@ export const regulationSourcesSeed: RegulationSource[] = [
     config: {
       apiProvider: "newsapi",
       sourceCategory: "media_discovery_source",
+      metadataOnly: true,
+      manualReviewRequired: true,
+      officialConfirmationRequired: true,
       maxItems: 12,
       allowedDomains: ["lexology.com", "jdsupra.com", "globalcompetitionreview.com"],
     },
@@ -2750,6 +2762,9 @@ export const regulationSourcesSeed: RegulationSource[] = [
     config: {
       apiProvider: "newsapi",
       sourceCategory: "media_discovery_source",
+      metadataOnly: true,
+      manualReviewRequired: true,
+      officialConfirmationRequired: true,
       maxItems: 12,
       allowedDomains: [
         "reuters.com",
@@ -2781,6 +2796,9 @@ export const regulationSourcesSeed: RegulationSource[] = [
     config: {
       apiProvider: "gdelt",
       sourceCategory: "media_discovery_source",
+      metadataOnly: true,
+      manualReviewRequired: true,
+      officialConfirmationRequired: true,
       maxItems: 20,
     },
     createdAt: now,
