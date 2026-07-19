@@ -942,6 +942,9 @@ export const regulationSourcesSeed: RegulationSource[] = [
     config: {
       apiProvider: "newsapi",
       sourceCategory: "media_discovery_source",
+      metadataOnly: true,
+      manualReviewRequired: true,
+      officialConfirmationRequired: true,
       maxItems: 12,
       allowedDomains: [
         "dalloz-actualite.fr",
@@ -973,6 +976,9 @@ export const regulationSourcesSeed: RegulationSource[] = [
     config: {
       apiProvider: "newsapi",
       sourceCategory: "media_discovery_source",
+      metadataOnly: true,
+      manualReviewRequired: true,
+      officialConfirmationRequired: true,
       maxItems: 12,
       allowedDomains: ["next.ink", "usine-digitale.fr", "siecledigital.fr", "zdnet.fr"],
     },
@@ -998,6 +1004,9 @@ export const regulationSourcesSeed: RegulationSource[] = [
     config: {
       apiProvider: "newsapi",
       sourceCategory: "media_discovery_source",
+      metadataOnly: true,
+      manualReviewRequired: true,
+      officialConfirmationRequired: true,
       maxItems: 12,
       allowedDomains: [
         "lemonde.fr",
@@ -1031,6 +1040,9 @@ export const regulationSourcesSeed: RegulationSource[] = [
     config: {
       apiProvider: "newsapi",
       sourceCategory: "media_discovery_source",
+      metadataOnly: true,
+      manualReviewRequired: true,
+      officialConfirmationRequired: true,
       maxItems: 12,
       allowedDomains: ["euractiv.fr", "politico.eu", "contexte.com", "iapp.org"],
     },
@@ -1056,6 +1068,9 @@ export const regulationSourcesSeed: RegulationSource[] = [
     config: {
       apiProvider: "newsapi",
       sourceCategory: "media_discovery_source",
+      metadataOnly: true,
+      manualReviewRequired: true,
+      officialConfirmationRequired: true,
       maxItems: 12,
       allowedDomains: [
         "lagazettedescommunes.com",
@@ -1086,6 +1101,9 @@ export const regulationSourcesSeed: RegulationSource[] = [
     config: {
       apiProvider: "gdelt",
       sourceCategory: "media_discovery_source",
+      metadataOnly: true,
+      manualReviewRequired: true,
+      officialConfirmationRequired: true,
       maxItems: 20,
     },
     createdAt: now,
