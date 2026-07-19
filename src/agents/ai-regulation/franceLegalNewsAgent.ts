@@ -212,8 +212,12 @@ export async function runFranceLegalNewsAgentScan(options?: {
 
 export async function getFranceLiveLegalIntelligenceData(limit = 6) {
   const franceSourceIds = getFranceAgentSourceIds("france_official_legal_scan");
+  // The public news list is global and ordered by publication date, so a
+  // small window starves France items once other jurisdictions publish in
+  // volume (France entries with a null publication date sort last). Widen the
+  // window until a country-filtered repository query exists.
   const [newsItems, sourceHealthChecks] = await Promise.all([
-    updateRepository.getPublicNewsItems(80),
+    updateRepository.getPublicNewsItems(500),
     updateRepository.getSourceHealthChecks(undefined, 80),
   ]);
 
