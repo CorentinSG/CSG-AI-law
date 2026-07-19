@@ -88,13 +88,12 @@ describe("buildSeedDataset", () => {
       sources.every((source) => source.notes.toLowerCase().includes("discovery-only")),
     ).toBe(true);
     expect(
-      sources.every(
-        (source) =>
-          !source.notes
-            .toLowerCase()
-            .includes("legal authority without official-source confirmation"),
+      sources.every((source) =>
+        source.notes
+          .toLowerCase()
+          .includes("legal authority without official-source confirmation"),
       ),
-    ).toBe(false);
+    ).toBe(true);
   });
 
   it("builds normalized country intelligence seed records from Europe profiles", () => {
