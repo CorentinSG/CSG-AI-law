@@ -432,9 +432,33 @@ describe("AI Law News", () => {
         "news-europe-gdelt-discovery",
         "news-france-newsapi-discovery",
         "news-france-major-press-newsapi",
+        "news-france-legal-press-newsapi",
+        "news-france-tech-policy-newsapi",
+        "news-france-general-press-newsapi",
+        "news-france-eu-policy-newsapi",
+        "news-france-sector-press-newsapi",
+        "news-france-aggressive-gdelt",
         "news-france-gdelt-discovery",
       ]),
     );
+
+    const aggressiveFranceSources = aiLawNewsSourceConfigs.filter((source) =>
+      [
+        "news-france-legal-press-newsapi",
+        "news-france-tech-policy-newsapi",
+        "news-france-general-press-newsapi",
+        "news-france-eu-policy-newsapi",
+        "news-france-sector-press-newsapi",
+        "news-france-aggressive-gdelt",
+      ].includes(source.id),
+    );
+
+    expect(aggressiveFranceSources.every((source) => !source.official)).toBe(true);
+    expect(
+      aggressiveFranceSources.every((source) =>
+        source.notes.toLowerCase().includes("never legal authority"),
+      ),
+    ).toBe(true);
   });
 
   it("filters news items by source type and topic", () => {
