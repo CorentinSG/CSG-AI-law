@@ -93,7 +93,7 @@ YYYY-MM-DD · <Agent> · <TASK-ID> · <STATUS>
 - Intent: Expand France AI-law monitoring with aggressive journalistic discovery lanes while preserving official-only authority rules.
 - Changed: Added legal-specialist, tech-policy, general/economic press, EU-policy, sector-press, and broad GDELT France media lanes across agent registry, seed sources, and public news-source metadata.
 - Guardrails: All media/API lanes remain discovery-only; official confirmation or manual review is required before verified legal authority use.
-- Verification: targeted France/scan-profile/seed/news tests PASS (4 files, 45 tests); `npm test` FAIL due to pre-existing unrelated `src/content/research.test.ts` featured-entry assertion (expected `white-collar-revolution-law-firms-ai`, received `generative-ai-access-to-justice-pro-se`); `npm run lint` PASS; `npm run typecheck` PASS; required PowerShell build command FAIL after compile because `APP_DATA_MODE` is required in production.
+- Verification: targeted France/scan-profile/seed/news tests PASS (4 files, 45 tests); `npm test` FAIL due to pre-existing unrelated `src/content/research.test.ts` featured-entry assertion (expected `white-collar-revolution-law-firms-ai`, received `generative-ai-access-to-justice-pro-se`); `npm run lint` PASS; `npm run typecheck` PASS; build PASS with local non-default admin credentials plus `APP_DATA_MODE=memory`, `ALLOW_MEMORY_MODE_IN_PRODUCTION=true`, and `ADMIN_AUTH_SECRET` set.
 - Next: Configure/verify `NEWSAPI_API_KEY` in the production worker runtime and monitor GDELT rate limits under the aggressive cadence.
 
 2026-07-19 · Claude Code · T-STANDARDS-ATLAS · MERGED
