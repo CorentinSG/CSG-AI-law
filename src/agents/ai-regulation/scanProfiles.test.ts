@@ -186,6 +186,12 @@ describe("scan profiles", () => {
     const sources = [
       createSource({ id: "src-eu-newsapi-ai", sourceType: "media_source" }),
       createSource({ id: "src-eu-major-press-newsapi-ai", sourceType: "media_source" }),
+      createSource({ id: "src-eu-brussels-policy-newsapi-ai", sourceType: "media_source" }),
+      createSource({ id: "src-eu-privacy-ai-governance-newsapi-ai", sourceType: "media_source" }),
+      createSource({ id: "src-eu-tech-regulation-newsapi-ai", sourceType: "media_source" }),
+      createSource({ id: "src-eu-legal-competition-newsapi-ai", sourceType: "media_source" }),
+      createSource({ id: "src-eu-general-international-newsapi-ai", sourceType: "media_source" }),
+      createSource({ id: "src-eu-aggressive-gdelt-ai", sourceType: "discovery_source" }),
       createSource({ id: "src-eu-gdelt-ai", sourceType: "discovery_source" }),
       createSource({ id: "src-fr-newsapi-ai", country: "France", jurisdiction: "France", sourceType: "media_source" }),
       createSource({ id: "src-eu-ai-office" }),
@@ -202,19 +208,16 @@ describe("scan profiles", () => {
     const euOfficialIds = getEuAgentSourceIds("eu_official_legal_scan");
     const sources = [
       createSource({ id: "src-eu-commission-news-rss", sourceType: "RSS", preferredExtractionMethod: "rss" }),
+      createSource({ id: "src-eur-lex-proposals-rss", sourceType: "RSS", preferredExtractionMethod: "rss" }),
       createSource({ id: "src-edpb-rss", sourceType: "RSS", preferredExtractionMethod: "rss" }),
       createSource({ id: "src-curia-rss", sourceType: "RSS", preferredExtractionMethod: "rss" }),
-      createSource({ id: "src-eur-lex-proposals-rss", sourceType: "RSS", preferredExtractionMethod: "rss" }),
       createSource({ id: "src-eu-newsapi-ai", sourceType: "media_source" }),
+      createSource({ id: "src-eu-brussels-policy-newsapi-ai", sourceType: "media_source" }),
     ];
 
     expect(
       selectSourcesForScanProfile(sources, "eu_official_legal_scan").map((source) => source.id),
-    ).toEqual(
-      expect.arrayContaining(
-        euOfficialIds.filter((id) => sources.some((source) => source.id === id)),
-      ),
-    );
+    ).toEqual(euOfficialIds.filter((id) => sources.some((source) => source.id === id)));
   });
 
   it("keeps International official scans limited to transnational governance and standards sources", () => {
