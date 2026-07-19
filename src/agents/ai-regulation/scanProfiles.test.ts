@@ -111,6 +111,12 @@ describe("scan profiles", () => {
       createSource({ id: "src-fr-conseil-etat-ai", country: "France", jurisdiction: "France" }),
       createSource({ id: "src-eu-ai-office", country: "European Union", jurisdiction: "European Union" }),
       createSource({ id: "src-tracker", sourceType: "discovery_source", country: "France", jurisdiction: "France" }),
+      createSource({
+        id: "src-fr-legal-press-newsapi-ai",
+        sourceType: "media_source",
+        country: "France",
+        jurisdiction: "France",
+      }),
     ];
 
     expect(
@@ -129,6 +135,42 @@ describe("scan profiles", () => {
         country: "France",
         jurisdiction: "France",
         sourceType: "media_source",
+      }),
+      createSource({
+        id: "src-fr-legal-press-newsapi-ai",
+        country: "France",
+        jurisdiction: "France",
+        sourceType: "media_source",
+      }),
+      createSource({
+        id: "src-fr-tech-policy-newsapi-ai",
+        country: "France",
+        jurisdiction: "France",
+        sourceType: "media_source",
+      }),
+      createSource({
+        id: "src-fr-general-press-newsapi-ai",
+        country: "France",
+        jurisdiction: "France",
+        sourceType: "media_source",
+      }),
+      createSource({
+        id: "src-fr-eu-policy-newsapi-ai",
+        country: "France",
+        jurisdiction: "France",
+        sourceType: "media_source",
+      }),
+      createSource({
+        id: "src-fr-sector-press-newsapi-ai",
+        country: "France",
+        jurisdiction: "France",
+        sourceType: "media_source",
+      }),
+      createSource({
+        id: "src-fr-aggressive-gdelt-ai",
+        country: "France",
+        jurisdiction: "France",
+        sourceType: "discovery_source",
       }),
       createSource({ id: "src-fr-legifrance-ai", country: "France", jurisdiction: "France" }),
       createSource({ id: "src-fr-conseil-etat-ai", country: "France", jurisdiction: "France" }),
