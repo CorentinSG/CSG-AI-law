@@ -105,6 +105,17 @@ export const REQUIRED_SCHEMA_INVARIANTS: Record<string, TableRequirement> = {
         objectName: "regulation_sources.reliability_level",
         requiredValues: ["high", "medium", "low"],
       },
+      {
+        // Widened by migration 031 (028 inserts official_legal_database).
+        name: "regulation_sources_source_category_check",
+        type: "CHECK",
+        columns: ["source_category"],
+        objectName: "regulation_sources.source_category",
+        requiredValues: [
+          "official", "regulator", "court", "parliament", "media",
+          "newsletter", "official_legal_database",
+        ],
+      },
     ],
     policies: [{
       name: "service_role_all_regulation_sources",
@@ -227,6 +238,46 @@ export const REQUIRED_SCHEMA_INVARIANTS: Record<string, TableRequirement> = {
       roles: ["anon", "authenticated"],
       usingExpression: "public_visibility_status = 'public'",
       checkExpression: null,
+    }],
+  },
+  // Provenance table: its source_type CHECK drifted in prod (017 recreated the
+  // pre-005 list; repaired by 031). The RLS policy requirement encodes the
+  // Wave 1.4 target — the audit stays red on this table until RLS ships,
+  // which is the intended tripwire behaviour.
+  source_references: {
+    columns: [
+      "id", "raw_item_id", "regulatory_update_id", "source_role", "title",
+      "institution", "url", "canonical_url", "source_type", "authority_type",
+      "publication_date", "retrieved_at", "last_verified_at", "excerpt",
+      "pinpoint", "reliability_level", "verification_status", "created_at",
+    ],
+    indexes: [
+      {
+        name: "source_references_raw_item_url_role_idx",
+        columns: ["raw_item_id", "url", "source_role"],
+        unique: true,
+      },
+    ],
+    constraints: [
+      {
+        // Full value list from 005, restored by 031.
+        name: "source_references_source_type_check",
+        type: "CHECK",
+        columns: ["source_type"],
+        objectName: "source_references.source_type",
+        requiredValues: [
+          "official", "court", "regulator", "government", "parliament",
+          "legislation", "policy", "standards_body", "discovery_source",
+          "media_source", "tracker",
+        ],
+      },
+    ],
+    policies: [{
+      name: "service_role_all_source_references",
+      command: "ALL",
+      roles: ["service_role"],
+      usingExpression: "auth.role() = 'service_role'",
+      checkExpression: "auth.role() = 'service_role'",
     }],
   },
 };

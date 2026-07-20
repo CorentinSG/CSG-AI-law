@@ -33,6 +33,12 @@ function completeSnapshot(): SchemaSnapshot {
       "country_or_state", "legal_area", "authority_type", "development_type",
       "verification_status", "public_visibility_status", "created_at", "updated_at",
     ],
+    source_references: [
+      "id", "raw_item_id", "regulatory_update_id", "source_role", "title",
+      "institution", "url", "canonical_url", "source_type", "authority_type",
+      "publication_date", "retrieved_at", "last_verified_at", "excerpt",
+      "pinpoint", "reliability_level", "verification_status", "created_at",
+    ],
   };
 
   return {
@@ -50,6 +56,7 @@ function completeSnapshot(): SchemaSnapshot {
       { tableName: "news_items", indexName: "news_items_slug_key", columnNames: ["slug"], isUnique: true, isValid: true, predicate: null },
       { tableName: "news_items", indexName: "news_items_visibility_idx", columnNames: ["public_visibility_status", "publication_date", "detected_at"], isUnique: false, isValid: true, predicate: null },
       { tableName: "news_items", indexName: "news_items_raw_item_idx", columnNames: ["raw_item_id"], isUnique: false, isValid: true, predicate: null },
+      { tableName: "source_references", indexName: "source_references_raw_item_url_role_idx", columnNames: ["raw_item_id", "url", "source_role"], isUnique: true, isValid: true, predicate: null },
     ].map((index) => ({
       ...index,
       indexDefinition: `CREATE ${index.isUnique ? "UNIQUE " : ""}INDEX ${index.indexName} ON public.${index.tableName} (${index.columnNames.join(", ")})`,
@@ -61,6 +68,8 @@ function completeSnapshot(): SchemaSnapshot {
       { tableName: "ai_regulatory_updates", constraintName: "ai_regulatory_updates_status_check", constraintType: "CHECK", columnNames: ["status"], isValidated: true, constraintDefinition: "CHECK ((status = ANY (ARRAY['needs_review'::text, 'approved'::text, 'rejected'::text, 'published'::text, 'archived'::text])))" },
       { tableName: "scan_jobs", constraintName: "scan_jobs_status_check", constraintType: "CHECK", columnNames: ["status"], isValidated: true, constraintDefinition: "CHECK ((status = ANY (ARRAY['queued'::text, 'running'::text, 'succeeded'::text, 'partial_success'::text, 'failed'::text])))" },
       { tableName: "news_items", constraintName: "news_items_visibility_check", constraintType: "CHECK", columnNames: ["public_visibility_status"], isValidated: true, constraintDefinition: "CHECK ((public_visibility_status = ANY (ARRAY['public'::text, 'admin_only'::text])))" },
+      { tableName: "regulation_sources", constraintName: "regulation_sources_source_category_check", constraintType: "CHECK", columnNames: ["source_category"], isValidated: true, constraintDefinition: "CHECK (((source_category = ANY (ARRAY['official'::text, 'regulator'::text, 'court'::text, 'parliament'::text, 'media'::text, 'newsletter'::text, 'official_legal_database'::text])) OR (source_category IS NULL)))" },
+      { tableName: "source_references", constraintName: "source_references_source_type_check", constraintType: "CHECK", columnNames: ["source_type"], isValidated: true, constraintDefinition: "CHECK ((source_type = ANY (ARRAY['official'::text, 'court'::text, 'regulator'::text, 'government'::text, 'parliament'::text, 'legislation'::text, 'policy'::text, 'standards_body'::text, 'discovery_source'::text, 'media_source'::text, 'tracker'::text])))" },
     ],
     tables: Object.keys(columnsByTable).map((tableName) => ({ tableName, rlsEnabled: true })),
     policies: [
@@ -69,6 +78,7 @@ function completeSnapshot(): SchemaSnapshot {
       { tableName: "ai_regulatory_updates", policyName: "public_published_updates_select", command: "SELECT", roles: ["anon", "authenticated"], usingExpression: "(status = 'published'::text)", checkExpression: null },
       { tableName: "scan_jobs", policyName: "service_role_all_scan_jobs", command: "ALL", roles: ["service_role"], usingExpression: "(auth.role() = 'service_role'::text)", checkExpression: "(auth.role() = 'service_role'::text)" },
       { tableName: "news_items", policyName: "Public can read visible news items", command: "SELECT", roles: ["anon", "authenticated"], usingExpression: "(public_visibility_status = 'public'::text)", checkExpression: null },
+      { tableName: "source_references", policyName: "service_role_all_source_references", command: "ALL", roles: ["service_role"], usingExpression: "(auth.role() = 'service_role'::text)", checkExpression: "(auth.role() = 'service_role'::text)" },
     ],
   };
 }
