@@ -175,6 +175,14 @@ export default async function AiRegulationPage({
   ).length;
   const internationalNewsCount = newsPage.items.filter(isInternationalSignal).length;
   const internationalDatabaseCount = updatesPage.items.filter(isInternationalSignal).length;
+  // Regional counts must actually be regional — the Europe and U.S. cards were
+  // both showing the same unfiltered total.
+  const europeDatabaseCount = updatesPage.items.filter(
+    (update) => update.region === "Europe",
+  ).length;
+  const usDatabaseCount = updatesPage.items.filter(
+    (update) => update.region === "North America",
+  ).length;
 
   // Slim, serializable projection for the client-side database explorer.
   const explorerEntries: ExplorerEntry[] = updates.map((update) => {
@@ -281,7 +289,7 @@ export default async function AiRegulationPage({
                   href="/ai-regulation/europe"
                   liveLabel="Europe news"
                   liveCount={europeNewsCount}
-                  dbCount={updatesPage.items.length}
+                  dbCount={europeDatabaseCount}
                   highlights={europeProfiles.map((p) => ({ label: p.countryName, href: `/ai-regulation/europe/${p.slug}` }))}
                   isLive
                 />
@@ -294,7 +302,7 @@ export default async function AiRegulationPage({
                   href="/ai-regulation/united-states"
                   liveLabel="U.S. news"
                   liveCount={usNewsCount}
-                  dbCount={updatesPage.items.length}
+                  dbCount={usDatabaseCount}
                   highlights={usProfiles.map((p) => ({ label: p.stateName, href: `/ai-regulation/united-states/${p.slug}` }))}
                   isLive
                 />

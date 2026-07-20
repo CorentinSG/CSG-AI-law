@@ -1,12 +1,22 @@
 "use client";
 
 import Link from "next/link";
+import dynamic from "next/dynamic";
 import { AnimatedHeading } from "@/components/site/animated-heading";
 import { FadeIn } from "@/components/site/fade-in";
 import { ProfilePortrait } from "@/components/site/profile-portrait";
-import { ShaderAnimation } from "@/components/ui/shader-animation";
 import type { Dictionary } from "@/lib/i18n/dictionary";
 import { LOCALES, type Locale } from "@/lib/i18n/config";
+
+// three.js weighs ~150KB gzip and only paints a decorative background:
+// load it after hydration instead of shipping it in the home's initial JS.
+const ShaderAnimation = dynamic(
+  () =>
+    import("@/components/ui/shader-animation").then(
+      (mod) => mod.ShaderAnimation,
+    ),
+  { ssr: false, loading: () => null },
+);
 
 export function HeroVideoSection({
   dict,

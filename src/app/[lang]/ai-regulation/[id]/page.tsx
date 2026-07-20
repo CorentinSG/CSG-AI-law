@@ -12,7 +12,7 @@ import { BreadcrumbNav } from "@/components/site/breadcrumb-nav";
 import { IntelligenceSignal } from "@/components/site/intelligence-signal";
 import { SiteShell } from "@/components/site/shell";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { env } from "@/lib/env";
+import { pageAlternates } from "@/lib/i18n/metadata";
 import { formatDisplayDate } from "@/lib/utils";
 
 // Stays dynamic (not ISR like the other public /ai-regulation pages, T-RT0C):
@@ -25,25 +25,25 @@ export const dynamic = "force-dynamic";
 export async function generateMetadata({
   params,
 }: {
-  params: Promise<{ id: string }>;
+  params: Promise<{ lang: string; id: string }>;
 }): Promise<Metadata> {
-  const { id } = await params;
+  const { lang, id } = await params;
   const update = await updateRepository.getPublicUpdate(id);
   if (!update) {
     return {};
   }
   const title = `${update.title} | AI Law Intelligence`;
   const description = update.oneSentenceSummary;
-  const canonical = `${env.NEXT_PUBLIC_SITE_URL}/ai-regulation/${update.id}`;
+  const alternates = pageAlternates(lang, `/ai-regulation/${update.id}`);
 
   return {
     title,
     description,
-    alternates: { canonical },
+    alternates,
     openGraph: {
       title,
       description,
-      url: canonical,
+      url: alternates.canonical,
       siteName: "C. Saint-Girons, Esq - AI Law & Legal Intelligence",
       type: "article",
     },

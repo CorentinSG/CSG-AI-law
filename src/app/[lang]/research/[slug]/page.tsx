@@ -68,8 +68,25 @@ export default async function ResearchArticlePage({
     (related) => related.status === "published",
   );
 
+  const articleJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    headline: entry.title,
+    description: entry.summary,
+    inLanguage: "en",
+    ...(entry.publishedAt ? { datePublished: entry.publishedAt } : {}),
+    author: {
+      "@type": "Person",
+      name: entry.author,
+    },
+  };
+
   return (
     <SiteShell className="space-y-14 md:space-y-20">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(articleJsonLd) }}
+      />
       <MotionReveal className="space-y-6">
         <BreadcrumbNav
           items={[

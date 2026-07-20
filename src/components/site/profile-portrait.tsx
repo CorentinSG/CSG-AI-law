@@ -36,6 +36,7 @@ export function ProfilePortrait({
           width={1200}
           height={1800}
           priority={priority}
+          sizes={side ? "(max-width: 1023px) 1px, 38vw" : "(max-width: 768px) 90vw, 40vw"}
           className={cn(
             "relative z-10 w-full object-cover object-top [mask-size:100%_100%,100%_100%] [mask-position:center,center] [mask-repeat:no-repeat,no-repeat]",
             ghost

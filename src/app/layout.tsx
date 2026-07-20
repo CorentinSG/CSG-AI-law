@@ -42,6 +42,36 @@ export const metadata: Metadata = {
       "Attorney-led AI regulation monitoring and legal intelligence platform.",
     type: "website",
   },
+  alternates: {
+    types: {
+      "application/rss+xml": `${env.NEXT_PUBLIC_SITE_URL.replace(/\/$/, "")}/feed.xml`,
+    },
+  },
+};
+
+// E-E-A-T structured data: only verifiable facts already presented on the
+// site (name, role, site identity). Never add credentials that are not
+// user-provided.
+const structuredData = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Person",
+      "@id": `${env.NEXT_PUBLIC_SITE_URL.replace(/\/$/, "")}#person`,
+      name: "Corentin Saint-Girons",
+      alternateName: "C. Saint-Girons, Esq",
+      jobTitle: "Attorney",
+      url: env.NEXT_PUBLIC_SITE_URL,
+      knowsAbout: ["Artificial intelligence law", "AI regulation", "Technology law"],
+    },
+    {
+      "@type": "WebSite",
+      "@id": `${env.NEXT_PUBLIC_SITE_URL.replace(/\/$/, "")}#website`,
+      name: "C. Saint-Girons, Esq - AI Law & Legal Intelligence",
+      url: env.NEXT_PUBLIC_SITE_URL,
+      author: { "@id": `${env.NEXT_PUBLIC_SITE_URL.replace(/\/$/, "")}#person` },
+    },
+  ],
 };
 
 export default function RootLayout({
@@ -54,7 +84,13 @@ export default function RootLayout({
       lang="en"
       className={`${inter.variable} ${bricolage.variable} ${plexMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col">
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+        />
+        {children}
+      </body>
     </html>
   );
 }

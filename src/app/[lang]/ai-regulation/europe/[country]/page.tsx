@@ -43,7 +43,7 @@ import { SectionHeading } from "@/components/site/section-heading";
 import { SiteShell } from "@/components/site/shell";
 import { UpdateCard } from "@/components/site/update-card";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { env } from "@/lib/env";
+import { pageAlternates } from "@/lib/i18n/metadata";
 import { DEFAULT_LOCALE } from "@/lib/i18n/config";
 import { localeHref } from "@/lib/i18n/href";
 import { formatDisplayDate } from "@/lib/utils";
@@ -62,24 +62,27 @@ export async function generateStaticParams() {
 export async function generateMetadata({
   params,
 }: {
-  params: Promise<{ country: string }>;
+  params: Promise<{ lang: string; country: string }>;
 }): Promise<Metadata> {
-  const { country } = await params;
+  const { lang, country } = await params;
   const profile = getEuropeCountryProfileBySlug(country);
   if (!profile) return {};
 
-  const title = `${profile.countryName} | Europe AI Regulation`;
+  const title =
+    lang === "fr"
+      ? `Réglementation de l'IA en ${profile.countryName} — suivi juridique`
+      : `${profile.countryName} AI Regulation — legal monitoring`;
   const description = profile.publicSummary;
-  const canonical = `${env.NEXT_PUBLIC_SITE_URL}/ai-regulation/europe/${profile.slug}`;
+  const alternates = pageAlternates(lang, `/ai-regulation/europe/${profile.slug}`);
 
   return {
     title,
     description,
-    alternates: { canonical },
+    alternates,
     openGraph: {
       title,
       description,
-      url: canonical,
+      url: alternates.canonical,
       siteName: "C. Saint-Girons, Esq - AI Law & Legal Intelligence",
       type: "article",
     },

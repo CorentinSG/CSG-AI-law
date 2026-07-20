@@ -17,7 +17,7 @@ import {
   getUsStateAiLawProfileBySlug,
   getUsStateAiLawProfiles,
 } from "@/content/ai-regulation/us-state-ai-law-baseline";
-import { env } from "@/lib/env";
+import { pageAlternates } from "@/lib/i18n/metadata";
 import { formatDisplayDate } from "@/lib/utils";
 
 // ISR (T-RT0C): serve from cache, revalidate every 5 min. Admin review/edit
@@ -33,24 +33,27 @@ export async function generateStaticParams() {
 export async function generateMetadata({
   params,
 }: {
-  params: Promise<{ state: string }>;
+  params: Promise<{ lang: string; state: string }>;
 }): Promise<Metadata> {
-  const { state } = await params;
+  const { lang, state } = await params;
   const profile = getUsStateAiLawProfileBySlug(state);
   if (!profile) return {};
 
-  const title = `${profile.stateName} | U.S. AI Law`;
+  const title =
+    lang === "fr"
+      ? `Droit de l'IA — ${profile.stateName} (États-Unis)`
+      : `${profile.stateName} AI Law — U.S. state monitoring`;
   const description = profile.publicSummary;
-  const canonical = `${env.NEXT_PUBLIC_SITE_URL}/ai-regulation/united-states/${profile.slug}`;
+  const alternates = pageAlternates(lang, `/ai-regulation/united-states/${profile.slug}`);
 
   return {
     title,
     description,
-    alternates: { canonical },
+    alternates,
     openGraph: {
       title,
       description,
-      url: canonical,
+      url: alternates.canonical,
       siteName: "C. Saint-Girons, Esq - AI Law & Legal Intelligence",
       type: "article",
     },

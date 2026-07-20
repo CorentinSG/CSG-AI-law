@@ -13,7 +13,7 @@ import {
   getNewsVerificationLabel,
   normalizeNewsItemRecord,
 } from "@/content/ai-regulation/news";
-import { env } from "@/lib/env";
+import { pageAlternates } from "@/lib/i18n/metadata";
 import { formatDisplayDate } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
@@ -26,23 +26,23 @@ async function getPublicNewsItem(slug: string) {
 export async function generateMetadata({
   params,
 }: {
-  params: Promise<{ slug: string }>;
+  params: Promise<{ lang: string; slug: string }>;
 }): Promise<Metadata> {
-  const { slug } = await params;
+  const { lang, slug } = await params;
   const item = await getPublicNewsItem(slug);
   if (!item) return {};
   const title = `${item.title} | AI Law News`;
   const description = item.shortSummary;
-  const canonical = `${env.NEXT_PUBLIC_SITE_URL}/news/${item.slug}`;
+  const alternates = pageAlternates(lang, `/news/${item.slug}`);
 
   return {
     title,
     description,
-    alternates: { canonical },
+    alternates,
     openGraph: {
       title,
       description,
-      url: canonical,
+      url: alternates.canonical,
       siteName: "C. Saint-Girons, Esq - AI Law & Legal Intelligence",
       type: "article",
     },
@@ -77,8 +77,26 @@ export default async function NewsDetailPage({
     item.verificationStatus === "published_news" ||
     item.officialSourceFound;
 
+  const newsJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "NewsArticle",
+    headline: item.title,
+    description: item.shortSummary,
+    ...(item.publicationDate ? { datePublished: item.publicationDate } : {}),
+    dateModified: item.detectedAt,
+    isBasedOn: item.officialSourceUrl ?? item.sourceUrl,
+    publisher: {
+      "@type": "Person",
+      name: "Corentin Saint-Girons",
+    },
+  };
+
   return (
     <SiteShell className="space-y-8">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(newsJsonLd) }}
+      />
       {/* Breadcrumb */}
       <MotionReveal>
       <BreadcrumbNav
