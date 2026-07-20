@@ -10,10 +10,33 @@ export type RegionalLiveIntelligenceScope = "Europe" | "North America";
 
 const publicEligibleStatuses = new Set([
   "official_verified",
+  "official_source_found",
   "corroborated",
   "published_news",
   "converted_to_monitor_item",
+  // Max-auto publication policy (2026-07-20): reputable-media reporting is
+  // shown live with an explicit "official source pending" badge instead of
+  // being held back until official confirmation.
+  "media_reported",
 ]);
+
+/**
+ * Single gate for every public "live legal intelligence" panel (regional
+ * hubs, country pages, factory countries). Visibility is still controlled by
+ * publicVisibilityStatus — this only widens which verification statuses are
+ * live-panel eligible; the verification badge always discloses the status.
+ */
+export function isLivePanelEligible(
+  item: Pick<
+    AiLawNewsItem,
+    "publicVisibilityStatus" | "officialSourceFound" | "verificationStatus"
+  >,
+) {
+  return (
+    item.publicVisibilityStatus === "public" &&
+    (item.officialSourceFound || publicEligibleStatuses.has(item.verificationStatus))
+  );
+}
 
 export function filterRegionalLiveItems(
   items: AiLawNewsItem[],
@@ -21,11 +44,7 @@ export function filterRegionalLiveItems(
 ) {
   return items
     .filter((item) => item.region === region)
-    .filter(
-      (item) =>
-        item.publicVisibilityStatus === "public" &&
-        (publicEligibleStatuses.has(item.verificationStatus) || item.officialSourceFound),
-    )
+    .filter((item) => isLivePanelEligible(item))
     .sort((a, b) => {
       const aDate = a.publicationDate ?? a.detectedAt;
       const bDate = b.publicationDate ?? b.detectedAt;

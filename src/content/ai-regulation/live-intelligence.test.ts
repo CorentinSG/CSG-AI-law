@@ -90,6 +90,21 @@ describe("live regional intelligence filters", () => {
     expect(filterRegionalLiveItems(items, "Europe")).toHaveLength(0);
   });
 
+  it("exposes public reputable-media reporting in live panels with its pending badge", () => {
+    const items = [
+      createItem({
+        id: "media-1",
+        sourceType: "legal_regulatory_press",
+        sourceReliability: "reputable_secondary",
+        verificationStatus: "media_reported",
+        officialSourceFound: false,
+        relatedMonitorItemId: null,
+      }),
+    ];
+
+    expect(filterRegionalLiveItems(items, "Europe")).toHaveLength(1);
+  });
+
   it("summarizes visible regional live items conservatively", () => {
     const items = [
       createItem({ id: "eu-1", region: "Europe", relatedMonitorItemId: "upd-1" }),

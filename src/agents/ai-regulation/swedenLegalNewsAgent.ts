@@ -1,3 +1,4 @@
+import { isLivePanelEligible } from "@/content/ai-regulation/live-intelligence";
 import { classifyEuNewsItem } from "@/agents/ai-regulation/euNewsClassification";
 import { decideEuNewsDatabaseConversion } from "@/agents/ai-regulation/euNewsToDatabase";
 import { assessEuNewsVerification } from "@/agents/ai-regulation/euNewsVerification";
@@ -209,14 +210,7 @@ export async function getSwedenLiveLegalIntelligenceData(limit = 6) {
     newsItems
       .map(normalizeNewsItemRecord)
       .filter(isSwedenNewsItem)
-      .filter(
-        (item) =>
-          item.publicVisibilityStatus === "public" &&
-          (item.officialSourceFound ||
-            item.verificationStatus === "official_verified" ||
-            item.verificationStatus === "corroborated" ||
-            item.verificationStatus === "published_news"),
-      ),
+      .filter(isLivePanelEligible),
   );
 
   return {

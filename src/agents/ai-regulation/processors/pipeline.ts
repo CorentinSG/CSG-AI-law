@@ -21,7 +21,8 @@ import { buildAuthorityTag } from "@/agents/ai-regulation/utils/authority";
 import { buildCandidateSourceReference } from "@/agents/ai-regulation/citations";
 import { getScanProfile } from "@/agents/ai-regulation/scanProfiles";
 import type { ScanProfileId } from "@/agents/ai-regulation/scanProfiles";
-import { isDiscoveryOnlySource } from "@/agents/ai-regulation/utils/discovery";
+import { isDiscoveryOnlySource, isMediaDiscoverySource } from "@/agents/ai-regulation/utils/discovery";
+import { getMediaDomainScore } from "@/agents/ai-regulation/mediaDomainScoring";
 import { buildInitialVerificationMetadata } from "@/agents/ai-regulation/verification";
 import { runRecurringVerification } from "@/agents/ai-regulation/processors/recurringVerification";
 import { sourceManager } from "@/agents/ai-regulation/processors/sourceManager";
@@ -548,6 +549,18 @@ async function processAllCandidates(
 
     try {
       const discoveryOnlySource = isDiscoveryOnlySource(entry.source);
+      // Reputable-media items (Reuters, Politico, Le Monde tier) keep their
+      // classified importance/confidence instead of the discovery low/low
+      // floor, so the fast media radar can actually surface publicly (with
+      // the "official source pending" badge). GDELT/informal lanes keep the
+      // floor.
+      const reputableMediaLane =
+        isMediaDiscoverySource(entry.source) &&
+        getMediaDomainScore({
+          sourceType: "legal_regulatory_press",
+          sourceUrl: entry.candidate.url,
+          sourceName: entry.source.name,
+        }).tier !== "secondary";
       const autoPublishLegalDatabaseItem = shouldAutoPublishLegalDatabaseItem({
         discoveryOnlySource,
       });
@@ -610,8 +623,14 @@ async function processAllCandidates(
         complianceDeadlines:
           discoveryCopy?.complianceDeadlines ?? deadlineExtractor.extract(entry.candidate.text),
         enforcementRisk: discoveryCopy?.enforcementRisk ?? summary.enforcementRisk,
-        importanceLevel: discoveryOnlySource ? "low" : entry.classification.importanceLevel,
-        confidenceLevel: discoveryOnlySource ? "low" : entry.classification.confidenceLevel,
+        importanceLevel:
+          discoveryOnlySource && !reputableMediaLane
+            ? "low"
+            : entry.classification.importanceLevel,
+        confidenceLevel:
+          discoveryOnlySource && !reputableMediaLane
+            ? "low"
+            : entry.classification.confidenceLevel,
         tags: Array.from(
           new Set([
             ...entry.classification.tags,

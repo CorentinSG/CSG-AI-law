@@ -146,6 +146,7 @@ vi.mock("@/agents/ai-regulation/scanProfiles", () => ({
 
 vi.mock("@/agents/ai-regulation/utils/discovery", () => ({
   isDiscoveryOnlySource: vi.fn(() => false),
+  isMediaDiscoverySource: vi.fn(() => false),
 }));
 
 vi.mock("@/agents/ai-regulation/processors/recurringVerification", () => ({

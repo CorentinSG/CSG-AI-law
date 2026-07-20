@@ -103,7 +103,9 @@ type NewsVerificationLabelInput = Pick<
 >;
 
 function sourceTypeFor(source: RegulationSource | null): AiLawNewsSourceType {
-  if (!source) return "official_source";
+  // A missing source record is a data-integrity failure (broken FK, renamed
+  // source): never let an unresolvable source inherit official authority.
+  if (!source) return "informal_discovery_source";
   const configured = getAiLawNewsSourceConfigByName(source.name);
   if (isMediaDiscoverySource(source)) {
     return "legal_regulatory_press";
@@ -113,7 +115,7 @@ function sourceTypeFor(source: RegulationSource | null): AiLawNewsSourceType {
 }
 
 function reliabilityFor(source: RegulationSource | null): AiLawNewsSourceReliability {
-  if (!source) return "official_authority";
+  if (!source) return "informal_discovery";
   const configured = getAiLawNewsSourceConfigByName(source.name);
   if (isMediaDiscoverySource(source)) {
     return "reputable_secondary";

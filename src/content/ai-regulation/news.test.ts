@@ -143,6 +143,18 @@ describe("AI Law News", () => {
     expect(JSON.stringify(item)).not.toContain("contentHash");
   });
 
+  it("never lets an unresolvable source inherit official authority", () => {
+    const item = buildNewsItemFromUpdate({
+      update: update({ status: "needs_review", reviewedBy: null, reviewedAt: null, publishedAt: null }),
+      rawItem: rawItem(),
+      source: null,
+    });
+
+    expect(item.sourceType).toBe("informal_discovery_source");
+    expect(item.sourceReliability).toBe("informal_discovery");
+    expect(item.publicVisibilityStatus).not.toBe("public");
+  });
+
   it("publishes legal news from serious sources without admin approval", () => {
     const item = buildNewsItemFromUpdate({
       update: update({ status: "needs_review", reviewedBy: null, reviewedAt: null, publishedAt: null }),

@@ -181,7 +181,8 @@ export function getCitationReferences(input: {
       institution: input.update.sourceName,
       url: input.update.sourceUrl,
       canonicalUrl: input.update.sourceUrl,
-      sourceType: source ? sourceTypeFor(source) : "official",
+      // An unresolvable source must never default to official authority.
+      sourceType: source ? sourceTypeFor(source) : "media_source",
       authorityType: input.update.developmentType,
       publicationDate: input.update.publicationDate,
       detectedAt: input.update.detectedDate,
