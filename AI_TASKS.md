@@ -89,6 +89,14 @@ YYYY-MM-DD · <Agent> · <TASK-ID> · <STATUS>
 
 ## Current status
 
+2026-07-19 · Claude Code · T-CONTACT-REDESIGN · DONE-LOCAL
+- Intent: Rebuild /contact as a pared-down, animated, fully bilingual page (it was EN-only). New client component carries all motion: word-masked headline reveal, clip-path portrait reveal (grayscale → color on hover), an "Écrivez-moi / Write to me" display CTA as the centerpiece (the address is never shown on screen per user request — it lives only in mailto hrefs and the copy-to-clipboard pill), gold underline sweep, traveling pulse on the section hairline, three inquiry rows with prefilled mailto subjects replacing the identical-card grid. Authored dark tokens directly; primary button uses explicit #f0f0f0 because the .dark-site bridge remaps bg-white to 5% glass.
+- Files: `src/app/[lang]/contact/page.tsx` (now a thin server shell), `src/components/site/contact-experience.tsx` (new)
+- Graph anchors: `ContactExperience` (new node — graph rebuild pending), community "Intelligence Hub UI"
+- Verification: typecheck pass · lint pass (changed files) · vitest 688/689 — the 1 failure (`research.test.ts` featured-entry mismatch) pre-exists at HEAD 69742b7 in Codex-owned content, flagged as a separate task, unrelated to contact · FR/EN + desktop/375px + copy interaction verified via Playwright
+- Branch/commit: `main` @ working tree (uncommitted)
+- Next: Claude Code — commit; Codex to realign `getFeaturedResearchEntry()` vs its test (see separate task).
+
 2026-07-19 · Claude Code · T-STANDARDS-ATLAS · MERGED
 - Intent:        Bring /standards onto the same atlas system as the Legal Database. Institutions mode (default): institution tiles clustered by region with a stacked binding-status spectrum bar, click → drill-down into that institution's type-grouped expandable ledger; Registry mode: full ledger grouped by authority type; transversal search; single binding filter kept in two-way sync with the interactive hero spectrum.
 - Files:         `src/components/site/standards-explorer.tsx`, `src/components/site/authority-spectrum.tsx`, `src/app/[lang]/standards/page.tsx` (Claude-owned Standards UI — the 3 frontend files only).
