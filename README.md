@@ -49,9 +49,8 @@ Only official or authoritative sources can support legal authority publication. 
 
 ### Publication eligibility guardrail
 
-Public legal-intelligence publication is blocked unless the item:
+Public legal-intelligence publication follows the current auto-publication policy: items from official sources (and reputable/corroborated sources for the news layer) auto-publish; discovery-only and unverified items stay admin-only. Publication still requires that the item:
 
-- has completed human review
 - has at least one official or authoritative primary source
 - has structured citation metadata
 - has clear jurisdiction and authority/development type
@@ -556,7 +555,7 @@ the system may create or update a structured legal-database item only as:
 - `needs_review`
 - `verified_for_review`
 
-It must never auto-publish.
+Discovery-only leads must never auto-publish; official-source items auto-publish under the current publication policy.
 
 ## Scan profiles and scheduling posture
 
@@ -854,7 +853,7 @@ Important editorial rule:
 
 - soft law, standards, and governance frameworks are not automatically binding law
 - technical standards may be paywalled; only official public metadata should be stored or displayed
-- every item still requires human review before publication
+- discovery-only and weak-source items still require human review before publication (official-source items auto-publish)
 
 ## Europe and United States intelligence hubs
 
@@ -1751,8 +1750,7 @@ Daily scan behavior:
 - detect new official items
 - ignore duplicates through stable hashing
 - persist new raw items and draft updates to Supabase
-- mark new updates as `needs_review`
-- never auto-publish
+- mark discovery/unverified updates as `needs_review` (official-source items auto-publish per the current policy)
 - keep OpenAI disabled unless explicitly enabled
 - preserve scan logs and admin diagnostics
 

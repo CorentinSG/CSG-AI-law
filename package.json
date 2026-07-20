@@ -13,6 +13,7 @@
     "lint": "eslint .",
     "typecheck": "next typegen && tsc --noEmit",
     "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
     "test:e2e": "playwright test",
     "report:data-quality": "tsx scripts/report-data-quality.ts",
     "backfill:news-items": "tsx scripts/backfill-news-items.ts",

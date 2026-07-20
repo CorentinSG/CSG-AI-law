@@ -191,8 +191,9 @@ export default async function AdminAiRegulationPage({
         </p>
         <h1 className="font-serif text-4xl text-white">AI Regulation Monitoring Agent</h1>
         <p className="max-w-3xl text-zinc-300">
-          Human review remains mandatory. New AI-generated drafts enter the queue
-          as <strong>needs_review</strong> and cannot be published until approved.
+          Publication policy: items from official or reputable corroborated sources
+          auto-publish; discovery-only and unverified items enter the queue as{" "}
+          <strong>needs_review</strong> and stay admin-only until approved.
         </p>
         <Link
           href="/admin/ai-regulation/review"
