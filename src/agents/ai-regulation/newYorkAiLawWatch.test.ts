@@ -53,4 +53,34 @@ describe("New York AI Law Watch monitoring descriptors", () => {
       ]),
     );
   });
+
+  it("adds aggressive New York media discovery lanes without making them authority sources", () => {
+    const newYork = usStateMonitoringAgentDefinitions.find(
+      (definition) => definition.countryName === "New York",
+    );
+
+    const aggressiveMediaIds = [
+      "src-us-ny-legal-press-newsapi-ai",
+      "src-us-ny-law-firm-commentary-newsapi-ai",
+      "src-us-ny-local-policy-newsapi-ai",
+      "src-us-ny-business-finance-newsapi-ai",
+      "src-us-ny-tech-platform-newsapi-ai",
+      "src-us-ny-aggressive-gdelt-ai",
+    ];
+
+    expect(newYork?.sourceRegistry.map((source) => source.sourceId)).toEqual(
+      expect.arrayContaining(aggressiveMediaIds),
+    );
+
+    for (const sourceId of aggressiveMediaIds) {
+      const source = newYork?.sourceRegistry.find((entry) => entry.sourceId === sourceId);
+
+      expect(source?.category).toBe("discovery_media_feed");
+      expect(source?.recommendedCadence).toBe("every_5_minutes_when_supported");
+      expect(source?.liveMonitoringEligible).toBe(true);
+      expect(source?.baselineEligible).toBe(false);
+      expect(source?.verificationEligible).toBe(false);
+      expect(source?.freshHours).toBeLessThanOrEqual(3);
+    }
+  });
 });
