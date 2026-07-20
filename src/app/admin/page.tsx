@@ -8,10 +8,22 @@ import {
 import { listAgentApiCapabilities } from "@/agents/ai-regulation/agentApiCapabilities";
 import { buildHealthSnapshot } from "@/lib/health";
 import { env } from "@/lib/env";
-import { IntelligenceSignal } from "@/components/site/intelligence-signal";
+import {
+  drainNextQueuedJob,
+  recoverStaleJobs,
+  triggerSourceScan,
+} from "@/app/admin/ai-regulation/actions";
+import { PendingButton } from "@/app/admin/_components/action-button";
+import {
+  BreakdownBars,
+  DonutChart,
+  MonthlyBars,
+  ScanStrip,
+  type MonthlyPoint,
+} from "@/app/admin/_components/admin-charts";
 import { OpsHealthBand } from "@/components/site/ops-health-band";
 import { SiteShell } from "@/components/site/shell";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
@@ -43,6 +55,29 @@ function formatDateTime(value: string | null | undefined) {
   });
 }
 
+function lastTwelveMonths(): Array<{ key: string; label: string }> {
+  const now = new Date();
+  const months: Array<{ key: string; label: string }> = [];
+  for (let i = 11; i >= 0; i -= 1) {
+    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    months.push({
+      key: `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`,
+      label: d.toLocaleString("en-US", { month: "short" }),
+    });
+  }
+  return months;
+}
+
+function toMonthKey(value: string | null | undefined) {
+  if (!value) return null;
+  const d = new Date(value);
+  if (Number.isNaN(d.getTime())) return null;
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+}
+
+const SECTION_TITLE =
+  "font-mono text-xs uppercase tracking-[0.28em] text-zinc-400";
+
 export default async function AdminDashboardPage() {
   const [updates, news, countries, sources, health, leads, scanLogs] =
     await Promise.all([
@@ -59,23 +94,17 @@ export default async function AdminDashboardPage() {
   const capabilities = listAgentApiCapabilities();
   const healthSnapshot = await buildHealthSnapshot({ access: "authenticated" });
 
-  // ── Legal database (regulatory updates) ──────────────────────────────
+  // ── Rollups ──────────────────────────────────────────────────────────
   const updatesPublished = count(updates, (u) => u.status === "published");
   const updatesNeedsReview = count(updates, (u) => u.status === "needs_review");
-
-  // ── AI Law News ──────────────────────────────────────────────────────
   const newsPublished = count(news, (n) => n.publicVisibilityStatus === "public");
   const newsAdminOnly = news.length - newsPublished;
-
-  // ── Country intelligence ─────────────────────────────────────────────
   const countriesVerified = count(countries, (c) => c.reviewStatus === "verified");
   const countriesNeedsReview = count(countries, (c) => c.reviewStatus === "needs_review");
   const countriesStaleOrFlagged = count(
     countries,
     (c) => c.reviewStatus === "stale" || c.reviewStatus === "flagged",
   );
-
-  // ── Sources + runtime health ─────────────────────────────────────────
   const sourcesActive = count(sources, (s) => s.active);
   const healthBy = (state: string) => count(health, (h) => h.state === state);
   const healthHealthy = healthBy("healthy");
@@ -83,32 +112,84 @@ export default async function AdminDashboardPage() {
   const healthStale = healthBy("stale");
   const healthInactive = healthBy("inactive");
   const sourcesNeedingAttention = healthDegraded + healthStale;
-
-  // ── Discovery leads ──────────────────────────────────────────────────
   const leadsUnresolved = count(leads, (l) => l.status === "unresolved");
-
-  // ── Recent scan activity ─────────────────────────────────────────────
-  const scansSucceeded = count(scanLogs, (s) => s.status === "success");
   const scansFailed = count(scanLogs, (s) => s.status === "failed");
+  const scansSucceeded = count(scanLogs, (s) => s.status === "success");
   const lastScanAt = scanLogs[0]?.scanFinishedAt ?? scanLogs[0]?.scanStartedAt ?? null;
+  const connectorsReady = count(capabilities, (c) => c.status === "available");
+  const connectorsNeedSetup = capabilities.length - connectorsReady;
 
-  // Region rollup for source health: join health summaries to source region.
-  const regionBySource = new Map(sources.map((s) => [s.id, s.region]));
-  const healthInRegion = (regionMatch: (region: string) => boolean) =>
-    health.filter((h) => {
-      const region = regionBySource.get(h.sourceId) ?? "";
-      return regionMatch(region);
-    });
-  const euHealth = healthInRegion((r) => /europe/i.test(r));
-  const usHealth = healthInRegion((r) => /united states|north america/i.test(r));
-  const regionHealthLabel = (rows: typeof health) => {
-    if (rows.length === 0) return "no sources mapped";
-    const ok = rows.filter((h) => h.state === "healthy").length;
-    const bad = rows.filter((h) => h.state === "degraded" || h.state === "stale").length;
-    return `${ok}/${rows.length} healthy · ${bad} need attention`;
-  };
+  // ── Monthly trend (published DB entries vs published news) ───────────
+  const months = lastTwelveMonths();
+  const monthIndex = new Map(months.map((m, i) => [m.key, i]));
+  const monthly: MonthlyPoint[] = months.map((m) => ({ label: m.label, a: 0, b: 0 }));
+  for (const u of updates) {
+    if (u.status !== "published") continue;
+    const key = toMonthKey(u.publishedAt ?? u.publicationDate ?? u.createdAt);
+    const idx = key != null ? monthIndex.get(key) : undefined;
+    if (idx != null) monthly[idx].a += 1;
+  }
+  for (const n of news) {
+    if (n.publicVisibilityStatus !== "public") continue;
+    const key = toMonthKey(n.publicationDate ?? n.detectedAt);
+    const idx = key != null ? monthIndex.get(key) : undefined;
+    if (idx != null) monthly[idx].b += 1;
+  }
 
-  // Databases overview rows.
+  // ── Published entries by region (top 6) ──────────────────────────────
+  const regionCounts = new Map<string, number>();
+  for (const u of updates) {
+    if (u.status !== "published") continue;
+    const region = u.region || "Unmapped";
+    regionCounts.set(region, (regionCounts.get(region) ?? 0) + 1);
+  }
+  const regionRows = [...regionCounts.entries()]
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 6)
+    .map(([label, value]) => ({ label, value, color: "#a1a1aa" }));
+
+  // ── Needs-attention list ─────────────────────────────────────────────
+  const attentionItems = [
+    {
+      count: updatesNeedsReview,
+      label: "database entries awaiting review",
+      href: "/admin/ai-regulation/review",
+      cta: "Open batch review",
+    },
+    {
+      count: sourcesNeedingAttention,
+      label: "sources degraded or stale",
+      href: "/admin/ai-regulation/sources",
+      cta: "Open sources",
+    },
+    {
+      count: countriesNeedsReview + countriesStaleOrFlagged,
+      label: "country profiles to re-verify",
+      href: "/admin/ai-regulation/countries",
+      cta: "Open countries",
+    },
+    {
+      count: leadsUnresolved,
+      label: "discovery leads to resolve",
+      href: "/admin/ai-regulation/data-quality",
+      cta: "Open data governance",
+    },
+    {
+      count: scansFailed,
+      label: `failed scans in the last ${scanLogs.length}`,
+      href: "/admin/operations",
+      cta: "Open operations",
+    },
+    {
+      count: connectorsNeedSetup,
+      label: "connectors needing setup",
+      href: "#connectors",
+      cta: "See connectors",
+    },
+  ].filter((item) => item.count > 0);
+  const attentionTotal = attentionItems.reduce((acc, i) => acc + i.count, 0);
+
+  // ── Databases overview rows ──────────────────────────────────────────
   const databases: Array<{
     name: string;
     primary: string;
@@ -157,6 +238,25 @@ export default async function AdminDashboardPage() {
       tone: leadsUnresolved > 0 ? "informative" : "neutral",
       href: "/admin/ai-regulation/data-quality",
     },
+    {
+      name: "Review queue",
+      primary: String(updatesNeedsReview),
+      primaryLabel: "items waiting",
+      breakdown: "Approve, publish, or reject in bulk",
+      tone: updatesNeedsReview > 0 ? "informative" : "positive",
+      href: "/admin/ai-regulation/review",
+    },
+  ];
+
+  const navLinks = [
+    { label: "Review queue", href: "/admin/ai-regulation" },
+    { label: "Batch review", href: "/admin/ai-regulation/review" },
+    { label: "Legal database", href: "/admin/ai-regulation/legal-database" },
+    { label: "News", href: "/admin/ai-regulation/news" },
+    { label: "Sources", href: "/admin/ai-regulation/sources" },
+    { label: "Countries", href: "/admin/ai-regulation/countries" },
+    { label: "Data governance", href: "/admin/ai-regulation/data-quality" },
+    { label: "Operations", href: "/admin/operations" },
   ];
 
   return (
@@ -167,44 +267,94 @@ export default async function AdminDashboardPage() {
           Admin control center
         </p>
         <h1 className="font-serif text-4xl text-white">Site dashboard</h1>
-        <p className="max-w-3xl text-zinc-300">
-          One-glance view of the whole site: what is published, the health of
-          every database, and the live state of the monitoring agents and their
-          sub-agents. Last scan finished {formatDateTime(lastScanAt)}.
+        <p className="max-w-3xl text-lg text-zinc-300">
+          {attentionTotal === 0 ? (
+            <>
+              <span className="text-emerald-300">Everything is running normally.</span>{" "}
+              Nothing needs your attention right now.
+            </>
+          ) : (
+            <>
+              <span className="text-amber-300">
+                {attentionTotal} item{attentionTotal > 1 ? "s" : ""} need your attention
+              </span>{" "}
+              — everything else is running normally.
+            </>
+          )}{" "}
+          <span className="text-zinc-500">
+            Last scan finished {formatDateTime(lastScanAt)}.
+          </span>
         </p>
-        <div className="flex flex-wrap gap-2 pt-1">
-          <Link
-            href="/admin/ai-regulation"
-            className="inline-flex rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-zinc-100 transition hover:bg-white/10"
-          >
-            Review queue →
-          </Link>
-          <Link
-            href="/admin/ai-regulation/review"
-            className="inline-flex rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-zinc-100 transition hover:bg-white/10"
-          >
-            Batch review →
-          </Link>
-          <Link
-            href="/admin/ai-regulation/legal-database"
-            className="inline-flex rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-zinc-100 transition hover:bg-white/10"
-          >
-            Legal database →
-          </Link>
-          <Link
-            href="/admin/ai-regulation/data-quality"
-            className="inline-flex rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-zinc-100 transition hover:bg-white/10"
-          >
-            Data governance →
-          </Link>
-          <Link
-            href="/admin/operations"
-            className="inline-flex rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-zinc-100 transition hover:bg-white/10"
-          >
-            Operations →
-          </Link>
-        </div>
+        <nav className="flex flex-wrap gap-2 pt-1">
+          {navLinks.map((link) => (
+            <Link
+              key={link.href}
+              href={link.href}
+              className="inline-flex rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-zinc-100 transition hover:bg-white/10"
+            >
+              {link.label} →
+            </Link>
+          ))}
+        </nav>
       </section>
+
+      {/* ── One-click actions ──────────────────────────────────────── */}
+      <section className="space-y-4">
+        <h2 className={SECTION_TITLE}>One-click actions</h2>
+        <Card className="border-white/10 bg-white/5">
+          <CardContent className="flex flex-wrap items-center gap-3 p-5">
+            <form action={triggerSourceScan}>
+              <PendingButton pendingLabel="Scanning…" className="bg-emerald-400/15 hover:bg-emerald-400/25">
+                ▶ Run a monitoring scan
+              </PendingButton>
+            </form>
+            <form action={drainNextQueuedJob}>
+              <PendingButton pendingLabel="Processing…">
+                Process next queued job
+              </PendingButton>
+            </form>
+            <form action={recoverStaleJobs}>
+              <PendingButton pendingLabel="Recovering…">
+                Unblock stuck jobs
+              </PendingButton>
+            </form>
+            <p className="basis-full text-sm text-zinc-500">
+              Scan queues fresh work across the monitoring sources and drains it
+              immediately. The other two buttons keep the job queue moving if
+              something stalls.
+            </p>
+          </CardContent>
+        </Card>
+      </section>
+
+      {/* ── Needs your attention ───────────────────────────────────── */}
+      {attentionItems.length > 0 ? (
+        <section className="space-y-4">
+          <h2 className={SECTION_TITLE}>Needs your attention</h2>
+          <Card className="border-amber-400/20 bg-amber-400/[0.04]">
+            <CardContent className="divide-y divide-white/5 p-2">
+              {attentionItems.map((item) => (
+                <div
+                  key={item.label}
+                  className="flex flex-wrap items-center gap-3 px-3 py-3"
+                >
+                  <StatusDot tone="warning" />
+                  <p className="text-sm text-zinc-200">
+                    <span className="font-mono text-base text-white">{item.count}</span>{" "}
+                    {item.label}
+                  </p>
+                  <Link
+                    href={item.href}
+                    className="ml-auto inline-flex rounded-full border border-white/10 bg-white/5 px-4 py-1.5 text-sm text-zinc-100 transition hover:bg-white/15"
+                  >
+                    {item.cta} →
+                  </Link>
+                </div>
+              ))}
+            </CardContent>
+          </Card>
+        </section>
+      ) : null}
 
       {/* ── Operational health band ────────────────────────────────── */}
       <OpsHealthBand
@@ -213,137 +363,197 @@ export default async function AdminDashboardPage() {
         aiBudgetUsd={env.AI_MONTHLY_BUDGET_USD}
       />
 
-      {/* ── KPI band ───────────────────────────────────────────────── */}
-      <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <IntelligenceSignal theme="dark" tone="positive" label="Published news" value={String(newsPublished)} note={`${news.length} tracked in total`} />
-        <IntelligenceSignal theme="dark" tone="positive" label="Published DB entries" value={String(updatesPublished)} note={`${updatesNeedsReview} awaiting review`} />
-        <IntelligenceSignal theme="dark" tone={sourcesNeedingAttention > 0 ? "warning" : "positive"} label="Active sources" value={`${sourcesActive}/${sources.length}`} note={`${sourcesNeedingAttention} need attention`} />
-        <IntelligenceSignal theme="dark" tone={countriesNeedsReview > 0 ? "warning" : "positive"} label="Verified countries" value={`${countriesVerified}/${countries.length}`} note={`${countriesNeedsReview} need review`} />
-        <IntelligenceSignal theme="dark" tone="neutral" label="Monitoring agents" value={String(agents.regionalSupervisors.reduce((acc, r) => acc + r.managedAgents.length, 0))} note={`${agents.regionalSupervisors.length} regional supervisors`} />
-        <IntelligenceSignal theme="dark" tone={scansFailed > 0 ? "warning" : "positive"} label="Recent scans" value={`${scansSucceeded} ok`} note={`${scansFailed} failed of last ${scanLogs.length}`} />
-        <IntelligenceSignal theme="dark" tone={leadsUnresolved > 0 ? "informative" : "neutral"} label="Open discovery leads" value={String(leadsUnresolved)} note={`${leads.length} tracked`} />
-        <IntelligenceSignal theme="dark" tone="neutral" label="Connectors" value={`${count(capabilities, (c) => c.status === "available")}/${capabilities.length}`} note="API / MCP capabilities ready" />
+      {/* ── Charts ─────────────────────────────────────────────────── */}
+      <section className="space-y-4">
+        <h2 className={SECTION_TITLE}>Trends &amp; distribution</h2>
+        <div className="grid gap-4 xl:grid-cols-2">
+          <Card className="border-white/10 bg-white/5">
+            <CardContent className="space-y-4 p-5">
+              <div>
+                <p className="text-sm font-medium text-zinc-100">
+                  Publications per month
+                </p>
+                <p className="text-xs text-zinc-500">
+                  Last 12 months, everything visible on the public site
+                </p>
+              </div>
+              <MonthlyBars
+                points={monthly}
+                aLabel="Database entries"
+                bLabel="News items"
+              />
+            </CardContent>
+          </Card>
+          <Card className="border-white/10 bg-white/5">
+            <CardContent className="space-y-4 p-5">
+              <div>
+                <p className="text-sm font-medium text-zinc-100">Source health</p>
+                <p className="text-xs text-zinc-500">
+                  Runtime state of every monitored source
+                </p>
+              </div>
+              <DonutChart
+                centerLabel="sources"
+                segments={[
+                  { label: "Healthy", value: healthHealthy, color: "#34d399" },
+                  { label: "Degraded", value: healthDegraded, color: "#fbbf24" },
+                  { label: "Stale", value: healthStale, color: "#fb7185" },
+                  { label: "Inactive", value: healthInactive, color: "#71717a" },
+                ]}
+              />
+            </CardContent>
+          </Card>
+          <Card className="border-white/10 bg-white/5">
+            <CardContent className="space-y-4 p-5">
+              <div>
+                <p className="text-sm font-medium text-zinc-100">Review pipeline</p>
+                <p className="text-xs text-zinc-500">
+                  Where every database entry sits right now
+                </p>
+              </div>
+              <BreakdownBars
+                rows={[
+                  {
+                    label: "Published",
+                    value: updatesPublished,
+                    color: "#34d399",
+                  },
+                  {
+                    label: "Needs review",
+                    value: updatesNeedsReview,
+                    color: "#fbbf24",
+                  },
+                  {
+                    label: "Approved",
+                    value: count(updates, (u) => u.status === "approved"),
+                    color: "#38bdf8",
+                  },
+                  {
+                    label: "Rejected",
+                    value: count(updates, (u) => u.status === "rejected"),
+                    color: "#fb7185",
+                  },
+                  {
+                    label: "Archived",
+                    value: count(updates, (u) => u.status === "archived"),
+                    color: "#71717a",
+                  },
+                ]}
+              />
+            </CardContent>
+          </Card>
+          <Card className="border-white/10 bg-white/5">
+            <CardContent className="space-y-4 p-5">
+              <div>
+                <p className="text-sm font-medium text-zinc-100">
+                  Published entries by region
+                </p>
+                <p className="text-xs text-zinc-500">Top regions in the legal database</p>
+              </div>
+              <BreakdownBars rows={regionRows} />
+            </CardContent>
+          </Card>
+        </div>
+        <Card className="border-white/10 bg-white/5">
+          <CardContent className="space-y-3 p-5">
+            <div className="flex flex-wrap items-baseline justify-between gap-2">
+              <p className="text-sm font-medium text-zinc-100">
+                Last {scanLogs.length} scans
+              </p>
+              <p className="text-xs text-zinc-500">
+                {scansSucceeded} succeeded · {scansFailed} failed · newest first
+              </p>
+            </div>
+            <ScanStrip
+              scans={scanLogs.map((s) => ({
+                id: s.id,
+                status: s.status,
+                label: `${formatDateTime(s.scanFinishedAt ?? s.scanStartedAt)} — ${s.status} · ${s.newItemsDetected} new items`,
+              }))}
+            />
+          </CardContent>
+        </Card>
       </section>
 
       {/* ── Databases ──────────────────────────────────────────────── */}
       <section className="space-y-4">
-        <h2 className="font-mono text-xs uppercase tracking-[0.28em] text-zinc-400">
-          Databases
-        </h2>
+        <h2 className={SECTION_TITLE}>Databases</h2>
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           {databases.map((db) => (
-            <Link key={db.name} href={db.href} className="group">
-              <Card className="h-full border-white/10 bg-white/5 transition group-hover:bg-white/10">
-                <CardContent className="space-y-3 p-5">
-                  <div className="flex items-center gap-2">
-                    <StatusDot tone={db.tone} />
-                    <p className="text-sm font-medium text-zinc-100">{db.name}</p>
-                  </div>
-                  <p className="font-display text-3xl font-medium uppercase tracking-[-0.05em] text-white">
-                    {db.primary}
-                  </p>
-                  <p className="text-xs uppercase tracking-[0.18em] text-zinc-500">
-                    {db.primaryLabel}
-                  </p>
-                  <p className="text-sm text-zinc-400">{db.breakdown}</p>
-                </CardContent>
-              </Card>
-            </Link>
-          ))}
-        </div>
-      </section>
-
-      {/* ── Source health ──────────────────────────────────────────── */}
-      <section className="space-y-4">
-        <h2 className="font-mono text-xs uppercase tracking-[0.28em] text-zinc-400">
-          Source runtime health
-        </h2>
-        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-          <IntelligenceSignal theme="dark" tone="positive" label="Healthy" value={String(healthHealthy)} />
-          <IntelligenceSignal theme="dark" tone="warning" label="Degraded" value={String(healthDegraded)} />
-          <IntelligenceSignal theme="dark" tone="warning" label="Stale" value={String(healthStale)} />
-          <IntelligenceSignal theme="dark" tone="neutral" label="Inactive" value={String(healthInactive)} />
-        </div>
-        <div className="grid gap-4 md:grid-cols-2">
-          <Card className="border-white/10 bg-white/5">
-            <CardContent className="flex items-center justify-between gap-3 p-5">
-              <p className="text-sm text-zinc-200">Europe sources</p>
-              <p className="text-sm text-zinc-400">{regionHealthLabel(euHealth)}</p>
-            </CardContent>
-          </Card>
-          <Card className="border-white/10 bg-white/5">
-            <CardContent className="flex items-center justify-between gap-3 p-5">
-              <p className="text-sm text-zinc-200">United States sources</p>
-              <p className="text-sm text-zinc-400">{regionHealthLabel(usHealth)}</p>
-            </CardContent>
-          </Card>
-        </div>
-      </section>
-
-      {/* ── Agents & sub-agents ────────────────────────────────────── */}
-      <section className="space-y-4">
-        <h2 className="font-mono text-xs uppercase tracking-[0.28em] text-zinc-400">
-          Agents &amp; sub-agents
-        </h2>
-
-        {/* Global supervisor */}
-        <Card className="border-white/10 bg-white/5">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-white">
-              <StatusDot tone="positive" />
-              {agents.supervisor.label}
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="text-sm leading-7 text-zinc-300">
-            {agents.supervisor.role}
-          </CardContent>
-        </Card>
-
-        {/* Regional supervisors + their sub-agents */}
-        <div className="grid gap-4 lg:grid-cols-2">
-          {agents.regionalSupervisors.map((supervisor) => (
-            <Card key={supervisor.id} className="border-white/10 bg-white/5">
-              <CardHeader>
-                <CardTitle className="flex items-center justify-between gap-2 text-white">
-                  <span className="flex items-center gap-2">
-                    <StatusDot tone="positive" />
-                    {supervisor.label}
-                  </span>
-                  <span className="font-mono text-xs uppercase tracking-[0.16em] text-zinc-500">
-                    {supervisor.managedAgents.length} sub-agents
-                  </span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-2">
-                <p className="text-xs uppercase tracking-[0.18em] text-zinc-500">
-                  {supervisor.region} ·{" "}
-                  {regionHealthLabel(
-                    /europe/i.test(supervisor.region) ? euHealth : usHealth,
-                  )}
+            <Card
+              key={db.name}
+              className="h-full border-white/10 bg-white/5 transition hover:bg-white/[0.08]"
+            >
+              <CardContent className="flex h-full flex-col gap-3 p-5">
+                <div className="flex items-center gap-2">
+                  <StatusDot tone={db.tone} />
+                  <p className="text-sm font-medium text-zinc-100">{db.name}</p>
+                </div>
+                <p className="font-display text-3xl font-medium uppercase tracking-[-0.05em] text-white">
+                  {db.primary}
                 </p>
-                <ul className="divide-y divide-white/5">
-                  {supervisor.managedAgents.map((agent) => (
-                    <li
-                      key={agent.id}
-                      className="flex items-center justify-between gap-3 py-2"
-                    >
-                      <span className="text-sm text-zinc-200">{agent.label}</span>
-                      <span className="font-mono text-[11px] uppercase tracking-[0.14em] text-zinc-500">
-                        {"country" in agent && agent.country
-                          ? agent.country
-                          : "jurisdiction" in agent && agent.jurisdiction
-                            ? agent.jurisdiction
-                            : agent.scope}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
+                <p className="text-xs uppercase tracking-[0.18em] text-zinc-500">
+                  {db.primaryLabel}
+                </p>
+                <p className="text-sm text-zinc-400">{db.breakdown}</p>
+                <Link
+                  href={db.href}
+                  className="mt-auto inline-flex w-fit rounded-full border border-white/10 bg-white/5 px-4 py-1.5 text-sm text-zinc-100 transition hover:bg-white/15"
+                >
+                  Manage →
+                </Link>
               </CardContent>
             </Card>
           ))}
         </div>
+      </section>
 
-        {/* Cross-functional agents */}
+      {/* ── Agents (condensed) ─────────────────────────────────────── */}
+      <section className="space-y-4">
+        <h2 className={SECTION_TITLE}>Monitoring agents</h2>
+        <div className="grid gap-4 md:grid-cols-2">
+          {agents.regionalSupervisors.map((supervisor) => (
+            <Card key={supervisor.id} className="border-white/10 bg-white/5">
+              <CardContent className="space-y-2 p-5">
+                <div className="flex items-center gap-2">
+                  <StatusDot tone="positive" />
+                  <p className="text-sm font-medium text-zinc-100">
+                    {supervisor.label}
+                  </p>
+                  <span className="ml-auto font-mono text-xs uppercase tracking-[0.16em] text-zinc-500">
+                    {supervisor.managedAgents.length} sub-agents
+                  </span>
+                </div>
+                <p className="text-xs uppercase tracking-[0.18em] text-zinc-500">
+                  {supervisor.region}
+                </p>
+                <details className="group">
+                  <summary className="cursor-pointer list-none text-sm text-zinc-400 transition hover:text-zinc-200">
+                    <span className="group-open:hidden">Show sub-agents ▾</span>
+                    <span className="hidden group-open:inline">Hide sub-agents ▴</span>
+                  </summary>
+                  <ul className="mt-2 divide-y divide-white/5">
+                    {supervisor.managedAgents.map((agent) => (
+                      <li
+                        key={agent.id}
+                        className="flex items-center justify-between gap-3 py-2"
+                      >
+                        <span className="text-sm text-zinc-200">{agent.label}</span>
+                        <span className="font-mono text-[11px] uppercase tracking-[0.14em] text-zinc-500">
+                          {"country" in agent && agent.country
+                            ? agent.country
+                            : "jurisdiction" in agent && agent.jurisdiction
+                              ? agent.jurisdiction
+                              : agent.scope}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                </details>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
         {agents.crossFunctionalAgents.length > 0 ? (
           <div className="grid gap-4 md:grid-cols-2">
             {agents.crossFunctionalAgents.map((agent) => (
@@ -364,32 +574,40 @@ export default async function AdminDashboardPage() {
         ) : null}
       </section>
 
-      {/* ── Connectors / capabilities ──────────────────────────────── */}
-      <section className="space-y-4">
-        <h2 className="font-mono text-xs uppercase tracking-[0.28em] text-zinc-400">
-          Agent connectors &amp; tools
-        </h2>
-        <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
-          {capabilities.map((cap) => {
-            const ready = cap.status === "available";
-            return (
-              <Card key={cap.id} className="border-white/10 bg-white/5">
-                <CardContent className="space-y-2 p-5">
-                  <div className="flex items-center gap-2">
-                    <StatusDot tone={ready ? "positive" : "warning"} />
-                    <p className="text-sm font-medium text-zinc-100">{cap.label}</p>
-                  </div>
-                  <p className="text-xs uppercase tracking-[0.16em] text-zinc-500">
-                    {cap.regions.join(" · ")} · {ready ? "ready" : "needs setup"}
-                  </p>
+      {/* ── Connectors ─────────────────────────────────────────────── */}
+      <section id="connectors" className="space-y-4">
+        <h2 className={SECTION_TITLE}>Agent connectors &amp; tools</h2>
+        <Card className="border-white/10 bg-white/5">
+          <CardContent className="divide-y divide-white/5 p-2">
+            {capabilities.map((cap) => {
+              const ready = cap.status === "available";
+              return (
+                <div key={cap.id} className="flex flex-wrap items-center gap-3 px-3 py-3">
+                  <StatusDot tone={ready ? "positive" : "warning"} />
+                  <p className="text-sm font-medium text-zinc-100">{cap.label}</p>
+                  <span className="font-mono text-[11px] uppercase tracking-[0.14em] text-zinc-500">
+                    {cap.regions.join(" · ")}
+                  </span>
+                  <span
+                    className={cn(
+                      "ml-auto rounded-full px-3 py-1 text-xs",
+                      ready
+                        ? "bg-emerald-400/10 text-emerald-300"
+                        : "bg-amber-400/10 text-amber-300",
+                    )}
+                  >
+                    {ready ? "Ready" : "Needs setup"}
+                  </span>
                   {!ready && cap.userAction ? (
-                    <p className="text-sm leading-6 text-amber-300/80">{cap.userAction}</p>
+                    <p className="basis-full pl-5 text-sm leading-6 text-amber-300/80">
+                      {cap.userAction}
+                    </p>
                   ) : null}
-                </CardContent>
-              </Card>
-            );
-          })}
-        </div>
+                </div>
+              );
+            })}
+          </CardContent>
+        </Card>
       </section>
     </SiteShell>
   );
