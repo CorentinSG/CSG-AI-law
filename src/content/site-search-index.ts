@@ -23,7 +23,7 @@ const pages: SearchEntry[] = [
 ];
 
 const europeSections: SearchEntry[] = [
-  ["live", "Live monitoring"],
+  ["live", "Ongoing monitoring"],
   ["ai-act", "EU AI Act baseline"],
   ["timeline", "EU timeline"],
   ["governance", "Governance & case law"],
@@ -38,7 +38,7 @@ const europeSections: SearchEntry[] = [
 }));
 
 const usSections: SearchEntry[] = [
-  ["live", "Live monitoring"],
+  ["live", "Ongoing monitoring"],
   ["federal", "Federal baseline"],
   ["timeline", "U.S. timeline"],
   ["states", "State implementation map"],

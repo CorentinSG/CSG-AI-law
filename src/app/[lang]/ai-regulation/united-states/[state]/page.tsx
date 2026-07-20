@@ -183,7 +183,7 @@ export default async function UsStatePage({
               <span className="relative inline-flex h-2 w-2 rounded-full bg-red-500" />
             </span>
             <p className="font-mono text-[10px] uppercase tracking-[0.26em] text-red-600">
-              {profile.stateName} · Live monitoring
+              {profile.stateName} · Ongoing monitoring
             </p>
           </div>
 

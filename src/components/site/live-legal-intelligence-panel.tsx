@@ -94,7 +94,7 @@ export function LiveLegalIntelligencePanel({
             <span className="relative inline-flex size-1.5 rounded-full bg-[color:var(--color-live,#10b981)]" />
           </span>
           <span className="font-mono text-[10px] uppercase tracking-[0.28em] text-white/60">
-            Live monitoring · {regionLabel}
+            Ongoing monitoring · {regionLabel}
           </span>
           <span className="ml-auto font-mono text-[9px] uppercase tracking-[0.18em] text-white/40">
             {formatExactDateTime(lastCheckedAt)}

@@ -383,7 +383,7 @@ export default async function AiRegulationPage({
                   How to read this hub
                 </p>
                 <p className="text-sm leading-6 text-zinc-500">
-                  Verification levels, authority classification, and the source-and-review
+                  Verification levels, authority classification, and the source
                   posture behind every published item.
                 </p>
               </div>

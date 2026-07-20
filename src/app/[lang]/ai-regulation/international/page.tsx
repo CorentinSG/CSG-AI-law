@@ -123,7 +123,7 @@ export default async function InternationalAiRegulationPage({
                 <span className="relative inline-flex size-1.5 rounded-full bg-[color:var(--color-live,#10b981)]" />
               </span>
               <span className="font-mono text-[10px] uppercase tracking-[0.28em] text-white/55">
-                {fr ? "Veille internationale" : "Live international monitor"}
+                {fr ? "Veille internationale" : "International monitor"}
               </span>
             </div>
 

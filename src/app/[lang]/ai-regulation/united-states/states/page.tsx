@@ -21,7 +21,7 @@ import { localeHref } from "@/lib/i18n/href";
 export const metadata: Metadata = {
   title: "All states | United States Hub",
   description:
-    "Every U.S. state and territory tracked for AI law — grouped by legal status, from enacted comprehensive law to pending legislation and agency activity.",
+    "U.S. states and territories tracked for AI law — grouped by legal status, from enacted comprehensive law to pending legislation and agency activity.",
 };
 
 export const revalidate = 3600;

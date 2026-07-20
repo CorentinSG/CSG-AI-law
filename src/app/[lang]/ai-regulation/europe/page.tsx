@@ -134,7 +134,7 @@ export default async function EuropeAiRegulationPage({
                 <span className="relative inline-flex size-1.5 rounded-full bg-[color:var(--color-live,#10b981)]" />
               </span>
               <span className="font-mono text-[10px] uppercase tracking-[0.28em] text-white/55">
-                {fr ? "Moniteur juridique UE" : "Live EU legal monitor"}
+                {fr ? "Moniteur juridique UE" : "EU legal monitor"}
               </span>
               <span className="ml-auto font-mono text-[9px] uppercase tracking-[0.18em] text-white/40">
                 {euLiveData.lastCheckedAt

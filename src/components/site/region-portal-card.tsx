@@ -66,7 +66,7 @@ export function RegionPortalCard({
             </span>
           ) : null}
           <p className={`font-mono text-[10px] uppercase tracking-[0.28em] ${regionAccent[region]}`}>
-            {kickerLabel ?? (isLive ? "Live monitoring" : "Monitoring")}
+            {kickerLabel ?? (isLive ? "Ongoing monitoring" : "Monitoring")}
           </p>
         </div>
         <ArrowUpRight

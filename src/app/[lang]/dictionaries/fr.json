@@ -19,7 +19,7 @@
   "home": {
     "stats": [
       { "value": "113", "label": "Articles du Règlement IA suivis" },
-      { "value": "51", "label": "Juridictions américaines couvertes" },
+      { "value": "51", "label": "Juridictions américaines suivies" },
       { "value": "40+", "label": "Sources surveillées" },
       { "value": "Vérifié", "label": "Publication vérifiée à la source" }
     ],
@@ -31,14 +31,14 @@
     "readNotes": "Lire les notes →",
     "contact": "Contact →",
     "capabilities": [
-      { "title": "Veille réglementaire", "desc": "Suivi en direct des obligations du Règlement IA de l'UE et des lois IA des 50 États américains." },
+      { "title": "Veille réglementaire", "desc": "Suivi continu des obligations du Règlement IA de l'UE et des lois IA des États américains." },
       { "title": "Vérification des sources", "desc": "Seuls les éléments officiellement vérifiés ou corroborés par plusieurs sources sont publiés." },
       { "title": "Analyse juridique", "desc": "Commentaire rédigé par un avocat — pas de résumés générés par algorithme." },
       { "title": "Intelligence structurée", "desc": "Profils par juridiction avec statut contraignant, domaine juridique et type de développement." }
     ],
     "exploreEyebrow": "Explorer",
     "entryPoints": [
-      { "label": "Hub Réglementation IA", "description": "Europe · États-Unis · Veille en direct" },
+      { "label": "Hub Réglementation IA", "description": "Europe · États-Unis · Veille continue" },
       { "label": "Notes de recherche", "description": "Analyses éditoriales et commentaire juridique" },
       { "label": "Standards juridiques", "description": "Normes techniques et cadres de conformité" }
     ],

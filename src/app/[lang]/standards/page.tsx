@@ -21,7 +21,7 @@ import { formatDisplayDate } from "@/lib/utils";
 export const metadata: Metadata = {
   title: "Standards & Soft Law",
   description:
-    "Every technical standard, governance framework, and soft-law instrument tracked for AI compliance — searchable, filterable, and clearly distinguished from binding law.",
+    "Technical standards, governance frameworks, and soft-law instruments tracked for AI compliance — searchable, filterable, and clearly distinguished from binding law.",
 };
 
 // ISR (T-RT0C): serve from cache, revalidate every 5 min.

@@ -317,7 +317,7 @@ export default async function EuropeCountryPage({
           <section id="live" className="scroll-mt-28 space-y-6">
             <MotionReveal>
               <SectionHeading
-                eyebrow="Live monitoring"
+                eyebrow="Ongoing monitoring"
                 title="French AI law, right now"
               />
             </MotionReveal>

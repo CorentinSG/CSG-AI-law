@@ -15,7 +15,7 @@ import { localeHref } from "@/lib/i18n/href";
 export const metadata: Metadata = {
   title: "Application Calendar | EU AI Act",
   description:
-    "Phased application calendar of the EU AI Act — every official deadline with its legal effect, plus key articles and annexes.",
+    "Phased application calendar of the EU AI Act — the official application deadlines with their legal effect, plus key articles and annexes.",
 };
 
 export const revalidate = 3600;

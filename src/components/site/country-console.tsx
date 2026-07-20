@@ -92,7 +92,7 @@ export function CountryConsoleHero({
               <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
             </span>
             <p className={`font-mono text-[10px] uppercase tracking-[0.28em] ${tint.text}`}>
-              Live monitoring
+              Ongoing monitoring
             </p>
           </div>
           <motion.h1
