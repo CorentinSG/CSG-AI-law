@@ -50,6 +50,12 @@ describe("New York AI Law Watch monitoring descriptors", () => {
         "src-nycourts-part-161-ai",
         "src-nydfs-ai",
         "src-nyag-ai",
+        "src-us-ny-legal-press-newsapi-ai",
+        "src-us-ny-law-firm-commentary-newsapi-ai",
+        "src-us-ny-local-policy-newsapi-ai",
+        "src-us-ny-business-finance-newsapi-ai",
+        "src-us-ny-tech-platform-newsapi-ai",
+        "src-us-ny-aggressive-gdelt-ai",
       ]),
     );
   });

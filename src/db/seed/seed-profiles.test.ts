@@ -165,6 +165,40 @@ describe("buildSeedDataset", () => {
     ).toBe(true);
   });
 
+  it("seeds aggressive New York journalistic discovery sources as metadata-only lanes", () => {
+    const dataset = buildSeedDataset("demo");
+    const aggressiveNewYorkIds = [
+      "src-us-ny-legal-press-newsapi-ai",
+      "src-us-ny-law-firm-commentary-newsapi-ai",
+      "src-us-ny-local-policy-newsapi-ai",
+      "src-us-ny-business-finance-newsapi-ai",
+      "src-us-ny-tech-platform-newsapi-ai",
+      "src-us-ny-aggressive-gdelt-ai",
+    ];
+
+    const sources = dataset.sources.filter((source) =>
+      aggressiveNewYorkIds.includes(source.id),
+    );
+
+    expect(sources.map((source) => source.id).sort()).toEqual(
+      [...aggressiveNewYorkIds].sort(),
+    );
+    expect(sources.every((source) => source.country === "United States")).toBe(true);
+    expect(sources.every((source) => source.jurisdiction === "New York")).toBe(true);
+    expect(sources.every((source) => source.region === "North America")).toBe(true);
+    expect(sources.every((source) => source.active)).toBe(true);
+    expect(sources.every((source) => source.preferredExtractionMethod === "api")).toBe(true);
+    expect(sources.every((source) => source.config?.sourceCategory === "media_discovery_source")).toBe(true);
+    expect(sources.every((source) => source.config?.metadataOnly === true)).toBe(true);
+    expect(sources.every((source) => source.config?.manualReviewRequired === true)).toBe(true);
+    expect(sources.every((source) => source.config?.officialConfirmationRequired === true)).toBe(true);
+    expect(
+      sources.every((source) =>
+        source.notes.toLowerCase().includes("legal authority without official-source confirmation"),
+      ),
+    ).toBe(true);
+  });
+
   it("builds normalized country intelligence seed records from Europe profiles", () => {
     const dataset = buildSeedDataset("demo");
     expect(dataset.countryIntelligence.length).toBeGreaterThan(0);
