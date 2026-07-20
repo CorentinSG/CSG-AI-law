@@ -15,10 +15,14 @@ Run: python worker.py  (default port 8765)
 """
 
 import hashlib
+import hmac
+import ipaddress
 import json
 import os
 import sys
+import time
 from typing import Any
+from urllib.parse import urlsplit
 
 from dotenv import load_dotenv
 from flask import Flask, jsonify, request
@@ -29,16 +33,86 @@ app = Flask(__name__)
 
 PORT = int(os.getenv("PORT", os.getenv("SCRAPLING_WORKER_PORT", "8765")))
 HOST = os.getenv("SCRAPLING_WORKER_HOST", "0.0.0.0")
-# Rate-limit: max requests per second per domain (enforced with a simple counter)
+# Rate-limit: max requests per second per domain (sliding one-second window).
 RATE_LIMIT_PER_DOMAIN = int(os.getenv("SCRAPING_RATE_LIMIT_PER_DOMAIN", "5"))
 USER_AGENT = os.getenv(
     "SCRAPING_USER_AGENT",
     "CSG-Law-AI-Intelligence/1.0 (legal monitoring; contact@saint-girons.com)",
 )
+# Insecure TLS fallback is opt-in: legal content must not be fetched over an
+# unverified connection unless the operator explicitly accepts the risk.
 ALLOW_INSECURE_SSL_FALLBACK = (
-    os.getenv("SCRAPLING_ALLOW_INSECURE_SSL_FALLBACK", "true").strip().lower()
+    os.getenv("SCRAPLING_ALLOW_INSECURE_SSL_FALLBACK", "false").strip().lower()
     in {"1", "true", "yes", "on"}
 )
+# Shared secret required on every extraction request. Without it the service
+# refuses to run extractions (the worker is deployed on a public URL).
+WORKER_TOKEN = os.getenv("SCRAPLING_WORKER_TOKEN", "").strip()
+
+_rate_windows: dict[str, list[float]] = {}
+
+
+def require_worker_auth() -> tuple[Any, int] | None:
+    """Return an error response when the request is not authenticated."""
+    if not WORKER_TOKEN:
+        return (
+            jsonify(
+                {
+                    "error": (
+                        "SCRAPLING_WORKER_TOKEN is not configured on the worker; "
+                        "extraction is disabled until it is set."
+                    )
+                }
+            ),
+            503,
+        )
+    header = request.headers.get("Authorization", "")
+    provided = header[7:] if header.startswith("Bearer ") else ""
+    if not provided or not hmac.compare_digest(provided, WORKER_TOKEN):
+        return jsonify({"error": "unauthorized"}), 401
+    return None
+
+
+def validate_target_url(url: str) -> str | None:
+    """Reject non-http(s) schemes and private/loopback/metadata targets."""
+    try:
+        parts = urlsplit(url)
+    except ValueError:
+        return "invalid url"
+    if parts.scheme not in {"http", "https"}:
+        return "only http(s) urls are allowed"
+    host = (parts.hostname or "").strip().lower()
+    if not host:
+        return "url has no host"
+    if host == "localhost" or host.endswith((".localhost", ".internal", ".local")):
+        return "internal hosts are not allowed"
+    try:
+        ip = ipaddress.ip_address(host)
+    except ValueError:
+        return None  # hostname, not an IP literal
+    if (
+        ip.is_private
+        or ip.is_loopback
+        or ip.is_link_local
+        or ip.is_reserved
+        or ip.is_multicast
+        or ip.is_unspecified
+    ):
+        return "private or reserved ip targets are not allowed"
+    return None
+
+
+def enforce_domain_rate_limit(url: str) -> str | None:
+    """Sliding one-second window per domain; returns an error when exceeded."""
+    host = (urlsplit(url).hostname or "unknown").lower()
+    now = time.monotonic()
+    window = [t for t in _rate_windows.get(host, []) if now - t < 1.0]
+    if len(window) >= RATE_LIMIT_PER_DOMAIN:
+        _rate_windows[host] = window
+        return f"rate limit exceeded for domain {host} ({RATE_LIMIT_PER_DOMAIN}/s)"
+    window.append(now)
+    _rate_windows[host] = window
+    return None
 
 # Per-source extractor configs loaded from extractors/ directory
 _extractor_configs: dict[str, dict[str, Any]] = {}
@@ -186,10 +260,20 @@ def health():
 
 @app.post("/extract")
 def extract():
+    auth_error = require_worker_auth()
+    if auth_error:
+        return auth_error
+
     payload = request.get_json(silent=True) or {}
     url = payload.get("url", "").strip()
     if not url:
         return jsonify({"error": "url is required"}), 400
+    url_error = validate_target_url(url)
+    if url_error:
+        return jsonify({"error": url_error}), 400
+    rate_error = enforce_domain_rate_limit(url)
+    if rate_error:
+        return jsonify({"error": rate_error}), 429
 
     # Merge: inline config overrides registered per-source config
     # The client may pass a source_id so we can look up the registered config
@@ -203,6 +287,10 @@ def extract():
 
 @app.post("/extract/batch")
 def extract_batch():
+    auth_error = require_worker_auth()
+    if auth_error:
+        return auth_error
+
     payload = request.get_json(silent=True) or {}
     items = payload.get("items", [])
     if not isinstance(items, list):
@@ -212,6 +300,12 @@ def extract_batch():
     for item in items:
         url = item.get("url", "").strip()
         if not url:
+            continue
+        if validate_target_url(url):
+            continue
+        rate_error = enforce_domain_rate_limit(url)
+        if rate_error:
+            results.append({"url": url, "error": rate_error})
             continue
         source_id = item.get("source_id", "")
         config = dict(_extractor_configs.get(source_id, {}))

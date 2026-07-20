@@ -161,7 +161,7 @@ export default async function EuropeCountryPage({
     profile.slug === "austria" ? getAustriaLiveLegalIntelligenceData(6) : Promise.resolve(null),
     profile.slug === "sweden" ? getSwedenLiveLegalIntelligenceData(6) : Promise.resolve(null),
     profile.slug === "ireland" ? getIrelandLiveLegalIntelligenceData(6) : Promise.resolve(null),
-    updateRepository.getCountryIntelligenceBySlug(profile.slug),
+    updateRepository.getCountryIntelligenceBySlug(profile.slug, { scope: "public" }),
     updateRepository.listCountryIntelligenceSources(`country-${profile.slug}`),
     ]);
   const franceSnapshot =

@@ -31,6 +31,13 @@ export function isScraplingRuntimeAvailable() {
   return Boolean(process.env.SCRAPLING_WORKER_URL?.trim()) || isProductionLikeRuntime();
 }
 
+function buildWorkerHeaders(): Record<string, string> {
+  const headers: Record<string, string> = { "Content-Type": "application/json" };
+  const token = process.env.SCRAPLING_WORKER_TOKEN?.trim();
+  if (token) headers.Authorization = `Bearer ${token}`;
+  return headers;
+}
+
 /** Extract a single URL via the Scrapling worker. */
 export async function scraplingExtract(
   url: string,
@@ -44,7 +51,7 @@ export async function scraplingExtract(
   try {
     res = await fetch(`${workerUrl}/extract`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: buildWorkerHeaders(),
       body: JSON.stringify({
         url: normalized,
         source_id: sourceId,

@@ -268,8 +268,11 @@ export const updateRepository = {
   async listCountryIntelligence(region?: CountryIntelligence["region"]) {
     return getAiRegulationRepository().listCountryIntelligence(region);
   },
-  async getCountryIntelligenceBySlug(slug: string) {
-    return getAiRegulationRepository().getCountryIntelligenceBySlug(slug);
+  async getCountryIntelligenceBySlug(
+    slug: string,
+    options?: { scope?: "admin" | "public" },
+  ) {
+    return getAiRegulationRepository().getCountryIntelligenceBySlug(slug, options);
   },
   async upsertCountryIntelligence(input: CountryIntelligenceUpsertInput) {
     return getAiRegulationRepository().upsertCountryIntelligence(input);

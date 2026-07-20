@@ -974,10 +974,23 @@ export class MemoryAiRegulationRepository implements AiRegulationRepository {
     return region ? countries.filter((country) => country.region === region) : countries;
   }
 
-  async getCountryIntelligenceBySlug(slug: string) {
-    return (
-      getMockStore().countryIntelligence.find((country) => country.slug === slug) ?? null
-    );
+  async getCountryIntelligenceBySlug(
+    slug: string,
+    options?: { scope?: VisibilityScope },
+  ) {
+    const country =
+      getMockStore().countryIntelligence.find((entry) => entry.slug === slug) ?? null;
+    if (!country) return null;
+    // Public scope only exposes profiles that have passed verification at
+    // least once; never-reviewed or flagged profiles stay admin-only.
+    if (
+      options?.scope === "public" &&
+      country.reviewStatus !== "verified" &&
+      country.reviewStatus !== "stale"
+    ) {
+      return null;
+    }
+    return country;
   }
 
   async upsertCountryIntelligence(input: CountryIntelligenceUpsertInput) {

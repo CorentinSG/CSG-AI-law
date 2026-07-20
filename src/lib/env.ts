@@ -61,6 +61,7 @@ const rawEnvSchema = z.object({
   SCRAPING_USER_AGENT: z.string().optional(),
   SCRAPING_RATE_LIMIT_PER_DOMAIN: z.coerce.number().int().positive().default(5),
   SCRAPLING_WORKER_URL: z.string().url().optional(),
+  SCRAPLING_WORKER_TOKEN: z.string().min(16).optional(),
 });
 
 export class EnvValidationError extends Error {}
@@ -122,6 +123,7 @@ export interface AppEnv {
   SCRAPING_USER_AGENT?: string;
   SCRAPING_RATE_LIMIT_PER_DOMAIN: number;
   SCRAPLING_WORKER_URL?: string;
+  SCRAPLING_WORKER_TOKEN?: string;
 }
 
 function buildEnv(): AppEnv {
@@ -177,6 +179,7 @@ function buildEnv(): AppEnv {
     SCRAPING_USER_AGENT: process.env.SCRAPING_USER_AGENT,
     SCRAPING_RATE_LIMIT_PER_DOMAIN: process.env.SCRAPING_RATE_LIMIT_PER_DOMAIN ?? "5",
     SCRAPLING_WORKER_URL: process.env.SCRAPLING_WORKER_URL,
+    SCRAPLING_WORKER_TOKEN: process.env.SCRAPLING_WORKER_TOKEN,
   });
 
   const isProduction = parsed.NODE_ENV === "production";

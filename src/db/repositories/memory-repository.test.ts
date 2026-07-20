@@ -894,6 +894,26 @@ describe("MemoryAiRegulationRepository", () => {
     expect(leadsSecond.items[0]?.id).not.toBe(leadsFirst.items[0]?.id);
   });
 
+  it("hides never-verified and flagged country profiles from the public scope", async () => {
+    const france = await repository.getCountryIntelligenceBySlug("france");
+    expect(france).not.toBeNull();
+
+    for (const reviewStatus of ["needs_review", "flagged"] as const) {
+      await repository.upsertCountryIntelligence({ ...france!, reviewedBy: "test", reviewStatus });
+      expect(
+        await repository.getCountryIntelligenceBySlug("france", { scope: "public" }),
+      ).toBeNull();
+    }
+
+    for (const reviewStatus of ["verified", "stale"] as const) {
+      await repository.upsertCountryIntelligence({ ...france!, reviewedBy: "test", reviewStatus });
+      const publicProfile = await repository.getCountryIntelligenceBySlug("france", {
+        scope: "public",
+      });
+      expect(publicProfile?.reviewStatus).toBe(reviewStatus);
+    }
+  });
+
   it("supports country intelligence list/upsert/source replacement flows", async () => {
     const seeded = await repository.listCountryIntelligence("Europe");
     expect(seeded.length).toBeGreaterThan(0);

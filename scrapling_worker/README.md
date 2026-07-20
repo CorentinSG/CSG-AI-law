@@ -54,8 +54,9 @@ project and private networking is enabled.
 | `SCRAPLING_WORKER_HOST` | `0.0.0.0` | Host/interface the worker binds to |
 | `SCRAPLING_WORKER_URL` | `http://localhost:8765` | URL used by Next.js to reach the worker |
 | `SCRAPING_USER_AGENT` | CSG-Law-AI-Intelligence/1.0 | HTTP user agent sent to target sites |
-| `SCRAPING_RATE_LIMIT_PER_DOMAIN` | `5` | Max requests per domain per run |
-| `SCRAPLING_ALLOW_INSECURE_SSL_FALLBACK` | `true` | Retry once with TLS certificate verification disabled when an official site fails certificate-chain validation |
+| `SCRAPING_RATE_LIMIT_PER_DOMAIN` | `5` | Max requests per second per target domain (sliding window, enforced) |
+| `SCRAPLING_ALLOW_INSECURE_SSL_FALLBACK` | `false` | Opt-in: retry once with TLS certificate verification disabled when an official site fails certificate-chain validation |
+| `SCRAPLING_WORKER_TOKEN` | unset | **Required.** Shared secret; `/extract` and `/extract/batch` return 503 until it is set, and 401 without a matching `Authorization: Bearer <token>` header. Set the same value on the Node side (Vercel + Railway scan worker) so `scraplingClient` sends it. |
 
 ## API
 
@@ -106,5 +107,5 @@ See `extractors/ftc.json` and `extractors/edpb.json` for examples.
 ## Adding a new extractor
 
 1. Create `extractors/<source-id>.json` with the selectors.
-2. Test manually: `curl -X POST http://localhost:8765/extract -H 'Content-Type: application/json' -d '{"url":"..."}'`
+2. Test manually: `curl -X POST http://localhost:8765/extract -H 'Content-Type: application/json' -H 'Authorization: Bearer <SCRAPLING_WORKER_TOKEN>' -d '{"url":"..."}'`
 3. Register the source in `src/agents/ingestion/seedSources.ts` with `ingestion_method: "scrapling"`.

@@ -2395,19 +2395,36 @@ export class SupabaseAiRegulationRepository implements AiRegulationRepository {
     return (data ?? []).map(mapCountryIntelligenceRow);
   }
 
-  async getCountryIntelligenceBySlug(slug: string) {
+  async getCountryIntelligenceBySlug(
+    slug: string,
+    options?: { scope?: VisibilityScope },
+  ) {
     const client = requireAdminClient();
-    const { data, error } = await client
+    let query = client
       .from("country_intelligence")
       .select("*")
-      .eq("slug", slug)
-      .maybeSingle();
+      .eq("slug", slug);
+    // Public scope mirrors the RLS intent: only profiles that passed
+    // verification at least once ("verified", or "stale" once aged) are
+    // publicly renderable; never-reviewed or flagged profiles stay admin-only.
+    if (options?.scope === "public") {
+      query = query.in("review_status", ["verified", "stale"]);
+    }
+    const { data, error } = await query.maybeSingle();
     if (isMissingRelationError(error)) {
-      return (
+      const legacy =
         Array.from(this.legacyCountryIntelligence.values()).find(
           (country) => country.slug === slug,
-        ) ?? null
-      );
+        ) ?? null;
+      if (
+        legacy &&
+        options?.scope === "public" &&
+        legacy.reviewStatus !== "verified" &&
+        legacy.reviewStatus !== "stale"
+      ) {
+        return null;
+      }
+      return legacy;
     }
     handleError("Failed to load country intelligence", error);
     return data ? mapCountryIntelligenceRow(data) : null;

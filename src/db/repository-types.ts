@@ -317,7 +317,10 @@ export interface AiRegulationRepository {
     input: SourceHealthCheckInput,
   ): Promise<SourceHealthCheck>;
   listCountryIntelligence(region?: CountryIntelligence["region"]): Promise<CountryIntelligence[]>;
-  getCountryIntelligenceBySlug(slug: string): Promise<CountryIntelligence | null>;
+  getCountryIntelligenceBySlug(
+    slug: string,
+    options?: { scope?: VisibilityScope },
+  ): Promise<CountryIntelligence | null>;
   upsertCountryIntelligence(input: CountryIntelligenceUpsertInput): Promise<CountryIntelligence>;
   listCountryProfileReviewEvents(
     limit?: number,
