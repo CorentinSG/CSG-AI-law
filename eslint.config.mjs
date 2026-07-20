@@ -19,6 +19,10 @@ const eslintConfig = defineConfig([
     ".impeccable/**",
     // Standalone tool sub-projects ship their own lint config and tooling.
     "tools/**",
+    // Git worktrees (bi-agent workflow) are full repo copies — never lint them
+    // from the main checkout.
+    ".worktrees/**",
+    ".claude/worktrees/**",
   ]),
 ]);
 

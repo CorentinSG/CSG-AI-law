@@ -11,7 +11,15 @@ export default defineConfig({
   test: {
     environment: "node",
     // Playwright e2e specs live in `e2e/` and must not be run by Vitest.
-    exclude: [...configDefaults.exclude, "e2e/**"],
+    // Git worktrees (bi-agent workflow) carry full repo copies whose tests
+    // must never be collected from the main checkout.
+    exclude: [
+      ...configDefaults.exclude,
+      "e2e/**",
+      "**/e2e/**",
+      "**/.worktrees/**",
+      "**/.claude/worktrees/**",
+    ],
     testTimeout: 60_000,
     hookTimeout: 60_000,
     coverage: {
