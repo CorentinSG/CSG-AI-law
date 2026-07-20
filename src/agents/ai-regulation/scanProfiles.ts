@@ -13,6 +13,7 @@ import { getInternationalAgentSourceIds, isInternationalMonitoringSource, type I
 
 export const scanProfileIds = [
   "official_baseline_scan",
+  "official_fast_scan",
   "live_news_discovery_scan",
   "verification_scan",
   "source_health_scan",
@@ -62,6 +63,7 @@ export interface ScanProfileDefinition {
   targetInterval: string;
   sourceStrategy:
     | "official_only"
+    | "official_fast"
     | "discovery_only"
     | "all_active"
     | "verification_only"
@@ -107,6 +109,21 @@ export interface ScanProfileDefinition {
   verificationLimit?: number;
 }
 
+/**
+ * Highest-value official feeds for the fast sweep: cheap RSS/API lanes whose
+ * publications are legally significant the hour they land. Conditional
+ * fetching (ETag/hash) keeps repeat polling nearly free.
+ */
+export const OFFICIAL_FAST_SOURCE_IDS = new Set([
+  "src-cnil-ai",
+  "src-curia-rss",
+  "src-edpb-rss",
+  "src-eu-commission-news-rss",
+  "src-eur-lex-proposals-rss",
+  "src-eur-lex-legislation-rss",
+  "src-federal-register-ai",
+]);
+
 export const scanProfiles: Record<ScanProfileId, ScanProfileDefinition> = {
   official_baseline_scan: {
     id: "official_baseline_scan",
@@ -115,6 +132,15 @@ export const scanProfiles: Record<ScanProfileId, ScanProfileDefinition> = {
       "Comprehensive official-source monitoring for the legal baseline. Intended for slower daily or hourly runs depending on source sensitivity.",
     targetInterval: "daily or hourly depending on source",
     sourceStrategy: "official_only",
+    runsRecurringVerification: false,
+  },
+  official_fast_scan: {
+    id: "official_fast_scan",
+    label: "Priority official feeds fast sweep",
+    description:
+      "Cheap conditional-fetch sweep of the highest-value official RSS/API lanes (CNIL, CURIA, EDPB, Commission, EUR-Lex feeds, Federal Register) so a real legal event reaches the site within the hour instead of the next daily sweep.",
+    targetInterval: "hourly via the worker self-scheduler; 15 minutes when capacity allows",
+    sourceStrategy: "official_fast",
     runsRecurringVerification: false,
   },
   live_news_discovery_scan: {
@@ -564,6 +590,8 @@ export function selectSourcesForScanProfile(
   switch (profile.sourceStrategy) {
     case "official_only":
       return sources.filter((source) => !isDiscoveryCategory(source));
+    case "official_fast":
+      return sources.filter((source) => OFFICIAL_FAST_SOURCE_IDS.has(source.id));
     case "discovery_only":
       return sources.filter((source) => isDiscoveryCategory(source));
     case "verification_only":

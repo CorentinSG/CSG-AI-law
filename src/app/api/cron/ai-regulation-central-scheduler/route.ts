@@ -4,9 +4,15 @@ import {
   enqueueCentralMonitoringSchedule,
   type CentralSchedulerRegion,
 } from "@/agents/ai-regulation/scheduler";
+import { drainQueuedScanJobs } from "@/agents/ai-regulation/processors/scanJobs";
 import { getRepositoryMode } from "@/db/repository";
 import { env } from "@/lib/env";
 import { getCronAuthStatus } from "@/lib/cron-auth";
+import { buildHealthSnapshot } from "@/lib/health";
+
+// Give the fallback drain room to run when the worker is down (Vercel Hobby
+// allows up to 60s).
+export const maxDuration = 60;
 
 function unauthorized(reason: string) {
   return NextResponse.json(
@@ -69,11 +75,39 @@ async function handleCentralScheduler(request: Request) {
     cadences: parseCadences(url.searchParams.get("cadences")),
   });
 
+  // Degraded-mode fallback: if the Railway worker heartbeat is stale, nothing
+  // drains the queue. Process a small bounded batch inline so the daily cron
+  // keeps the monitor minimally alive during a worker outage, and surface the
+  // outage in the response payload.
+  let workerAlive: boolean | null = null;
+  let fallbackDrain: Awaited<ReturnType<typeof drainQueuedScanJobs>> | null = null;
+  try {
+    const health = await buildHealthSnapshot({ access: "authenticated" });
+    workerAlive = health.worker.alive;
+    if (!health.worker.alive) {
+      fallbackDrain = await drainQueuedScanJobs({
+        maxJobs: 2,
+        leaseOwner: "central-scheduler-fallback",
+      });
+    }
+  } catch {
+    // The fallback drain must never break the enqueue response.
+  }
+
   return NextResponse.json({
     ok: true,
     trigger: "scheduled",
     dataMode: getRepositoryMode(),
     aiEnabled: env.AI_ENABLE_PROCESSING,
+    workerAlive,
+    fallbackDrain: fallbackDrain
+      ? {
+          processedJobIds: fallbackDrain.processedJobs.map((job) => job.jobId),
+          processedCount: fallbackDrain.processedCount,
+          failedCount: fallbackDrain.failedCount,
+          reason: "worker_heartbeat_stale",
+        }
+      : null,
     plan: result.plan,
     queuedJobCount: result.queuedJobCount,
     skippedJobCount: result.skippedJobCount,

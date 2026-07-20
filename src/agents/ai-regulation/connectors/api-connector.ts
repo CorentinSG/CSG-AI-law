@@ -1,6 +1,6 @@
 import type { ConnectorScanResult, SourceConnector } from "@/agents/ai-regulation/connectors/types";
 import type { ConditionalFetchNotModifiedResult, ConditionalJsonFetchResult } from "@/agents/ai-regulation/connectors/conditional-fetch";
-import { fetchJsonWithConditionalCaching } from "@/agents/ai-regulation/connectors/conditional-fetch";
+import { CONNECTOR_FETCH_TIMEOUT_MS, fetchJsonWithConditionalCaching } from "@/agents/ai-regulation/connectors/conditional-fetch";
 import {
   buildExcerpt,
   buildStableCandidateId,
@@ -246,6 +246,40 @@ function buildNonFatalApiConstraintResult(message: string): ConnectorScanResult 
   };
 }
 
+/**
+ * Runtime failures (network down, DNS, timeout, HTTP 5xx) must be counted as
+ * scan errors so the circuit breaker, backoff and alerting can see a broken
+ * official connector. Expected constraints (missing credentials, 4xx query
+ * rejections) stay non-fatal warnings.
+ */
+function isRuntimeApiFailure(error: unknown) {
+  const name = error instanceof Error ? error.name : "";
+  if (name === "TimeoutError" || name === "AbortError") return true;
+  const message = error instanceof Error ? error.message : String(error);
+  if (
+    /(fetch failed|ENOTFOUND|ECONNREFUSED|ECONNRESET|ETIMEDOUT|EAI_AGAIN|socket hang up|UND_ERR)/i.test(
+      message,
+    )
+  ) {
+    return true;
+  }
+  return /\b(?:failed with|status)\s*5\d{2}\b/i.test(message);
+}
+
+function buildApiScanIssueResult(error: unknown, message: string): ConnectorScanResult {
+  if (isRuntimeApiFailure(error)) {
+    return {
+      items: [],
+      errors: [message],
+      warnings: [],
+      responseStatus: null,
+      itemsFetched: 0,
+      zeroResultsReason: message,
+    };
+  }
+  return buildNonFatalApiConstraintResult(message);
+}
+
 function normalizeTerms(values: readonly string[]) {
   return values.map((value) => normalizeWhitespace(value).toLowerCase());
 }
@@ -442,7 +476,8 @@ async function scanNewsApi(source: RegulationSource): Promise<ConnectorScanResul
     }
   } catch (error) {
     const message = error instanceof Error ? error.message : "NewsAPI request failed";
-    return buildNonFatalApiConstraintResult(
+    return buildApiScanIssueResult(
+      error,
       `NewsAPI discovery could not be queried safely in this run: ${message}`,
     );
   }
@@ -524,7 +559,8 @@ async function scanGdelt(source: RegulationSource): Promise<ConnectorScanResult>
     }
   } catch (error) {
     const message = error instanceof Error ? error.message : "GDELT request failed";
-    return buildNonFatalApiConstraintResult(
+    return buildApiScanIssueResult(
+      error,
       `GDELT discovery could not be queried safely in this run: ${message}`,
     );
   }
@@ -799,6 +835,7 @@ async function scanEurLex(source: RegulationSource): Promise<ConnectorScanResult
   let xml: string;
   try {
     response = await fetch(EURLEX_WEBSERVICE_URL, {
+      signal: AbortSignal.timeout(CONNECTOR_FETCH_TIMEOUT_MS),
       method: "POST",
       headers: {
         "Content-Type": "application/soap+xml; charset=utf-8; action=\"https://eur-lex.europa.eu/ws/doQuery\"",
@@ -828,7 +865,8 @@ async function scanEurLex(source: RegulationSource): Promise<ConnectorScanResult
     }
   } catch (error) {
     const message = error instanceof Error ? error.message : "EUR-Lex SOAP request failed";
-    return buildNonFatalApiConstraintResult(
+    return buildApiScanIssueResult(
+      error,
       `EUR-Lex official SOAP webservice could not be queried safely in this run: ${message}. EUR-Lex RSS/static official lanes remain the degraded fallback.`,
     );
   }
@@ -950,7 +988,8 @@ async function scanJudilibre(source: RegulationSource): Promise<ConnectorScanRes
     }
   } catch (error) {
     const message = error instanceof Error ? error.message : "Judilibre request failed";
-    return buildNonFatalApiConstraintResult(
+    return buildApiScanIssueResult(
+      error,
       `Judilibre official-case-law discovery could not be queried safely in this run: ${message}`,
     );
   }
@@ -1006,6 +1045,7 @@ async function requestPisteAccessToken(
   });
 
   const response = await fetch(tokenUrl, {
+    signal: AbortSignal.timeout(CONNECTOR_FETCH_TIMEOUT_MS),
     method: "POST",
     headers: {
       "Content-Type": "application/x-www-form-urlencoded",
@@ -1049,26 +1089,60 @@ function stripXmlTags(value: string) {
   return normalizeWhitespace(decodeXmlEntities(value.replace(/<[^>]+>/g, " ")));
 }
 
+interface CachedPisteToken {
+  accessToken: string;
+  environment: "production" | "sandbox";
+  expiresAtMs: number;
+  clientId: string;
+}
+
+let cachedPisteToken: CachedPisteToken | null = null;
+
+export function resetPisteTokenCacheForTests() {
+  cachedPisteToken = null;
+}
+
 async function fetchPisteAccessToken(clientId: string, clientSecret: string) {
-  try {
+  // PISTE tokens live ~60 minutes; re-requesting on every scan wastes two
+  // OAuth round-trips per cycle and risks PISTE-side rate limiting.
+  if (
+    cachedPisteToken &&
+    cachedPisteToken.clientId === clientId &&
+    Date.now() < cachedPisteToken.expiresAtMs
+  ) {
     return {
-      accessToken: await requestPisteAccessToken(
-        PISTE_OAUTH_TOKEN_URL,
-        clientId,
-        clientSecret,
-      ),
-      environment: "production" as const,
+      accessToken: cachedPisteToken.accessToken,
+      environment: cachedPisteToken.environment,
     };
+  }
+
+  const cacheAndReturn = (token: string, environment: "production" | "sandbox") => {
+    cachedPisteToken = {
+      accessToken: token,
+      environment,
+      // Conservative 30-minute cache; PISTE issues 60-minute tokens.
+      expiresAtMs: Date.now() + 30 * 60 * 1000,
+      clientId,
+    };
+    return { accessToken: token, environment };
+  };
+
+  try {
+    return cacheAndReturn(
+      await requestPisteAccessToken(PISTE_OAUTH_TOKEN_URL, clientId, clientSecret),
+      "production",
+    );
   } catch (productionError) {
+    // Sandbox data is DILA test data and must never silently masquerade as
+    // official content in an auto-publishing pipeline: opt-in only.
+    if (process.env.PISTE_ALLOW_SANDBOX_FALLBACK !== "true") {
+      throw productionError;
+    }
     try {
-      return {
-        accessToken: await requestPisteAccessToken(
-          PISTE_SANDBOX_OAUTH_TOKEN_URL,
-          clientId,
-          clientSecret,
-        ),
-        environment: "sandbox" as const,
-      };
+      return cacheAndReturn(
+        await requestPisteAccessToken(PISTE_SANDBOX_OAUTH_TOKEN_URL, clientId, clientSecret),
+        "sandbox",
+      );
     } catch {
       throw productionError;
     }
@@ -1110,6 +1184,7 @@ async function scanLegifrance(source: RegulationSource): Promise<ConnectorScanRe
   try {
     const oauth = await fetchPisteAccessToken(clientId, clientSecret);
     response = await fetch(getPisteApiUrl(source.sourceUrl, oauth.environment), {
+      signal: AbortSignal.timeout(CONNECTOR_FETCH_TIMEOUT_MS),
       method: "POST",
       headers: {
         Authorization: `Bearer ${oauth.accessToken}`,
@@ -1148,7 +1223,8 @@ async function scanLegifrance(source: RegulationSource): Promise<ConnectorScanRe
     json = (await response.json()) as unknown;
   } catch (error) {
     const message = error instanceof Error ? error.message : "Legifrance request failed";
-    return buildNonFatalApiConstraintResult(
+    return buildApiScanIssueResult(
+      error,
       `Legifrance official DILA/PISTE API could not be queried safely in this run: ${message}. Scraping remains the honest degraded fallback.`,
     );
   }
@@ -1241,7 +1317,8 @@ async function scanCourtListener(source: RegulationSource): Promise<ConnectorSca
     }
   } catch (error) {
     const message = error instanceof Error ? error.message : "CourtListener request failed";
-    return buildNonFatalApiConstraintResult(
+    return buildApiScanIssueResult(
+      error,
       `CourtListener/RECAP case-law discovery could not be queried safely in this run: ${message}`,
     );
   }
@@ -1324,6 +1401,7 @@ async function scanLegalDataHunter(source: RegulationSource): Promise<ConnectorS
     }
 
     response = await fetch(endpoint, {
+      signal: AbortSignal.timeout(CONNECTOR_FETCH_TIMEOUT_MS),
       method: "POST",
       headers,
       body: JSON.stringify({
@@ -1345,7 +1423,8 @@ async function scanLegalDataHunter(source: RegulationSource): Promise<ConnectorS
     json = (await response.json()) as unknown;
   } catch (error) {
     const message = error instanceof Error ? error.message : "Legal Data Hunter MCP request failed";
-    return buildNonFatalApiConstraintResult(
+    return buildApiScanIssueResult(
+      error,
       `Legal Data Hunter / legal-research could not be queried safely in this run: ${message}`,
     );
   }

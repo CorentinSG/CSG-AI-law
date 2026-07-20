@@ -38,11 +38,15 @@ describe("central monitoring scheduler", () => {
     expect(plan.usAgents).toBe(52);
     expect(plan.internationalAgents).toBe(10);
     expect(plan.totalAgents).toBe(90);
-    expect(plan.items).toHaveLength(9);
-    expect(plan.items.filter((item) => item.region === "eu")).toHaveLength(3);
+    expect(plan.items).toHaveLength(10);
+    expect(plan.items.filter((item) => item.region === "eu")).toHaveLength(4);
     expect(plan.items.filter((item) => item.region === "us")).toHaveLength(3);
     expect(plan.items.filter((item) => item.region === "international")).toHaveLength(3);
     expect(plan.items.every((item) => item.agentCount > 0)).toBe(true);
+
+    const fastLane = plan.items.find((item) => item.id === "official-fast");
+    expect(fastLane?.scanProfile).toBe("official_fast_scan");
+    expect(fastLane?.cadence).toBe("hourly");
   });
 
   it("queues selected regional/cadence sweeps with agent coverage metadata", async () => {

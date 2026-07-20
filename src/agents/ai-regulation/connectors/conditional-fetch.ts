@@ -72,6 +72,13 @@ function buildBaseHeaders(extraHeaders?: HeadersInit) {
   };
 }
 
+/**
+ * Hard per-request timeout. Without it, a hanging source freezes the whole
+ * scan queue (single-flight) while the job heartbeat keeps it looking
+ * healthy — the worst failure mode for a near-real-time monitor.
+ */
+export const CONNECTOR_FETCH_TIMEOUT_MS = 25_000;
+
 export async function fetchTextWithConditionalCaching(
   source: RegulationSource,
   extraHeaders?: HeadersInit,
@@ -88,6 +95,7 @@ export async function fetchTextWithConditionalCaching(
   const response = await fetch(source.sourceUrl, {
     headers,
     next: { revalidate: 0 },
+    signal: AbortSignal.timeout(CONNECTOR_FETCH_TIMEOUT_MS),
   });
 
   const reusedConditionalHeaders = Boolean(

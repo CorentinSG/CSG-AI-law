@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { ApiConnector } from "@/agents/ai-regulation/connectors/api-connector";
+import { ApiConnector, resetPisteTokenCacheForTests } from "@/agents/ai-regulation/connectors/api-connector";
 import type { RegulationSource } from "@/agents/ai-regulation/types";
 import { resetEnvForTests } from "@/lib/env";
 
@@ -28,6 +28,7 @@ function makeSource(overrides: Partial<RegulationSource>): RegulationSource {
 
 afterEach(() => {
   vi.restoreAllMocks();
+  resetPisteTokenCacheForTests();
   delete process.env.NEWSAPI_API_KEY;
   delete process.env.JUDILIBRE_API_KEYID;
   delete process.env.COURTLISTENER_API_KEY;
@@ -275,6 +276,50 @@ describe("ApiConnector", () => {
     expect(headers.get("Authorization")).toBe("Bearer test-token");
     expect(result.items).toHaveLength(1);
     expect(result.items[0]?.metadata?.provider).toBe("judilibre");
+  });
+
+  it("counts network-level connector failures as scan errors so alerting can see them", async () => {
+    process.env.NEWSAPI_API_KEY = "test-key";
+    resetEnvForTests();
+    vi.spyOn(globalThis, "fetch").mockRejectedValue(
+      new TypeError("fetch failed: getaddrinfo ENOTFOUND newsapi.org"),
+    );
+
+    const connector = new ApiConnector();
+    const result = await connector.scan(
+      makeSource({
+        id: "src-fr-newsapi-ai",
+        name: "France AI legal news discovery (NewsAPI)",
+        sourceUrl: "https://newsapi.org/v2/everything?q=ai",
+        config: { apiProvider: "newsapi" },
+      }),
+    );
+
+    expect(result.items).toHaveLength(0);
+    expect(result.errors).toHaveLength(1);
+    expect(result.errors[0]).toContain("NewsAPI discovery could not be queried safely");
+    expect(result.warnings).toHaveLength(0);
+  });
+
+  it("counts upstream 5xx responses as scan errors", async () => {
+    process.env.LEGAL_DATA_HUNTER_MCP_URL = "https://mcp.example.test";
+    resetEnvForTests();
+    vi.spyOn(globalThis, "fetch").mockResolvedValue(
+      new Response("upstream exploded", { status: 503 }) as Response,
+    );
+
+    const connector = new ApiConnector();
+    const result = await connector.scan(
+      makeSource({
+        id: "src-ldh-ai",
+        name: "Legal Data Hunter",
+        sourceUrl: "https://mcp.example.test/search",
+        config: { apiProvider: "legal_data_hunter" },
+      }),
+    );
+
+    expect(result.errors).toHaveLength(1);
+    expect(result.warnings).toHaveLength(0);
   });
 
   it("returns a non-fatal warning when Judilibre rejects the request", async () => {

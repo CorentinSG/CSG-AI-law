@@ -37,6 +37,16 @@ export interface CentralSchedulerSkippedJob {
 
 const EU_SCAN_ITEMS = [
   {
+    // Hourly fast lane over the priority official feeds (CNIL, CURIA, EDPB,
+    // Commission, EUR-Lex, Federal Register): this is what turns a 24h
+    // publication latency into <1h for real legal events. Runs via the worker
+    // self-scheduler's hourly cadence.
+    id: "official-fast",
+    label: "Priority official feeds fast sweep (EU + US)",
+    scanProfile: "official_fast_scan",
+    cadence: "hourly",
+  },
+  {
     id: "eu-official",
     label: "EU official legal database sweep",
     scanProfile: "eu_official_legal_scan",

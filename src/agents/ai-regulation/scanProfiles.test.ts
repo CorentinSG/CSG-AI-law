@@ -96,6 +96,22 @@ describe("scan profiles", () => {
     ).toEqual(["official"]);
   });
 
+  it("limits the fast official sweep to the priority feed allowlist", () => {
+    const sources = [
+      createSource({ id: "src-cnil-ai", sourceType: "RSS" }),
+      createSource({ id: "src-curia-rss", sourceType: "RSS" }),
+      createSource({ id: "src-federal-register-ai", sourceType: "API" }),
+      createSource({ id: "src-random-official", sourceType: "regulator_page" }),
+      createSource({ id: "discovery", sourceType: "discovery_source" }),
+    ];
+
+    expect(
+      selectSourcesForScanProfile(sources, "official_fast_scan").map(
+        (source) => source.id,
+      ),
+    ).toEqual(["src-cnil-ai", "src-curia-rss", "src-federal-register-ai"]);
+  });
+
   it("documents hourly fallback when five-minute scheduling is unavailable", () => {
     const recommendation = getSchedulerRecommendation("daily_only");
 

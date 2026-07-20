@@ -191,6 +191,32 @@ function shouldAutoPublishLegalDatabaseItem(input: {
   return !input.discoveryOnlySource;
 }
 
+// Wall-clock budget for one source scan (fetch + parse). Connectors carry
+// their own 25s request timeouts; this is the outer safety net so a source
+// can never stall the single-flight queue indefinitely.
+const SOURCE_SCAN_TIMEOUT_MS = 90_000;
+
+async function withSourceScanTimeout<T>(
+  scanPromise: Promise<T>,
+  source: { id: string; name: string },
+): Promise<T> {
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  const timeout = new Promise<never>((_, reject) => {
+    timer = setTimeout(() => {
+      reject(
+        new Error(
+          `Source scan timed out after ${SOURCE_SCAN_TIMEOUT_MS / 1000}s for ${source.name} (${source.id})`,
+        ),
+      );
+    }, SOURCE_SCAN_TIMEOUT_MS);
+  });
+  try {
+    return await Promise.race([scanPromise, timeout]);
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
 // --- Types shared across pipeline stages ---
 interface ProcessableCandidate {
   source: Awaited<ReturnType<typeof sourceManager.getActiveSourcesForProfile>>[number];
@@ -274,7 +300,14 @@ async function scanSourcesForCandidates(
     }
 
     try {
-      const scanResult = await sourceScanner.scanSource(source);
+      // Hard wall-clock budget per source: the queue is single-flight, so one
+      // hanging source (connector without its own timeout, slow proxy) must
+      // never stall every other country's scans while the job heartbeat keeps
+      // reporting it healthy.
+      const scanResult = await withSourceScanTimeout(
+        sourceScanner.scanSource(source),
+        source,
+      );
       const candidates = itemExtractor.extract(scanResult.items, source);
       state.itemsFound = scanResult.itemsFetched ?? candidates.length;
       state.responseStatus = scanResult.responseStatus;
