@@ -134,7 +134,8 @@ export const researchEntries: ResearchEntry[] = [
     references: [
       {
         label:
-          "The New Pro Se: Generative AI and the Surge in Federal Civil Self-Representation",
+          "Or Cohen-Sasson, The New Pro Se: Generative AI and the Surge in Federal Civil Self-Representation (arXiv, 2026)",
+        href: "https://arxiv.org/abs/2605.29493",
         note: "Study analyzing ~2.8 million federal civil filings (2008–2025).",
       },
     ],
