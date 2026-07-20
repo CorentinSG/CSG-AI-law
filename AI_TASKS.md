@@ -89,6 +89,13 @@ YYYY-MM-DD · <Agent> · <TASK-ID> · <STATUS>
 
 ## Current status
 
+### 2026-07-19 - Codex, New York aggressive legal-news radar
+- Intent: Expand New York AI-law monitoring with aggressive legal press, local policy, law-firm commentary, business/finance, tech/platform, and GDELT discovery lanes while preserving official-only authority rules.
+- Changed: Added six New York media/API lanes across state agent registry, seed sources, and public news-source metadata.
+- Guardrails: All media/API/commentary lanes remain discovery-only and metadata-only; New York court, agency, legislature, CourtListener, or manual-review confirmation is required before verified legal authority use.
+- Verification: targeted New York/seed/news tests PASS (3 files, 27 tests); `npm test` FAIL due to known unrelated `src/content/research.test.ts` featured-entry assertion (expected `white-collar-revolution-law-firms-ai`, received `generative-ai-access-to-justice-pro-se`); `npm run lint` PASS; `npm run typecheck` PASS; build PASS with local non-default admin credentials plus `APP_DATA_MODE=memory`, `ALLOW_MEMORY_MODE_IN_PRODUCTION=true`, and `ADMIN_AUTH_SECRET` set.
+- Next: Configure/verify `NEWSAPI_API_KEY` in the production worker runtime, monitor GDELT rate limits, and do not describe the New York radar as guaranteed real-time unless the deployed scheduler actually runs the five-minute lane.
+
 ### 2026-07-19 - Codex, EU aggressive legal-news radar
 - Intent: Expand supranational EU AI-law monitoring with aggressive journalistic and Brussels policy discovery lanes while preserving official-only authority rules.
 - Changed: Added Brussels-policy, privacy/AI-governance, tech-regulation, legal/competition, general international press, and broad GDELT EU media lanes across agent registry, seed sources, and public news-source metadata.
