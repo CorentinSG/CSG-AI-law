@@ -509,6 +509,47 @@ describe("AI Law News", () => {
     ).toBe(true);
   });
 
+  it("includes aggressive New York legal-news source configs as non-authority metadata lanes", () => {
+    const aggressiveNewYorkIds = [
+      "news-new-york-legal-press-newsapi",
+      "news-new-york-law-firm-commentary-newsapi",
+      "news-new-york-local-policy-newsapi",
+      "news-new-york-business-finance-newsapi",
+      "news-new-york-tech-platform-newsapi",
+      "news-new-york-aggressive-gdelt",
+    ];
+
+    const sources = aiLawNewsSourceConfigs.filter((source) =>
+      aggressiveNewYorkIds.includes(source.id),
+    );
+
+    expect(sources.map((source) => source.id).sort()).toEqual([...aggressiveNewYorkIds].sort());
+    expect(sources.every((source) => !source.official)).toBe(true);
+    expect(sources.every((source) => source.region === "North America")).toBe(true);
+    expect(sources.every((source) => source.scanFrequency === "hourly")).toBe(true);
+    expect(sources.every((source) => source.active)).toBe(true);
+    expect(sources.every((source) => source.manualOnly === false)).toBe(true);
+    expect(sources.every((source) => source.parserStatus === "ready")).toBe(true);
+    expect(
+      sources.filter((source) => source.id !== "news-new-york-aggressive-gdelt").every(
+        (source) =>
+          source.sourceType === "legal_regulatory_press" &&
+          source.reliabilityLevel === "reputable_secondary" &&
+          source.paywallStatus === "mixed",
+      ),
+    ).toBe(true);
+    expect(sources.find((source) => source.id === "news-new-york-aggressive-gdelt")).toMatchObject({
+      sourceType: "informal_discovery_source",
+      reliabilityLevel: "informal_discovery",
+      paywallStatus: "public",
+    });
+    expect(
+      sources.every((source) =>
+        source.notes.toLowerCase().includes("never legal authority"),
+      ),
+    ).toBe(true);
+  });
+
   it("filters news items by source type and topic", () => {
     const item = buildNewsItemFromUpdate({
       update: update(),
