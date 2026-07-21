@@ -69,6 +69,7 @@ Each agent edits only its own rows. Status vocabulary: `CLAIMED` · `WIP` · `BL
 | T-BUILD-FIX | Claude Code | DONE-LOCAL | `ops/t-ops9-ux` @ `bf0d746` | `src/app/page.tsx`, `src/components/site/update-card.tsx` | `UpdateCard`, community "UI Components and Visual Elements" | 2026-06-21 |
 | T-E2E (P6) | Claude Code | DONE-LOCAL | `ops/t-ops9-ux` @ `aa0346c` | `playwright.config.ts`, `e2e/**`, `vitest.config.ts`, `package.json`, `.gitignore` | n/a (test harness) | 2026-06-21 |
 | COWORK-A-F | Cowork (Claude) | DONE-LOCAL | working tree (uncommitted) | none | community "Scan Pipeline", "DB Repository Layer", "Intelligence Hub UI" | 2026-06-20 |
+| T-ADMIN-COMMAND-CENTER | Claude Code | DONE-LOCAL | `main` @ working tree | `src/app/admin/page.tsx`, `src/app/admin/_components/**` | `AdminDashboardPage`, `MonthlyBars`, `DonutChart`, `PendingButton`, community "News and Regulation Admin" | 2026-07-20 |
 | T-COUNTRY-CONSOLE-FRANCE-V2 | Claude Code | MERGED | `main` @ `d9a496f` | `src/app/[lang]/ai-regulation/europe/[country]/page.tsx`, `src/components/site/country-console.tsx` | `EuropeCountryPage`, `CountryConsoleHero`, `CountryLedger`, `CorpusExplorer`, community "Intelligence Hub UI" | 2026-07-18 |
 | T-LEGALDB-EXPLORER-UX | Claude Code | MERGED | `main` @ `fefe433` | `src/components/site/legal-database-explorer.tsx`, `src/app/[lang]/ai-regulation/page.tsx` | `LegalDatabaseExplorer`, `deriveUpdateAuthorityType()`, community "Intelligence Hub UI" | 2026-07-18 |
 | T-AUDIT-WAVE0(+0B) | Claude Code | MERGED | `main` @ f80af22 local (push pending) | tooling configs, `scrapling_worker/**`, connectors, `pipeline.ts`, `scanProfiles.ts`, scheduler, health/cron routes, `live-intelligence.ts`, `news.ts`, feed/metadata/layout, `ci.yml` | `isLivePanelEligible()`, `buildApiScanIssueResult()`, `official_fast_scan`, `withSourceScanTimeout()`, `pageAlternates()`, communities "Scan Pipeline", "Source Runtime Health", "Live Legal Intelligence Data" | 2026-07-20 |
@@ -90,6 +91,14 @@ YYYY-MM-DD · <Agent> · <TASK-ID> · <STATUS>
 ```
 
 ## Current status
+
+2026-07-20 · Claude Code · T-ADMIN-COMMAND-CENTER · DONE-LOCAL
+- Intent: Rebuild /admin as a button-driven control center per user request: one-click server-action buttons (global scan, drain next job, recover stale jobs) each with plain-language "when to use" copy, a numbered "How the site runs" 3-step guide, a "Needs your attention" panel with per-item what-to-do hints and CTAs, and hand-rolled SVG charts (monthly publications, source-health donut, review-pipeline bars, region bars, scan strip). Agents/connectors sections condensed into collapsible rows.
+- Files: `src/app/admin/page.tsx` (rewritten), `src/app/admin/_components/admin-charts.tsx` (new), `src/app/admin/_components/action-button.tsx` (new)
+- Graph anchors: `AdminDashboardPage`, `triggerSourceScan()`, `drainNextQueuedJob()`, `recoverStaleJobs()`, community "News and Regulation Admin" (new chart nodes pending graph rebuild)
+- Verification: `npm test` PASS (695/695) · lint PASS (changed files) · typecheck PASS · `npm run build` PASS (VERCEL_ENV=preview; plain build fails on the pre-existing default-admin-credentials guard, unrelated) · SSR verified via authenticated curl on the running dev server (all sections render, HTTP 200). Browser screenshot blocked (admin session cookie injection denied by permission classifier).
+- Branch/commit: `main` @ committed (follow-up to ec15128 which landed the dashboard base + `_components`)
+- Next: user validated /admin visually; done. Optional follow-ups: French admin copy, same treatment for admin sub-pages.
 
 2026-07-20 · Claude Code · T-AUDIT-WAVE0B · MERGED
 - Intent: Continue the master plan: repair the prod-blocking DB CHECK drift (code side of W1.1), generalize the Country Console to all 9 monitored countries (W3.7 core), and fix the sharpest i18n defects (W4.9 + part of W4.2).

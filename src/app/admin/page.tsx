@@ -153,36 +153,42 @@ export default async function AdminDashboardPage() {
     {
       count: updatesNeedsReview,
       label: "database entries awaiting review",
+      hint: "Tick the items, then approve or reject them all at once.",
       href: "/admin/ai-regulation/review",
       cta: "Open batch review",
     },
     {
       count: sourcesNeedingAttention,
       label: "sources degraded or stale",
+      hint: "Open the source, check its last error, rescan or deactivate it.",
       href: "/admin/ai-regulation/sources",
       cta: "Open sources",
     },
     {
       count: countriesNeedsReview + countriesStaleOrFlagged,
       label: "country profiles to re-verify",
+      hint: "Re-read the flagged profile and mark it verified.",
       href: "/admin/ai-regulation/countries",
       cta: "Open countries",
     },
     {
       count: leadsUnresolved,
       label: "discovery leads to resolve",
+      hint: "Confirm an official source for each lead, or reject it.",
       href: "/admin/ai-regulation/data-quality",
       cta: "Open data governance",
     },
     {
       count: scansFailed,
       label: `failed scans in the last ${scanLogs.length}`,
+      hint: "Check the error, then rerun the scan with the button above.",
       href: "/admin/operations",
       cta: "Open operations",
     },
     {
       count: connectorsNeedSetup,
       label: "connectors needing setup",
+      hint: "Each one lists the exact key or account it still needs.",
       href: "#connectors",
       cta: "See connectors",
     },
@@ -298,33 +304,116 @@ export default async function AdminDashboardPage() {
         </nav>
       </section>
 
+      {/* ── How the site runs (3-step guide) ───────────────────────── */}
+      <section className="space-y-4">
+        <h2 className={SECTION_TITLE}>How the site runs — your 3-step workflow</h2>
+        <div className="grid gap-4 md:grid-cols-3">
+          <Card className="border-white/10 bg-white/5">
+            <CardContent className="flex h-full flex-col gap-3 p-5">
+              <p className="font-mono text-2xl text-emerald-300">1</p>
+              <p className="text-sm font-medium text-zinc-100">The agents collect</p>
+              <p className="text-sm leading-6 text-zinc-400">
+                Monitoring agents scan official sources automatically, every day.
+                You never have to do this by hand — but you can force a fresh
+                pass anytime with the scan button below.
+              </p>
+              <Link
+                href="/admin/operations"
+                className="mt-auto inline-flex w-fit rounded-full border border-white/10 bg-white/5 px-4 py-1.5 text-sm text-zinc-100 transition hover:bg-white/15"
+              >
+                Check the machines →
+              </Link>
+            </CardContent>
+          </Card>
+          <Card className="border-white/10 bg-white/5">
+            <CardContent className="flex h-full flex-col gap-3 p-5">
+              <p className="font-mono text-2xl text-emerald-300">2</p>
+              <p className="text-sm font-medium text-zinc-100">You review</p>
+              <p className="text-sm leading-6 text-zinc-400">
+                Items from official sources publish themselves. Anything
+                uncertain waits for you: open the review queue, tick the items,
+                approve or reject them in bulk — a few clicks, done.
+              </p>
+              <Link
+                href="/admin/ai-regulation/review"
+                className="mt-auto inline-flex w-fit rounded-full border border-white/10 bg-white/5 px-4 py-1.5 text-sm text-zinc-100 transition hover:bg-white/15"
+              >
+                {updatesNeedsReview > 0
+                  ? `Review ${updatesNeedsReview} waiting item${updatesNeedsReview > 1 ? "s" : ""} →`
+                  : "Open the review queue →"}
+              </Link>
+            </CardContent>
+          </Card>
+          <Card className="border-white/10 bg-white/5">
+            <CardContent className="flex h-full flex-col gap-3 p-5">
+              <p className="font-mono text-2xl text-emerald-300">3</p>
+              <p className="text-sm font-medium text-zinc-100">The site updates itself</p>
+              <p className="text-sm leading-6 text-zinc-400">
+                Everything you approve appears on the public site immediately —
+                news, legal database, country pages. Nothing else to do.
+              </p>
+              <Link
+                href="/ai-regulation"
+                className="mt-auto inline-flex w-fit rounded-full border border-white/10 bg-white/5 px-4 py-1.5 text-sm text-zinc-100 transition hover:bg-white/15"
+              >
+                See the public site →
+              </Link>
+            </CardContent>
+          </Card>
+        </div>
+      </section>
+
       {/* ── One-click actions ──────────────────────────────────────── */}
       <section className="space-y-4">
         <h2 className={SECTION_TITLE}>One-click actions</h2>
-        <Card className="border-white/10 bg-white/5">
-          <CardContent className="flex flex-wrap items-center gap-3 p-5">
-            <form action={triggerSourceScan}>
-              <PendingButton pendingLabel="Scanning…" className="bg-emerald-400/15 hover:bg-emerald-400/25">
-                ▶ Run a monitoring scan
-              </PendingButton>
-            </form>
-            <form action={drainNextQueuedJob}>
-              <PendingButton pendingLabel="Processing…">
-                Process next queued job
-              </PendingButton>
-            </form>
-            <form action={recoverStaleJobs}>
-              <PendingButton pendingLabel="Recovering…">
-                Unblock stuck jobs
-              </PendingButton>
-            </form>
-            <p className="basis-full text-sm text-zinc-500">
-              Scan queues fresh work across the monitoring sources and drains it
-              immediately. The other two buttons keep the job queue moving if
-              something stalls.
-            </p>
-          </CardContent>
-        </Card>
+        <div className="grid gap-4 md:grid-cols-3">
+          <Card className="border-emerald-400/20 bg-emerald-400/[0.04]">
+            <CardContent className="flex h-full flex-col gap-3 p-5">
+              <form action={triggerSourceScan}>
+                <PendingButton
+                  pendingLabel="Scanning… (can take a minute)"
+                  className="bg-emerald-400/15 hover:bg-emerald-400/25"
+                >
+                  ▶ Run a monitoring scan
+                </PendingButton>
+              </form>
+              <p className="text-sm leading-6 text-zinc-400">
+                <span className="text-zinc-200">Fetches the latest legal news right now</span>{" "}
+                from all monitored sources instead of waiting for the daily
+                automatic pass. Safe to press anytime, as often as you like.
+              </p>
+            </CardContent>
+          </Card>
+          <Card className="border-white/10 bg-white/5">
+            <CardContent className="flex h-full flex-col gap-3 p-5">
+              <form action={drainNextQueuedJob}>
+                <PendingButton pendingLabel="Processing…">
+                  Process next queued job
+                </PendingButton>
+              </form>
+              <p className="text-sm leading-6 text-zinc-400">
+                <span className="text-zinc-200">Runs one waiting scan by hand.</span>{" "}
+                Use it if scans are piling up in the queue and you want to push
+                them through without waiting for the background worker.
+              </p>
+            </CardContent>
+          </Card>
+          <Card className="border-white/10 bg-white/5">
+            <CardContent className="flex h-full flex-col gap-3 p-5">
+              <form action={recoverStaleJobs}>
+                <PendingButton pendingLabel="Recovering…">
+                  Unblock stuck jobs
+                </PendingButton>
+              </form>
+              <p className="text-sm leading-6 text-zinc-400">
+                <span className="text-zinc-200">Frees scans that froze mid-run</span>{" "}
+                so they can be retried. Use it if a scan has looked
+                &ldquo;running&rdquo; for a long time with no result. Harmless
+                if nothing is stuck.
+              </p>
+            </CardContent>
+          </Card>
+        </div>
       </section>
 
       {/* ── Needs your attention ───────────────────────────────────── */}
@@ -339,10 +428,13 @@ export default async function AdminDashboardPage() {
                   className="flex flex-wrap items-center gap-3 px-3 py-3"
                 >
                   <StatusDot tone="warning" />
-                  <p className="text-sm text-zinc-200">
-                    <span className="font-mono text-base text-white">{item.count}</span>{" "}
-                    {item.label}
-                  </p>
+                  <div className="min-w-0">
+                    <p className="text-sm text-zinc-200">
+                      <span className="font-mono text-base text-white">{item.count}</span>{" "}
+                      {item.label}
+                    </p>
+                    <p className="text-xs text-zinc-500">{item.hint}</p>
+                  </div>
                   <Link
                     href={item.href}
                     className="ml-auto inline-flex rounded-full border border-white/10 bg-white/5 px-4 py-1.5 text-sm text-zinc-100 transition hover:bg-white/15"
