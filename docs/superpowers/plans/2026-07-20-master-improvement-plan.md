@@ -32,6 +32,15 @@
 | 0.18 | CI: concurrency, timeouts, weekly schedule, e2e job against production build (`playwright.config` switches to `next start` on CI), `test:coverage` script | DONE |
 | 0.19 | Admin copy + README aligned with auto-publication policy (4 stale "never auto-publish / human review mandatory" claims fixed) | DONE |
 
+## Wave 0b — shipped 2026-07-20, second pass (Claude Code)
+
+| # | Item | State |
+|---|---|---|
+| 0.20 | **Migration 031** (was W1.1): both CHECK drifts repaired + self-healing EUR-Lex re-upsert; `REQUIRED_SCHEMA_INVARIANTS` extended (both CHECKs + `source_references` table incl. Wave-1.4 target RLS policy — audit intentionally red on that table until RLS ships). **OPS: run 031 in the Supabase SQL editor.** | DONE (code) / OPS (apply) |
+| 0.21 | **Country Console generalized to all 9 countries** (was W3.7 core): `countryConsoleRegistry` (slug → {getLiveData, getSnapshot}, structural contracts), page 2,959 → 852 lines, 8 duplicated legacy blocks + public ops jargon deleted, region filter pushed into the updates query. Verified in browser: Germany/France = console, Bulgaria = generic legacy intact. Remaining W3.7 tail: design a console-grade template for the 18 no-snapshot countries. | DONE |
+| 0.22 | Live panel copy fully bilingual (COPY table; was mixing hardcoded French into EN pages) (W4.9) | DONE |
+| 0.23 | Sticky locale in breadcrumbs: research/[slug] (had broken /en/fr/… links on FR), europe/[country] (component + published-entry links) (part of W4.2) | DONE |
+
 ## Wave 0 ops actions (owner, ~15 minutes, no code)
 
 1. **Railway (scrapling worker service)**: set `SCRAPLING_WORKER_TOKEN=<random 32+ chars>`; optionally `SCRAPLING_ALLOW_INSECURE_SSL_FALLBACK=true` only if an official source genuinely needs it.

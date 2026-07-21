@@ -71,7 +71,7 @@ Each agent edits only its own rows. Status vocabulary: `CLAIMED` · `WIP` · `BL
 | COWORK-A-F | Cowork (Claude) | DONE-LOCAL | working tree (uncommitted) | none | community "Scan Pipeline", "DB Repository Layer", "Intelligence Hub UI" | 2026-06-20 |
 | T-COUNTRY-CONSOLE-FRANCE-V2 | Claude Code | MERGED | `main` @ `d9a496f` | `src/app/[lang]/ai-regulation/europe/[country]/page.tsx`, `src/components/site/country-console.tsx` | `EuropeCountryPage`, `CountryConsoleHero`, `CountryLedger`, `CorpusExplorer`, community "Intelligence Hub UI" | 2026-07-18 |
 | T-LEGALDB-EXPLORER-UX | Claude Code | MERGED | `main` @ `fefe433` | `src/components/site/legal-database-explorer.tsx`, `src/app/[lang]/ai-regulation/page.tsx` | `LegalDatabaseExplorer`, `deriveUpdateAuthorityType()`, community "Intelligence Hub UI" | 2026-07-18 |
-| T-AUDIT-WAVE0 | Claude Code | MERGED | `main` @ local (push pending) | tooling configs, `scrapling_worker/**`, connectors, `pipeline.ts`, `scanProfiles.ts`, scheduler, health/cron routes, `live-intelligence.ts`, `news.ts`, feed/metadata/layout, `ci.yml` | `isLivePanelEligible()`, `buildApiScanIssueResult()`, `official_fast_scan`, `withSourceScanTimeout()`, `pageAlternates()`, communities "Scan Pipeline", "Source Runtime Health", "Live Legal Intelligence Data" | 2026-07-20 |
+| T-AUDIT-WAVE0(+0B) | Claude Code | MERGED | `main` @ f80af22 local (push pending) | tooling configs, `scrapling_worker/**`, connectors, `pipeline.ts`, `scanProfiles.ts`, scheduler, health/cron routes, `live-intelligence.ts`, `news.ts`, feed/metadata/layout, `ci.yml` | `isLivePanelEligible()`, `buildApiScanIssueResult()`, `official_fast_scan`, `withSourceScanTimeout()`, `pageAlternates()`, communities "Scan Pipeline", "Source Runtime Health", "Live Legal Intelligence Data" | 2026-07-20 |
 | T-DB-INTEGRITY-W1 | HANDOFF→Codex | CLAIMED | n/a | `src/db/migrations/031+`, dedup module, repositories, backups, OpenAI cost accounting | see docs/superpowers/plans/2026-07-20-master-improvement-plan.md Wave 1 | 2026-07-20 |
 
 - **Graph freshness:** built from `30bc31ca` — in sync with HEAD `30bc31c`. If these diverge, run `py -m graphify update .` before trusting the graph.
@@ -90,6 +90,14 @@ YYYY-MM-DD · <Agent> · <TASK-ID> · <STATUS>
 ```
 
 ## Current status
+
+2026-07-20 · Claude Code · T-AUDIT-WAVE0B · MERGED
+- Intent: Continue the master plan: repair the prod-blocking DB CHECK drift (code side of W1.1), generalize the Country Console to all 9 monitored countries (W3.7 core), and fix the sharpest i18n defects (W4.9 + part of W4.2).
+- Files: src/db/migrations/031_repair_check_constraint_drift.sql (NEW), src/db/schema-integrity.ts(+test), src/agents/ai-regulation/countryConsoleRegistry.ts (NEW), src/app/[lang]/ai-regulation/europe/[country]/page.tsx (2,959→852 lines), src/components/site/live-legal-intelligence-panel.tsx, src/app/[lang]/research/[slug]/page.tsx, docs/superpowers/plans/2026-07-20-master-improvement-plan.md.
+- Graph anchors: `getCountryConsoleEntry()` / `countryConsoleRegistry` (new nodes), `evaluateSchemaIntegrity()`, `REQUIRED_SCHEMA_INVARIANTS`, `LiveLegalIntelligencePanel`, community "Intelligence Hub UI", community "Data Quality Assessment".
+- Verification: npm test 695/695 PASS · typecheck PASS (after clearing a corrupted generated .next/dev/types file) · lint PASS · production build PASS (CI placeholder env) · browser-verified on dev server: Germany + France render the Country Console (live ledger + authority map + FR code), Bulgaria keeps the generic legacy layout, zero console errors; screenshots not capturable (local memory saturation), DOM probes used instead.
+- Branch/commit: `main` @ f80af22 (local; push to origin still pending with the Wave 0 commits).
+- Next: (1) OWNER: apply migration 031 in Supabase SQL editor + the Wave 0 ops actions (unchanged). (2) HANDOFF→Codex: rest of Wave 1 (migration runner, 016 damage assessment, RLS on 7 tables incl. source_references to turn the audit green, unified dedup, publication gate at creation, retention/backups, OpenAI real cost) — note the two agent-behavior divergences to settle before W3.1 factory migration are documented in the plan. (3) Claude Code next: console-grade template for the 18 no-snapshot countries, hub i18n (W4.1), navigation unification (W4.7).
 
 2026-07-20 · Claude Code · T-AUDIT-WAVE0 · MERGED
 - Intent: Execute Wave 0 of the full-site audit (143 findings, 10 domains) under the owner's max-auto directive: restore the verification signal, close the scrapling SSRF hole, make the media radar reach the public with badges, add the hourly official fast lane + timeouts + worker dead-man switch, ship RSS/canonicals/JSON-LD/lang, align admin/README copy with auto-publication.
