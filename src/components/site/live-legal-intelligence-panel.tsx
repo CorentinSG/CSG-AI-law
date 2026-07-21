@@ -44,12 +44,57 @@ interface LiveLegalIntelligencePanelProps {
   lang?: Locale;
 }
 
-function getActivitySummary(activity: LiveSourceActivityItem[]) {
-  if (activity.length === 0) {
-    return {
+// All user-facing strings live here so the panel renders one consistent
+// language per locale (it previously mixed hardcoded French into EN pages).
+const COPY = {
+  en: {
+    published: "Published",
+    officialSource: "official source ↗",
+    officialPending: "official verification pending",
+    publicState: "Public state",
+    emptyNote:
+      "Only sourced, publicly safe developments appear here — an item shows once its source, date, and verification are ready.",
+    emptyNoActivity: {
       title: "No public signals yet",
       body: "Monitoring continues in the background.",
-    };
+    },
+    emptyBlocked: {
+      title: "Source access degraded",
+      body: "Tracked sources were blocked or inaccessible; nothing shown until verified.",
+    },
+    emptyDefault: {
+      title: "No newly visible developments",
+      body: "No new public legal signals ready to show right now.",
+    },
+  },
+  fr: {
+    published: "Publié",
+    officialSource: "source officielle ↗",
+    officialPending: "vérification officielle en attente",
+    publicState: "État public",
+    emptyNote:
+      "Seuls les développements sourcés et publiquement sûrs apparaissent ici — un élément s'affiche une fois source, date et vérification prêtes.",
+    emptyNoActivity: {
+      title: "Aucun signal public pour le moment",
+      body: "La surveillance continue en arrière-plan.",
+    },
+    emptyBlocked: {
+      title: "Accès aux sources dégradé",
+      body: "Les sources suivies étaient bloquées ou inaccessibles ; rien n'est affiché avant vérification.",
+    },
+    emptyDefault: {
+      title: "Aucun développement nouvellement visible",
+      body: "Aucun nouveau signal juridique public prêt à être affiché.",
+    },
+  },
+} as const;
+
+function getActivitySummary(
+  activity: LiveSourceActivityItem[],
+  copy: (typeof COPY)[Locale],
+) {
+  if (activity.length === 0) {
+    return copy.emptyNoActivity;
   }
 
   const blockedCount = activity.filter(
@@ -60,16 +105,10 @@ function getActivitySummary(activity: LiveSourceActivityItem[]) {
   ).length;
 
   if (blockedCount === activity.length) {
-    return {
-      title: "Source access degraded",
-      body: "Tracked sources were blocked or inaccessible; nothing shown until verified.",
-    };
+    return copy.emptyBlocked;
   }
 
-  return {
-    title: "No newly visible developments",
-    body: "No new public legal signals ready to show right now.",
-  };
+  return copy.emptyDefault;
 }
 
 export function LiveLegalIntelligencePanel({
@@ -82,7 +121,8 @@ export function LiveLegalIntelligencePanel({
   itemFreshnessById,
   lang = DEFAULT_LOCALE,
 }: LiveLegalIntelligencePanelProps) {
-  const emptyState = getActivitySummary(activity);
+  const copy = COPY[lang];
+  const emptyState = getActivitySummary(activity, copy);
 
   return (
     <section className="space-y-5">
@@ -136,7 +176,7 @@ export function LiveLegalIntelligencePanel({
                 <span aria-hidden className="text-white/25">·</span>
                 <span>{item.legalArea}</span>
                 <span aria-hidden className="text-white/25">·</span>
-                <span>Publié {formatDisplayDate(item.publicationDate)}</span>
+                <span>{copy.published} {formatDisplayDate(item.publicationDate)}</span>
                 <span aria-hidden className="text-white/25">·</span>
                 <span>{item.sourceName}</span>
                 {item.officialSourceUrl ? (
@@ -148,13 +188,13 @@ export function LiveLegalIntelligencePanel({
                       rel="noreferrer"
                       className="text-[color:var(--color-accent-strong,#c4882a)] transition-colors hover:text-white/80"
                     >
-                      source officielle ↗
+                      {copy.officialSource}
                     </a>
                   </>
                 ) : (
                   <>
                     <span aria-hidden className="text-white/25">·</span>
-                    <span className="text-amber-300/80">vérification officielle en attente</span>
+                    <span className="text-amber-300/80">{copy.officialPending}</span>
                   </>
                 )}
               </div>
@@ -164,15 +204,14 @@ export function LiveLegalIntelligencePanel({
       ) : (
         <div className="border-y border-white/8 py-8">
           <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-white/45">
-            État public
+            {copy.publicState}
           </p>
           <p className="mt-2 font-display text-xl font-medium tracking-[-0.03em] text-white/90">
             {emptyState.title}
           </p>
           <p className="mt-2 max-w-2xl text-sm leading-7 text-white/60">{emptyState.body}</p>
           <p className="mt-3 max-w-2xl text-[13px] leading-6 text-white/45">
-            Seuls les développements sourcés et publiquement sûrs apparaissent ici — un
-            élément s&apos;affiche une fois source, date et vérification prêtes.
+            {copy.emptyNote}
           </p>
         </div>
       )}

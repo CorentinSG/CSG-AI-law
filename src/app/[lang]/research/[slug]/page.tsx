@@ -89,14 +89,15 @@ export default async function ResearchArticlePage({
       />
       <MotionReveal className="space-y-6">
         <BreadcrumbNav
+          lang={lang}
           items={[
-            { label: t.home, href: `/${lang}` },
-            { label: t.notesCommentary, href: `/${lang}/research` },
+            { label: t.home, href: "/" },
+            { label: t.notesCommentary, href: "/research" },
             {
               label:
                 entry.title.slice(0, 30) +
                 (entry.title.length > 30 ? "…" : ""),
-              href: `/${lang}/research/${entry.slug}`,
+              href: `/research/${entry.slug}`,
             },
           ]}
         />

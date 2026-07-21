@@ -25,7 +25,7 @@ import { SiteShell } from "@/components/site/shell";
 import { UpdateCard } from "@/components/site/update-card";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { pageAlternates } from "@/lib/i18n/metadata";
-import { DEFAULT_LOCALE } from "@/lib/i18n/config";
+import { DEFAULT_LOCALE, isLocale } from "@/lib/i18n/config";
 import { localeHref } from "@/lib/i18n/href";
 import { formatDisplayDate } from "@/lib/utils";
 
@@ -127,9 +127,10 @@ function SourceList({
 export default async function EuropeCountryPage({
   params,
 }: {
-  params: Promise<{ country: string }>;
+  params: Promise<{ lang: string; country: string }>;
 }) {
-  const { country } = await params;
+  const { lang: langParam, country } = await params;
+  const lang = isLocale(langParam) ? langParam : DEFAULT_LOCALE;
   const profile = getEuropeCountryProfileBySlug(country);
   if (!profile) notFound();
 
@@ -242,6 +243,7 @@ export default async function EuropeCountryPage({
         <section id="overview" className="scroll-mt-28 space-y-8">
           <MotionReveal>
             <BreadcrumbNav
+              lang={lang}
               items={[
                 { label: "AI Law Hub", href: "/ai-regulation" },
                 { label: "Europe", href: "/ai-regulation/europe" },
@@ -447,7 +449,7 @@ export default async function EuropeCountryPage({
                 title: update.title,
                 note: update.oneSentenceSummary,
                 meta: `${formatDisplayDate(update.publicationDate)} · ${update.legalArea.replaceAll("_", " ")}`,
-                href: localeHref(DEFAULT_LOCALE, `/ai-regulation/${update.id}`),
+                href: localeHref(lang, `/ai-regulation/${update.id}`),
               }))}
             />
           ) : (
@@ -471,6 +473,7 @@ export default async function EuropeCountryPage({
       <section id="overview" className="scroll-mt-28 space-y-5">
         <MotionReveal>
         <BreadcrumbNav
+              lang={lang}
           items={[
             { label: "AI Law Hub", href: "/ai-regulation" },
             { label: "Europe", href: "/ai-regulation/europe" },
