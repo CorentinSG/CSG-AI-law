@@ -1982,8 +1982,15 @@ Supabase:
 NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your-supabase-anon-key
 SUPABASE_SERVICE_ROLE_KEY=your-supabase-service-role-key
-DATABASE_URL=postgresql://postgres:postgres@127.0.0.1:5432/postgres
+SUPABASE_DISPOSABLE_SCHEMA_AUDIT_DATABASE_URL=postgresql://csg_schema_auditor.abcdefghijklmnopqrst:readonly-audit-password@aws-0-us-east-1.pooler.supabase.com:5432/postgres?sslmode=require&options=-c%20default_transaction_read_only%3Don
+SUPABASE_PRODUCTION_SCHEMA_AUDIT_DATABASE_URL=postgresql://csg_schema_auditor.abcdefghijklmnopqrst:readonly-audit-password@aws-0-us-east-1.pooler.supabase.com:5432/postgres?sslmode=require&options=-c%20default_transaction_read_only%3Don
 ```
+
+The schema-audit URLs are operator-only Supavisor session-pooler credentials.
+They must use port `5432` and the custom role username
+`csg_schema_auditor.<20-character-project-ref>`. Map only the intended audit
+target to `DATABASE_URL` immediately before `npm run audit:database-schema`;
+never use an audit URL for Supabase CLI deployment.
 
 OpenAI:
 
@@ -2007,6 +2014,7 @@ Validation behavior:
 
 - `ADMIN_AUTH_SECRET` is required
 - `APP_DATA_MODE=supabase` requires the Supabase URL, anon key, and service role key
+- `DATABASE_URL`, when set for a schema audit, accepts only the read-only Supavisor session-pooler route described above
 - `AI_PROCESSING_ENABLED=true` is also accepted as a backward-compatible alias
 - AI processing remains disabled by default even when ranking and cost planning are active
 - if `AI_ENABLE_PROCESSING=true` but `OPENAI_API_KEY` is missing, the planner skips live AI safely and records the reason in `ai_processing_logs`

@@ -50,8 +50,6 @@ jobs:
   database-schema-audit:
     if: github.event_name == 'schedule'
     runs-on: ubuntu-latest
-    env:
-      DATABASE_URL: ${{ secrets.SUPABASE_PRODUCTION_SCHEMA_AUDIT_DATABASE_URL }}
     steps:
       - uses: actions/checkout@v4
         with: { fetch-depth: 0 }
@@ -59,6 +57,8 @@ jobs:
         with: { node-version: 20, cache: npm }
       - run: npm ci
       - run: npm run audit:database-schema
+        env:
+          DATABASE_URL: ${{ secrets.SUPABASE_PRODUCTION_SCHEMA_AUDIT_DATABASE_URL }}
 
   verify:
     runs-on: ubuntu-latest

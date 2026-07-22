@@ -79,6 +79,7 @@
     "scan:verification": "tsx scripts/run-verification-scan.ts",
     "verify:ingestion-runtime": "tsx scripts/verify-ingestion-runtime.ts",
     "audit:database-schema": "tsx scripts/audit-database-schema.ts",
+    "psql:readonly": "tsx scripts/run-readonly-psql.ts",
     "db:pull": "supabase db pull --linked --schema public",
     "db:push:dry-run": "supabase db push --linked --dry-run",
     "db:push": "supabase db push --linked",
