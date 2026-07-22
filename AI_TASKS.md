@@ -74,6 +74,7 @@ Each agent edits only its own rows. Status vocabulary: `CLAIMED` · `WIP` · `BL
 | T-LEGALDB-EXPLORER-UX | Claude Code | MERGED | `main` @ `fefe433` | `src/components/site/legal-database-explorer.tsx`, `src/app/[lang]/ai-regulation/page.tsx` | `LegalDatabaseExplorer`, `deriveUpdateAuthorityType()`, community "Intelligence Hub UI" | 2026-07-18 |
 | T-AUDIT-WAVE0(+0B) | Claude Code | MERGED | `main` @ f80af22 local (push pending) | tooling configs, `scrapling_worker/**`, connectors, `pipeline.ts`, `scanProfiles.ts`, scheduler, health/cron routes, `live-intelligence.ts`, `news.ts`, feed/metadata/layout, `ci.yml` | `isLivePanelEligible()`, `buildApiScanIssueResult()`, `official_fast_scan`, `withSourceScanTimeout()`, `pageAlternates()`, communities "Scan Pipeline", "Source Runtime Health", "Live Legal Intelligence Data" | 2026-07-20 |
 | T-DB-INTEGRITY-W1 | HANDOFF→Codex | CLAIMED | n/a | `src/db/migrations/031+`, dedup module, repositories, backups, OpenAI cost accounting | see docs/superpowers/plans/2026-07-20-master-improvement-plan.md Wave 1 | 2026-07-20 |
+| T-DB-INTEGRITY-W1A | Codex | BLOCKED | `codex/wave1-db-integrity-tranche-a` @ `9cc1967` | local Task1/2 files and future `supabase/migrations` 032/033 scope | `parseDatabaseUrl()`, `evaluateSchemaIntegrity()`, `REQUIRED_SCHEMA_INVARIANTS` | 2026-07-21 |
 
 - **Graph freshness:** built from `30bc31ca` — in sync with HEAD `30bc31c`. If these diverge, run `py -m graphify update .` before trusting the graph.
 - Move a task to `MERGED` only once it is in `main`; delete its row one entry after it merges (the log keeps the history).
@@ -91,6 +92,14 @@ YYYY-MM-DD · <Agent> · <TASK-ID> · <STATUS>
 ```
 
 ## Current status
+
+2026-07-21 · Codex · T-DB-INTEGRITY-W1A · BLOCKED
+- Intent: local Tranche A Task 1/2 work is complete and final-reviewed; operator-only 031, pre-016 backup, production read-only audit, and Gate B link/db pull remain unavailable to Codex.
+- Files: `scripts/{audit-016-dedup-integrity.sql,audit-016-dedup-integrity.test.ts,run-readonly-psql.ts,run-readonly-psql.test.ts,check-migration-immutability.mjs,check-migration-immutability.test.ts,audit-database-schema.ts}`, `src/lib/{env.ts,env.test.ts}`, `supabase/config.toml`, `.env.example`, `.github/workflows/ci.yml`, `package{,-lock}.json`; no frontend or historical migration edits.
+- Graph anchors: `parseDatabaseUrl()`, `evaluateSchemaIntegrity()`, `REQUIRED_SCHEMA_INVARIANTS`.
+- Verification: `npm test` PASS 131 files/745 tests; lint PASS; typecheck PASS; build PASS; `check:migrations` PASS; final branch review APPROVED. Expected credential-blocked audit; no production run.
+- Branch/commit: `codex/wave1-db-integrity-tranche-a` @ `9cc1967`.
+- Next: operator manually applies/verifies 031, provides/executes pre-016 backup and production read-only audits, then Supabase link/db pull baseline; Codex resumes CLI 032, 033, RLS, and Task 4.
 
 2026-07-20 · Claude Code · T-ADMIN-COMMAND-CENTER · DONE-LOCAL
 - Intent: Rebuild /admin as a button-driven control center per user request: one-click server-action buttons (global scan, drain next job, recover stale jobs) each with plain-language "when to use" copy, a numbered "How the site runs" 3-step guide, a "Needs your attention" panel with per-item what-to-do hints and CTAs, and hand-rolled SVG charts (monthly publications, source-health donut, review-pipeline bars, region bars, scan strip). Agents/connectors sections condensed into collapsible rows.

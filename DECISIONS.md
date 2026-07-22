@@ -6,6 +6,11 @@ Record only major project decisions that future agents must know.
 
 ## Decisions
 
+- 2026-07-21 - `src/db/migrations/001...031` is an immutable archive; the operator manually applies and verifies 031 first.
+  The operator-linked `supabase db pull` creates the real applied baseline; future deploy lineage is only `supabase/migrations`, dry-run before push, 032 before 033.
+  `DATABASE_URL` is auditor-only: routable read-only session-pooler `csg_schema_auditor.<project-ref>` on port 5432.
+  Actual 016 outcome: no restorable pre-016 backup or production read-only credentials were available to Codex on 2026-07-21, so exact destroyed counts remain unknown; do not fabricate counts.
+
 - 2026-07-20 — Max-auto publication confirmed by owner: publish as much as possible automatically; manual review is the exception, not the rule. Reputable-media items (Reuters/Politico/Le Monde tier via `getMediaDomainScore`) keep their classified importance/confidence and surface in the public live panels with the explicit "official source pending" badge (`isLivePanelEligible` in `live-intelligence.ts` is THE single live-panel gate — never re-add inline filters). Fail-closed applies only to genuine error states: unresolvable source records map to `informal_discovery` (never official), GDELT/informal lanes stay non-public. Do not propose restoring mandatory human review.
 
 - 2026-07-20 — Connector runtime failures (network/DNS/timeout/HTTP 5xx) are scan **errors** (`buildApiScanIssueResult`), so backoff, circuit breaker, and alerting can see a dead official API; missing credentials and 4xx query rejections stay non-fatal warnings. PISTE sandbox fallback is opt-in via `PISTE_ALLOW_SANDBOX_FALLBACK=true` — DILA sandbox data must never silently enter an auto-publishing pipeline.
