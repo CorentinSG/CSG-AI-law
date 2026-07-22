@@ -92,6 +92,14 @@ YYYY-MM-DD · <Agent> · <TASK-ID> · <STATUS>
 
 ## Current status
 
+2026-07-20 · Claude Code · T-UX-DECLUTTER · MERGED
+- Intent: Owner directive « épure le site » — strip meta-prose and ops jargon from public pages, collapse long notes behind disclosures, hide machine boilerplate rendered as legal substance, tighten the admin hub.
+- Files: src/app/[lang]/ai-regulation/europe/[country]/page.tsx (legacy template shared by 18 countries), united-states/[state]/page.tsx, [id]/page.tsx, ai-regulation/page.tsx (empty states), src/app/admin/ai-regulation/page.tsx, src/content/ai-regulation/editorial-boilerplate.ts (NEW + test).
+- Graph anchors: stripCurationBoilerplate() (new node), SourceList, community "Intelligence Hub UI". NOTE for Codex: stripCurationBoilerplate patterns must stay in sync with the generators (utils/deadlines.ts fallbacks, buildDiscoveryLeadCopy, backfill keyObligations) — the long-term fix is Wave 1 item 1.15 / audit finding dataquality#6 (stop writing boilerplate into legal fields at the source).
+- Verification: npm test 697/697 PASS · typecheck PASS · lint PASS · production build PASS · browser check on Bulgaria (11 disclosures, zero meta-prose, zero ops jargon).
+- Branch/commit: main @ 2b3bf64 (local; push pending with the rest).
+- Next: Claude Code — same pass on europe/us hub landings + methodology if owner wants more; Codex unchanged (Wave 1).
+
 2026-07-20 · Claude Code · T-ADMIN-COMMAND-CENTER · DONE-LOCAL
 - Intent: Rebuild /admin as a button-driven control center per user request: one-click server-action buttons (global scan, drain next job, recover stale jobs) each with plain-language "when to use" copy, a numbered "How the site runs" 3-step guide, a "Needs your attention" panel with per-item what-to-do hints and CTAs, and hand-rolled SVG charts (monthly publications, source-health donut, review-pipeline bars, region bars, scan strip). Agents/connectors sections condensed into collapsible rows.
 - Files: `src/app/admin/page.tsx` (rewritten), `src/app/admin/_components/admin-charts.tsx` (new), `src/app/admin/_components/action-button.tsx` (new)
