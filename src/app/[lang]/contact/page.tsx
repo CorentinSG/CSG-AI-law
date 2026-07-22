@@ -36,41 +36,23 @@ const INQUIRY_TYPES = [
 export default function ContactPage() {
   return (
     <SiteShell className="space-y-16">
-      {/* ── Hero ── */}
-      <MotionReveal className="space-y-5">
-        <p className="font-mono text-[11px] uppercase tracking-[0.35em] text-accent-strong">
-          Contact
-        </p>
-        <h1 className="max-w-4xl font-display text-5xl font-medium tracking-[-0.05em] text-zinc-950 md:text-6xl">
-          Start a conversation
-        </h1>
-        <p className="max-w-2xl text-lg leading-8 text-zinc-600">
-          For professional inquiries at the intersection of artificial
-          intelligence, law, and legal intelligence — research, writing,
-          speaking, and collaborations.
-        </p>
-      </MotionReveal>
-
-      {/* ── Channel + portrait ── */}
+      {/* ── Hero + portrait ── */}
       <MotionReveal>
-        <section className="grid gap-6 border-t border-white/8 pt-14 lg:grid-cols-[1.2fr_0.8fr] lg:items-stretch">
-          {/* Primary channel */}
-          <div className="glass-panel flex flex-col justify-between gap-10 rounded-[2rem] p-8 md:p-10">
-            <div className="space-y-4">
-              <p className="flex items-center gap-2.5 font-mono text-[10px] uppercase tracking-[0.3em] text-zinc-500">
-                <Mail className="size-3.5 text-accent-strong" aria-hidden />
-                Direct channel
-              </p>
-              <p className="font-display text-2xl font-medium tracking-[-0.03em] text-zinc-950 md:text-3xl">
-                One inbox, read personally.
-              </p>
-              <p className="max-w-md text-sm leading-7 text-zinc-600">
-                Write in English or French. Include who you are, the context,
-                and what you have in mind — a focused paragraph beats a long
-                brief.
-              </p>
-            </div>
-            <div className="flex flex-wrap items-center gap-4">
+        <section className="grid gap-10 lg:grid-cols-[1fr_0.72fr] lg:items-center">
+          {/* Intro */}
+          <div className="space-y-5 lg:pr-6">
+            <p className="font-mono text-[11px] uppercase tracking-[0.35em] text-accent-strong">
+              Contact
+            </p>
+            <h1 className="max-w-2xl font-display text-5xl font-medium tracking-[-0.05em] text-zinc-950 md:text-6xl">
+              Start a conversation
+            </h1>
+            <p className="max-w-xl text-lg leading-8 text-zinc-600">
+              For professional inquiries at the intersection of artificial
+              intelligence, law, and legal intelligence — research, writing,
+              speaking, and collaborations.
+            </p>
+            <div className="flex flex-wrap items-center gap-4 pt-2">
               <a
                 href={`mailto:${CONTACT_EMAIL}`}
                 className="inline-flex items-center gap-2 rounded-xl bg-white px-6 py-3 text-sm font-semibold text-black transition hover:bg-white/90 active:scale-[0.98]"
@@ -84,24 +66,53 @@ export default function ContactPage() {
             </div>
           </div>
 
-          {/* Portrait */}
-          <div className="relative min-h-[24rem] overflow-hidden rounded-[2rem] border border-white/10 bg-[#0d0d0d]">
-            <Image
-              src="/images/profile/corentin-saint-girons-hero-v2.png"
-              alt="Portrait of Corentin Saint-Girons"
-              fill
-              sizes="(max-width: 1024px) 100vw, 40vw"
-              className="object-cover object-top"
-            />
-            <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 to-transparent p-6">
-              <p className="font-display text-lg font-medium tracking-[-0.02em] text-white">
-                C. Saint-Girons, Esq
-              </p>
-              <p className="mt-1 font-mono text-[10px] uppercase tracking-[0.24em] text-white/60">
-                AI Law &amp; Legal Intelligence
-              </p>
+          {/* Portrait — framed on the face, full head-and-shoulders */}
+          <div className="relative mx-auto w-full max-w-sm">
+            <div className="relative aspect-[4/5] overflow-hidden rounded-[2rem] border border-white/10 bg-[#0d0d0d] shadow-2xl shadow-black/40">
+              <Image
+                src="/images/profile/corentin-saint-girons-hero-v2.png"
+                alt="Portrait of Corentin Saint-Girons"
+                fill
+                priority
+                sizes="(max-width: 1024px) 90vw, 32vw"
+                className="object-cover object-[center_22%]"
+              />
+              <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent p-6 pt-16">
+                <p className="font-display text-lg font-medium tracking-[-0.02em] text-white">
+                  C. Saint-Girons, Esq
+                </p>
+                <p className="mt-1 font-mono text-[10px] uppercase tracking-[0.24em] text-white/60">
+                  AI Law &amp; Legal Intelligence
+                </p>
+              </div>
             </div>
           </div>
+        </section>
+      </MotionReveal>
+
+      {/* ── Direct channel ── */}
+      <MotionReveal>
+        <section className="glass-panel flex flex-col gap-8 rounded-[2rem] border-t border-white/8 p-8 md:flex-row md:items-center md:justify-between md:p-10">
+          <div className="space-y-4">
+            <p className="flex items-center gap-2.5 font-mono text-[10px] uppercase tracking-[0.3em] text-zinc-500">
+              <Mail className="size-3.5 text-accent-strong" aria-hidden />
+              Direct channel
+            </p>
+            <p className="font-display text-2xl font-medium tracking-[-0.03em] text-zinc-950 md:text-3xl">
+              One inbox, read personally.
+            </p>
+            <p className="max-w-md text-sm leading-7 text-zinc-600">
+              Write in English or French. Include who you are, the context, and
+              what you have in mind — a focused paragraph beats a long brief.
+            </p>
+          </div>
+          <a
+            href={`mailto:${CONTACT_EMAIL}`}
+            className="inline-flex shrink-0 items-center gap-2 self-start rounded-xl border border-white/15 px-6 py-3 text-sm font-semibold text-zinc-950 transition hover:bg-white/5 active:scale-[0.98] md:self-auto"
+          >
+            {CONTACT_EMAIL}
+            <ArrowUpRight className="size-4" aria-hidden />
+          </a>
         </section>
       </MotionReveal>
 
