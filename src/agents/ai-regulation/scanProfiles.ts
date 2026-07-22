@@ -124,6 +124,33 @@ export const OFFICIAL_FAST_SOURCE_IDS = new Set([
   "src-federal-register-ai",
 ]);
 
+// W2.3: minimum re-scan interval per declared scanFrequency. Only enforced on
+// the heavy official_only sweeps (health scans still check every source): a weekly Legifrance page no
+// longer burns budget in every daily sweep, and Federal Register
+// (every_6_hours) becomes due 4×/day instead of being clamped to the sweep
+// cadence. Fast/live/verification lanes deliberately over-poll (conditional
+// fetch makes it nearly free), so they ignore this. Unknown values = always due.
+const SCAN_FREQUENCY_INTERVAL_MS: Record<string, number> = {
+  every_5_minutes: 5 * 60 * 1000,
+  every_15_minutes: 15 * 60 * 1000,
+  hourly: 60 * 60 * 1000,
+  every_6_hours: 6 * 60 * 60 * 1000,
+  daily: 24 * 60 * 60 * 1000,
+  weekly: 7 * 24 * 60 * 60 * 1000,
+  monthly: 30 * 24 * 60 * 60 * 1000,
+};
+
+export function isSourceDueByFrequency(
+  source: Pick<RegulationSource, "scanFrequency" | "lastScannedAt">,
+  nowMs = Date.now(),
+) {
+  const interval = SCAN_FREQUENCY_INTERVAL_MS[source.scanFrequency ?? ""];
+  if (!interval || !source.lastScannedAt) return true;
+  const last = Date.parse(source.lastScannedAt);
+  if (Number.isNaN(last)) return true;
+  return nowMs - last >= interval;
+}
+
 export const scanProfiles: Record<ScanProfileId, ScanProfileDefinition> = {
   official_baseline_scan: {
     id: "official_baseline_scan",
@@ -589,7 +616,9 @@ export function selectSourcesForScanProfile(
   const profile = scanProfiles[profileId];
   switch (profile.sourceStrategy) {
     case "official_only":
-      return sources.filter((source) => !isDiscoveryCategory(source));
+      return sources.filter(
+        (source) => !isDiscoveryCategory(source) && isSourceDueByFrequency(source),
+      );
     case "official_fast":
       return sources.filter((source) => OFFICIAL_FAST_SOURCE_IDS.has(source.id));
     case "discovery_only":

@@ -359,4 +359,23 @@ describe("scan profiles", () => {
       ),
     ).toEqual(germanyLiveIds.filter((id) => sources.some((source) => source.id === id)));
   });
+
+  it("skips not-yet-due sources in the official baseline sweep but never in the fast lane", () => {
+    const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+    const eightDaysAgo = new Date(Date.now() - 8 * 24 * 60 * 60 * 1000).toISOString();
+    const sources = [
+      createSource({ id: "weekly-fresh", scanFrequency: "weekly", lastScannedAt: oneDayAgo }),
+      createSource({ id: "weekly-due", scanFrequency: "weekly", lastScannedAt: eightDaysAgo }),
+      createSource({ id: "never-scanned", scanFrequency: "weekly", lastScannedAt: null }),
+      createSource({ id: "src-cnil-ai", sourceType: "RSS", scanFrequency: "daily", lastScannedAt: oneDayAgo }),
+    ];
+
+    expect(
+      selectSourcesForScanProfile(sources, "official_baseline_scan").map((s) => s.id),
+    ).toEqual(["weekly-due", "never-scanned", "src-cnil-ai"]);
+    // The hourly fast lane deliberately over-polls: frequency is ignored.
+    expect(
+      selectSourcesForScanProfile(sources, "official_fast_scan").map((s) => s.id),
+    ).toEqual(["src-cnil-ai"]);
+  });
 });

@@ -19,6 +19,7 @@ import type {
   RegulationScanLog,
   RegulationSource,
 } from "@/agents/ai-regulation/types";
+import { evaluatePublicationEligibility } from "@/agents/ai-regulation/publicationEligibility";
 import { getAiRegulationRepository } from "@/db/repository";
 import type {
   CountryIntelligenceSourceWriteInput,
@@ -82,6 +83,42 @@ export const updateRepository = {
     );
   },
   async createUpdate(input: RegulatoryUpdateDraftInput) {
+    // W1.6: the eligibility gate used to guard only status *transitions*, so
+    // the scan pipeline and backfill scripts — the volume channels — could
+    // create rows directly in "published" without any citation/official-source
+    // check. Max-auto policy: never block creation, but an ineligible item is
+    // downgraded to needs_review instead of silently reaching the public.
+    if (input.status === "published") {
+      const repository = getAiRegulationRepository();
+      const [rawItem, source] = await Promise.all([
+        input.rawItemId
+          ? repository.getRawRegulatoryItemById(input.rawItemId)
+          : Promise.resolve(null),
+        input.sourceId
+          ? repository.getSourceById(input.sourceId)
+          : Promise.resolve(null),
+      ]);
+      const assessment = evaluatePublicationEligibility({
+        update: {
+          ...input,
+          status: "published",
+        },
+        rawItem,
+        source,
+      });
+      if (!assessment.eligible) {
+        console.warn(
+          `[publication-gate] createUpdate downgraded to needs_review (${assessment.blockingReasons.join("; ")}): ${input.title}`,
+        );
+        return getAiRegulationRepository().createAiRegulatoryUpdate({
+          ...input,
+          status: "needs_review",
+          reviewedBy: null,
+          reviewedAt: null,
+          publishedAt: null,
+        });
+      }
+    }
     return getAiRegulationRepository().createAiRegulatoryUpdate(input);
   },
   async getSources() {
