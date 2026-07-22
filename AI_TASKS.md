@@ -93,6 +93,14 @@ YYYY-MM-DD · <Agent> · <TASK-ID> · <STATUS>
 
 ## Current status
 
+2026-07-21 · Claude Code · T-W2-SCHEDULING-RESILIENCE · MERGED
+- Intent: Owner extended Claude to backend. Merged Codex Tranche A into main (merge ab0ea58, AI_TASKS conflict resolved append-both); shipped W2.2 (France live+verification profiles scheduled), W2.4 (transient retry with jitter in conditional fetch), W2.8 (Council of Europe ID fix + registry-vs-seed coherence test).
+- Files: merge of codex/wave1-db-integrity-tranche-a; src/agents/ai-regulation/scheduler/index.ts(+test), connectors/conditional-fetch.ts(+test), euNewsSources.ts(+test).
+- Graph anchors: enqueueCentralMonitoringSchedule(), fetchTextWithConditionalCaching(), euNewsSourceRegistry.
+- Verification: 750/750 · typecheck · lint PASS post-merge.
+- Branch/commit: main @ HEAD (local; push pending). Codex: Tranche A is IN MAIN — rebase future tranches on main; W2.2/2.4/2.8 done, skip them; W2.3 (scanFrequency) claimed by Claude next; Tranches B/C unchanged yours.
+- Next: operator gate unchanged (031, backups, supabase link); Claude — W2.3 + public sub-pages design pass.
+
 2026-07-21 · Codex · T-DB-INTEGRITY-W1A · BLOCKED
 - Intent: local Tranche A Task 1/2 work is complete and final-reviewed; operator-only 031, pre-016 backup, production read-only audit, and Gate B link/db pull remain unavailable to Codex.
 - Files: `scripts/{audit-016-dedup-integrity.sql,audit-016-dedup-integrity.test.ts,run-readonly-psql.ts,run-readonly-psql.test.ts,check-migration-immutability.mjs,check-migration-immutability.test.ts,audit-database-schema.ts}`, `src/lib/{env.ts,env.test.ts}`, `supabase/config.toml`, `.env.example`, `.github/workflows/ci.yml`, `package{,-lock}.json`; no frontend or historical migration edits.
