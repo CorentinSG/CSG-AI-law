@@ -103,4 +103,152 @@ describe("env validation", () => {
       APP_DATA_MODE: "memory",
     });
   });
+
+  it("rejects a database URL that is not the read-only Supabase session pooler", async () => {
+    const { parseDatabaseUrl } = await import("@/lib/env");
+
+    expect(() =>
+      parseDatabaseUrl(
+        "postgresql://postgres:pw@db.example.com:5432/postgres",
+      ),
+    ).toThrow("DATABASE_URL must use the read-only Supabase session pooler");
+  });
+
+  it("accepts the dedicated read-only Supabase session pooler URL", async () => {
+    const { parseDatabaseUrl } = await import("@/lib/env");
+    const databaseUrl =
+      "postgresql://csg_schema_auditor.abcdefghijklmnopqrst:pw@aws-0-us-east-1.pooler.supabase.com:5432/postgres?sslmode=require&options=-c%20default_transaction_read_only%3Don";
+
+    expect(parseDatabaseUrl(databaseUrl)).toBe(databaseUrl);
+  });
+
+  it.each([
+    "postgresql://csg_schema_auditor.abcdefghijklmnopqrst:pw@aws-0-us-east-1.pooler.supabase.com:6543/postgres?sslmode=require&options=-c%20default_transaction_read_only%3Don",
+    "postgresql://csg_schema_auditor.abcdefghijklmnopqrst:pw@aws-0-us-east-1.pooler.supabase.com:5433/postgres?sslmode=require&options=-c%20default_transaction_read_only%3Don",
+    "postgresql://csg_schema_auditor.abcdefghijklmnopqrst:pw@aws-0-us-east-1.pooler.supabase.com/postgres?sslmode=require&options=-c%20default_transaction_read_only%3Don",
+  ])("rejects a non-session Supavisor port: %s", async (databaseUrl) => {
+    const { parseDatabaseUrl } = await import("@/lib/env");
+
+    expect(() => parseDatabaseUrl(databaseUrl)).toThrow(
+      "DATABASE_URL must use the read-only Supabase session pooler",
+    );
+  });
+
+  it.each([
+    "csg_schema_auditor",
+    "csg_schema_auditor.abcdefghijklmnopqrs",
+    "csg_schema_auditor.abcdefghijklmnopqrstu",
+    "csg_schema_auditor.ABCDEFGHIJKLMNOPQRST",
+    "csg_schema_auditor.abcdefghijklmnopqrs-",
+  ])("rejects an unroutable Supavisor audit username: %s", async (username) => {
+    const { parseDatabaseUrl } = await import("@/lib/env");
+    const databaseUrl =
+      `postgresql://${username}:pw@aws-0-us-east-1.pooler.supabase.com:5432/postgres?` +
+      "sslmode=require&options=-c%20default_transaction_read_only%3Don";
+
+    expect(() => parseDatabaseUrl(databaseUrl)).toThrow(
+      "DATABASE_URL must use the read-only Supabase session pooler",
+    );
+  });
+
+  it.each([
+    ["host", "db.example.com"],
+    ["port", "5433"],
+    ["user", "postgres"],
+    ["password", "other"],
+    ["database", "other"],
+    ["db", "other"],
+    ["application_name", "schema-audit"],
+  ])("rejects database URL query parameter %s", async (key, value) => {
+    const { parseDatabaseUrl } = await import("@/lib/env");
+    const databaseUrl =
+      "postgresql://csg_schema_auditor.abcdefghijklmnopqrst:pw@aws-0-us-east-1.pooler.supabase.com:5432/postgres?sslmode=require&options=-c%20default_transaction_read_only%3Don&" +
+      `${key}=${encodeURIComponent(value)}`;
+
+    expect(() => parseDatabaseUrl(databaseUrl)).toThrow(
+      "DATABASE_URL must use the read-only Supabase session pooler",
+    );
+  });
+
+  it.each([
+    "postgresql://csg_schema_auditor.abcdefghijklmnopqrst:pw@aws-0-us-east-1.pooler.supabase.com:5432/postgres?sslmode=require&sslmode=disable&options=-c%20default_transaction_read_only%3Don",
+    "postgresql://csg_schema_auditor.abcdefghijklmnopqrst:pw@aws-0-us-east-1.pooler.supabase.com:5432/postgres?sslmode=disable&sslmode=require&options=-c%20default_transaction_read_only%3Don",
+  ])("rejects duplicate sslmode parameters", async (databaseUrl) => {
+    const { parseDatabaseUrl } = await import("@/lib/env");
+
+    expect(() => parseDatabaseUrl(databaseUrl)).toThrow(
+      "DATABASE_URL must use the read-only Supabase session pooler",
+    );
+  });
+
+  it("rejects duplicate options parameters even when both request read-only mode", async () => {
+    const { parseDatabaseUrl } = await import("@/lib/env");
+    const databaseUrl =
+      "postgresql://csg_schema_auditor.abcdefghijklmnopqrst:pw@aws-0-us-east-1.pooler.supabase.com:5432/postgres?sslmode=require&options=-c%20default_transaction_read_only%3Don&options=-c%20default_transaction_read_only%3Don";
+
+    expect(() => parseDatabaseUrl(databaseUrl)).toThrow(
+      "DATABASE_URL must use the read-only Supabase session pooler",
+    );
+  });
+
+  it.each([
+    "-c default_transaction_read_only=on -c default_transaction_read_only=off",
+    "-c default_transaction_read_only=off -c default_transaction_read_only=on",
+    "-cdefault_transaction_read_only=on -cdefault_transaction_read_only=off",
+    "--default_transaction_read_only=on --default_transaction_read_only=off",
+  ])("rejects conflicting read-only option assignments: %s", async (options) => {
+    const { parseDatabaseUrl } = await import("@/lib/env");
+    const databaseUrl =
+      "postgresql://csg_schema_auditor.abcdefghijklmnopqrst:pw@aws-0-us-east-1.pooler.supabase.com:5432/postgres?sslmode=require&options=" +
+      encodeURIComponent(options);
+
+    expect(() => parseDatabaseUrl(databaseUrl)).toThrow(
+      "DATABASE_URL must use the read-only Supabase session pooler",
+    );
+  });
+
+  it.each([
+    "-c not_default_transaction_read_only=on",
+    "-c default_transaction_read_only=only",
+    "-c default_transaction_read_only=onward",
+  ])("rejects inexact read-only option assignments: %s", async (options) => {
+    const { parseDatabaseUrl } = await import("@/lib/env");
+    const databaseUrl =
+      "postgresql://csg_schema_auditor.abcdefghijklmnopqrst:pw@aws-0-us-east-1.pooler.supabase.com:5432/postgres?sslmode=require&options=" +
+      encodeURIComponent(options);
+
+    expect(() => parseDatabaseUrl(databaseUrl)).toThrow(
+      "DATABASE_URL must use the read-only Supabase session pooler",
+    );
+  });
+
+  it.each([
+    "-cdefault_transaction_read_only=on",
+    "--default_transaction_read_only=on",
+  ])("accepts one exact PostgreSQL read-only assignment: %s", async (options) => {
+    const { parseDatabaseUrl } = await import("@/lib/env");
+    const databaseUrl =
+      "postgresql://csg_schema_auditor.abcdefghijklmnopqrst:pw@aws-0-us-east-1.pooler.supabase.com:5432/postgres?sslmode=require&options=" +
+      encodeURIComponent(options);
+
+    expect(parseDatabaseUrl(databaseUrl)).toBe(databaseUrl);
+  });
+
+  it.each([
+    "postgresql://postgres.abcdefghijklmnopqrst:pw@aws-0-us-east-1.pooler.supabase.com:5432/postgres?sslmode=require&options=-c%20default_transaction_read_only%3Don",
+    "postgresql://csg_schema_auditor.abcdefghijklmnopqrst:pw@aws-0-us-east-1.pooler.supabase.com:5432/postgres?options=-c%20default_transaction_read_only%3Don",
+    "postgresql://csg_schema_auditor.abcdefghijklmnopqrst:pw@aws-0-us-east-1.pooler.supabase.com:5432/postgres?sslmode=require",
+  ])("rejects a database URL missing a read-only audit safeguard", async (databaseUrl) => {
+    const { parseDatabaseUrl } = await import("@/lib/env");
+
+    expect(() => parseDatabaseUrl(databaseUrl)).toThrow(
+      "DATABASE_URL must use the read-only Supabase session pooler",
+    );
+  });
+
+  it("keeps DATABASE_URL optional", async () => {
+    const { parseDatabaseUrl } = await import("@/lib/env");
+
+    expect(parseDatabaseUrl(undefined)).toBeUndefined();
+  });
 });

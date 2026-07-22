@@ -39,6 +39,8 @@ yarn-error.log*
 # agent harness traces (local debugging artifacts)
 .agent-traces/
 .worktrees/
+supabase/.temp/
+supabase/.branches/
 
 # dev artifacts and local logs
 *.log

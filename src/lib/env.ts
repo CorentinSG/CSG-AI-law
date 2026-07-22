@@ -2,6 +2,115 @@ import { z } from "zod";
 
 import type { RepositoryMode } from "@/db/repository-types";
 
+export class EnvValidationError extends Error {}
+
+const DATABASE_URL_ERROR =
+  "DATABASE_URL must use the read-only Supabase session pooler";
+const READ_ONLY_OPTION = "default_transaction_read_only";
+const ALLOWED_DATABASE_QUERY_KEYS = new Set(["sslmode", "options"]);
+const SUPABASE_AUDIT_USERNAME =
+  /^csg_schema_auditor\.[a-z0-9]{20}$/;
+
+function parsePostgresOptionTokens(options: string) {
+  const tokens: string[] = [];
+  let token = "";
+
+  for (let index = 0; index < options.length; index += 1) {
+    const character = options[index];
+    if (/\s/.test(character)) {
+      if (token) {
+        tokens.push(token);
+        token = "";
+      }
+      continue;
+    }
+
+    if (character === "\\") {
+      index += 1;
+      if (index >= options.length) return undefined;
+      token += options[index];
+      continue;
+    }
+
+    token += character;
+  }
+
+  if (token) tokens.push(token);
+  return tokens;
+}
+
+function hasOneReadOnlyAssignment(options: string) {
+  const tokens = parsePostgresOptionTokens(options);
+  if (!tokens) return false;
+
+  const assignments: string[] = [];
+  for (let index = 0; index < tokens.length; index += 1) {
+    const token = tokens[index];
+    let assignment: string | undefined;
+
+    if (token === "-c") {
+      assignment = tokens[index + 1];
+      if (!assignment) return false;
+      index += 1;
+    } else if (token.startsWith("-c") && token.length > 2) {
+      assignment = token.slice(2);
+    } else if (token.startsWith("--") && token.length > 2) {
+      assignment = token.slice(2);
+    }
+
+    if (!assignment) continue;
+    const separator = assignment.indexOf("=");
+    if (separator === -1) continue;
+    const name = assignment.slice(0, separator).toLowerCase();
+    if (name === READ_ONLY_OPTION) {
+      assignments.push(assignment.slice(separator + 1));
+    }
+  }
+
+  return assignments.length === 1 && assignments[0] === "on";
+}
+
+export function parseDatabaseUrl(
+  value: string | undefined,
+): string | undefined {
+  const connectionString = value?.trim();
+  if (!connectionString) return undefined;
+
+  let databaseUrl: URL;
+  try {
+    databaseUrl = new URL(connectionString);
+  } catch {
+    throw new EnvValidationError(DATABASE_URL_ERROR);
+  }
+
+  let username: string;
+  try {
+    username = decodeURIComponent(databaseUrl.username);
+  } catch {
+    throw new EnvValidationError(DATABASE_URL_ERROR);
+  }
+
+  const sslModes = databaseUrl.searchParams.getAll("sslmode");
+  const optionsValues = databaseUrl.searchParams.getAll("options");
+  if (
+    databaseUrl.protocol !== "postgresql:" ||
+    !databaseUrl.hostname.endsWith(".pooler.supabase.com") ||
+    databaseUrl.port !== "5432" ||
+    !SUPABASE_AUDIT_USERNAME.test(username) ||
+    [...databaseUrl.searchParams.keys()].some(
+      (key) => !ALLOWED_DATABASE_QUERY_KEYS.has(key),
+    ) ||
+    sslModes.length !== 1 ||
+    sslModes[0] !== "require" ||
+    optionsValues.length !== 1 ||
+    !hasOneReadOnlyAssignment(optionsValues[0])
+  ) {
+    throw new EnvValidationError(DATABASE_URL_ERROR);
+  }
+
+  return connectionString;
+}
+
 const booleanString = z
   .union([z.literal("true"), z.literal("false")])
   .transform((value) => value === "true");
@@ -54,7 +163,7 @@ const rawEnvSchema = z.object({
   UPSTASH_REDIS_REST_URL: z.string().url().optional(),
   UPSTASH_REDIS_REST_TOKEN: z.string().min(1).optional(),
   SUPABASE_SERVICE_ROLE_KEY: z.string().min(1).optional(),
-  DATABASE_URL: z.string().min(1).optional(),
+  DATABASE_URL: z.string().min(1).optional().transform(parseDatabaseUrl),
   // ── Ingestion pipeline ──────────────────────────────────────────────────
   FIRECRAWL_API_KEY: z.string().min(1).optional(),
   INGESTION_SECRET: z.string().min(16).optional(),
@@ -63,8 +172,6 @@ const rawEnvSchema = z.object({
   SCRAPLING_WORKER_URL: z.string().url().optional(),
   SCRAPLING_WORKER_TOKEN: z.string().min(16).optional(),
 });
-
-export class EnvValidationError extends Error {}
 
 export interface AppEnv {
   NODE_ENV: "development" | "test" | "production";

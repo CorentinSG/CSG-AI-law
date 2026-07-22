@@ -17,3 +17,12 @@ Task 2: complete (commits 4d7f2d2..ffca8fe, review clean)
 Task 3: complete (commits ffca8fe..5abab84, review clean)
 Task 4: complete (commits 5abab84..bd3a139, review clean; live restore intentionally not run)
 Task 5: done-local (2026-07-02 final review fixed in 7beac0c; 107 files / 612 tests, backend lint, typecheck, preview build, and backup/restore self-tests pass; schema audit blocked_missing_credentials; global lint blocked only by Claude-owned UI; migrations 013-015 and live restore remain operator-gated; implementation range is 7df6848..HEAD)
+
+# Wave 1 Database Integrity Tranche A Progress
+
+Plan: `docs/superpowers/plans/2026-07-21-wave1-db-integrity-tranche-a.md`
+
+Task 1: complete (commits f7d3c29..5692d27, review clean; live evidence operator-gated)
+Task 2: complete-local (commits 5692d27..9cc1967, final review approved; Gate A/B operator-blocked)
+Task 3: blocked pending operator Gate B
+Task 4: blocked pending Task 3
