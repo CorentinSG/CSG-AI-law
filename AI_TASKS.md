@@ -93,6 +93,14 @@ YYYY-MM-DD · <Agent> · <TASK-ID> · <STATUS>
 
 ## Current status
 
+2026-07-21 · Claude Code · T-W1B-GATE-W23-FREQUENCY · MERGED
+- Intent: Owner directive — Claude covers Codex work during his multi-day absence (app-code items only; his operator/migration gates stay respected). Shipped W1.6 (publication gate at creation, downgrade-to-needs_review, max-auto preserved) and W2.3 (scanFrequency honored on official_only sweeps via isSourceDueByFrequency).
+- Files: src/agents/ai-regulation/processors/updateRepository.ts, src/agents/ai-regulation/scanProfiles.ts(+test).
+- Graph anchors: updateRepository.createUpdate(), evaluatePublicationEligibility(), isSourceDueByFrequency() (new), selectSourcesForScanProfile().
+- Verification: 751/751 · typecheck · lint PASS. Note: intermittent test-count flakiness (750/748/744 across runs) traced to OneDrive sync making files transiently unavailable — two clean consecutive runs are identical; consider moving the checkout off OneDrive.
+- Branch/commit: main @ HEAD (local; push pending — 33 commits).
+- Next: CODEX (when back): Tranche B remaining = unified dedup module + cross-source index (DB part gated on 031+baseline), Tranche C = Zod read-validation, real verification events, retention/lease/queue, backups, OpenAI real costs, taxonomy — W1.6 and W2.3 are DONE, do not redo. Claude next: W1.7 Zod validation, W6.2 pytest scrapling. Operator gate unchanged.
+
 2026-07-21 · Claude Code · T-W2-SCHEDULING-RESILIENCE · MERGED
 - Intent: Owner extended Claude to backend. Merged Codex Tranche A into main (merge ab0ea58, AI_TASKS conflict resolved append-both); shipped W2.2 (France live+verification profiles scheduled), W2.4 (transient retry with jitter in conditional fetch), W2.8 (Council of Europe ID fix + registry-vs-seed coherence test).
 - Files: merge of codex/wave1-db-integrity-tranche-a; src/agents/ai-regulation/scheduler/index.ts(+test), connectors/conditional-fetch.ts(+test), euNewsSources.ts(+test).
