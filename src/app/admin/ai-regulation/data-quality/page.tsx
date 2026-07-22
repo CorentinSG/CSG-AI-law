@@ -127,10 +127,8 @@ export default async function AiRegulationDataQualityPage({
           Legal Intelligence Data Steward
         </h1>
         <p className="max-w-3xl text-zinc-300">
-          Read-only stewardship layer for source health, citation completeness,
-          freshness, verification status, and Europe/U.S. coverage gaps. This
-          page does not publish, modify, or approve items.
-        </p>
+          Source health, citation completeness, freshness, and verification — read-only.
+            </p>
         <p className="text-sm text-zinc-500">
           Generated: {formatDateTime(report.generatedAt)}
         </p>
@@ -147,10 +145,6 @@ export default async function AiRegulationDataQualityPage({
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-5">
-            <p className="max-w-2xl text-sm leading-7 text-zinc-300">
-              This admin surface translates raw governance signals into a readable operational picture:
-              what is strong, what is drifting, and what could weaken public legal credibility if left unattended.
-            </p>
             <div className="grid gap-3 md:grid-cols-2">
               {readinessSignals.map((signal) => (
                 <IntelligenceSignal

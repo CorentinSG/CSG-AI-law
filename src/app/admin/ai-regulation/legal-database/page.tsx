@@ -132,10 +132,7 @@ export default async function LegalDatabasePage({
               Legal database
             </h1>
             <p className="mt-1 max-w-2xl text-sm text-zinc-400">
-              Every legal-intelligence entry, sorted by nature of the source
-              (binding law → guidance → soft law → other), then by region, then
-              by legal area. Filter on any axis or search across titles,
-              summaries, and tags.
+              Sorted by source nature → region → legal area.
             </p>
           </div>
           <Link

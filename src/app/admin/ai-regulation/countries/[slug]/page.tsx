@@ -93,10 +93,8 @@ export default async function AdminCountryProfileEditorPage({
           </span>
         </h1>
         <p className="max-w-3xl text-zinc-300">
-          Edit the editorial fields below. Blank fields fall back to the verified
-          TypeScript baseline on the public page. Structural fields (status,
-          confidence, authority maps, source lists) are not editable here.
-        </p>
+          Blank fields fall back to the verified baseline; edits go live instantly.
+            </p>
       </div>
 
       <section className="grid gap-6 lg:grid-cols-[1fr_0.6fr]">

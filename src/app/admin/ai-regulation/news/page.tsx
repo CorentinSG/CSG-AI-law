@@ -135,10 +135,8 @@ export default async function AdminAiLawNewsPage({
         </p>
         <h1 className="font-serif text-4xl text-white">AI Law News review</h1>
         <p className="max-w-3xl text-zinc-300">
-          News and legal-development leads are broader than the verified monitor.
-          Non-official items stay discovery-only until official-source verification
-          and human review.
-        </p>
+              News and legal-development leads are broader than the verified monitor.
+            </p>
       </section>
 
       <section className="grid gap-4 md:grid-cols-4">
@@ -169,10 +167,7 @@ export default async function AdminAiLawNewsPage({
           </CardHeader>
           <CardContent className="space-y-3">
             <p className="text-sm text-zinc-300">
-              The Germany agent keeps a dedicated official-source watch over BfDI AI materials,
-              the BfDI AI-model consultation, Federal Government implementation pages, and
-              Bundestag implementation materials. Lightweight Germany live monitoring is centered
-              on BfDI, while parliamentary and government implementation sources stay on a slower cadence.
+              The Germany agent keeps a dedicated official-source watch over BfDI AI materials, the BfDI AI-model consultation, Federal Government implementation pages, and Bundestag implementation materials.
             </p>
             <div className="grid gap-3 md:grid-cols-3">
               <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
@@ -234,10 +229,7 @@ export default async function AdminAiLawNewsPage({
           </CardHeader>
           <CardContent className="space-y-3">
             <p className="text-sm text-zinc-300">
-              The EU agent watches official EU and Member State sources, then
-              cross-checks discovery leads before any database conversion. Hard-law,
-              guidance, case-law, and enforcement signals are ranked before softer
-              commentary.
+              The EU agent watches official EU and Member State sources, then cross-checks discovery leads before any database conversion.
             </p>
             <div className="grid gap-3 md:grid-cols-3">
               <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
@@ -299,10 +291,7 @@ export default async function AdminAiLawNewsPage({
           </CardHeader>
           <CardContent className="space-y-3">
             <p className="text-sm text-zinc-300">
-              The France agent keeps a dedicated official-source watch over CNIL,
-              Legifrance, the Conseil d&apos;Etat, the Cour de cassation, and the
-              Defender of Rights. Lightweight France live monitoring is centered on
-              CNIL; heavier legal-text and judicial sources stay on a slower cadence.
+              The France agent keeps a dedicated official-source watch over CNIL, Legifrance, the Conseil d&apos;Etat, the Cour de cassation, and the Defender of Rights.
             </p>
             <div className="grid gap-3 md:grid-cols-3">
               <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
@@ -455,9 +444,7 @@ export default async function AdminAiLawNewsPage({
           </CardHeader>
           <CardContent className="space-y-3">
             <p className="text-sm text-zinc-300">
-              The Spain agent keeps a dedicated official-source watch over AEPD, AESIA, BOE,
-              and La Moncloa. Lightweight Spain live monitoring is centered on AEPD, while
-              legal-text and government-implementation sources stay on a slower cadence.
+              The Spain agent keeps a dedicated official-source watch over AEPD, AESIA, BOE, and La Moncloa.
             </p>
             <div className="grid gap-3 md:grid-cols-3">
               <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
@@ -602,10 +589,7 @@ export default async function AdminAiLawNewsPage({
           </CardHeader>
           <CardContent className="space-y-3">
             <p className="text-sm text-zinc-300">
-              The Italy agent keeps a dedicated official-source watch over the Garante,
-              AgID, Normattiva, and the Digital Transformation Department. Lightweight
-              Italy live monitoring is centered on the Garante, while legislative and
-              government-implementation sources stay on a slower cadence.
+              The Italy agent keeps a dedicated official-source watch over the Garante, AgID, Normattiva, and the Digital Transformation Department.
             </p>
             <div className="grid gap-3 md:grid-cols-3">
               <div className="rounded-2xl border border-white/10 bg-black/20 p-4">

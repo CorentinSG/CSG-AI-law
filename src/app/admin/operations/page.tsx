@@ -53,10 +53,8 @@ export default async function AdminOperationsPage() {
         </p>
         <h1 className="font-serif text-4xl text-white">Operations</h1>
         <p className="max-w-3xl text-zinc-300">
-          Live operational state of the monitoring pipeline: worker heartbeat,
-          scan jobs, source health, and the credentials each connector still
-          needs. This is the screen to check first when something looks stalled.
-        </p>
+          Worker heartbeat, scan jobs, source health, credentials.
+            </p>
         <div className="flex flex-wrap gap-2 pt-1">
           <Link
             href="/admin"

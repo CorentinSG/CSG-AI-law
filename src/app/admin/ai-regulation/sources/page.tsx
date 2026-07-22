@@ -54,10 +54,8 @@ export default async function AdminSourceDiagnosticsPage() {
         </p>
         <h1 className="font-serif text-4xl text-white">Official and discovery source watchlist</h1>
         <p className="max-w-3xl text-zinc-300">
-          This page turns source diagnostics into a readable review index: what is healthy,
-          what is blocked, and which connectors still need attention before their outputs can
-          be trusted operationally.
-        </p>
+          Source health at a glance — healthy, blocked, and what needs review.
+            </p>
         <Link
           href="/admin/ai-regulation"
           className="inline-flex rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-zinc-100 transition hover:bg-white/10"

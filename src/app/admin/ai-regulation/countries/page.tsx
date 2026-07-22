@@ -88,12 +88,8 @@ export default async function AdminCountryProfilesPage() {
         </Link>
         <h1 className="font-serif text-4xl text-white">Country profiles</h1>
         <p className="max-w-3xl text-zinc-300">
-          Edit the editorial fields of each country profile (public summary,
-          editorial notes, missing-source warnings, review status) directly in
-          the database. Saved edits appear on the public country page without a
-          redeployment. Structural content (authority maps, source lists) stays
-          sourced from the verified content layer.
-        </p>
+          Editorial fields per country — edits go live on the public page without a redeploy.
+            </p>
         {sorted.length === 0 ? (
           <p className="rounded-2xl border border-amber-400/20 bg-amber-500/10 p-4 text-sm text-amber-100">
             No country_intelligence rows found. Run{" "}

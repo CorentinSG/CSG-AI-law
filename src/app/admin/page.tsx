@@ -313,10 +313,8 @@ export default async function AdminDashboardPage() {
               <p className="font-mono text-2xl text-emerald-300">1</p>
               <p className="text-sm font-medium text-zinc-100">The agents collect</p>
               <p className="text-sm leading-6 text-zinc-400">
-                Monitoring agents scan official sources automatically, every day.
-                You never have to do this by hand — but you can force a fresh
-                pass anytime with the scan button below.
-              </p>
+              Monitoring agents scan official sources automatically, every day.
+            </p>
               <Link
                 href="/admin/operations"
                 className="mt-auto inline-flex w-fit rounded-full border border-white/10 bg-white/5 px-4 py-1.5 text-sm text-zinc-100 transition hover:bg-white/15"
@@ -330,10 +328,8 @@ export default async function AdminDashboardPage() {
               <p className="font-mono text-2xl text-emerald-300">2</p>
               <p className="text-sm font-medium text-zinc-100">You review</p>
               <p className="text-sm leading-6 text-zinc-400">
-                Items from official sources publish themselves. Anything
-                uncertain waits for you: open the review queue, tick the items,
-                approve or reject them in bulk — a few clicks, done.
-              </p>
+              Items from official sources publish themselves.
+            </p>
               <Link
                 href="/admin/ai-regulation/review"
                 className="mt-auto inline-flex w-fit rounded-full border border-white/10 bg-white/5 px-4 py-1.5 text-sm text-zinc-100 transition hover:bg-white/15"
@@ -349,9 +345,8 @@ export default async function AdminDashboardPage() {
               <p className="font-mono text-2xl text-emerald-300">3</p>
               <p className="text-sm font-medium text-zinc-100">The site updates itself</p>
               <p className="text-sm leading-6 text-zinc-400">
-                Everything you approve appears on the public site immediately —
-                news, legal database, country pages. Nothing else to do.
-              </p>
+              Everything you approve appears on the public site immediately — news, legal database, country pages.
+            </p>
               <Link
                 href="/ai-regulation"
                 className="mt-auto inline-flex w-fit rounded-full border border-white/10 bg-white/5 px-4 py-1.5 text-sm text-zinc-100 transition hover:bg-white/15"
