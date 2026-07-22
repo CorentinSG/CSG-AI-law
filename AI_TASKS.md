@@ -92,6 +92,14 @@ YYYY-MM-DD · <Agent> · <TASK-ID> · <STATUS>
 
 ## Current status
 
+2026-07-20 · Claude Code · T-ADMIN-DECLUTTER · MERGED
+- Intent: Owner directive — same épure pass on every admin sub-page (news overview, dashboard workflow cards, data-quality, countries, legal-database, sources, operations): meta-prose deleted, explainers cut to one sentence.
+- Files: src/app/admin/page.tsx, src/app/admin/operations/page.tsx, src/app/admin/ai-regulation/{news,data-quality,legal-database,sources,countries}/page.tsx, countries/[slug]/page.tsx.
+- Graph anchors: community "News and Regulation Admin", community "Admin and Intelligence Overview".
+- Verification: 697/697 · typecheck · lint · production build PASS (admin pages are auth-gated; build + e2e smoke in CI cover render).
+- Branch/commit: main @ HEAD (local; push pending — 20 commits).
+- Next: Claude Code — public sub-pages design pass still open; Codex unchanged (Wave 1).
+
 2026-07-20 · Claude Code · T-CONSOLE-LITE-27 · MERGED
 - Intent: Owner directive — all 27 European country pages on the console system; 18 no-snapshot countries get console-lite from profile data; legacy layout deleted; admin country editor explainer trimmed.
 - Files: src/app/[lang]/ai-regulation/europe/[country]/page.tsx (852→692 lines, SourceList deleted), src/app/admin/ai-regulation/countries/[slug]/page.tsx.
