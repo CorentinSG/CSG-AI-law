@@ -359,10 +359,7 @@ export default async function AdminCountryProfileEditorPage({
           </CardHeader>
           <CardContent className="space-y-5">
             <p className="text-sm text-zinc-400">
-              These rows drive the three source lists on the public country page.
-              Authority type decides which list a source appears in (case-law and
-              guidance/soft-law have their own lists; everything else is the
-              national AI regulation list). Edits apply without a redeployment.
+              Drives the public source lists — authority type picks the list; edits apply instantly.
             </p>
 
             {sources.length === 0 ? (
