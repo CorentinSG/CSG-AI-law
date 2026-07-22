@@ -103,4 +103,40 @@ describe("env validation", () => {
       APP_DATA_MODE: "memory",
     });
   });
+
+  it("rejects a database URL that is not the read-only Supabase session pooler", async () => {
+    const { parseDatabaseUrl } = await import("@/lib/env");
+
+    expect(() =>
+      parseDatabaseUrl(
+        "postgresql://postgres:pw@db.example.com:5432/postgres",
+      ),
+    ).toThrow("DATABASE_URL must use the read-only Supabase session pooler");
+  });
+
+  it("accepts the dedicated read-only Supabase session pooler URL", async () => {
+    const { parseDatabaseUrl } = await import("@/lib/env");
+    const databaseUrl =
+      "postgresql://csg_schema_auditor:pw@aws-0-us-east-1.pooler.supabase.com:5432/postgres?sslmode=require&options=-c%20default_transaction_read_only%3Don";
+
+    expect(parseDatabaseUrl(databaseUrl)).toBe(databaseUrl);
+  });
+
+  it.each([
+    "postgresql://postgres:pw@aws-0-us-east-1.pooler.supabase.com:5432/postgres?sslmode=require&options=-c%20default_transaction_read_only%3Don",
+    "postgresql://csg_schema_auditor:pw@aws-0-us-east-1.pooler.supabase.com:5432/postgres?options=-c%20default_transaction_read_only%3Don",
+    "postgresql://csg_schema_auditor:pw@aws-0-us-east-1.pooler.supabase.com:5432/postgres?sslmode=require",
+  ])("rejects a database URL missing a read-only audit safeguard", async (databaseUrl) => {
+    const { parseDatabaseUrl } = await import("@/lib/env");
+
+    expect(() => parseDatabaseUrl(databaseUrl)).toThrow(
+      "DATABASE_URL must use the read-only Supabase session pooler",
+    );
+  });
+
+  it("keeps DATABASE_URL optional", async () => {
+    const { parseDatabaseUrl } = await import("@/lib/env");
+
+    expect(parseDatabaseUrl(undefined)).toBeUndefined();
+  });
 });
