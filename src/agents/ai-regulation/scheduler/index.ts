@@ -53,6 +53,21 @@ const EU_SCAN_ITEMS = [
     cadence: "daily",
   },
   {
+    // W2.2: the per-country live/verification profiles existed but were never
+    // scheduled anywhere. France is the pilot: live media radar + the
+    // verification pass that converts leads into official-source items.
+    id: "france-live-news",
+    label: "France live legal-news radar",
+    scanProfile: "france_live_news_scan",
+    cadence: "live",
+  },
+  {
+    id: "france-verification",
+    label: "France verification sweep",
+    scanProfile: "france_verification_scan",
+    cadence: "hourly",
+  },
+  {
     id: "eu-live-news",
     label: "EU legal-news discovery sweep",
     scanProfile: "eu_live_news_discovery_scan",

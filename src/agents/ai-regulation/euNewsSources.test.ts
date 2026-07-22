@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest";
 
+import { regulationSourcesSeed } from "@/db/seed/ai-regulation-seed";
+import { euNewsSourceRegistry } from "@/agents/ai-regulation/euNewsSources";
+
 import {
   getEuAgentSourceIds,
   getEuNewsSourceConfigs,
@@ -48,5 +51,15 @@ describe("EU news source registry", () => {
         "src-eur-lex-legislation-rss",
       ]),
     );
+  });
+
+  it("registers every EU registry sourceId in the Supabase seed (prevents silent scan-set dropouts)", () => {
+    const seededIds = new Set(regulationSourcesSeed.map((source) => source.id));
+    const missing = euNewsSourceRegistry
+      .map((descriptor) => descriptor.sourceId)
+      .filter((sourceId): sourceId is string => typeof sourceId === "string")
+      .filter((sourceId) => !seededIds.has(sourceId));
+
+    expect(missing).toEqual([]);
   });
 });

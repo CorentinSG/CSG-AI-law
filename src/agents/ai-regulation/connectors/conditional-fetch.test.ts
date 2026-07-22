@@ -101,4 +101,25 @@ describe("conditional-fetch", () => {
     expect(result.shortCircuitedByHash).toBe(true);
     expect(result.fetchMetadata.state.etag).toBe('"abc124"');
   });
+
+  it("retries once with jitter on a transient network failure", async () => {
+    const fetchMock = vi
+      .spyOn(globalThis, "fetch")
+      .mockRejectedValueOnce(new TypeError("fetch failed: ECONNRESET"))
+      .mockResolvedValueOnce(new Response("recovered", { status: 200 }) as Response);
+
+    const result = await fetchTextWithConditionalCaching(makeSource());
+
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    expect("body" in result && result.body).toBe("recovered");
+  });
+
+  it("does not retry after a timeout (budget already spent)", async () => {
+    const timeoutError = new Error("The operation was aborted due to timeout");
+    timeoutError.name = "TimeoutError";
+    const fetchMock = vi.spyOn(globalThis, "fetch").mockRejectedValue(timeoutError);
+
+    await expect(fetchTextWithConditionalCaching(makeSource())).rejects.toThrow();
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
 });

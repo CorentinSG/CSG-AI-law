@@ -267,7 +267,7 @@ export const euNewsSourceRegistry: EuNewsSourceDescriptor[] = [
   },
   {
     id: "council-of-europe-ai",
-    sourceId: "src-council-of-europe-ai",
+    sourceId: "src-council-europe-ai",
     name: "Council of Europe Artificial Intelligence",
     sourceAuthorityLevel: "standards_governance_body",
     official: true,

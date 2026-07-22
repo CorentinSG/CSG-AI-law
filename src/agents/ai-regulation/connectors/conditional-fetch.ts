@@ -79,6 +79,44 @@ function buildBaseHeaders(extraHeaders?: HeadersInit) {
  */
 export const CONNECTOR_FETCH_TIMEOUT_MS = 25_000;
 
+const TRANSIENT_STATUSES = new Set([502, 503, 504]);
+
+function isTransientNetworkError(error: unknown) {
+  const name = error instanceof Error ? error.name : "";
+  // A timeout already consumed the full 25s budget — never double it.
+  if (name === "TimeoutError" || name === "AbortError") return false;
+  const message = error instanceof Error ? error.message : String(error);
+  return /(fetch failed|ENOTFOUND|ECONNREFUSED|ECONNRESET|EAI_AGAIN|socket hang up|UND_ERR)/i.test(
+    message,
+  );
+}
+
+function jitterDelay() {
+  return new Promise((resolve) => setTimeout(resolve, 200 + Math.random() * 600));
+}
+
+/**
+ * One retry with jitter for transient failures (network blip, 502/503/504).
+ * Without it, a single blip on a live-cadence source pushes the next attempt
+ * a full backoff cycle away — the opposite of near-real-time. Each attempt
+ * gets a fresh timeout signal.
+ */
+async function fetchWithTransientRetry(
+  url: string,
+  buildInit: () => RequestInit,
+): Promise<Response> {
+  try {
+    const response = await fetch(url, buildInit());
+    if (!TRANSIENT_STATUSES.has(response.status)) return response;
+    await jitterDelay();
+    return await fetch(url, buildInit());
+  } catch (error) {
+    if (!isTransientNetworkError(error)) throw error;
+    await jitterDelay();
+    return await fetch(url, buildInit());
+  }
+}
+
 export async function fetchTextWithConditionalCaching(
   source: RegulationSource,
   extraHeaders?: HeadersInit,
@@ -92,11 +130,11 @@ export async function fetchTextWithConditionalCaching(
     headers.set("If-Modified-Since", previousState.lastModified);
   }
 
-  const response = await fetch(source.sourceUrl, {
+  const response = await fetchWithTransientRetry(source.sourceUrl, () => ({
     headers,
     next: { revalidate: 0 },
     signal: AbortSignal.timeout(CONNECTOR_FETCH_TIMEOUT_MS),
-  });
+  }));
 
   const reusedConditionalHeaders = Boolean(
     previousState?.etag || previousState?.lastModified,
