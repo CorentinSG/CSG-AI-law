@@ -8,6 +8,8 @@ const DATABASE_URL_ERROR =
   "DATABASE_URL must use the read-only Supabase session pooler";
 const READ_ONLY_OPTION = "default_transaction_read_only";
 const ALLOWED_DATABASE_QUERY_KEYS = new Set(["sslmode", "options"]);
+const SUPABASE_AUDIT_USERNAME =
+  /^csg_schema_auditor\.[a-z0-9]{20}$/;
 
 function parsePostgresOptionTokens(options: string) {
   const tokens: string[] = [];
@@ -93,7 +95,8 @@ export function parseDatabaseUrl(
   if (
     databaseUrl.protocol !== "postgresql:" ||
     !databaseUrl.hostname.endsWith(".pooler.supabase.com") ||
-    username !== "csg_schema_auditor" ||
+    databaseUrl.port !== "5432" ||
+    !SUPABASE_AUDIT_USERNAME.test(username) ||
     [...databaseUrl.searchParams.keys()].some(
       (key) => !ALLOWED_DATABASE_QUERY_KEYS.has(key),
     ) ||

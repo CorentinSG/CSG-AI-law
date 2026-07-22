@@ -1,7 +1,7 @@
 \set ON_ERROR_STOP on
 \pset tuples_only on
 \pset format unaligned
-begin transaction read only;
+begin transaction isolation level repeatable read read only;
 
 -- The CTE is repeated below because a READ ONLY transaction cannot CREATE TEMP TABLE.
 with expected(child_table, child_column) as (

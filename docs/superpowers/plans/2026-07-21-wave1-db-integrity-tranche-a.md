@@ -25,6 +25,7 @@
 
 ## File Map
 
+- `scripts/run-readonly-psql.ts`, `scripts/run-readonly-psql.test.ts` - credential-safe psql wrapper that validates a named audit URL and passes only libpq environment settings to the child.
 - `scripts/audit-016-dedup-integrity.sql` — psql-gated, CTE-only loser-to-canonical forensic JSONL report, complete raw-item ID inventory, and loser-only child impact counts.
 - `supabase/config.toml`, `package.json`, `package-lock.json` — credential-free CLI runner configuration.
 - `scripts/check-migration-immutability.mjs`, `scripts/check-migration-immutability.test.ts` — immutable migration guard.
@@ -52,7 +53,7 @@ Create `scripts/audit-016-dedup-integrity.sql`:
 \set ON_ERROR_STOP on
 \pset tuples_only on
 \pset format unaligned
-begin transaction read only;
+begin transaction isolation level repeatable read read only;
 
 -- The CTE is repeated below because a READ ONLY transaction cannot CREATE TEMP TABLE.
 with expected(child_table, child_column) as (
@@ -139,11 +140,10 @@ The operator first restores a pre-016 backup into an isolated database and sets 
 $stamp = (Get-Date).ToUniversalTime().ToString('yyyyMMddTHHmmssZ')
 $evidenceDir = Join-Path $env:USERPROFILE "csg-db-evidence\\016-$stamp"
 New-Item -ItemType Directory -Force $evidenceDir | Out-Null
-psql $env:PRE_016_BACKUP_DATABASE_URL -X -q -v ON_ERROR_STOP=1 -f scripts/audit-016-dedup-integrity.sql > (Join-Path $evidenceDir 'pre-016.jsonl')
+npm run --silent psql:readonly -- PRE_016_BACKUP_DATABASE_URL -X -q -v ON_ERROR_STOP=1 -f scripts/audit-016-dedup-integrity.sql > (Join-Path $evidenceDir 'pre-016.jsonl')
 if ($LASTEXITCODE -ne 0) { throw 'Pre-016 forensic audit failed.' }
 if (-not $env:SUPABASE_PRODUCTION_SCHEMA_AUDIT_DATABASE_URL) { throw 'SUPABASE_PRODUCTION_SCHEMA_AUDIT_DATABASE_URL is required.' }
-$env:DATABASE_URL = $env:SUPABASE_PRODUCTION_SCHEMA_AUDIT_DATABASE_URL
-psql $env:DATABASE_URL -X -q -v ON_ERROR_STOP=1 -f scripts/audit-016-dedup-integrity.sql > (Join-Path $evidenceDir 'current-production.jsonl')
+npm run --silent psql:readonly -- SUPABASE_PRODUCTION_SCHEMA_AUDIT_DATABASE_URL -X -q -v ON_ERROR_STOP=1 -f scripts/audit-016-dedup-integrity.sql > (Join-Path $evidenceDir 'current-production.jsonl')
 if ($LASTEXITCODE -ne 0) { throw 'Current-production forensic audit failed.' }
 $pre = Get-Content (Join-Path $evidenceDir 'pre-016.jsonl') | ForEach-Object { $_ | ConvertFrom-Json }
 $current = Get-Content (Join-Path $evidenceDir 'current-production.jsonl') | ForEach-Object { $_ | ConvertFrom-Json }
@@ -196,6 +196,8 @@ git commit -m "docs(db): add raw item dedup forensic audit"
 - Create: `supabase/config.toml`
 - Create: `scripts/check-migration-immutability.mjs`
 - Create: `scripts/check-migration-immutability.test.ts`
+- Create: `scripts/run-readonly-psql.ts`
+- Create: `scripts/run-readonly-psql.test.ts`
 - Modify: `package.json`
 - Modify: `package-lock.json`
 - Modify: `.github/workflows/ci.yml`
@@ -215,7 +217,7 @@ Create checker fixtures accepting only a new versioned `.sql` under `supabase/mi
 expect(() => parseDatabaseUrl("postgresql://postgres:pw@db.example.com:5432/postgres"))
   .toThrow("DATABASE_URL must use the read-only Supabase session pooler");
 expect(parseDatabaseUrl(
-  "postgresql://csg_schema_auditor:pw@aws-0-us-east-1.pooler.supabase.com:5432/postgres?sslmode=require&options=-c%20default_transaction_read_only%3Don",
+  "postgresql://csg_schema_auditor.abcdefghijklmnopqrst:pw@aws-0-us-east-1.pooler.supabase.com:5432/postgres?sslmode=require&options=-c%20default_transaction_read_only%3Don",
 )).toBeDefined();
 ```
 
@@ -227,16 +229,16 @@ Expected: FAIL because neither parser nor checker exists and `DATABASE_URL` is a
 
 - [ ] **Step 3: Implement runner, env validation, and CI**
 
-Run `npm install --save-dev --save-exact supabase@2.109.1`. Add npm scripts `db:pull`, `db:push:dry-run`, `db:push`, `migration:new`, and `check:migrations`. `db:push:dry-run` runs `supabase db push --linked --dry-run`; `db:push` runs `supabase db push --linked`; neither reads `DATABASE_URL`. Do not add any reset script.
+Run `npm install --save-dev --save-exact supabase@2.109.1`. Add npm scripts `db:pull`, `db:push:dry-run`, `db:push`, `migration:new`, `check:migrations`, and `psql:readonly`. `db:push:dry-run` runs `supabase db push --linked --dry-run`; `db:push` runs `supabase db push --linked`; neither reads `DATABASE_URL`. `psql:readonly` runs the tested TypeScript wrapper, which accepts only a named environment variable, validates it with `parseDatabaseUrl`, derives libpq `PGHOST`, `PGPORT`, `PGUSER`, `PGPASSWORD`, `PGDATABASE`, `PGSSLMODE`, and `PGOPTIONS`, and never places the URL in child arguments or logs. Do not add any reset script.
 
 The checker evaluates migration paths only. Locally, without `--base`, combine `git diff --cached --name-status --find-renames HEAD`, `git diff --name-status --find-renames`, and `git ls-files --others --exclude-standard`; this inspects staged, unstaged, and untracked changes. In CI, require `--base $mergeBase` and combine `git diff --name-status --find-renames $mergeBase...HEAD` with `git ls-files --others --exclude-standard`, so an untracked migration is never invisible. Only an added versioned `.sql` under `supabase/migrations/` passes after the baseline commit. All historical-path additions and every modification, deletion, or rename in either lineage fail. Never default to `HEAD...HEAD`.
 
-Implement optional `parseDatabaseUrl`: host ends `.pooler.supabase.com`, username is `csg_schema_auditor`, `sslmode=require` exists, and decoded `options` contains `default_transaction_read_only=on`. Document separate operator variables for disposable and production audits, each mapped to the runtime audit variable only immediately before its corresponding audit:
+Implement optional `parseDatabaseUrl`: host ends `.pooler.supabase.com`, port is exactly session-pooler `5432`, username is `csg_schema_auditor.<project-ref>` where the project ref matches `[a-z0-9]{20}`, `sslmode=require` exists, and decoded `options` contains `default_transaction_read_only=on`. Document separate operator variables for disposable and production audits, each mapped to the runtime audit variable only immediately before its corresponding schema audit:
 
 ```dotenv
 # Read-only session-pooler audit accounts; never use either for CLI deployment.
-SUPABASE_DISPOSABLE_SCHEMA_AUDIT_DATABASE_URL=postgresql://csg_schema_auditor:readonly-audit-password@aws-0-us-east-1.pooler.supabase.com:5432/postgres?sslmode=require&options=-c%20default_transaction_read_only%3Don
-SUPABASE_PRODUCTION_SCHEMA_AUDIT_DATABASE_URL=postgresql://csg_schema_auditor:readonly-audit-password@aws-0-us-east-1.pooler.supabase.com:5432/postgres?sslmode=require&options=-c%20default_transaction_read_only%3Don
+SUPABASE_DISPOSABLE_SCHEMA_AUDIT_DATABASE_URL=postgresql://csg_schema_auditor.abcdefghijklmnopqrst:readonly-audit-password@aws-0-us-east-1.pooler.supabase.com:5432/postgres?sslmode=require&options=-c%20default_transaction_read_only%3Don
+SUPABASE_PRODUCTION_SCHEMA_AUDIT_DATABASE_URL=postgresql://csg_schema_auditor.abcdefghijklmnopqrst:readonly-audit-password@aws-0-us-east-1.pooler.supabase.com:5432/postgres?sslmode=require&options=-c%20default_transaction_read_only%3Don
 ```
 
 In `scripts/audit-database-schema.ts`, call `parseDatabaseUrl(process.env.DATABASE_URL)` and use its returned connection string before constructing `new pg.Client(...)`; a missing or invalid URL must exit before `pg.Client` is created.
@@ -263,14 +265,12 @@ on:
     - cron: "0 6 * * 1"
 ```
 
-Add this scheduled-only job; the production-audit secret is intentionally mapped to the runtime name `DATABASE_URL`:
+Add this scheduled-only job; the production-audit secret is intentionally mapped to the runtime name `DATABASE_URL` only on the final audit step:
 
 ```yaml
   database-schema-audit:
     if: github.event_name == 'schedule'
     runs-on: ubuntu-latest
-    env:
-      DATABASE_URL: ${{ secrets.SUPABASE_PRODUCTION_SCHEMA_AUDIT_DATABASE_URL }}
     steps:
       - uses: actions/checkout@v4
         with: { fetch-depth: 0 }
@@ -278,6 +278,8 @@ Add this scheduled-only job; the production-audit secret is intentionally mapped
         with: { node-version: 20, cache: npm }
       - run: npm ci
       - run: npm run audit:database-schema
+        env:
+          DATABASE_URL: ${{ secrets.SUPABASE_PRODUCTION_SCHEMA_AUDIT_DATABASE_URL }}
 ```
 
 - [ ] **Step 4: Verify the complete local deliverable**
@@ -557,7 +559,7 @@ npm run db:push
 if ($LASTEXITCODE -ne 0) { throw 'Disposable Supabase push failed.' }
 $env:DATABASE_URL = $env:SUPABASE_DISPOSABLE_SCHEMA_AUDIT_DATABASE_URL
 npm run audit:database-schema
-psql $env:DATABASE_URL -X -q -v ON_ERROR_STOP=1 -f scripts/audit-016-dedup-integrity.sql
+npm run --silent psql:readonly -- SUPABASE_DISPOSABLE_SCHEMA_AUDIT_DATABASE_URL -X -q -v ON_ERROR_STOP=1 -f scripts/audit-016-dedup-integrity.sql
 ```
 
 Expected: focused contracts pass; the disposable dry run lists only pending 032 then 033 after the pulled baseline; its audit prints `ok`; all eight service-role policies exist; zero children reference losers; each deleted loser has a complete immutable archive row; serialized discarded source-reference evidence is on each winner; and `raw_regulatory_items_hash_unique_idx` exists with no duplicate hash. Never use `db reset --linked`.
@@ -611,7 +613,7 @@ npx supabase migration list --linked
 if ($LASTEXITCODE -ne 0) { throw 'Production Supabase migration list failed.' }
 $env:DATABASE_URL = $env:SUPABASE_PRODUCTION_SCHEMA_AUDIT_DATABASE_URL
 npm run audit:database-schema
-psql $env:DATABASE_URL -X -q -v ON_ERROR_STOP=1 -f scripts/audit-016-dedup-integrity.sql
+npm run --silent psql:readonly -- SUPABASE_PRODUCTION_SCHEMA_AUDIT_DATABASE_URL -X -q -v ON_ERROR_STOP=1 -f scripts/audit-016-dedup-integrity.sql
 ```
 
 Production passes when history is baseline then 032 then 033, audit prints `ok`, all eight exact RLS policies exist, and there are no unexpected/missing FK rows or loser references. This remains an operator/code-review gate; the publication no-human-review policy does not waive it.
