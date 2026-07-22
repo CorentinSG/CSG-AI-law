@@ -53,6 +53,106 @@ export type ResearchEntry = {
 const author = "Corentin Saint-Girons";
 export const researchEntries: ResearchEntry[] = [
   {
+    slug: "ai-summaries-rule-1006-admissibility",
+    title:
+      "How AI-Generated Summaries Could Make Their Way Into the Courtroom Under Federal Rule of Evidence 1006",
+    subtitle:
+      "AI-generated summaries may soon have a clearer path into evidence — provided the underlying records and the process behind them are properly handled.",
+    author,
+    status: "published",
+    category: "AI Litigation",
+    tags: [
+      "Federal Rules of Evidence",
+      "Rule 1006",
+      "AI evidence",
+      "Admissibility",
+      "Litigation",
+    ],
+    jurisdiction: "United States / Federal",
+    readingTime: "6 min read",
+    summary:
+      "A recent legal development explores how Federal Rule of Evidence 1006 could support the admissibility of AI-generated summaries, provided the underlying evidence is properly handled. If adopted by courts, it could significantly change how lawyers review and present large volumes of documents.",
+    abstract:
+      "AI-generated summaries may soon have a clearer path into the courtroom. A recent legal development explores how Federal Rule of Evidence 1006 could support the admissibility of AI-generated summaries, provided the underlying evidence is properly handled. This note breaks down what this means, why it matters, and the safeguards that will still be required.",
+    image: "/images/research/rule-1006-ai-summaries.png",
+    publishedAt: "2026-07-20",
+    featured: true,
+    relatedSlugs: [
+      "generative-ai-access-to-justice-pro-se",
+      "ai-legal-ethics-early-questions-lawyers",
+      "white-collar-revolution-law-firms-ai",
+    ],
+    body: [
+      {
+        heading: "The problem: too many documents to review",
+        paragraphs: [
+          "Lawyers regularly deal with thousands of pages of financial records, rent ledgers, invoices, emails, medical records and other documents that cannot realistically be reviewed one by one during a trial.",
+        ],
+      },
+      {
+        heading: "What Rule 1006 allows",
+        paragraphs: [
+          "Federal Rule of Evidence 1006 provides a solution. It allows a party to present a summary, chart or calculation to prove the content of voluminous admissible records that cannot conveniently be examined in court.[1]",
+          "Since December 1, 2024, the rule expressly states that these summaries may be admitted as evidence, even when the underlying documents have not themselves been introduced into evidence.[1]",
+          "This clarification matters because a Rule 1006 summary is not merely a visual aid. When the proper foundation is established, the summary can become substantive evidence that the judge or jury may rely on.[2][3][4]",
+        ],
+      },
+      {
+        heading: "Where artificial intelligence fits",
+        paragraphs: [
+          "This creates an interesting path for the use of artificial intelligence.",
+          "An AI system could help extract information from thousands of documents, identify transactions, organize dates, calculate totals and produce a clear summary of the underlying evidence.",
+          "But the fact that AI helped create the summary would not automatically make it admissible.",
+        ],
+      },
+      {
+        heading: "The safeguards that still apply",
+        paragraphs: [
+          "The underlying records must still be admissible. They must be made available to the opposing party, and the final summary must fairly and accurately reflect their contents.[1][3]",
+          "The party offering the summary would also need to explain how it was created. This may require preserving the documents provided to the AI system, the prompts used, the model version, the generated output and the human verification process.[5]",
+          "Most importantly, a lawyer or qualified witness should independently verify every figure and adopt the final summary as accurate. The safest approach is therefore not to present an unexplained AI output as evidence, but to present a human-reviewed Rule 1006 summary created with the assistance of AI.",
+        ],
+      },
+      {
+        heading: "A proposed Rule 707 — not yet adopted",
+        paragraphs: [
+          "A proposed Federal Rule of Evidence 707 could eventually introduce more specific reliability requirements for evidence produced by artificial intelligence. However, the Advisory Committee on Evidence Rules stated in its May 17, 2026 report that it was not recommending adoption of the proposal at that time.[6]",
+          "For now, the existing rules already provide a possible framework.",
+        ],
+      },
+      {
+        heading: "Existing rules, carefully applied",
+        paragraphs: [
+          "AI can assist with the preparation of the evidence, but admissibility will continue to depend on the reliability of the process, the admissibility of the underlying records and the ability of a human witness to explain and verify the final result.",
+          "The future of AI-generated evidence may therefore arrive not through a completely new evidentiary system, but through the careful application of rules that already exist.",
+        ],
+      },
+    ],
+    references: [
+      {
+        label:
+          "[1] Federal Rule of Evidence 1006 and Advisory Committee Note to the 2024 amendment.",
+        href: "https://www.law.cornell.edu/rules/fre/rule_1006",
+      },
+      {
+        label: "[2] United States v. Bray, 139 F.3d 1104 (6th Cir. 1998).",
+      },
+      {
+        label: "[3] United States v. Janati, 374 F.3d 263 (4th Cir. 2004).",
+      },
+      {
+        label: "[4] United States v. White, 737 F.3d 1121 (7th Cir. 2013).",
+      },
+      {
+        label: "[5] Federal Rules of Evidence 803(6), 901(a) and 901(b)(9).",
+      },
+      {
+        label:
+          "[6] Advisory Committee on Evidence Rules, May 17, 2026 report concerning proposed Federal Rule of Evidence 707.",
+      },
+    ],
+  },
+  {
     slug: "generative-ai-access-to-justice-pro-se",
     title:
       "Generative AI, Self-Representation, and the Distance Between Access to Courts and Access to Justice",
@@ -76,7 +176,6 @@ export const researchEntries: ResearchEntry[] = [
       "Generative AI may be improving access to courts. But is it improving access to justice? A new paper analyzing roughly 2.8 million federal civil filings from 2008 to 2025 finds a sharp rise in self-representation and signs of AI-assisted drafting — yet no corresponding improvement in outcomes. Access to legal drafting is not the same as access to a legal remedy.",
     image: "/images/research/pro-se-generative-ai.png",
     publishedAt: "2026-07-19",
-    featured: true,
     relatedSlugs: [
       "white-collar-revolution-law-firms-ai",
       "ai-regulation-access-to-justice",

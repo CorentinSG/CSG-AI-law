@@ -266,7 +266,8 @@ export default async function AiRegulationPage({
                   <div className="flex items-center gap-3">
                     <span className="h-2 w-2 rounded-full bg-zinc-200" />
                     <p className="text-sm text-zinc-500">
-                      No public legal developments yet. The intelligence layer is monitoring — source-backed items will appear here once published.
+                      No public development yet — monitoring continues.
+              
                     </p>
                   </div>
                 </CardContent>
@@ -353,7 +354,8 @@ export default async function AiRegulationPage({
                 <Card className="rounded-[1.8rem] border-black/6 bg-white/90 shadow-sm md:col-span-2 xl:col-span-3">
                   <CardContent className="p-6">
                     <p className="text-sm text-zinc-500">
-                      No published database entries yet. The structured legal database stays intentionally empty until an entry is source-verified and published.
+                      No published entry yet — the database stays empty until an entry is source-verified.
+              
                     </p>
                   </CardContent>
                 </Card>

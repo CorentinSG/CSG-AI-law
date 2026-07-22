@@ -98,20 +98,25 @@ function SourceList({
               key={item.url}
               className="rounded-[1.4rem] border border-black/6 bg-zinc-50/80 p-4"
             >
-              <p className="font-medium text-zinc-950">{item.label}</p>
-              <p className="mt-1 text-xs uppercase tracking-[0.22em] text-zinc-500">
-                {item.institution} / status {item.responseStatus ?? "n/a"} / accessible{" "}
-                {item.runtimeAccessible === null ? "unchecked" : item.runtimeAccessible ? "yes" : "no"}
-              </p>
               <a
                 href={item.url}
                 target="_blank"
                 rel="noreferrer"
-                className="mt-2 block text-sm text-zinc-800 underline decoration-black/15 underline-offset-4"
+                className="font-medium text-zinc-950 underline decoration-black/15 underline-offset-4 hover:decoration-black/40"
               >
-                {item.url}
+                {item.label} <span aria-hidden>↗</span>
               </a>
-              <p className="mt-2 text-sm leading-7 text-zinc-700">{item.note}</p>
+              <p className="mt-1 text-xs uppercase tracking-[0.22em] text-zinc-500">
+                {item.institution}
+              </p>
+              {item.note ? (
+                <details className="group mt-2">
+                  <summary className="cursor-pointer list-none font-mono text-[10px] uppercase tracking-[0.2em] text-zinc-400 transition-colors hover:text-zinc-600 group-open:text-zinc-600">
+                    Note
+                  </summary>
+                  <p className="mt-1.5 text-sm leading-6 text-zinc-700">{item.note}</p>
+                </details>
+              ) : null}
             </div>
           ))
         ) : (
@@ -511,7 +516,7 @@ export default async function EuropeCountryPage({
                   Verification pending
                 </p>
                 <p className="text-sm text-amber-800">
-                  No official national AI Act implementation source has been verified for {profile.countryName} yet. This profile is a placeholder — the EU framework applies to all Member States. Absence of a verified source here does not mean absence of national law or institutional activity.
+                  No verified national source yet — the EU framework still applies to {profile.countryName}.
                 </p>
               </div>
             </div>
@@ -634,38 +639,33 @@ export default async function EuropeCountryPage({
 
         <Card className="rounded-[1.9rem] border-black/6 bg-white shadow-[0_18px_50px_rgba(15,15,15,0.04)]">
           <CardHeader>
-            <CardTitle>Editorial posture</CardTitle>
+            <CardTitle>Caveats &amp; editorial notes</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4 text-sm leading-7 text-zinc-700">
-            <p>
-              This country profile is intentionally conservative. The absence of a
-              verified national source does not mean the absence of law, policy work,
-              or institutional preparation.
-            </p>
-            <p>
-              Public content here is presented for legal research and legal intelligence
-              purposes only. It does not constitute legal advice.
-            </p>
-            <div>
-              <p className="font-mono text-[11px] uppercase tracking-[0.24em] text-zinc-500">
-                Missing source warnings
-              </p>
-              <ul className="mt-2 space-y-2">
-                {missingSourceWarnings.map((item) => (
-                  <li key={item}>{item}</li>
-                ))}
-              </ul>
-            </div>
-            <div>
-              <p className="font-mono text-[11px] uppercase tracking-[0.24em] text-zinc-500">
-                Editorial notes
-              </p>
-              <ul className="mt-2 space-y-2">
-                {editorialNotes.map((item) => (
-                  <li key={item}>{item}</li>
-                ))}
-              </ul>
-            </div>
+          <CardContent className="space-y-3 text-sm leading-7 text-zinc-700">
+            {missingSourceWarnings.length > 0 ? (
+              <details className="group rounded-[1.2rem] border border-black/6 bg-zinc-50/80 px-4 py-3">
+                <summary className="cursor-pointer list-none font-mono text-[11px] uppercase tracking-[0.24em] text-zinc-500 transition-colors group-open:text-zinc-700">
+                  Missing source warnings · {missingSourceWarnings.length}
+                </summary>
+                <ul className="mt-3 space-y-2">
+                  {missingSourceWarnings.map((item) => (
+                    <li key={item}>{item}</li>
+                  ))}
+                </ul>
+              </details>
+            ) : null}
+            {editorialNotes.length > 0 ? (
+              <details className="group rounded-[1.2rem] border border-black/6 bg-zinc-50/80 px-4 py-3">
+                <summary className="cursor-pointer list-none font-mono text-[11px] uppercase tracking-[0.24em] text-zinc-500 transition-colors group-open:text-zinc-700">
+                  Editorial notes · {editorialNotes.length}
+                </summary>
+                <ul className="mt-3 space-y-2">
+                  {editorialNotes.map((item) => (
+                    <li key={item}>{item}</li>
+                  ))}
+                </ul>
+              </details>
+            ) : null}
           </CardContent>
         </Card>
       </section>
@@ -692,7 +692,6 @@ export default async function EuropeCountryPage({
         <SectionHeading
           eyebrow="Precise citations"
           title="Official source references"
-          description="Country status should remain conservative unless supported by official source references."
         />
         <Card className="rounded-[1.9rem] border-black/6 bg-white shadow-[0_18px_50px_rgba(15,15,15,0.04)]">
           <CardContent className="space-y-4 p-6">
@@ -705,59 +704,43 @@ export default async function EuropeCountryPage({
                   <p className="font-medium text-zinc-950">
                     {reference.institution}, <span>&ldquo;{reference.title}&rdquo;</span>
                   </p>
-                  <p className="mt-1 text-xs uppercase tracking-[0.22em] text-zinc-500">
-                    {reference.sourceRole.replaceAll("_", " ")} /{" "}
-                    {reference.sourceType.replaceAll("_", " ")} /{" "}
-                    {reference.authorityType ?? "authority type not detected"}
+                  <p className="mt-1.5 flex flex-wrap gap-x-2 gap-y-0.5 font-mono text-[10px] uppercase tracking-[0.18em] text-zinc-500">
+                    <span>{reference.sourceType.replaceAll("_", " ")}</span>
+                    {reference.publicationDate ? (
+                      <span>· {formatDisplayDate(reference.publicationDate)}</span>
+                    ) : null}
+                    <span>· verified {formatDisplayDate(reference.lastVerifiedAt ?? null)}</span>
+                    {reference.pinpoint?.article ? (
+                      <span>· art. {reference.pinpoint.article}</span>
+                    ) : null}
+                    {reference.pinpoint?.section ? (
+                      <span>· §{reference.pinpoint.section}</span>
+                    ) : null}
+                    {reference.pinpoint?.caseNumber ? (
+                      <span>· case {reference.pinpoint.caseNumber}</span>
+                    ) : null}
                   </p>
-                  <p className="mt-2 text-sm leading-7 text-zinc-700">
-                    Last verified: {formatDisplayDate(reference.lastVerifiedAt ?? null)}.
-                  </p>
-                  {reference.publicationDate ? (
-                    <p className="mt-1 text-sm leading-7 text-zinc-700">
-                      Publication date: {formatDisplayDate(reference.publicationDate)}.
-                    </p>
-                  ) : null}
-                  {reference.pinpoint &&
-                  Object.values(reference.pinpoint).some((value) => Boolean(value)) ? (
-                    <p className="mt-1 text-sm leading-7 text-zinc-700">
-                      Pinpoint:{" "}
-                      {[
-                        reference.pinpoint.article
-                          ? `article ${reference.pinpoint.article}`
-                          : null,
-                        reference.pinpoint.section
-                          ? `section ${reference.pinpoint.section}`
-                          : null,
-                        reference.pinpoint.page ? `page ${reference.pinpoint.page}` : null,
-                        reference.pinpoint.caseNumber
-                          ? `case ${reference.pinpoint.caseNumber}`
-                          : null,
-                      ]
-                        .filter(Boolean)
-                        .join(", ")}
-                      .
-                    </p>
-                  ) : null}
                   <a
                     href={reference.url}
                     target="_blank"
                     rel="noreferrer"
-                    className="mt-2 block text-sm text-zinc-800 underline decoration-black/15 underline-offset-4"
+                    className="mt-2 inline-block text-sm text-zinc-800 underline decoration-black/15 underline-offset-4 hover:decoration-black/40"
                   >
-                    {reference.url}
+                    Open source <span aria-hidden>↗</span>
                   </a>
                   {reference.notes ? (
-                    <p className="mt-2 text-sm leading-7 text-zinc-700">
-                      {reference.notes}
-                    </p>
+                    <details className="group mt-1.5">
+                      <summary className="cursor-pointer list-none font-mono text-[10px] uppercase tracking-[0.2em] text-zinc-400 transition-colors hover:text-zinc-600 group-open:text-zinc-600">
+                        Note
+                      </summary>
+                      <p className="mt-1.5 text-sm leading-6 text-zinc-700">{reference.notes}</p>
+                    </details>
                   ) : null}
                 </div>
               ))
             ) : (
               <div className="rounded-[1.4rem] border border-amber-300/40 bg-amber-50 p-4 text-sm leading-7 text-amber-900">
-                No official source reference has been verified for this country profile yet.
-                The profile remains non-exhaustive and under review.
+                No verified official reference yet — profile under review.
               </div>
             )}
           </CardContent>
@@ -830,7 +813,6 @@ export default async function EuropeCountryPage({
         <SectionHeading
           eyebrow="Published monitor items"
           title={`Latest published entries for ${profile.countryName}`}
-          description="Public monitor entries remain published-only. Country profiles do not expose private drafts or unpublished content."
         />
         <Card className="rounded-[2rem] border-black/6 bg-white/70 shadow-[0_18px_50px_rgba(15,15,15,0.04)]">
           <CardContent className="grid gap-6 p-6 md:grid-cols-2 xl:grid-cols-3">
@@ -844,7 +826,7 @@ export default async function EuropeCountryPage({
               ))
             ) : (
               <div className="rounded-[1.6rem] border border-black/6 bg-white p-6 text-sm leading-7 text-zinc-700 xl:col-span-3">
-                No published monitor item is currently available for this country. That does not imply an absence of national activity; it only means nothing has yet been published through the existing workflow.
+                No published entry yet — monitoring continues.
               </div>
             )}
           </CardContent>

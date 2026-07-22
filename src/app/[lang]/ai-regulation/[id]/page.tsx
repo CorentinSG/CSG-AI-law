@@ -13,6 +13,7 @@ import { IntelligenceSignal } from "@/components/site/intelligence-signal";
 import { SiteShell } from "@/components/site/shell";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { pageAlternates } from "@/lib/i18n/metadata";
+import { stripCurationBoilerplate } from "@/content/ai-regulation/editorial-boilerplate";
 import { formatDisplayDate } from "@/lib/utils";
 
 // Stays dynamic (not ISR like the other public /ai-regulation pages, T-RT0C):
@@ -67,6 +68,11 @@ export default async function LegalUpdateDetailPage({
 
   const authorityType = deriveUpdateAuthorityType(update);
   const authority = getAuthorityPresentation(authorityType);
+  // Never show internal curation instructions or extractor fallbacks as if
+  // they were the law's obligations.
+  const affectedParties = stripCurationBoilerplate(update.affectedParties);
+  const keyObligations = stripCurationBoilerplate(update.keyObligations);
+  const complianceDeadlines = stripCurationBoilerplate(update.complianceDeadlines);
   const sourceReferences = getCitationReferences({ update, rawItem, source });
   const citationAssessment = assessCitationQuality(sourceReferences);
   const hubPath =
@@ -211,31 +217,31 @@ export default async function LegalUpdateDetailPage({
             </div>
 
             {/* Affected parties */}
-            {update.affectedParties.length > 0 ? (
+            {affectedParties.length > 0 ? (
               <div>
                 <p className="mb-2 font-mono text-[9px] uppercase tracking-[0.18em] text-zinc-400">Affected parties</p>
                 <ul className="space-y-1 text-xs text-zinc-600">
-                  {update.affectedParties.map((p) => <li key={p} className="flex gap-1"><span className="text-zinc-300">—</span>{p}</li>)}
+                  {affectedParties.map((p) => <li key={p} className="flex gap-1"><span className="text-zinc-300">—</span>{p}</li>)}
                 </ul>
               </div>
             ) : null}
 
             {/* Key obligations */}
-            {update.keyObligations.length > 0 ? (
+            {keyObligations.length > 0 ? (
               <div>
                 <p className="mb-2 font-mono text-[9px] uppercase tracking-[0.18em] text-zinc-400">Key obligations</p>
                 <ul className="space-y-1 text-xs text-zinc-600">
-                  {update.keyObligations.map((item) => <li key={item} className="flex gap-1"><span className="text-zinc-300">—</span>{item}</li>)}
+                  {keyObligations.map((item) => <li key={item} className="flex gap-1"><span className="text-zinc-300">—</span>{item}</li>)}
                 </ul>
               </div>
             ) : null}
 
             {/* Compliance deadlines */}
-            {update.complianceDeadlines.length > 0 ? (
+            {complianceDeadlines.length > 0 ? (
               <div>
                 <p className="mb-2 font-mono text-[9px] uppercase tracking-[0.18em] text-zinc-400">Compliance deadlines</p>
                 <ul className="space-y-1 text-xs text-zinc-600">
-                  {update.complianceDeadlines.map((item) => <li key={item} className="flex gap-1"><span className="text-amber-400">!</span>{item}</li>)}
+                  {complianceDeadlines.map((item) => <li key={item} className="flex gap-1"><span className="text-amber-400">!</span>{item}</li>)}
                 </ul>
               </div>
             ) : null}

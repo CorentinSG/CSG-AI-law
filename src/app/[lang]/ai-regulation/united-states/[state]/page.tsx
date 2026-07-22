@@ -268,7 +268,6 @@ export default async function UsStatePage({
           <SectionHeading
             eyebrow="Precise citations"
             title="Official source references"
-            description="State-law claims should remain conservative unless supported by official source references."
           />
           <Card className="rounded-[1.9rem] border-black/6 bg-white shadow-[0_18px_50px_rgba(15,15,15,0.04)]">
             <CardContent className="space-y-4 p-6">
@@ -317,7 +316,6 @@ export default async function UsStatePage({
         <SectionHeading
           eyebrow="Published monitor items"
           title={`Latest published entries for ${profile.stateName}`}
-          description="Public monitor entries remain published-only. State profiles do not expose private drafts or discovery leads."
         />
         <Card className="rounded-[2rem] border-black/6 bg-white/70 shadow-[0_18px_50px_rgba(15,15,15,0.04)]">
           <CardContent className="grid gap-6 p-6 md:grid-cols-2 xl:grid-cols-3">

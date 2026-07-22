@@ -336,27 +336,18 @@ export default async function AdminAiRegulationPage({
                 Europe backlog
               </p>
               <p className="mt-3 text-2xl text-white">{europeCountryProfiles.length}</p>
-              <p className="mt-2 text-sm text-zinc-400">
-                Country-level verification entries currently surfaced for Europe review.
-              </p>
             </div>
             <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
               <p className="font-mono text-[10px] uppercase tracking-[0.24em] text-zinc-500">
                 U.S. backlog
               </p>
               <p className="mt-3 text-2xl text-white">{usStateBacklog.length}</p>
-              <p className="mt-2 text-sm text-zinc-400">
-                State-level baseline entries still needing stronger source verification.
-              </p>
             </div>
             <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
               <p className="font-mono text-[10px] uppercase tracking-[0.24em] text-zinc-500">
                 Scan jobs visible
               </p>
               <p className="mt-3 text-2xl text-white">{scanJobs.items.length}</p>
-              <p className="mt-2 text-sm text-zinc-400">
-                Recent scan runs visible on this page for operational context.
-              </p>
             </div>
             <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
               <p className="font-mono text-[10px] uppercase tracking-[0.24em] text-zinc-500">
@@ -364,9 +355,6 @@ export default async function AdminAiRegulationPage({
               </p>
               <p className="mt-3 text-lg text-white">
                 {env.AI_ENABLE_PROCESSING ? "Enabled" : "Disabled by default"}
-              </p>
-              <p className="mt-2 text-sm text-zinc-400">
-                Guardrails stay visible so operations never mistake planning scaffolding for auto-publishing authority.
               </p>
             </div>
           </CardContent>
@@ -417,9 +405,7 @@ export default async function AdminAiRegulationPage({
           </CardHeader>
           <CardContent className="space-y-3">
             <p className="text-sm text-zinc-400">
-              Specialist press and media sources are manual discovery references only.
-              Paywalled content must not be scraped or reproduced. Official sources
-              control before any publication.
+              Manual discovery references only — official sources control before publication.
             </p>
             <div className="grid gap-3 md:grid-cols-2">
               {mediaDiscoveryReferences.slice(0, 6).map((entry) => (
