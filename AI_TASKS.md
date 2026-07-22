@@ -92,6 +92,14 @@ YYYY-MM-DD · <Agent> · <TASK-ID> · <STATUS>
 
 ## Current status
 
+2026-07-20 · Claude Code · T-CONSOLE-LITE-27 · MERGED
+- Intent: Owner directive — all 27 European country pages on the console system; 18 no-snapshot countries get console-lite from profile data; legacy layout deleted; admin country editor explainer trimmed.
+- Files: src/app/[lang]/ai-regulation/europe/[country]/page.tsx (852→692 lines, SourceList deleted), src/app/admin/ai-regulation/countries/[slug]/page.tsx.
+- Graph anchors: CountryConsoleHero, CountryLedger, CorpusExplorer, community "Intelligence Hub UI".
+- Verification: 697/697 · typecheck · lint PASS · browser: Bulgaria=console-lite (BG hero, 5 sections), Germany=full console intact.
+- Branch/commit: main @ HEAD (local; push pending).
+- Next: Claude Code — sub-page épure needs a dedicated design pass (density is content-driven, not boilerplate); Codex unchanged (Wave 1).
+
 2026-07-20 · Claude Code · T-UX-DECLUTTER · MERGED
 - Intent: Owner directive « épure le site » — strip meta-prose and ops jargon from public pages, collapse long notes behind disclosures, hide machine boilerplate rendered as legal substance, tighten the admin hub.
 - Files: src/app/[lang]/ai-regulation/europe/[country]/page.tsx (legacy template shared by 18 countries), united-states/[state]/page.tsx, [id]/page.tsx, ai-regulation/page.tsx (empty states), src/app/admin/ai-regulation/page.tsx, src/content/ai-regulation/editorial-boilerplate.ts (NEW + test).
