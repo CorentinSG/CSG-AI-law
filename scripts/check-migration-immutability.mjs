@@ -6,10 +6,6 @@ const HISTORICAL_MIGRATION_PREFIX = "src/db/migrations/";
 const SUPABASE_MIGRATION_PREFIX = "supabase/migrations/";
 const VERSIONED_MIGRATION = /^supabase\/migrations\/\d{14}_[^/]+\.sql$/;
 
-function normalizePath(filePath) {
-  return filePath.replaceAll("\\", "/");
-}
-
 function isMigrationPath(filePath) {
   return (
     filePath.startsWith(HISTORICAL_MIGRATION_PREFIX) ||
@@ -20,11 +16,7 @@ function isMigrationPath(filePath) {
 export function findMigrationViolations(changes) {
   const violations = [];
 
-  for (const change of changes) {
-    if (!change.trim()) continue;
-
-    const [status, ...rawPaths] = change.split("\t");
-    const paths = rawPaths.map(normalizePath);
+  for (const { status, paths } of changes) {
     const migrationPaths = paths.filter(isMigrationPath);
     if (migrationPaths.length === 0) continue;
 
@@ -61,31 +53,81 @@ export function findMigrationViolations(changes) {
   return violations;
 }
 
-function runGit(args) {
-  const output = execFileSync("git", args, { encoding: "utf8" }).trim();
-  return output ? output.split(/\r?\n/) : [];
+function parseNullFields(output) {
+  if (!output) return [];
+  if (!output.endsWith("\0")) {
+    throw new Error("Git returned malformed non-NUL-terminated output");
+  }
+  return output.slice(0, -1).split("\0");
 }
 
-function collectChanges(base) {
-  const trackedChanges = base
-    ? runGit(["diff", "--name-status", "--find-renames", `${base}...HEAD`])
-    : [
-        ...runGit([
-          "diff",
-          "--cached",
-          "--name-status",
-          "--find-renames",
-          "HEAD",
-        ]),
-        ...runGit(["diff", "--name-status", "--find-renames"]),
-      ];
-  const untrackedChanges = runGit([
-    "ls-files",
-    "--others",
-    "--exclude-standard",
-  ]).map((filePath) => `A\t${filePath}`);
+export function parseGitNameStatusOutput(output) {
+  const fields = parseNullFields(output);
+  const changes = [];
 
-  return [...new Set([...trackedChanges, ...untrackedChanges])];
+  for (let index = 0; index < fields.length; ) {
+    const status = fields[index];
+    index += 1;
+    const pathCount = /^[RC]\d+$/.test(status) ? 2 : 1;
+    if (index + pathCount > fields.length) {
+      throw new Error(`Git returned incomplete path fields for status ${status}`);
+    }
+    changes.push({ status, paths: fields.slice(index, index + pathCount) });
+    index += pathCount;
+  }
+
+  return changes;
+}
+
+function parseGitPathOutput(output) {
+  return parseNullFields(output).map((filePath) => ({
+    status: "A",
+    paths: [filePath],
+  }));
+}
+
+function runGit(args, cwd) {
+  return execFileSync("git", args, { cwd, encoding: "utf8" });
+}
+
+export function collectChanges(base, cwd = process.cwd()) {
+  const trackedChanges = base
+    ? parseGitNameStatusOutput(
+        runGit(
+          ["diff", "--name-status", "--find-renames", "-z", `${base}...HEAD`],
+          cwd,
+        ),
+      )
+    : [
+        ...parseGitNameStatusOutput(
+          runGit(
+            [
+              "diff",
+              "--cached",
+              "--name-status",
+              "--find-renames",
+              "-z",
+              "HEAD",
+            ],
+            cwd,
+          ),
+        ),
+        ...parseGitNameStatusOutput(
+          runGit(["diff", "--name-status", "--find-renames", "-z"], cwd),
+        ),
+      ];
+  const untrackedChanges = parseGitPathOutput(
+    runGit(["ls-files", "--others", "--exclude-standard", "-z"], cwd),
+  );
+
+  return [
+    ...new Map(
+      [...trackedChanges, ...untrackedChanges].map((change) => [
+        JSON.stringify(change),
+        change,
+      ]),
+    ).values(),
+  ];
 }
 
 function parseBaseArgument(args) {
