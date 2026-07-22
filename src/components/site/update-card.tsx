@@ -31,7 +31,7 @@ export function UpdateCard({
 
   return (
     <MotionStaggerItem className="h-full">
-      <Card className="glass-panel-soft group h-full rounded-[1.9rem] transition duration-300 hover:-translate-y-0.5 hover:shadow-[0_24px_60px_rgba(0,0,0,0.4)]">
+      <Card className="glass-panel-soft group flex h-full flex-col rounded-[1.9rem] transition duration-300 hover:-translate-y-0.5 hover:shadow-[0_24px_60px_rgba(0,0,0,0.4)]">
         <CardHeader className="space-y-3">
           <div className="flex items-start justify-between gap-3">
             <p className="min-w-0 truncate font-mono text-[10px] uppercase tracking-[0.22em] text-zinc-500">
@@ -63,7 +63,9 @@ export function UpdateCard({
             ) : null}
           </p>
         </CardHeader>
-        <CardContent className="flex h-full flex-col justify-between gap-4 text-sm text-zinc-700">
+        {/* flex-1 (not h-full: that resolves to the FULL card height and pushes
+            the footer past the card bottom, bleeding into the next section) */}
+        <CardContent className="flex flex-1 flex-col justify-between gap-4 text-sm text-zinc-700">
           <p className="line-clamp-3 leading-7">{update.oneSentenceSummary}</p>
           <div className="flex items-center justify-between gap-3 border-t border-white/8 pt-3">
             <span className="min-w-0 truncate text-xs text-zinc-500">
