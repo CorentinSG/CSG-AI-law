@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 
+import { ConstructionBanner } from "@/components/site/construction-banner";
 import { CursorBot } from "@/components/site/cursor-bot";
 import { PageTransition } from "@/components/site/page-transition";
 import { SiteFooter } from "@/components/site/site-footer";
@@ -29,6 +30,7 @@ export function SiteShell({
       )}
     >
       {!isAdmin ? <CursorBot /> : null}
+      {!isAdmin ? <ConstructionBanner /> : null}
       <SiteHeader variant={variant} />
       <PageTransition>
         <main
