@@ -6,6 +6,66 @@ export class EnvValidationError extends Error {}
 
 const DATABASE_URL_ERROR =
   "DATABASE_URL must use the read-only Supabase session pooler";
+const READ_ONLY_OPTION = "default_transaction_read_only";
+
+function parsePostgresOptionTokens(options: string) {
+  const tokens: string[] = [];
+  let token = "";
+
+  for (let index = 0; index < options.length; index += 1) {
+    const character = options[index];
+    if (/\s/.test(character)) {
+      if (token) {
+        tokens.push(token);
+        token = "";
+      }
+      continue;
+    }
+
+    if (character === "\\") {
+      index += 1;
+      if (index >= options.length) return undefined;
+      token += options[index];
+      continue;
+    }
+
+    token += character;
+  }
+
+  if (token) tokens.push(token);
+  return tokens;
+}
+
+function hasOneReadOnlyAssignment(options: string) {
+  const tokens = parsePostgresOptionTokens(options);
+  if (!tokens) return false;
+
+  const assignments: string[] = [];
+  for (let index = 0; index < tokens.length; index += 1) {
+    const token = tokens[index];
+    let assignment: string | undefined;
+
+    if (token === "-c") {
+      assignment = tokens[index + 1];
+      if (!assignment) return false;
+      index += 1;
+    } else if (token.startsWith("-c") && token.length > 2) {
+      assignment = token.slice(2);
+    } else if (token.startsWith("--") && token.length > 2) {
+      assignment = token.slice(2);
+    }
+
+    if (!assignment) continue;
+    const separator = assignment.indexOf("=");
+    if (separator === -1) continue;
+    const name = assignment.slice(0, separator).toLowerCase();
+    if (name === READ_ONLY_OPTION) {
+      assignments.push(assignment.slice(separator + 1));
+    }
+  }
+
+  return assignments.length === 1 && assignments[0] === "on";
+}
 
 export function parseDatabaseUrl(
   value: string | undefined,
@@ -27,13 +87,16 @@ export function parseDatabaseUrl(
     throw new EnvValidationError(DATABASE_URL_ERROR);
   }
 
-  const options = databaseUrl.searchParams.get("options") ?? "";
+  const sslModes = databaseUrl.searchParams.getAll("sslmode");
+  const optionsValues = databaseUrl.searchParams.getAll("options");
   if (
     databaseUrl.protocol !== "postgresql:" ||
     !databaseUrl.hostname.endsWith(".pooler.supabase.com") ||
     username !== "csg_schema_auditor" ||
-    databaseUrl.searchParams.get("sslmode") !== "require" ||
-    !options.includes("default_transaction_read_only=on")
+    sslModes.length !== 1 ||
+    sslModes[0] !== "require" ||
+    optionsValues.length !== 1 ||
+    !hasOneReadOnlyAssignment(optionsValues[0])
   ) {
     throw new EnvValidationError(DATABASE_URL_ERROR);
   }
