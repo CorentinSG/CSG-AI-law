@@ -6,6 +6,7 @@ import {
   mapCatalogQueryResults,
   type SchemaSnapshot,
 } from "../src/db/schema-integrity";
+import { parseDatabaseUrl } from "../src/lib/env";
 
 config({ path: ".env.local", quiet: true });
 
@@ -82,7 +83,7 @@ async function loadSnapshot(client: Client): Promise<SchemaSnapshot> {
 }
 
 async function main() {
-  const connectionString = process.env.DATABASE_URL?.trim();
+  const connectionString = parseDatabaseUrl(process.env.DATABASE_URL);
   if (!connectionString) {
     process.stderr.write("[audit:database-schema] blocked_missing_credentials DATABASE_URL\n");
     process.exitCode = 2;

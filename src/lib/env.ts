@@ -2,6 +2,45 @@ import { z } from "zod";
 
 import type { RepositoryMode } from "@/db/repository-types";
 
+export class EnvValidationError extends Error {}
+
+const DATABASE_URL_ERROR =
+  "DATABASE_URL must use the read-only Supabase session pooler";
+
+export function parseDatabaseUrl(
+  value: string | undefined,
+): string | undefined {
+  const connectionString = value?.trim();
+  if (!connectionString) return undefined;
+
+  let databaseUrl: URL;
+  try {
+    databaseUrl = new URL(connectionString);
+  } catch {
+    throw new EnvValidationError(DATABASE_URL_ERROR);
+  }
+
+  let username: string;
+  try {
+    username = decodeURIComponent(databaseUrl.username);
+  } catch {
+    throw new EnvValidationError(DATABASE_URL_ERROR);
+  }
+
+  const options = databaseUrl.searchParams.get("options") ?? "";
+  if (
+    databaseUrl.protocol !== "postgresql:" ||
+    !databaseUrl.hostname.endsWith(".pooler.supabase.com") ||
+    username !== "csg_schema_auditor" ||
+    databaseUrl.searchParams.get("sslmode") !== "require" ||
+    !options.includes("default_transaction_read_only=on")
+  ) {
+    throw new EnvValidationError(DATABASE_URL_ERROR);
+  }
+
+  return connectionString;
+}
+
 const booleanString = z
   .union([z.literal("true"), z.literal("false")])
   .transform((value) => value === "true");
@@ -54,7 +93,7 @@ const rawEnvSchema = z.object({
   UPSTASH_REDIS_REST_URL: z.string().url().optional(),
   UPSTASH_REDIS_REST_TOKEN: z.string().min(1).optional(),
   SUPABASE_SERVICE_ROLE_KEY: z.string().min(1).optional(),
-  DATABASE_URL: z.string().min(1).optional(),
+  DATABASE_URL: z.string().min(1).optional().transform(parseDatabaseUrl),
   // ── Ingestion pipeline ──────────────────────────────────────────────────
   FIRECRAWL_API_KEY: z.string().min(1).optional(),
   INGESTION_SECRET: z.string().min(16).optional(),
@@ -63,8 +102,6 @@ const rawEnvSchema = z.object({
   SCRAPLING_WORKER_URL: z.string().url().optional(),
   SCRAPLING_WORKER_TOKEN: z.string().min(16).optional(),
 });
-
-export class EnvValidationError extends Error {}
 
 export interface AppEnv {
   NODE_ENV: "development" | "test" | "production";

@@ -28,6 +28,38 @@ env:
   CRON_SECRET: ci-placeholder-cron-secret-0000
 
 jobs:
+  migration-integrity:
+    if: github.event_name == 'pull_request' || github.event_name == 'push'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+      - name: Enforce migration immutability
+        shell: pwsh
+        run: |
+          if ('${{ github.event_name }}' -eq 'pull_request') {
+            $parent = '${{ github.event.pull_request.base.sha }}'
+          } elseif ('${{ github.event.before }}' -match '^0+$') {
+            $parent = git rev-list --max-parents=0 --reverse HEAD | Select-Object -First 1
+          } else {
+            $parent = '${{ github.event.before }}'
+          }
+          $mergeBase = git merge-base $parent HEAD
+          node scripts/check-migration-immutability.mjs --base $mergeBase
+
+  database-schema-audit:
+    if: github.event_name == 'schedule'
+    runs-on: ubuntu-latest
+    env:
+      DATABASE_URL: ${{ secrets.SUPABASE_PRODUCTION_SCHEMA_AUDIT_DATABASE_URL }}
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+      - uses: actions/setup-node@v4
+        with: { node-version: 20, cache: npm }
+      - run: npm ci
+      - run: npm run audit:database-schema
+
   verify:
     runs-on: ubuntu-latest
     timeout-minutes: 20
