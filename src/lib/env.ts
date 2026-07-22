@@ -7,6 +7,7 @@ export class EnvValidationError extends Error {}
 const DATABASE_URL_ERROR =
   "DATABASE_URL must use the read-only Supabase session pooler";
 const READ_ONLY_OPTION = "default_transaction_read_only";
+const ALLOWED_DATABASE_QUERY_KEYS = new Set(["sslmode", "options"]);
 
 function parsePostgresOptionTokens(options: string) {
   const tokens: string[] = [];
@@ -93,6 +94,9 @@ export function parseDatabaseUrl(
     databaseUrl.protocol !== "postgresql:" ||
     !databaseUrl.hostname.endsWith(".pooler.supabase.com") ||
     username !== "csg_schema_auditor" ||
+    [...databaseUrl.searchParams.keys()].some(
+      (key) => !ALLOWED_DATABASE_QUERY_KEYS.has(key),
+    ) ||
     sslModes.length !== 1 ||
     sslModes[0] !== "require" ||
     optionsValues.length !== 1 ||

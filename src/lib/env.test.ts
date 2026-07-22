@@ -123,6 +123,25 @@ describe("env validation", () => {
   });
 
   it.each([
+    ["host", "db.example.com"],
+    ["port", "5433"],
+    ["user", "postgres"],
+    ["password", "other"],
+    ["database", "other"],
+    ["db", "other"],
+    ["application_name", "schema-audit"],
+  ])("rejects database URL query parameter %s", async (key, value) => {
+    const { parseDatabaseUrl } = await import("@/lib/env");
+    const databaseUrl =
+      "postgresql://csg_schema_auditor:pw@aws-0-us-east-1.pooler.supabase.com:5432/postgres?sslmode=require&options=-c%20default_transaction_read_only%3Don&" +
+      `${key}=${encodeURIComponent(value)}`;
+
+    expect(() => parseDatabaseUrl(databaseUrl)).toThrow(
+      "DATABASE_URL must use the read-only Supabase session pooler",
+    );
+  });
+
+  it.each([
     "postgresql://csg_schema_auditor:pw@aws-0-us-east-1.pooler.supabase.com:5432/postgres?sslmode=require&sslmode=disable&options=-c%20default_transaction_read_only%3Don",
     "postgresql://csg_schema_auditor:pw@aws-0-us-east-1.pooler.supabase.com:5432/postgres?sslmode=disable&sslmode=require&options=-c%20default_transaction_read_only%3Don",
   ])("rejects duplicate sslmode parameters", async (databaseUrl) => {
