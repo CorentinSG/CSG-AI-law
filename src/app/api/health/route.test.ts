@@ -91,7 +91,7 @@ describe("health route", () => {
     buildHealthSnapshot.mockResolvedValueOnce({
       ok: true,
       worker: {
-        alive: false,
+        alive: true,
         heartbeatFresh: false,
       },
     });
@@ -109,7 +109,7 @@ describe("health route", () => {
     expect(buildHealthSnapshot).toHaveBeenCalledWith({ access: "authenticated" });
     await expect(response.json()).resolves.toMatchObject({
       ok: false,
-      worker: { alive: false },
+      worker: { alive: true, heartbeatFresh: false },
     });
   });
 });
