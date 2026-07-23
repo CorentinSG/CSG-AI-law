@@ -65,6 +65,8 @@ export interface CandidateForAiPlanning {
     developmentType: DevelopmentType;
     importanceLevel: ImportanceLevel;
   };
+  /** Independent serious sources already reporting the same story (0 if unknown). */
+  corroboratingSourceCount?: number;
 }
 
 const sourcePriorityBoosts: Record<string, number> = {
@@ -257,6 +259,18 @@ export function rankCandidateForAi(input: CandidateForAiPlanning) {
   const importanceBoost = importanceBoosts[input.classification.importanceLevel];
   score += importanceBoost;
   reasons.push(`importance ${input.classification.importanceLevel}`);
+
+  // Cross-source corroboration outranks single-source items of equal weight,
+  // so the capped per-scan AI budget goes to multi-source stories first. This
+  // only reorders candidates; every cost guardrail applies unchanged.
+  const corroboratingSourceCount = input.corroboratingSourceCount ?? 0;
+  if (corroboratingSourceCount > 0) {
+    const corroborationBoost = Math.min(20, corroboratingSourceCount * 10);
+    score += corroborationBoost;
+    reasons.push(
+      `corroborated by ${corroboratingSourceCount} independent source(s)`,
+    );
+  }
 
   const { aiHits, regulatoryHits } = countKeywordMatches(combinedText);
   const keywordBoost = Math.min(14, aiHits.length * 3 + regulatoryHits.length * 2);

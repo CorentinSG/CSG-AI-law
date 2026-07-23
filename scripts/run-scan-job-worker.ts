@@ -22,7 +22,11 @@ import { getRepositoryMode } from "@/db/repository";
 import { env } from "@/lib/env";
 
 const WORKER_HEARTBEAT_TRIGGER = "worker_heartbeat";
-const LIVE_SCHEDULER_INTERVAL_MS = 15 * 60 * 1000;
+// Hard safety floor for the live cadence. The effective live interval comes
+// from SCAN_JOB_WORKER_SCHEDULER_INTERVAL_MS (default 15 min in
+// createScanWorkerConfig); operators can lower it down to this floor for
+// near-real-time monitoring without being silently clamped back to 15 min.
+const LIVE_SCHEDULER_INTERVAL_FLOOR_MS = 5 * 60 * 1000;
 const HOURLY_SCHEDULER_INTERVAL_MS = 60 * 60 * 1000;
 const DAILY_SCHEDULER_INTERVAL_MS = 24 * 60 * 60 * 1000;
 
@@ -144,7 +148,7 @@ async function main() {
         const cadenceRuns = [
           {
             cadence: "live" as const,
-            intervalMs: Math.max(config.schedulerIntervalMs, LIVE_SCHEDULER_INTERVAL_MS),
+            intervalMs: Math.max(config.schedulerIntervalMs, LIVE_SCHEDULER_INTERVAL_FLOOR_MS),
           },
           { cadence: "hourly" as const, intervalMs: HOURLY_SCHEDULER_INTERVAL_MS },
           { cadence: "daily" as const, intervalMs: DAILY_SCHEDULER_INTERVAL_MS },

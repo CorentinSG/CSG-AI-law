@@ -19,6 +19,12 @@ import {
 } from "@/agents/ai-regulation/processors/scanDiagnostics";
 import { buildAuthorityTag } from "@/agents/ai-regulation/utils/authority";
 import { buildCandidateSourceReference } from "@/agents/ai-regulation/citations";
+import {
+  buildCorroborationMetadataPatch,
+  findCorroboratingUpdates,
+  isEligibleCorroboratingSource,
+  type CorroborationMatch,
+} from "@/agents/ai-regulation/processors/crossSourceCorroboration";
 import { getScanProfile } from "@/agents/ai-regulation/scanProfiles";
 import type { ScanProfileId } from "@/agents/ai-regulation/scanProfiles";
 import { isDiscoveryOnlySource } from "@/agents/ai-regulation/utils/discovery";
@@ -491,6 +497,43 @@ async function scanSourcesForCandidates(
   return processableCandidates;
 }
 
+// Marks each corroborating counterpart with a reciprocal "supporting"
+// reference to the freshly created update and refreshes its news projection,
+// so corroboration is symmetric across sources. Counterparts whose review
+// outcome is negative are left untouched.
+async function applyReciprocalCorroboration(input: {
+  update: Awaited<ReturnType<typeof updateRepository.createUpdate>>;
+  source: ProcessableCandidate["source"];
+  matches: CorroborationMatch[];
+  now: string;
+}) {
+  for (const match of input.matches) {
+    if (match.update.status === "rejected" || match.update.status === "archived") continue;
+    const counterpartRawItem = await updateRepository.getRawItem(match.update.rawItemId);
+    if (!counterpartRawItem) continue;
+    const patch = buildCorroborationMetadataPatch({
+      rawItem: counterpartRawItem,
+      matches: [{ update: input.update, source: input.source }],
+      now: input.now,
+    });
+    if (!patch) continue;
+    const updatedCounterpartRawItem = await updateRepository.updateRawItemMetadata(
+      counterpartRawItem.id,
+      patch.rawMetadata,
+    );
+    const counterpartNewsItem = buildNewsItemFromUpdate({
+      update: match.update,
+      rawItem: updatedCounterpartRawItem,
+      source: match.source,
+    });
+    await updateRepository.upsertNewsItem({
+      ...counterpartNewsItem,
+      regulatoryUpdateId: match.update.id,
+      rawItemId: counterpartRawItem.id,
+    });
+  }
+}
+
 // --- Stage 2 helper: processAllCandidates ---
 // Plans AI processing, creates regulatory updates and news items, optionally
 // calls OpenAI for allowed items, and logs outcomes. Mutates sourceStates
@@ -499,8 +542,28 @@ async function processAllCandidates(
   processableCandidates: ProcessableCandidate[],
   sourceStates: Map<string, SourceScanState>,
 ): Promise<void> {
+  if (processableCandidates.length === 0) return;
+  // Corroboration context, loaded once per batch: the recent-update window
+  // that new candidates are matched against, and the source registry used to
+  // qualify counterpart sources.
+  const [recentUpdatesPage, allSources] = await Promise.all([
+    updateRepository.listUpdatesPage(undefined, { limit: 400, offset: 0 }),
+    updateRepository.getSources(),
+  ]);
+  const recentUpdates = recentUpdatesPage.items;
+  const sourcesById = new Map(allSources.map((source) => [source.id, source]));
   const existingProcessingLogs = await updateRepository.getProcessingLogs(2000);
   const monthlyEstimatedSpendUsd = estimateMonthlyAiSpend(existingProcessingLogs);
+  const corroborationProbeFor = (entry: ProcessableCandidate) => ({
+    id: entry.rawItem.id,
+    sourceId: entry.source.id,
+    title: entry.candidate.title,
+    jurisdiction: entry.classification.jurisdiction,
+    region: entry.source.region,
+    country: entry.source.country,
+    publicationDate: entry.candidate.publicationDate ?? null,
+    detectedDate: entry.rawItem.detectedAt,
+  });
   const aiPlan = planAiProcessingBatch(
     processableCandidates.map((entry) => ({
       candidate: entry.candidate,
@@ -511,6 +574,13 @@ async function processAllCandidates(
         developmentType: entry.classification.developmentType,
         importanceLevel: entry.classification.importanceLevel,
       },
+      // Pre-update corroboration probe so multi-source stories win the
+      // capped AI slots even before their update rows exist.
+      corroboratingSourceCount: findCorroboratingUpdates({
+        update: corroborationProbeFor(entry),
+        recentUpdates,
+        sourcesById,
+      }).length,
     })),
     env,
     monthlyEstimatedSpendUsd,
@@ -633,6 +703,49 @@ async function processAllCandidates(
         reviewedAt: autoPublicationTimestamp,
         publishedAt: autoPublicationTimestamp,
       });
+
+      // Cross-source corroboration: fuzzy-match this update against recent
+      // updates from other serious sources; matches become "supporting"
+      // references on both sides before the news projection is built, so the
+      // multi-source auto-publish policy can act on them immediately.
+      const corroborationNow = new Date().toISOString();
+      const corroborationMatches = findCorroboratingUpdates({
+        update,
+        recentUpdates,
+        sourcesById,
+      });
+      const corroborationPatch = buildCorroborationMetadataPatch({
+        rawItem: entry.rawItem,
+        matches: corroborationMatches,
+        now: corroborationNow,
+      });
+      if (corroborationPatch) {
+        entry.rawItem.rawMetadata = corroborationPatch.rawMetadata;
+        if (isEligibleCorroboratingSource(entry.source)) {
+          await applyReciprocalCorroboration({
+            update,
+            source: entry.source,
+            matches: corroborationMatches,
+            now: corroborationNow,
+          });
+        }
+        await updateRepository.addProcessingLog({
+          rawItemId: entry.rawItem.id,
+          regulatoryUpdateId: update.id,
+          modelUsed: "cross-source-corroboration",
+          promptVersion: "story-similarity.v1",
+          processingStartedAt: corroborationNow,
+          processingFinishedAt: new Date().toISOString(),
+          status: "success",
+          errorMessage: `corroborating_sources=${corroborationPatch.addedReferences.length} | matched_updates=${corroborationMatches
+            .map((match) => match.update.id)
+            .join(",")}`,
+        });
+      }
+      // Same-batch corroboration: later candidates in this batch can match
+      // this update even though it postdates the recent-updates window.
+      recentUpdates.unshift(update);
+
       const updatedRawItem = await updateRepository.updateRawItemMetadata(
         entry.rawItem.id,
         mergeTraceabilityMetadata(entry.rawItem.rawMetadata, {

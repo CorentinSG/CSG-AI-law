@@ -90,6 +90,11 @@ function isSameStory(a: Set<string>, b: Set<string>) {
   return overlap >= STORY_OVERLAP_THRESHOLD && shared >= STORY_MIN_SHARED_TOKENS;
 }
 
+/** Whether two raw titles describe the same story, per the clustering rules. */
+export function isSameStoryTitle(a: string, b: string) {
+  return isSameStory(tokenizeStoryTitle(a), tokenizeStoryTitle(b));
+}
+
 /** 1 = official, 2 = reputable press, 3 = tracker, 4 = other/discovery. */
 export function getNewsSourceTier(
   item: Pick<AiLawNewsItem, "sourceType" | "sourceReliability">,
