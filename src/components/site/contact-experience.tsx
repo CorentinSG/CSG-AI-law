@@ -8,7 +8,6 @@ import {
   Copy,
   FileText,
   Globe2,
-  Mail,
   Mic,
   Scale,
 } from "lucide-react";
@@ -99,9 +98,9 @@ function ParisClock() {
   );
 }
 
-/* ── Email row — discreet address + copy-to-clipboard ─────────── */
+/* ── Copy-email button — copies the address without displaying it ─── */
 
-function EmailRow({ email }: { email: string }) {
+function CopyEmailButton({ email }: { email: string }) {
   const [copied, setCopied] = useState(false);
 
   const copy = async () => {
@@ -110,37 +109,33 @@ function EmailRow({ email }: { email: string }) {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch {
-      // Clipboard unavailable (permissions/insecure context) — leave the
-      // address selectable as the fallback.
+      // Clipboard unavailable (permissions/insecure context) — the primary
+      // "Write to me" mailto action remains as the fallback.
     }
   };
 
   return (
-    <div className="flex items-center gap-3 rounded-xl border border-white/8 bg-white/[0.03] px-4 py-3">
-      <Mail className="size-4 shrink-0 text-accent-strong" aria-hidden />
-      <span className="min-w-0 truncate font-mono text-sm tracking-tight text-zinc-800 select-all">
-        {email}
-      </span>
-      <button
-        type="button"
-        onClick={copy}
-        aria-label={copied ? "Email address copied" : "Copy email address"}
-        className="ml-auto inline-flex size-8 shrink-0 items-center justify-center rounded-lg border border-white/8 bg-white/[0.04] text-zinc-500 transition hover:border-white/20 hover:text-zinc-900"
+    <button
+      type="button"
+      onClick={copy}
+      aria-label={copied ? "Email address copied to clipboard" : "Copy email address to clipboard"}
+      className="group inline-flex items-center gap-2.5 rounded-xl border border-white/10 bg-white/[0.03] px-5 py-3.5 text-sm font-medium text-zinc-700 transition hover:border-white/20 hover:text-zinc-900 active:scale-[0.98]"
+    >
+      <motion.span
+        key={copied ? "check" : "copy"}
+        initial={{ scale: 0.6, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        transition={{ duration: 0.25, ease }}
+        className="inline-flex"
       >
-        <motion.span
-          key={copied ? "check" : "copy"}
-          initial={{ scale: 0.6, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          transition={{ duration: 0.25, ease }}
-        >
-          {copied ? (
-            <Check className="size-3.5 text-emerald-400" aria-hidden />
-          ) : (
-            <Copy className="size-3.5" aria-hidden />
-          )}
-        </motion.span>
-      </button>
-    </div>
+        {copied ? (
+          <Check className="size-4 text-emerald-400" aria-hidden />
+        ) : (
+          <Copy className="size-4" aria-hidden />
+        )}
+      </motion.span>
+      {copied ? "Address copied" : "Copy address"}
+    </button>
   );
 }
 
@@ -225,51 +220,48 @@ function PortraitCard() {
         onMouseMove={onMove}
         onMouseLeave={onLeave}
         style={reduced ? undefined : { rotateX, rotateY, transformStyle: "preserve-3d" }}
-        className="group relative overflow-hidden rounded-[2rem] border border-white/10 bg-[#0b0b0b]"
+        className="group relative overflow-hidden rounded-[2rem] border border-white/10 bg-[radial-gradient(120%_80%_at_50%_0%,#17171b,#0b0b0d_55%,#08080a)]"
       >
-        {/* Warm halo behind the subject so the studio backdrop reads as stagecraft */}
+        {/* Fine grid + spotlight backdrop the cutout subject stands against */}
         <div
           aria-hidden
-          className="absolute inset-0 bg-[radial-gradient(75%_55%_at_50%_18%,rgba(196,136,42,0.16),transparent_70%)]"
+          className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[size:36px_36px] [mask-image:radial-gradient(75%_60%_at_50%_25%,black,transparent)]"
+        />
+        {/* Warm gold spotlight glow behind the head */}
+        <div
+          aria-hidden
+          className="absolute inset-0 bg-[radial-gradient(50%_42%_at_50%_20%,rgba(196,136,42,0.22),transparent_72%)]"
+        />
+        {/* Cool rim light from below to ground the figure */}
+        <div
+          aria-hidden
+          className="absolute inset-x-0 bottom-0 h-1/2 bg-[radial-gradient(80%_100%_at_50%_120%,rgba(30,41,59,0.5),transparent_70%)]"
         />
 
         <div className="relative aspect-[4/5]">
+          {/* Cutout portrait (transparent background) — sits directly on the
+              lit backdrop above; no vignette needed since there is no studio wall. */}
           <Image
-            src="/images/profile/corentin-saint-girons-hero-v2.png"
+            src="/images/profile/corentin-saint-girons-cutout.png"
             alt="Portrait of Corentin Saint-Girons"
             fill
             sizes="(max-width: 1024px) 100vw, 40vw"
             priority
-            className="object-cover object-[50%_18%] brightness-[0.78] contrast-[1.05] grayscale-[0.5] saturate-[0.85] transition-[filter] duration-700 group-hover:brightness-[0.86] group-hover:grayscale-[0.3]"
+            className="object-cover object-[50%_8%] brightness-[0.97] contrast-[1.03] grayscale-[0.15] drop-shadow-[0_28px_45px_rgba(0,0,0,0.6)] transition-[filter,transform] duration-700 group-hover:brightness-100 group-hover:grayscale-0 group-hover:scale-[1.015]"
           />
 
-          {/* Edge vignette — melts the light studio backdrop into the panel */}
-          <div
-            aria-hidden
-            className="absolute inset-0 bg-[radial-gradient(100%_80%_at_50%_30%,transparent_26%,rgba(8,8,8,0.5)_62%,rgba(8,8,8,0.94)_100%)]"
-          />
-          {/* Top fade — kills the bright studio backdrop above the head */}
-          <div
-            aria-hidden
-            className="absolute inset-x-0 top-0 h-1/3 bg-gradient-to-b from-[#080808]/65 via-[#080808]/25 to-transparent"
-          />
-          {/* Gold wash keyed to the site accent */}
-          <div
-            aria-hidden
-            className="absolute inset-0 mix-blend-overlay bg-[linear-gradient(160deg,rgba(196,136,42,0.28),transparent_46%,rgba(30,41,59,0.35)_100%)]"
-          />
           {/* Cursor-tracked specular glare */}
           {!reduced ? (
             <motion.div
               aria-hidden
-              className="absolute inset-0 opacity-0 transition-opacity duration-500 group-hover:opacity-100"
+              className="pointer-events-none absolute inset-0 opacity-0 mix-blend-soft-light transition-opacity duration-500 group-hover:opacity-100"
               style={{ background: glareBackground }}
             />
           ) : null}
           {/* Bottom fade under the caption */}
           <div
             aria-hidden
-            className="absolute inset-x-0 bottom-0 h-2/5 bg-gradient-to-t from-[#080808] via-[#080808]/70 to-transparent"
+            className="pointer-events-none absolute inset-x-0 bottom-0 h-2/5 bg-gradient-to-t from-[#08080a] via-[#08080a]/70 to-transparent"
           />
         </div>
 
@@ -403,15 +395,15 @@ export function ContactExperience({ email }: { email: string }) {
           </div>
 
           <div className="space-y-5">
-            <EmailRow email={email} />
-            <div className="flex flex-wrap items-center justify-between gap-4">
+            <div className="flex flex-wrap items-center gap-3">
               <MagneticCta email={email} />
-              <div className="flex flex-col items-end gap-1.5">
-                <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-zinc-500">
-                  Replies within a few days · EN / FR
-                </span>
-                <ParisClock />
-              </div>
+              <CopyEmailButton email={email} />
+            </div>
+            <div className="flex items-center justify-between gap-4 border-t border-white/8 pt-4">
+              <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-zinc-500">
+                Replies within a few days · EN / FR
+              </span>
+              <ParisClock />
             </div>
           </div>
         </div>
