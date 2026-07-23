@@ -559,7 +559,7 @@ describe("runAiRegulationScan harness wiring", () => {
       skipped: false,
       modelUsed: "gpt-5.4-mini",
       promptVersion:
-        "classification=classification.v1;summary=summary.v1;obligations=obligations.v1;openai-structured.v1",
+        "analysis=analysis.v1;openai-structured.v2",
       logMessage: 'ai_result={"outcome":"completed_ai_processing"}',
       updatePatch: {
         title: "AI courts rule",
