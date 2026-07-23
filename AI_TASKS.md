@@ -72,6 +72,7 @@ Each agent edits only its own rows. Status vocabulary: `CLAIMED` · `WIP` · `BL
 | T-COUNTRY-CONSOLE-FRANCE-V2 | Claude Code | MERGED | `main` @ `d9a496f` | `src/app/[lang]/ai-regulation/europe/[country]/page.tsx`, `src/components/site/country-console.tsx` | `EuropeCountryPage`, `CountryConsoleHero`, `CountryLedger`, `CorpusExplorer`, community "Intelligence Hub UI" | 2026-07-18 |
 | T-LEGALDB-EXPLORER-UX | Claude Code | MERGED | `main` @ `fefe433` | `src/components/site/legal-database-explorer.tsx`, `src/app/[lang]/ai-regulation/page.tsx` | `LegalDatabaseExplorer`, `deriveUpdateAuthorityType()`, community "Intelligence Hub UI" | 2026-07-18 |
 | T-COUNTRY-CONSOLE-FRANCE-V3 | Claude Code | REVIEW | `claude/csg-law-design-review-70zota` | `src/app/[lang]/ai-regulation/europe/[country]/page.tsx`, `src/components/site/country-console.tsx` | `EuropeCountryPage`, `CountryConsoleHero`, `CountryLedger`, `CountryLegalDatabase`, community "Intelligence Hub UI" | 2026-07-19 |
+| T-CONTACT-REDESIGN | Claude Code | REVIEW | `claude/contact-page-redesign-u2sh6q` @ `c3f6ded` | `src/app/[lang]/contact/page.tsx`, `src/components/site/contact-experience.tsx` | `ContactPage`, `ContactExperience` (new), `SpotlightHover`, community "UI Components and Utilities" | 2026-07-23 |
 
 - **Graph freshness:** built from `30bc31ca` — in sync with HEAD `30bc31c`. If these diverge, run `py -m graphify update .` before trusting the graph.
 - Move a task to `MERGED` only once it is in `main`; delete its row one entry after it merges (the log keeps the history).
@@ -89,6 +90,14 @@ YYYY-MM-DD · <Agent> · <TASK-ID> · <STATUS>
 ```
 
 ## Current status
+
+2026-07-23 · Claude Code · T-CONTACT-REDESIGN · REVIEW
+- Intent:        Full contact-page redesign per user: portrait was mis-framed (head cropped) and its light studio backdrop clashed with the dark theme; published email changed to corentin.stgirons@gmail.com and no longer displayed as a raw-address button.
+- Files:         `src/app/[lang]/contact/page.tsx` (now thin server page: metadata + email const), `src/components/site/contact-experience.tsx` (new client component: staggered hero, ambient orbs, tilt/glare portrait with vignette+gold-wash integration, copy-to-clipboard email row, magnetic gold CTA, live Paris clock, spotlight inquiry cards; reduced-motion safe).
+- Graph anchors: `ContactPage`, `ContactExperience` (new node — graph rebuild pending on this branch), `SpotlightHover`, community "UI Components and Utilities".
+- Verification:  `npm test` PASS (689), `npm run lint` PASS, `npm run typecheck` PASS, `npm run build` PASS (with local env stubs); Playwright screenshots verified at 1440px and 390px, zero console errors.
+- Branch/commit: `claude/contact-page-redesign-u2sh6q` @ `c3f6ded`.
+- Next:          User review of the design; no backend impact, nothing for Codex.
 
 2026-07-19 - Claude Code - T-FRANCE-LIVE-EMPTY-FIX - REVIEW
 - Intent:        Production France live-monitoring section rendered empty: `getFranceLiveLegalIntelligenceData()` reads the GLOBAL latest-N public news list (ordered publication_date desc, nulls last) and filters to France afterwards — recent multi-country/international publishing volume evicted France items from the 80-item window (France items with null publication_date sort last and are evicted first). Widened the window to 500 in the France agent + quiet empty-state row on the page instead of an empty box.
