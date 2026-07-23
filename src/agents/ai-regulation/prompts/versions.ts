@@ -5,6 +5,7 @@ export const promptVersions = {
   importance: "importance.v1",
   deadlines: "deadlines.v1",
   obligations: "obligations.v1",
+  analysis: "analysis.v1",
   practicalImpact: "practical-impact.v1",
 } as const;
 

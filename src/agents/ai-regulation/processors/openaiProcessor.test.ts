@@ -5,8 +5,7 @@ import {
   parseOpenAiResultLog,
   processRegulatoryItemWithOpenAi,
 } from "@/agents/ai-regulation/processors/openaiProcessor";
-import { buildRegulatoryClassificationPrompt } from "@/agents/ai-regulation/prompts/classificationPrompt";
-import { buildRegulatorySummaryPrompt } from "@/agents/ai-regulation/prompts/regulatorySummaryPrompt";
+import { buildRegulatoryAnalysisPrompt } from "@/agents/ai-regulation/prompts/regulatoryAnalysisPrompt";
 
 const createMock = vi.fn();
 
@@ -137,55 +136,35 @@ describe("openaiProcessor", () => {
   });
 
   it("maps successful AI JSON into update fields", async () => {
-    createMock
-      .mockResolvedValueOnce({
-        choices: [
-          {
-            message: {
-              content: JSON.stringify({
-                jurisdiction: "United States federal",
-                developmentType: "Agency guidance",
-                legalArea: "Consumer protection",
-                importanceLevel: "high",
-                confidenceLevel: "high",
-                tags: ["ftc", "ai-guidance"],
-              }),
-            },
+    createMock.mockResolvedValueOnce({
+      choices: [
+        {
+          message: {
+            content: JSON.stringify({
+              jurisdiction: "United States federal",
+              developmentType: "Agency guidance",
+              legalArea: "Consumer protection",
+              importanceLevel: "high",
+              confidenceLevel: "high",
+              tags: ["ftc", "ai-guidance"],
+              oneSentenceSummary: "FTC guidance sharpens AI compliance expectations.",
+              summary: "Summary text",
+              whatHappened: "What happened text",
+              whyItMatters: "Why it matters text",
+              practicalImpact: "Practical impact text",
+              affectedParties: ["AI vendors", "Compliance teams"],
+              enforcementRisk: "Enforcement risk text",
+              keyObligations: ["Review AI marketing claims."],
+              complianceDeadlines: ["No clear deadline detected"],
+            }),
           },
-        ],
-      })
-      .mockResolvedValueOnce({
-        choices: [
-          {
-            message: {
-              content: JSON.stringify({
-                oneSentenceSummary: "FTC guidance sharpens AI compliance expectations.",
-                summary: "Summary text",
-                whatHappened: "What happened text",
-                whyItMatters: "Why it matters text",
-                practicalImpact: "Practical impact text",
-                affectedParties: ["AI vendors", "Compliance teams"],
-                enforcementRisk: "Enforcement risk text",
-              }),
-            },
-          },
-        ],
-      })
-      .mockResolvedValueOnce({
-        choices: [
-          {
-            message: {
-              content: JSON.stringify({
-                keyObligations: ["Review AI marketing claims."],
-                complianceDeadlines: ["No clear deadline detected"],
-              }),
-            },
-          },
-        ],
-      });
+        },
+      ],
+    });
 
     const result = await processRegulatoryItemWithOpenAi(makeInput());
 
+    expect(createMock).toHaveBeenCalledTimes(1);
     expect(result.skipped).toBe(false);
     if (!result.skipped) {
       expect(result.updatePatch.oneSentenceSummary).toContain("FTC");
@@ -233,7 +212,7 @@ describe("openaiProcessor", () => {
   });
 
   it("prompt construction does not include secrets", () => {
-    const prompt = buildRegulatoryClassificationPrompt({
+    const prompt = buildRegulatoryAnalysisPrompt({
       sourceName: "FTC",
       sourceUrl: "https://www.ftc.gov/example",
       jurisdiction: "United States federal",
@@ -242,22 +221,8 @@ describe("openaiProcessor", () => {
       title: "FTC item",
       publicationDate: "2026-05-24",
       text: "Official AI guidance text",
-    });
-
-    const summaryPrompt = buildRegulatorySummaryPrompt({
-      sourceName: "FTC",
-      sourceUrl: "https://www.ftc.gov/example",
-      title: "FTC item",
-      publicationDate: "2026-05-24",
-      jurisdiction: "United States federal",
-      region: "North America",
-      country: "United States",
-      text: "Official AI guidance text",
-      developmentType: "Agency guidance",
-      legalArea: "Consumer protection",
     });
 
     expect(prompt).not.toContain("sk-");
-    expect(summaryPrompt).not.toContain("sk-");
   });
 });
