@@ -10,9 +10,10 @@ Each agent edits only its own rows. Status vocabulary: `CLAIMED` · `WIP` · `BL
 
 | Task ID | Owner | Status | Branch @ sha | Locked files | Graph anchor | Updated |
 |---|---|---|---|---|---|---|
-| T-NY-PROD-CORRECTION | Codex | REVIEW | `codex/new-york-production-correction` @ working tree | New York reconciliation module/backfill, editable update fields | `findExistingNewYorkUpdate()`, `listChangedUpdateFields()` | 2026-07-23 |
+| T-MIGRATION-031 | Codex | REVIEW | `codex/db-migration-031` @ working tree | migration 031 and schema invariants | `evaluateSchemaIntegrity()`, `REQUIRED_SCHEMA_INVARIANTS` | 2026-07-23 |
+| T-NY-PROD-CORRECTION | Codex | MERGED | `main` @ `7689187` | New York reconciliation module/backfill, editable update fields | `findExistingNewYorkUpdate()`, `listChangedUpdateFields()` | 2026-07-23 |
 | T-NY-CORPUS-PARITY | Codex | MERGED | `main` @ `9148879` | `src/content/ai-regulation/new-york-ai-law-depth.ts`, related test | `newYorkAiLawDepthEntries` | 2026-07-23 |
-| T-RECOVERY-GITHUB-MONITORING | Codex | DONE-LOCAL | `codex/project-recovery-2026-07-23` @ `1dde0dc` | GitHub monitoring workflow, scan worker runtime, health, Scrapling client, operations docs | `createScanWorkerConfig()`, `getScraplingWorkerUrl()`, communities "Scan Job Management" and "Source Runtime Health" | 2026-07-23 |
+| T-RECOVERY-GITHUB-MONITORING | Codex | MERGED | `main` @ `41d9bd0` | GitHub monitoring workflow, scan worker runtime, health, Scrapling client, operations docs | `createScanWorkerConfig()`, `getScraplingWorkerUrl()`, communities "Scan Job Management" and "Source Runtime Health" | 2026-07-23 |
 | TOOLING-GRAPH-PROTOCOL | Claude Code | REVIEW | `ops/t-ops9-ux` @ `30bc31c` | `AGENTS.md`, `AI_TASKS.md`, `.gitignore`, `.git/hooks/*` | n/a (tooling, no app code) | 2026-06-20 |
 | T-OPS9-UX | Claude Code | WIP | `ops/t-ops9-ux` @ `30bc31c` | `src/app/**`, shared UI components | community "UI Components and Utilities", "Intelligence Hub UI" | 2026-06-20 |
 | T-LEGALDB-UI | Claude Code | DONE-LOCAL | `ops/t-ops9-ux` @ `0f2809d` | `src/app/admin/ai-regulation/legal-database/**`, `src/app/admin/ai-regulation/page.tsx` | `deriveUpdateAuthorityType()`, `getAuthorityPriorityRank()`, `FilterBar`, community "News and Regulation Admin" | 2026-06-20 |
@@ -95,6 +96,14 @@ YYYY-MM-DD · <Agent> · <TASK-ID> · <STATUS>
 ```
 
 ## Current status
+
+2026-07-23 - Codex - T-MIGRATION-031 - REVIEW
+- Intent: Ship the isolated CHECK-constraint repair and schema tripwires before adopting the migration runner.
+- Files: `src/db/migrations/031_repair_check_constraint_drift.sql`, schema integrity code/test, `AI_TASKS.md`.
+- Graph anchors: `evaluateSchemaIntegrity()`, `REQUIRED_SCHEMA_INVARIANTS`, community "DB Repository Layer".
+- Verification: 718/718 Vitest, lint, typecheck, and production build pass.
+- Branch/commit: `codex/db-migration-031` @ working tree.
+- Next: Merge source only; production application remains a separate operator-approved step after read-only audit.
 
 2026-07-23 - Codex - T-RECOVERY-GITHUB-MONITORING - DONE-LOCAL
 - Intent: Recheck the stop file immediately before marking a scheduled idle worker completed.
