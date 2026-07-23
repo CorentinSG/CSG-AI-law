@@ -730,6 +730,8 @@ describe("MemoryAiRegulationRepository", () => {
     expect(before).toBeNull();
 
     await repository.updateAiRegulatoryUpdate("upd-006", {
+      sourceName: "Corrected official source",
+      sourceUrl: "https://example.com/corrected-official-source",
       summary: "Admin-reviewed AI draft summary",
       keyObligations: ["Review the draft carefully before publication."],
       enforcementRisk: "Review queue only.",
@@ -738,6 +740,8 @@ describe("MemoryAiRegulationRepository", () => {
     const adminView = await repository.getRegulatoryUpdateById("upd-006", "admin");
     const publicView = await repository.getRegulatoryUpdateById("upd-006", "public");
 
+    expect(adminView?.sourceName).toBe("Corrected official source");
+    expect(adminView?.sourceUrl).toBe("https://example.com/corrected-official-source");
     expect(adminView?.summary).toBe("Admin-reviewed AI draft summary");
     expect(adminView?.keyObligations).toEqual([
       "Review the draft carefully before publication.",
