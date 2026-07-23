@@ -10,9 +10,10 @@ Each agent edits only its own rows. Status vocabulary: `CLAIMED` · `WIP` · `BL
 
 | Task ID | Owner | Status | Branch @ sha | Locked files | Graph anchor | Updated |
 |---|---|---|---|---|---|---|
-| T-NY-PROD-CORRECTION | Codex | REVIEW | `codex/new-york-production-correction` @ working tree | New York reconciliation module/backfill, editable update fields | `findExistingNewYorkUpdate()`, `listChangedUpdateFields()` | 2026-07-23 |
+| T-DB-MIGRATION-DISCIPLINE | Codex | REVIEW | `codex/db-migration-discipline` @ working tree | migration 031, migration/audit runner, schema invariants, CI | `parseDatabaseUrl()`, `evaluateSchemaIntegrity()`, `findMigrationViolations()` | 2026-07-23 |
+| T-NY-PROD-CORRECTION | Codex | MERGED | `main` @ `7689187` | New York reconciliation module/backfill, editable update fields | `findExistingNewYorkUpdate()`, `listChangedUpdateFields()` | 2026-07-23 |
 | T-NY-CORPUS-PARITY | Codex | MERGED | `main` @ `9148879` | `src/content/ai-regulation/new-york-ai-law-depth.ts`, related test | `newYorkAiLawDepthEntries` | 2026-07-23 |
-| T-RECOVERY-GITHUB-MONITORING | Codex | DONE-LOCAL | `codex/project-recovery-2026-07-23` @ `1dde0dc` | GitHub monitoring workflow, scan worker runtime, health, Scrapling client, operations docs | `createScanWorkerConfig()`, `getScraplingWorkerUrl()`, communities "Scan Job Management" and "Source Runtime Health" | 2026-07-23 |
+| T-RECOVERY-GITHUB-MONITORING | Codex | MERGED | `main` @ `41d9bd0` | GitHub monitoring workflow, scan worker runtime, health, Scrapling client, operations docs | `createScanWorkerConfig()`, `getScraplingWorkerUrl()`, communities "Scan Job Management" and "Source Runtime Health" | 2026-07-23 |
 | TOOLING-GRAPH-PROTOCOL | Claude Code | REVIEW | `ops/t-ops9-ux` @ `30bc31c` | `AGENTS.md`, `AI_TASKS.md`, `.gitignore`, `.git/hooks/*` | n/a (tooling, no app code) | 2026-06-20 |
 | T-OPS9-UX | Claude Code | WIP | `ops/t-ops9-ux` @ `30bc31c` | `src/app/**`, shared UI components | community "UI Components and Utilities", "Intelligence Hub UI" | 2026-06-20 |
 | T-LEGALDB-UI | Claude Code | DONE-LOCAL | `ops/t-ops9-ux` @ `0f2809d` | `src/app/admin/ai-regulation/legal-database/**`, `src/app/admin/ai-regulation/page.tsx` | `deriveUpdateAuthorityType()`, `getAuthorityPriorityRank()`, `FilterBar`, community "News and Regulation Admin" | 2026-06-20 |
@@ -95,6 +96,14 @@ YYYY-MM-DD · <Agent> · <TASK-ID> · <STATUS>
 ```
 
 ## Current status
+
+2026-07-23 - Codex - T-DB-MIGRATION-DISCIPLINE - REVIEW
+- Intent: Transplant migration 031 and the guarded Supabase migration/audit runner onto current production history without applying production SQL.
+- Files: migration 031, schema integrity, migration/audit scripts and tests, Supabase config, CI, env/package/operator docs, `AI_TASKS.md`.
+- Graph anchors: `parseDatabaseUrl()`, `evaluateSchemaIntegrity()`, `findMigrationViolations()`, community "DB Repository Layer".
+- Verification: 768/768 Vitest, lint, typecheck, production build, and `check:migrations --base origin/main` pass.
+- Branch/commit: `codex/db-migration-discipline` @ working tree.
+- Next: Merge after independent review; production audit remains blocked until a dedicated read-only session-pooler URL is configured.
 
 2026-07-23 - Codex - T-RECOVERY-GITHUB-MONITORING - DONE-LOCAL
 - Intent: Recheck the stop file immediately before marking a scheduled idle worker completed.

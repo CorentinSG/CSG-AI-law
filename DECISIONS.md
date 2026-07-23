@@ -6,6 +6,8 @@ Record only major project decisions that future agents must know.
 
 ## Decisions
 
+- 2026-07-23 - Database migrations use the Supabase CLI from this baseline onward. The legacy `src/db/migrations` lineage becomes immutable after the one grandfathered 031 repair; every later schema change is a timestamped file under `supabase/migrations`. Production inspection uses a dedicated read-only session-pooler account, and migration application remains a separate operator-approved action.
+
 - 2026-07-23 — Cross-source corroboration happens at ingestion time (`crossSourceCorroboration.ts` in the scan pipeline): new updates are fuzzy-matched against recent updates from other serious sources; matches add reciprocal "supporting" source references, which is what makes the existing multi-source auto-publish policy fire without human latency. Informal discovery sources never count as corroboration and never gain visibility from it; rejected/archived items neither give nor receive corroboration. Corroborated candidates also outrank single-source ones for the capped AI budget — caps and budgets themselves are unchanged.
 
 - 2026-07-23 — Live monitoring uses a worldmonitor-inspired story-clustering layer (`storyClustering.ts`), applied at serving time in the country legal-news agents: fuzzy title similarity groups the same development across sources into one story carrying corroboration count, a composite importance score (authority 0.55 / source tier 0.2 / corroboration 0.15 / recency 0.1) and a lifecycle phase (breaking/developing/sustained/fading). Deterministic heuristics only — no LLM, no embeddings; the AI-off cost rule is unchanged. Story persistence across scans and cadence upgrades are backend follow-ups owned by Codex.

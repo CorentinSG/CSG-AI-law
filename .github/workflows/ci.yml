@@ -4,6 +4,12 @@ on:
   push:
     branches: [main]
   pull_request:
+  schedule:
+    - cron: "0 6 * * 1"
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
 
 # Tests run in memory mode; no real secrets are required. The values below are
 # obvious non-secret placeholders that only satisfy env validation so the

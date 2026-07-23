@@ -59,6 +59,17 @@ afterEach(() => {
 });
 
 describe("migration immutability policy", () => {
+  it("accepts the one legacy migration that bootstraps the immutable runner", () => {
+    expect(
+      findMigrationViolations([
+        change(
+          "A",
+          "src/db/migrations/031_repair_check_constraint_drift.sql",
+        ),
+      ]),
+    ).toEqual([]);
+  });
+
   it("accepts a newly added versioned Supabase migration", () => {
     expect(
       findMigrationViolations([

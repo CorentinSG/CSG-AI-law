@@ -5,6 +5,9 @@ import path from "node:path";
 const HISTORICAL_MIGRATION_PREFIX = "src/db/migrations/";
 const SUPABASE_MIGRATION_PREFIX = "supabase/migrations/";
 const VERSIONED_MIGRATION = /^supabase\/migrations\/\d{14}_[^/]+\.sql$/;
+const LEGACY_BOOTSTRAP_ADDITIONS = new Set([
+  "src/db/migrations/031_repair_check_constraint_drift.sql",
+]);
 
 function isMigrationPath(filePath) {
   return (
@@ -21,6 +24,14 @@ export function findMigrationViolations(changes) {
     if (migrationPaths.length === 0) continue;
 
     const displayPath = paths.join(" -> ");
+    if (
+      status === "A" &&
+      paths.length === 1 &&
+      LEGACY_BOOTSTRAP_ADDITIONS.has(paths[0])
+    ) {
+      continue;
+    }
+
     if (
       status === "A" &&
       paths.length === 1 &&

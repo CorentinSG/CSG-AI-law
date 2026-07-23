@@ -4,19 +4,14 @@ import { Client } from "pg";
 import {
   evaluateSchemaIntegrity,
   mapCatalogQueryResults,
+  REQUIRED_SCHEMA_INVARIANTS,
   type SchemaSnapshot,
 } from "../src/db/schema-integrity";
 import { parseDatabaseUrl } from "../src/lib/env";
 
 config({ path: ".env.local", quiet: true });
 
-const TABLES = [
-  "raw_regulatory_items",
-  "ai_regulatory_updates",
-  "scan_jobs",
-  "regulation_sources",
-  "news_items",
-];
+const TABLES = Object.keys(REQUIRED_SCHEMA_INVARIANTS);
 
 async function loadSnapshot(client: Client): Promise<SchemaSnapshot> {
   const results = await Promise.all([
