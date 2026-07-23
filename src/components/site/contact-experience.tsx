@@ -11,13 +11,7 @@ import {
   Mic,
   Scale,
 } from "lucide-react";
-import {
-  motion,
-  useMotionValue,
-  useReducedMotion,
-  useSpring,
-  useTransform,
-} from "framer-motion";
+import { motion, useReducedMotion, useSpring } from "framer-motion";
 
 import { SpotlightHover } from "@/components/ui/spotlight-hover";
 
@@ -177,120 +171,68 @@ function MagneticCta({ email }: { email: string }) {
   );
 }
 
-/* ── Portrait — framed, tinted into the dark theme, 3D tilt ───── */
+/* ── Portrait — frameless, dissolves into the page background ──── */
 
-function PortraitCard() {
+function PortraitFigure() {
   const reduced = useReducedMotion();
-  const ref = useRef<HTMLDivElement>(null);
-
-  const px = useMotionValue(0.5);
-  const py = useMotionValue(0.5);
-  const rotateX = useSpring(useTransform(py, [0, 1], [4.5, -4.5]), {
-    stiffness: 160,
-    damping: 20,
-  });
-  const rotateY = useSpring(useTransform(px, [0, 1], [-6, 6]), {
-    stiffness: 160,
-    damping: 20,
-  });
-  const glareX = useTransform(px, [0, 1], ["20%", "80%"]);
-  const glareY = useTransform(py, [0, 1], ["15%", "70%"]);
-  const glareBackground = useTransform(
-    [glareX, glareY],
-    ([gx, gy]) =>
-      `radial-gradient(38% 32% at ${gx} ${gy}, rgba(255,255,255,0.14), transparent 70%)`,
-  );
-
-  const onMove = (event: React.MouseEvent) => {
-    if (reduced || !ref.current) return;
-    const rect = ref.current.getBoundingClientRect();
-    px.set((event.clientX - rect.left) / rect.width);
-    py.set((event.clientY - rect.top) / rect.height);
-  };
-
-  const onLeave = () => {
-    px.set(0.5);
-    py.set(0.5);
-  };
 
   return (
-    <div style={{ perspective: 1200 }}>
+    <div className="group relative flex min-h-[26rem] items-end justify-center lg:min-h-full">
+      {/* Ambient light living in the page — no card. A warm gold spotlight
+          behind the head, plus a cool base wash, so the figure reads as lit
+          by the environment rather than pasted onto a panel. */}
       <motion.div
-        ref={ref}
-        onMouseMove={onMove}
-        onMouseLeave={onLeave}
-        style={reduced ? undefined : { rotateX, rotateY, transformStyle: "preserve-3d" }}
-        className="group relative overflow-hidden rounded-[2rem] border border-white/10 bg-[radial-gradient(120%_80%_at_50%_0%,#17171b,#0b0b0d_55%,#08080a)]"
+        aria-hidden
+        className="pointer-events-none absolute inset-0 bg-[radial-gradient(42%_38%_at_50%_24%,rgba(196,136,42,0.20),transparent_70%)]"
+        animate={reduced ? undefined : { opacity: [0.75, 1, 0.75], scale: [1, 1.04, 1] }}
+        transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+      />
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-x-0 bottom-0 h-2/3 bg-[radial-gradient(70%_80%_at_50%_110%,rgba(30,41,59,0.4),transparent_72%)]"
+      />
+
+      {/* The subject. object-contain keeps the whole figure; the mask fades
+          the lower body straight into the background so there is no edge. */}
+      <motion.div
+        className="relative aspect-[3/4] w-full max-w-[26rem]"
+        animate={reduced ? undefined : { y: [0, -10, 0] }}
+        transition={{ duration: 9, repeat: Infinity, ease: "easeInOut" }}
       >
-        {/* Fine grid + spotlight backdrop the cutout subject stands against */}
-        <div
-          aria-hidden
-          className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[size:36px_36px] [mask-image:radial-gradient(75%_60%_at_50%_25%,black,transparent)]"
+        <Image
+          src="/images/profile/corentin-saint-girons-cutout.png"
+          alt="Portrait of Corentin Saint-Girons"
+          fill
+          sizes="(max-width: 1024px) 100vw, 40vw"
+          priority
+          style={{
+            maskImage:
+              "linear-gradient(to bottom, black 62%, transparent 90%)",
+            WebkitMaskImage:
+              "linear-gradient(to bottom, black 62%, transparent 90%)",
+          }}
+          className="object-contain object-bottom brightness-[0.98] contrast-[1.03] grayscale-[0.12] drop-shadow-[0_35px_60px_rgba(0,0,0,0.55)] transition-[filter,transform] duration-700 group-hover:brightness-100 group-hover:grayscale-0 group-hover:scale-[1.015]"
         />
-        {/* Warm gold spotlight glow behind the head */}
-        <div
-          aria-hidden
-          className="absolute inset-0 bg-[radial-gradient(50%_42%_at_50%_20%,rgba(196,136,42,0.22),transparent_72%)]"
-        />
-        {/* Cool rim light from below to ground the figure */}
-        <div
-          aria-hidden
-          className="absolute inset-x-0 bottom-0 h-1/2 bg-[radial-gradient(80%_100%_at_50%_120%,rgba(30,41,59,0.5),transparent_70%)]"
-        />
-
-        <div className="relative aspect-[4/5]">
-          {/* Cutout portrait (transparent background) — sits directly on the
-              lit backdrop above; no vignette needed since there is no studio wall. */}
-          <Image
-            src="/images/profile/corentin-saint-girons-cutout.png"
-            alt="Portrait of Corentin Saint-Girons"
-            fill
-            sizes="(max-width: 1024px) 100vw, 40vw"
-            priority
-            className="object-cover object-[50%_8%] brightness-[0.97] contrast-[1.03] grayscale-[0.15] drop-shadow-[0_28px_45px_rgba(0,0,0,0.6)] transition-[filter,transform] duration-700 group-hover:brightness-100 group-hover:grayscale-0 group-hover:scale-[1.015]"
-          />
-
-          {/* Cursor-tracked specular glare */}
-          {!reduced ? (
-            <motion.div
-              aria-hidden
-              className="pointer-events-none absolute inset-0 opacity-0 mix-blend-soft-light transition-opacity duration-500 group-hover:opacity-100"
-              style={{ background: glareBackground }}
-            />
-          ) : null}
-          {/* Bottom fade under the caption */}
-          <div
-            aria-hidden
-            className="pointer-events-none absolute inset-x-0 bottom-0 h-2/5 bg-gradient-to-t from-[#08080a] via-[#08080a]/70 to-transparent"
-          />
-        </div>
-
-        {/* HUD corner brackets */}
-        <div aria-hidden className="pointer-events-none absolute inset-4">
-          <span className="absolute left-0 top-0 h-5 w-5 border-l border-t border-accent-strong/50" />
-          <span className="absolute right-0 top-0 h-5 w-5 border-r border-t border-accent-strong/50" />
-          <span className="absolute bottom-0 left-0 h-5 w-5 border-b border-l border-accent-strong/50" />
-          <span className="absolute bottom-0 right-0 h-5 w-5 border-b border-r border-accent-strong/50" />
-        </div>
-
-        <div className="absolute inset-x-0 bottom-0 flex items-end justify-between gap-4 p-7">
-          <div>
-            <p className="font-display text-xl font-medium tracking-[-0.02em] text-white">
-              C. Saint-Girons, Esq
-            </p>
-            <p className="mt-1.5 font-mono text-[10px] uppercase tracking-[0.24em] text-white/60">
-              AI Law &amp; Legal Intelligence
-            </p>
-          </div>
-          <span className="mb-0.5 inline-flex items-center gap-1.5 rounded-full border border-white/12 bg-black/40 px-3 py-1 font-mono text-[9px] uppercase tracking-[0.18em] text-white/70 backdrop-blur-sm">
-            <span className="relative flex size-1.5">
-              <span className="absolute inline-flex size-full animate-ping rounded-full bg-emerald-400 opacity-60" />
-              <span className="relative inline-flex size-1.5 rounded-full bg-emerald-400" />
-            </span>
-            Open to inquiries
-          </span>
-        </div>
       </motion.div>
+
+      {/* Floating identity — sits over the dissolve, no chip behind the name. */}
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 flex items-end justify-between gap-4">
+        <div>
+          <p className="font-display text-xl font-medium tracking-[-0.02em] text-white drop-shadow-[0_2px_10px_rgba(0,0,0,0.6)]">
+            C. Saint-Girons, Esq
+          </p>
+          <p className="mt-1.5 font-mono text-[10px] uppercase tracking-[0.24em] text-white/60">
+            AI Law &amp; Legal Intelligence
+          </p>
+        </div>
+        <span className="mb-0.5 inline-flex items-center gap-1.5 rounded-full border border-white/12 bg-black/30 px-3 py-1 font-mono text-[9px] uppercase tracking-[0.18em] text-white/70 backdrop-blur-sm">
+          <span className="relative flex size-1.5">
+            <span className="absolute inline-flex size-full animate-ping rounded-full bg-emerald-400 opacity-60" />
+            <span className="relative inline-flex size-1.5 rounded-full bg-emerald-400" />
+          </span>
+          Open to inquiries
+        </span>
+      </div>
     </div>
   );
 }
@@ -408,7 +350,7 @@ export function ContactExperience({ email }: { email: string }) {
           </div>
         </div>
 
-        <PortraitCard />
+        <PortraitFigure />
       </motion.section>
 
       {/* ── What this covers ── */}
