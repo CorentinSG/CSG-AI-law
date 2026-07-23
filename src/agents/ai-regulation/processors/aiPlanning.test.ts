@@ -107,6 +107,18 @@ describe("aiPlanning", () => {
     expect(highValue.tier === "high" || highValue.tier === "critical").toBe(true);
   });
 
+  it("boosts corroborated candidates above identical single-source candidates", () => {
+    const single = rankCandidateForAi(makeCandidate());
+    const corroborated = rankCandidateForAi(
+      makeCandidate({ corroboratingSourceCount: 2 }),
+    );
+
+    expect(corroborated.score).toBe(single.score + 20);
+    expect(
+      corroborated.reasons.some((reason) => reason.includes("corroborated by 2")),
+    ).toBe(true);
+  });
+
   it("estimates token counts deterministically", () => {
     expect(estimateTokenCount("abcd")).toBe(1);
     expect(estimateTokenCount("a".repeat(400))).toBe(100);

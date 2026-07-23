@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { ArrowRight, ExternalLink } from "lucide-react";
 
 import { updateRepository } from "@/agents/ai-regulation/processors/updateRepository";
+import { buildLiveStoryFeed } from "@/agents/ai-regulation/storyClustering";
 import { UsHubMap } from "@/components/site/us-hub-map";
 import { MotionReveal } from "@/components/site/motion-reveal";
 import { MotionStagger, MotionStaggerItem } from "@/components/site/motion-stagger";
@@ -84,9 +85,11 @@ export default async function UnitedStatesAiRegulationPage({
   if (!isLocale(lang)) notFound();
   const fr = lang === "fr";
   const usTiles = getUsTiles(fr);
+  // Window widened from 30 so story clustering sees enough items to group
+  // cross-source duplicates instead of a thin top-of-feed slice.
   const [updates, newsItems, sources, sourceHealthChecks] = await Promise.all([
     updateRepository.listPublicUpdates({ region: "North America" }),
-    updateRepository.getPublicNewsItems(30),
+    updateRepository.getPublicNewsItems(120),
     updateRepository.getSources(),
     updateRepository.getSourceHealthChecks(undefined, 30),
   ]);
@@ -94,10 +97,12 @@ export default async function UnitedStatesAiRegulationPage({
   const priorityStates = getPriorityUsStateProfiles();
   const geoPaths = getUsGeoPaths();
 
-  const regionalLiveItems = filterRegionalLiveItems(
-    newsItems.map(normalizeNewsItemRecord),
-    "North America",
-  ).slice(0, 5);
+  // Clustered into cross-source stories before the display cap, so the same
+  // development reported by several sources renders as one corroborated row.
+  const regionalLiveStories = buildLiveStoryFeed(
+    filterRegionalLiveItems(newsItems.map(normalizeNewsItemRecord), "North America"),
+    { limit: 5 },
+  );
 
   const liveLastCheckedAt = getRegionalLastCheckedAt(
     sourceHealthChecks,
@@ -148,14 +153,32 @@ export default async function UnitedStatesAiRegulationPage({
               </span>
             </div>
 
-            {regionalLiveItems.length > 0 ? (
+            {regionalLiveStories.length > 0 ? (
               <ol className="flex-1 divide-y divide-white/8">
-                {regionalLiveItems.map((item) => (
-                  <li key={item.id} className="group py-3.5">
+                {regionalLiveStories.map((story) => {
+                  const item = story.primary;
+                  return (
+                  <li key={story.id} className="group py-3.5">
                     <p className="line-clamp-2 text-[15px] font-medium leading-6 text-white/90">
                       {item.title}
                     </p>
                     <p className="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1 font-mono text-[9.5px] uppercase tracking-[0.14em] text-white/45">
+                      {(story.phase === "breaking" || story.phase === "developing") && (
+                        <>
+                          <span className={story.phase === "breaking" ? "text-emerald-300" : "text-sky-300"}>
+                            {story.phase === "breaking" ? "Breaking" : "Developing"}
+                          </span>
+                          <span aria-hidden className="text-white/25">·</span>
+                        </>
+                      )}
+                      {story.corroboration.sourceCount > 1 && (
+                        <>
+                          <span className="text-[color:var(--color-accent-strong,#c4882a)]">
+                            {story.corroboration.sourceCount} sources
+                          </span>
+                          <span aria-hidden className="text-white/25">·</span>
+                        </>
+                      )}
                       {item.jurisdiction && <span className="text-white/60">{item.jurisdiction}</span>}
                       {item.jurisdiction && <span aria-hidden className="text-white/25">·</span>}
                       <span>{item.publicationDate ? formatDisplayDate(item.publicationDate) : "—"}</span>
@@ -175,7 +198,8 @@ export default async function UnitedStatesAiRegulationPage({
                       )}
                     </p>
                   </li>
-                ))}
+                  );
+                })}
               </ol>
             ) : (
               <div className="flex flex-1 items-center py-10">

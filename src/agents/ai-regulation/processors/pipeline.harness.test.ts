@@ -29,6 +29,9 @@ const mocks = vi.hoisted(() => ({
   },
   updateRepository: {
     getProcessingLogs: vi.fn(),
+    listUpdatesPage: vi.fn(),
+    getSources: vi.fn(),
+    getRawItem: vi.fn(),
     createRawItem: vi.fn(),
     updateRawItemMetadata: vi.fn(),
     createUpdate: vi.fn(),
@@ -217,6 +220,15 @@ beforeEach(() => {
   mocks.deduplicator.createHash.mockReturnValue("hash-1");
   mocks.deduplicator.findDuplicate.mockResolvedValue(null);
   mocks.updateRepository.getProcessingLogs.mockResolvedValue([]);
+  mocks.updateRepository.listUpdatesPage.mockResolvedValue({
+    items: [],
+    total: 0,
+    limit: 400,
+    offset: 0,
+    hasMore: false,
+  });
+  mocks.updateRepository.getSources.mockResolvedValue([]);
+  mocks.updateRepository.getRawItem.mockResolvedValue(null);
   mocks.updateRepository.createRawItem.mockResolvedValue({ ...rawItem });
   mocks.repository.upsertRawItem.mockResolvedValue({
     item: { ...rawItem },
@@ -547,7 +559,7 @@ describe("runAiRegulationScan harness wiring", () => {
       skipped: false,
       modelUsed: "gpt-5.4-mini",
       promptVersion:
-        "classification=classification.v1;summary=summary.v1;obligations=obligations.v1;openai-structured.v1",
+        "analysis=analysis.v1;openai-structured.v2",
       logMessage: 'ai_result={"outcome":"completed_ai_processing"}',
       updatePatch: {
         title: "AI courts rule",

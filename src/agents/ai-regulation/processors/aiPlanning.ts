@@ -65,6 +65,8 @@ export interface CandidateForAiPlanning {
     developmentType: DevelopmentType;
     importanceLevel: ImportanceLevel;
   };
+  /** Independent serious sources already reporting the same story (0 if unknown). */
+  corroboratingSourceCount?: number;
 }
 
 const sourcePriorityBoosts: Record<string, number> = {
@@ -180,52 +182,21 @@ export function estimateTokenCount(value: string) {
 }
 
 export function estimateAiCost(input: {
-  env: Pick<
-    AppEnv,
-    | "AI_MODEL_RELEVANCE"
-    | "AI_MODEL_CLASSIFICATION"
-    | "AI_MODEL_SUMMARY"
-    | "AI_MODEL_DEEP_ANALYSIS"
-  >;
+  env: Pick<AppEnv, "AI_MODEL_SUMMARY" | "AI_MODEL_DEEP_ANALYSIS">;
   inputTokens: number;
   requiresDeepAnalysis: boolean;
 }) {
-  const outputProfile = {
-    relevance: 120,
-    classification: 220,
-    summary: 900,
-    deepAnalysis: 1400,
-  };
+  // The processor makes a single combined analysis call (classification +
+  // summary + obligations), so the input text is billed once on one model.
+  const model = input.requiresDeepAnalysis
+    ? input.env.AI_MODEL_DEEP_ANALYSIS
+    : input.env.AI_MODEL_SUMMARY;
+  const estimatedOutputTokens = input.requiresDeepAnalysis ? 1500 : 1100;
 
-  const models = [
-    { model: input.env.AI_MODEL_RELEVANCE, outputTokens: outputProfile.relevance },
-    {
-      model: input.env.AI_MODEL_CLASSIFICATION,
-      outputTokens: outputProfile.classification,
-    },
-    { model: input.env.AI_MODEL_SUMMARY, outputTokens: outputProfile.summary },
-  ];
-
-  if (input.requiresDeepAnalysis) {
-    models.push({
-      model: input.env.AI_MODEL_DEEP_ANALYSIS,
-      outputTokens: outputProfile.deepAnalysis,
-    });
-  }
-
-  const estimatedOutputTokens = models.reduce(
-    (sum, entry) => sum + entry.outputTokens,
-    0,
-  );
-
-  const estimatedCostUsd = models.reduce((sum, entry) => {
-    const pricing = getModelPricing(entry.model);
-    return (
-      sum +
-      (input.inputTokens / 1000) * pricing.input +
-      (entry.outputTokens / 1000) * pricing.output
-    );
-  }, 0);
+  const pricing = getModelPricing(model);
+  const estimatedCostUsd =
+    (input.inputTokens / 1000) * pricing.input +
+    (estimatedOutputTokens / 1000) * pricing.output;
 
   return {
     estimatedOutputTokens,
@@ -257,6 +228,18 @@ export function rankCandidateForAi(input: CandidateForAiPlanning) {
   const importanceBoost = importanceBoosts[input.classification.importanceLevel];
   score += importanceBoost;
   reasons.push(`importance ${input.classification.importanceLevel}`);
+
+  // Cross-source corroboration outranks single-source items of equal weight,
+  // so the capped per-scan AI budget goes to multi-source stories first. This
+  // only reorders candidates; every cost guardrail applies unchanged.
+  const corroboratingSourceCount = input.corroboratingSourceCount ?? 0;
+  if (corroboratingSourceCount > 0) {
+    const corroborationBoost = Math.min(20, corroboratingSourceCount * 10);
+    score += corroborationBoost;
+    reasons.push(
+      `corroborated by ${corroboratingSourceCount} independent source(s)`,
+    );
+  }
 
   const { aiHits, regulatoryHits } = countKeywordMatches(combinedText);
   const keywordBoost = Math.min(14, aiHits.length * 3 + regulatoryHits.length * 2);

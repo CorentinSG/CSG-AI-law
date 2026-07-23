@@ -17,6 +17,7 @@ import {
 } from "@/agents/ai-regulation/newsCurrentness";
 import { runAiRegulationScan, type ScanTrigger } from "@/agents/ai-regulation/processors/pipeline";
 import { updateRepository } from "@/agents/ai-regulation/processors/updateRepository";
+import { buildLiveStoryFeed } from "@/agents/ai-regulation/storyClustering";
 import type { SourceHealthCheck } from "@/agents/ai-regulation/governance";
 import { normalizeNewsItemRecord, type AiLawNewsItem } from "@/content/ai-regulation/news";
 
@@ -237,6 +238,12 @@ export async function getFranceLiveLegalIntelligenceData(limit = 6) {
 
   return {
     items: rankedItems.slice(0, limit),
+    // Clustered before the display cap so the same development reported by
+    // several sources counts as one corroborated story, not N rows.
+    stories: buildLiveStoryFeed(
+      rankedItems.map((entry) => entry.item),
+      { limit },
+    ),
     summary: buildFranceNewsSummary(rankedItems),
     lastCheckedAt: getLastCheckedAtForSourceIds(franceSourceIds, sourceHealthChecks),
     activity: getSourceActivityForSourceIds(franceSourceIds, sourceHealthChecks),

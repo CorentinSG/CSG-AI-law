@@ -144,12 +144,30 @@ export default async function EuropeAiRegulationPage({
             </div>
 
             <ol className="flex-1 divide-y divide-white/8">
-              {euLiveData.items.slice(0, 5).map(({ item }) => (
-                <li key={item.id} className="group py-3.5">
+              {euLiveData.stories.slice(0, 5).map((story) => {
+                const item = story.primary;
+                return (
+                <li key={story.id} className="group py-3.5">
                   <p className="line-clamp-2 text-[15px] font-medium leading-6 text-white/90">
                     {item.title}
                   </p>
                   <p className="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1 font-mono text-[9.5px] uppercase tracking-[0.14em] text-white/45">
+                    {(story.phase === "breaking" || story.phase === "developing") && (
+                      <>
+                        <span className={story.phase === "breaking" ? "text-emerald-300" : "text-sky-300"}>
+                          {story.phase === "breaking" ? "Breaking" : "Developing"}
+                        </span>
+                        <span aria-hidden className="text-white/25">·</span>
+                      </>
+                    )}
+                    {story.corroboration.sourceCount > 1 && (
+                      <>
+                        <span className="text-[color:var(--color-accent-strong,#c4882a)]">
+                          {story.corroboration.sourceCount} sources
+                        </span>
+                        <span aria-hidden className="text-white/25">·</span>
+                      </>
+                    )}
                     {item.jurisdiction && <span className="text-white/60">{item.jurisdiction}</span>}
                     {item.jurisdiction && <span aria-hidden className="text-white/25">·</span>}
                     <span>
@@ -171,7 +189,8 @@ export default async function EuropeAiRegulationPage({
                     )}
                   </p>
                 </li>
-              ))}
+                );
+              })}
             </ol>
 
             <div className="border-t border-white/10 pt-3">
