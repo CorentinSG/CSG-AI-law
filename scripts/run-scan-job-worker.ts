@@ -254,7 +254,18 @@ async function main() {
 
     await writeStatus("stopped");
     await writePersistentHeartbeat(
-      getScanWorkerTerminalHeartbeatState(config, idleCycles, stopRequested),
+      await getScanWorkerTerminalHeartbeatState(
+        config,
+        idleCycles,
+        stopRequested,
+        async () => {
+          const externalStopRequested = await scanWorkerStopRequested(config);
+          if (externalStopRequested) {
+            requestStop("stop-file-before-scheduled-completion");
+          }
+          return externalStopRequested;
+        },
+      ),
     );
   } catch (error) {
     await writeStatus("failed", {

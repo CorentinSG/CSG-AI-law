@@ -2,7 +2,7 @@ import { mkdtemp, readFile, utimes, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
 import * as scanWorkerRuntime from "@/agents/ai-regulation/processors/scanWorkerRuntime";
 
@@ -80,14 +80,15 @@ describe("scanWorkerRuntime", () => {
     expect(config.idleExitAfter).toBe(1);
   });
 
-  it("only marks an unrequested scheduled idle exit as completed", () => {
+  it("rechecks an external stop request immediately before scheduled completion", async () => {
     const getTerminalHeartbeatState = (
       scanWorkerRuntime as typeof scanWorkerRuntime & {
         getScanWorkerTerminalHeartbeatState?: (
           config: ReturnType<typeof createScanWorkerConfig>,
           idleCycles: number,
           stopRequested: boolean,
-        ) => string;
+          checkExternalStop: () => Promise<boolean>,
+        ) => Promise<string> | string;
       }
     ).getScanWorkerTerminalHeartbeatState;
     const scheduledConfig = createScanWorkerConfig(
@@ -103,10 +104,25 @@ describe("scanWorkerRuntime", () => {
       "C:\\repo",
       42,
     );
+    const completionCheck = vi.fn().mockResolvedValue(false);
+    const lateStopCheck = vi.fn().mockResolvedValue(true);
+    const signalStopCheck = vi.fn().mockResolvedValue(false);
 
-    expect(getTerminalHeartbeatState?.(scheduledConfig, 1, false)).toBe("completed");
-    expect(getTerminalHeartbeatState?.(scheduledConfig, 1, true)).toBe("stopped");
-    expect(getTerminalHeartbeatState?.(continuousConfig, 1, false)).toBe("stopped");
+    expect(
+      await getTerminalHeartbeatState?.(scheduledConfig, 1, false, completionCheck),
+    ).toBe("completed");
+    expect(completionCheck).toHaveBeenCalledOnce();
+    expect(
+      await getTerminalHeartbeatState?.(scheduledConfig, 1, false, lateStopCheck),
+    ).toBe("stopped");
+    expect(lateStopCheck).toHaveBeenCalledOnce();
+    expect(
+      await getTerminalHeartbeatState?.(scheduledConfig, 1, true, signalStopCheck),
+    ).toBe("stopped");
+    expect(signalStopCheck).not.toHaveBeenCalled();
+    expect(
+      await getTerminalHeartbeatState?.(continuousConfig, 1, false, completionCheck),
+    ).toBe("stopped");
   });
 
   it("refuses a second fresh worker lease but allows takeover after stale state", async () => {

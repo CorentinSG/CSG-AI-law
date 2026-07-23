@@ -60,17 +60,22 @@ export type ScanWorkerStatus = {
 
 export type ScanWorkerTerminalHeartbeatState = "completed" | "stopped";
 
-export function getScanWorkerTerminalHeartbeatState(
+export async function getScanWorkerTerminalHeartbeatState(
   config: Pick<ScanWorkerConfig, "workerMode" | "idleExitAfter">,
   idleCycles: number,
   stopRequested: boolean,
-): ScanWorkerTerminalHeartbeatState {
-  return config.workerMode === "scheduled" &&
+  checkExternalStop: () => Promise<boolean> = async () => false,
+): Promise<ScanWorkerTerminalHeartbeatState> {
+  const completedScheduledIdleCycle =
+    config.workerMode === "scheduled" &&
     !stopRequested &&
     config.idleExitAfter > 0 &&
-    idleCycles >= config.idleExitAfter
-    ? "completed"
-    : "stopped";
+    idleCycles >= config.idleExitAfter;
+  if (!completedScheduledIdleCycle) {
+    return "stopped";
+  }
+
+  return (await checkExternalStop()) ? "stopped" : "completed";
 }
 
 export function createScanWorkerConfig(
