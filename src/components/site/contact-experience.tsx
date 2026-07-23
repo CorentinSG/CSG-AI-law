@@ -194,7 +194,7 @@ function ContactBackdrop() {
           Darkened, desaturated and heavily faded so it reads as part of the
           dark environment, only just perceptible. */}
       <motion.div
-        className="absolute inset-y-0 right-[-12%] w-[85%] opacity-[0.18] sm:right-[-4%] sm:w-[80%] sm:opacity-[0.22] lg:right-0 lg:w-[68%] lg:opacity-[0.32]"
+        className="absolute inset-y-0 right-[-12%] w-[85%] opacity-[0.11] sm:right-[-4%] sm:w-[80%] sm:opacity-[0.13] lg:right-0 lg:w-[68%] lg:opacity-[0.2]"
         animate={reduced ? undefined : { y: [0, -12, 0] }}
         transition={{ duration: 11, repeat: Infinity, ease: "easeInOut" }}
       >
@@ -204,7 +204,7 @@ function ContactBackdrop() {
           fill
           sizes="(max-width: 1024px) 100vw, 62vw"
           priority
-          className="object-contain object-right-top brightness-[0.62] contrast-[1.02] grayscale-[0.5]"
+          className="object-contain object-right-top brightness-[0.45] contrast-[1.02] grayscale-[0.6]"
         />
         {/* Dissolve the figure into the page: fade its left edge, base and
             top into the near-black body colour so it has no visible border. */}
