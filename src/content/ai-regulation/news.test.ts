@@ -404,6 +404,58 @@ describe("AI Law News", () => {
     expect(item.verificationStatus).toBe("corroborated");
   });
 
+  it("does not treat automatic story similarity as publication-grade corroboration", () => {
+    const item = buildNewsItemFromUpdate({
+      update: update({
+        sourceId: "news-france-newsapi-discovery",
+        sourceName: "France AI legal news discovery (NewsAPI)",
+        sourceUrl: "https://www.reuters.com/legal/example",
+        status: "needs_review",
+        reviewedBy: null,
+        reviewedAt: null,
+        publishedAt: null,
+        developmentType: "Enforcement action",
+      }),
+      rawItem: rawItem({
+        rawMetadata: {
+          sourceReferences: [
+            {
+              sourceRole: "discovery",
+              title: "Reuters report",
+              institution: "Reuters",
+              url: "https://www.reuters.com/legal/example",
+              sourceType: "media_source",
+              reliabilityLevel: "medium",
+              verificationStatus: "needs_official_source",
+            },
+            {
+              sourceRole: "supporting",
+              title: "Automatically similar report",
+              institution: "Another publisher",
+              url: "https://example.com/similar",
+              sourceType: "media_source",
+              reliabilityLevel: "medium",
+              verificationStatus: "corroborated",
+              notes:
+                "Cross-source corroboration: an independent monitored source reported the same development (matched automatically by story similarity).",
+            },
+          ],
+        },
+      }),
+      source: officialSource({
+        id: "news-france-newsapi-discovery",
+        name: "France AI legal news discovery (NewsAPI)",
+        sourceType: "media_source",
+        config: { sourceCategory: "media_discovery_source" },
+        reliabilityLevel: "medium",
+      }),
+    });
+
+    expect(item.sourceReferences).toHaveLength(2);
+    expect(item.corroboratingSources).toHaveLength(0);
+    expect(item.verificationStatus).toBe("media_reported");
+  });
+
   it("keeps paywalled media sources manual or metadata-only", () => {
     const paywalled = aiLawNewsSourceConfigs.filter(
       (source) => source.paywallStatus === "paywalled",
