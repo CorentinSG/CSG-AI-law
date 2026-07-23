@@ -10,7 +10,8 @@ Each agent edits only its own rows. Status vocabulary: `CLAIMED` · `WIP` · `BL
 
 | Task ID | Owner | Status | Branch @ sha | Locked files | Graph anchor | Updated |
 |---|---|---|---|---|---|---|
-| T-NY-CORPUS-PARITY | Codex | REVIEW | `codex/new-york-corpus-parity` @ working tree | `src/content/ai-regulation/new-york-ai-law-depth.ts`, related test | `newYorkAiLawDepthEntries` | 2026-07-23 |
+| T-NY-PROD-CORRECTION | Codex | REVIEW | `codex/new-york-production-correction` @ working tree | New York reconciliation module/backfill, editable update fields | `findExistingNewYorkUpdate()`, `listChangedUpdateFields()` | 2026-07-23 |
+| T-NY-CORPUS-PARITY | Codex | MERGED | `main` @ `9148879` | `src/content/ai-regulation/new-york-ai-law-depth.ts`, related test | `newYorkAiLawDepthEntries` | 2026-07-23 |
 | T-RECOVERY-GITHUB-MONITORING | Codex | DONE-LOCAL | `codex/project-recovery-2026-07-23` @ `1dde0dc` | GitHub monitoring workflow, scan worker runtime, health, Scrapling client, operations docs | `createScanWorkerConfig()`, `getScraplingWorkerUrl()`, communities "Scan Job Management" and "Source Runtime Health" | 2026-07-23 |
 | TOOLING-GRAPH-PROTOCOL | Claude Code | REVIEW | `ops/t-ops9-ux` @ `30bc31c` | `AGENTS.md`, `AI_TASKS.md`, `.gitignore`, `.git/hooks/*` | n/a (tooling, no app code) | 2026-06-20 |
 | T-OPS9-UX | Claude Code | WIP | `ops/t-ops9-ux` @ `30bc31c` | `src/app/**`, shared UI components | community "UI Components and Utilities", "Intelligence Hub UI" | 2026-06-20 |
@@ -1117,3 +1118,13 @@ Every non-trivial task should have:
 - Corrections:    RAISE tiering, S7676B date/scope, Election Law knowledge standard, SAFE effective status, section 50-f historical source, NYS-P24-001 scope/date, and SDNY authority/DMCA description.
 - Verification:  713/713 tests, lint and typecheck pass; two independent legal review rounds end with MERGE verdict; 60 unique titles and URLs.
 - Follow-up:     Run a corrective idempotent Supabase replay after merge because the earlier 60-entry production backfill contains the superseded wording.
+
+### 2026-07-23 - Codex - T-NY-PROD-CORRECTION - REVIEW
+
+- Intent:        Make the New York backfill reconcile corrected derived updates instead of skipping them or creating title-variant duplicates.
+- Files:         backfill script, reconciliation module/tests, repository editable-field contract/test, `AI_TASKS.md`.
+- Graph anchors: `findExistingNewYorkUpdate()`, `listChangedUpdateFields()`, `updateAiRegulatoryUpdate()`.
+- Safety:        Existing-only mode preflights all 60 matches in dry-run and write mode, rejects ambiguous duplicates, and mutates only derived updates; raw evidence and audit-reference IDs remain immutable.
+- Dry-run:       Supabase found 60/60 existing entries, 49 unchanged and 11 requiring correction, with zero creates.
+- Verification:  718/718 tests, lint, typecheck and production build pass; final backend review verdict MERGE with no P1/P2 findings.
+- Follow-up:     Merge first, then run the existing-only production write and an immediate idempotence/recount check.

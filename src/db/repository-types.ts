@@ -111,6 +111,8 @@ export type EditableRegulatoryUpdateFields = Partial<
   Pick<
     AiRegulatoryUpdate,
     | "title"
+    | "sourceName"
+    | "sourceUrl"
     | "jurisdiction"
     | "region"
     | "country"
