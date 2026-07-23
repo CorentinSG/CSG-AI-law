@@ -10,6 +10,7 @@ import {
 } from "@/agents/ai-regulation/newsCurrentness";
 import { runAiRegulationScan, type ScanTrigger } from "@/agents/ai-regulation/processors/pipeline";
 import { updateRepository } from "@/agents/ai-regulation/processors/updateRepository";
+import { buildLiveStoryFeed } from "@/agents/ai-regulation/storyClustering";
 import {
   swedenMonitoringSourceRegistry,
   getSwedenAgentSourceIds,
@@ -225,6 +226,12 @@ export async function getSwedenLiveLegalIntelligenceData(limit = 6) {
       reviewPriority: getReviewPriority(entry),
       currentness: entry.currentness,
     })),
+    // Clustered before the display cap so the same development reported by
+    // several sources counts as one corroborated story, not N rows.
+    stories: buildLiveStoryFeed(
+      rankedItems.map((entry) => entry.item),
+      { limit },
+    ),
     summary: buildSwedenNewsSummary(rankedItems),
     lastCheckedAt: getLastCheckedAtForSourceIds(sourceIds, sourceHealthChecks),
     activity: getSourceActivityForSourceIds(sourceIds, sourceHealthChecks).sort((a, b) =>

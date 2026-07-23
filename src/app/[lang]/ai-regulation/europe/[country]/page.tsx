@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import { getFranceLiveLegalIntelligenceData } from "@/agents/ai-regulation/franceLegalNewsAgent";
+import { getStoryPhaseDisplay } from "@/agents/ai-regulation/storyClustering";
 import { getGermanyLiveLegalIntelligenceData } from "@/agents/ai-regulation/germanyLegalNewsAgent";
 import { getNetherlandsLiveLegalIntelligenceData } from "@/agents/ai-regulation/netherlandsLegalNewsAgent";
 import { getBelgiumLiveLegalIntelligenceData } from "@/agents/ai-regulation/belgiumLegalNewsAgent";
@@ -354,23 +355,33 @@ export default async function EuropeCountryPage({
               title="French AI law, right now"
             />
           </MotionReveal>
-          {franceLiveData && franceLiveData.items.length > 0 ? (
+          {franceLiveData && franceLiveData.stories.length > 0 ? (
             <CountryLedger
-              entries={franceLiveData.items.map(({ item, currentness }) => ({
-                id: item.id,
+              entries={franceLiveData.stories.map((story) => ({
+                id: story.id,
                 chips: [
-                  { label: item.developmentType.replaceAll("_", " ") },
-                  { label: currentness.freshnessLabel.replaceAll("_", " "), tone: "info" as const },
-                  ...(item.officialSourceFound
+                  { label: story.primary.developmentType.replaceAll("_", " ") },
+                  { label: getStoryPhaseDisplay(story.phase), tone: "info" as const },
+                  ...(story.primary.officialSourceFound
                     ? [{ label: "official source", tone: "gold" as const }]
                     : []),
+                  ...(story.corroboration.sourceCount > 1
+                    ? [
+                        {
+                          label: `corroboré · ${story.corroboration.sourceCount} sources`,
+                          tone: "gold" as const,
+                        },
+                      ]
+                    : []),
                 ],
-                title: item.title,
-                note: item.shortSummary,
+                title: story.primary.title,
+                note: story.primary.shortSummary,
                 meta: `${
-                  item.publicationDate ? formatDisplayDate(item.publicationDate) : "Date under review"
-                } · ${item.sourceName}`,
-                href: item.officialSourceUrl ?? item.sourceUrl,
+                  story.primary.publicationDate
+                    ? formatDisplayDate(story.primary.publicationDate)
+                    : "Date under review"
+                } · ${story.primary.sourceName}`,
+                href: story.primary.officialSourceUrl ?? story.primary.sourceUrl,
               }))}
             />
           ) : (
@@ -526,6 +537,7 @@ export default async function EuropeCountryPage({
             description="Germany live monitoring prioritises BfDI and other official German legal or institutional sources. The architecture is built for frequent refresh, but only lightweight approved sources should be treated as near-real-time candidates."
             regionLabel="Germany"
             items={germanyLiveData.items.map((entry) => entry.item)}
+            stories={germanyLiveData.stories}
             lastCheckedAt={germanyLiveData.lastCheckedAt}
             activity={germanyLiveData.activity}
             itemFreshnessById={Object.fromEntries(
@@ -778,6 +790,7 @@ export default async function EuropeCountryPage({
             description="Netherlands live monitoring prioritises AP and RDI official Dutch sources. The architecture is built for frequent refresh, but only lightweight approved sources should be treated as near-real-time candidates."
             regionLabel="Netherlands"
             items={netherlandsLiveData.items.map((entry) => entry.item)}
+            stories={netherlandsLiveData.stories}
             lastCheckedAt={netherlandsLiveData.lastCheckedAt}
             activity={netherlandsLiveData.activity}
             itemFreshnessById={Object.fromEntries(
@@ -1036,6 +1049,7 @@ export default async function EuropeCountryPage({
             description="Belgium live monitoring prioritises APD/GBA official Belgian sources. The architecture is built for frequent refresh, but only lightweight approved sources should be treated as near-real-time candidates."
             regionLabel="Belgium"
             items={belgiumLiveData.items.map((entry) => entry.item)}
+            stories={belgiumLiveData.stories}
             lastCheckedAt={belgiumLiveData.lastCheckedAt}
             activity={belgiumLiveData.activity}
             itemFreshnessById={Object.fromEntries(
@@ -1300,6 +1314,7 @@ export default async function EuropeCountryPage({
             description="Austria live monitoring prioritises DSB official Austrian sources. The architecture is built for frequent refresh, but only lightweight approved sources should be treated as near-real-time candidates."
             regionLabel="Austria"
             items={austriaLiveData.items.map((entry) => entry.item)}
+            stories={austriaLiveData.stories}
             lastCheckedAt={austriaLiveData.lastCheckedAt}
             activity={austriaLiveData.activity}
             itemFreshnessById={Object.fromEntries(
@@ -1564,6 +1579,7 @@ export default async function EuropeCountryPage({
             description="Sweden live monitoring prioritises IMY official Swedish sources. The architecture is built for frequent refresh, but only lightweight approved sources should be treated as near-real-time candidates."
             regionLabel="Sweden"
             items={swedenLiveData.items.map((entry) => entry.item)}
+            stories={swedenLiveData.stories}
             lastCheckedAt={swedenLiveData.lastCheckedAt}
             activity={swedenLiveData.activity}
             itemFreshnessById={Object.fromEntries(
@@ -1828,6 +1844,7 @@ export default async function EuropeCountryPage({
             description="Ireland live monitoring prioritises DPC guidance and official Irish sources. The DPC is the primary live anchor given its role as lead supervisory authority for many major AI and technology companies established in Ireland. The architecture is built for frequent refresh, but only lightweight approved sources should be treated as near-real-time candidates."
             regionLabel="Ireland"
             items={irelandLiveData.items.map((entry) => entry.item)}
+            stories={irelandLiveData.stories}
             lastCheckedAt={irelandLiveData.lastCheckedAt}
             activity={irelandLiveData.activity}
             itemFreshnessById={Object.fromEntries(
@@ -2092,6 +2109,7 @@ export default async function EuropeCountryPage({
             description="Spain live monitoring prioritises AEPD and other official Spanish legal or institutional sources. The architecture is built for frequent refresh, but only lightweight approved sources should be treated as near-real-time candidates."
             regionLabel="Spain"
             items={spainLiveData.items.map((entry) => entry.item)}
+            stories={spainLiveData.stories}
             lastCheckedAt={spainLiveData.lastCheckedAt}
             activity={spainLiveData.activity}
             itemFreshnessById={Object.fromEntries(
@@ -2342,6 +2360,7 @@ export default async function EuropeCountryPage({
             description="Italy live monitoring prioritises the Garante and other official Italian legal or institutional sources. The architecture is built for frequent refresh, but only lightweight approved sources should be treated as near-real-time candidates."
             regionLabel="Italy"
             items={italyLiveData.items.map((entry) => entry.item)}
+            stories={italyLiveData.stories}
             lastCheckedAt={italyLiveData.lastCheckedAt}
             activity={italyLiveData.activity}
             itemFreshnessById={Object.fromEntries(
