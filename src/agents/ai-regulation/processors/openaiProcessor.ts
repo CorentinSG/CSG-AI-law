@@ -1,8 +1,6 @@
 import { z } from "zod";
 
-import { buildObligationExtractionPrompt } from "@/agents/ai-regulation/prompts/obligationExtractionPrompt";
-import { buildRegulatoryClassificationPrompt } from "@/agents/ai-regulation/prompts/classificationPrompt";
-import { buildRegulatorySummaryPrompt } from "@/agents/ai-regulation/prompts/regulatorySummaryPrompt";
+import { buildRegulatoryAnalysisPrompt } from "@/agents/ai-regulation/prompts/regulatoryAnalysisPrompt";
 import { promptVersions } from "@/agents/ai-regulation/prompts/versions";
 import { getOpenAiClient } from "@/agents/ai-regulation/processors/openaiClient";
 import type {
@@ -24,16 +22,13 @@ import type {
   LegalArea,
 } from "@/db/schema";
 
-const classificationSchema = z.object({
+const analysisSchema = z.object({
   jurisdiction: z.string().min(1),
   developmentType: z.string().min(1),
   legalArea: z.string().min(1),
   importanceLevel: z.string().min(1),
   confidenceLevel: z.string().min(1),
   tags: z.array(z.string().min(1)).min(1),
-});
-
-const summarySchema = z.object({
   oneSentenceSummary: z.string().min(1),
   summary: z.string().min(1),
   whatHappened: z.string().min(1),
@@ -41,9 +36,6 @@ const summarySchema = z.object({
   practicalImpact: z.string().min(1),
   affectedParties: z.array(z.string().min(1)).min(1),
   enforcementRisk: z.string().min(1),
-});
-
-const obligationsSchema = z.object({
   keyObligations: z.array(z.string().min(1)).min(1),
   complianceDeadlines: z.array(z.string().min(1)).min(1),
 });
@@ -131,6 +123,7 @@ async function callJsonModel<T>(input: {
   model: string;
   prompt: string;
   schema: z.ZodSchema<T>;
+  maxOutputTokens: number;
 }) {
   const client = getOpenAiClient();
   if (!client) {
@@ -141,6 +134,7 @@ async function callJsonModel<T>(input: {
     model: input.model,
     temperature: 0.1,
     response_format: { type: "json_object" },
+    max_completion_tokens: input.maxOutputTokens,
     messages: [
       {
         role: "system",
@@ -228,12 +222,7 @@ export function parseOpenAiResultLog(log: { errorMessage: string | null }) {
 }
 
 export async function processRegulatoryItemWithOpenAi(input: {
-  env: Pick<
-    AppEnv,
-    | "AI_MODEL_CLASSIFICATION"
-    | "AI_MODEL_SUMMARY"
-    | "AI_MODEL_DEEP_ANALYSIS"
-  >;
+  env: Pick<AppEnv, "AI_MODEL_SUMMARY" | "AI_MODEL_DEEP_ANALYSIS">;
   source: RegulationSource;
   candidate: ExtractedCandidateItem;
   rawItem: RawRegulatoryItem;
@@ -247,7 +236,7 @@ export async function processRegulatoryItemWithOpenAi(input: {
       logMessage: buildOpenAiResultLogMessage({
         outcome: "skipped_published_item",
         modelUsed: input.env.AI_MODEL_SUMMARY,
-        promptVersion: "openai-structured.v1",
+        promptVersion: "openai-structured.v2",
         estimatedInputTokens: input.planningDecision.estimatedInputTokens,
         estimatedOutputTokens: input.planningDecision.estimatedOutputTokens,
         estimatedCostUsd: input.planningDecision.estimatedCostUsd,
@@ -256,9 +245,15 @@ export async function processRegulatoryItemWithOpenAi(input: {
     };
   }
 
-  const classification = await callJsonModel({
-    model: input.env.AI_MODEL_CLASSIFICATION,
-    prompt: buildRegulatoryClassificationPrompt({
+  const narrativeModel = input.planningDecision.requiresDeepAnalysis
+    ? input.env.AI_MODEL_DEEP_ANALYSIS
+    : input.env.AI_MODEL_SUMMARY;
+
+  // One call covers classification + summary + obligations so the source text
+  // is only paid for once.
+  const analysis = await callJsonModel({
+    model: narrativeModel,
+    prompt: buildRegulatoryAnalysisPrompt({
       sourceName: input.source.name,
       sourceUrl: input.candidate.url,
       jurisdiction: input.source.jurisdiction,
@@ -268,44 +263,12 @@ export async function processRegulatoryItemWithOpenAi(input: {
       publicationDate: input.candidate.publicationDate ?? null,
       text: input.candidate.text,
     }),
-    schema: classificationSchema,
-  });
-
-  const narrativeModel = input.planningDecision.requiresDeepAnalysis
-    ? input.env.AI_MODEL_DEEP_ANALYSIS
-    : input.env.AI_MODEL_SUMMARY;
-
-  const summary = await callJsonModel({
-    model: narrativeModel,
-    prompt: buildRegulatorySummaryPrompt({
-      sourceName: input.source.name,
-      sourceUrl: input.candidate.url,
-      title: input.candidate.title,
-      publicationDate: input.candidate.publicationDate ?? null,
-      jurisdiction: classification.jurisdiction,
-      region: input.source.region,
-      country: input.source.country,
-      text: input.candidate.text,
-      developmentType: classification.developmentType,
-      legalArea: classification.legalArea,
-    }),
-    schema: summarySchema,
-  });
-
-  const obligations = await callJsonModel({
-    model: input.env.AI_MODEL_SUMMARY,
-    prompt: buildObligationExtractionPrompt({
-      sourceName: input.source.name,
-      sourceUrl: input.candidate.url,
-      title: input.candidate.title,
-      publicationDate: input.candidate.publicationDate ?? null,
-      text: input.candidate.text,
-    }),
-    schema: obligationsSchema,
+    schema: analysisSchema,
+    maxOutputTokens: input.planningDecision.requiresDeepAnalysis ? 3000 : 2000,
   });
 
   const confidenceLevel = normalizeOrFallback<ConfidenceLevel>(
-    classification.confidenceLevel.toLowerCase(),
+    analysis.confidenceLevel.toLowerCase(),
     allowedConfidenceLevels,
     input.existingUpdate.confidenceLevel,
   );
@@ -313,36 +276,36 @@ export async function processRegulatoryItemWithOpenAi(input: {
   const updatePatch: OpenAiProcessingSuccess["updatePatch"] = {
     title: input.existingUpdate.title,
     jurisdiction: normalizeOrFallback<Jurisdiction>(
-      classification.jurisdiction,
+      analysis.jurisdiction,
       allowedJurisdictions,
       input.existingUpdate.jurisdiction,
     ),
     region: input.source.region,
     country: input.source.country,
     publicationDate: input.candidate.publicationDate ?? input.existingUpdate.publicationDate,
-    oneSentenceSummary: summary.oneSentenceSummary,
-    summary: summary.summary,
-    whatHappened: summary.whatHappened,
-    whyItMatters: summary.whyItMatters,
-    practicalImpact: summary.practicalImpact,
-    affectedParties: summary.affectedParties,
-    keyObligations: obligations.keyObligations,
-    complianceDeadlines: obligations.complianceDeadlines,
-    enforcementRisk: summary.enforcementRisk,
+    oneSentenceSummary: analysis.oneSentenceSummary,
+    summary: analysis.summary,
+    whatHappened: analysis.whatHappened,
+    whyItMatters: analysis.whyItMatters,
+    practicalImpact: analysis.practicalImpact,
+    affectedParties: analysis.affectedParties,
+    keyObligations: analysis.keyObligations,
+    complianceDeadlines: analysis.complianceDeadlines,
+    enforcementRisk: analysis.enforcementRisk,
     importanceLevel: normalizeOrFallback<ImportanceLevel>(
-      classification.importanceLevel.toLowerCase(),
+      analysis.importanceLevel.toLowerCase(),
       allowedImportanceLevels,
       input.existingUpdate.importanceLevel,
     ),
     confidenceLevel,
-    tags: Array.from(new Set(classification.tags.map((tag) => tag.trim()).filter(Boolean))).slice(0, 12),
+    tags: Array.from(new Set(analysis.tags.map((tag) => tag.trim()).filter(Boolean))).slice(0, 12),
     developmentType: normalizeOrFallback<DevelopmentType>(
-      classification.developmentType,
+      analysis.developmentType,
       allowedDevelopmentTypes,
       input.existingUpdate.developmentType,
     ),
     legalArea: normalizeOrFallback<LegalArea>(
-      classification.legalArea,
+      analysis.legalArea,
       allowedLegalAreas,
       input.existingUpdate.legalArea,
     ),
@@ -352,11 +315,11 @@ export async function processRegulatoryItemWithOpenAi(input: {
     skipped: false as const,
     updatePatch,
     modelUsed: narrativeModel,
-    promptVersion: `classification=${promptVersions.classification};summary=${promptVersions.summary};obligations=${promptVersions.obligations};openai-structured.v1`,
+    promptVersion: `analysis=${promptVersions.analysis};openai-structured.v2`,
     logMessage: buildOpenAiResultLogMessage({
       outcome: "completed_ai_processing",
       modelUsed: narrativeModel,
-      promptVersion: "openai-structured.v1",
+      promptVersion: "openai-structured.v2",
       estimatedInputTokens: input.planningDecision.estimatedInputTokens,
       estimatedOutputTokens: input.planningDecision.estimatedOutputTokens,
       estimatedCostUsd: input.planningDecision.estimatedCostUsd,

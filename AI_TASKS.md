@@ -90,6 +90,14 @@ YYYY-MM-DD · <Agent> · <TASK-ID> · <STATUS>
 
 ## Current status
 
+2026-07-23 · Claude Code · T-AI-TOKEN-OPTIMISATION · DONE-LOCAL
+- Intent: Cut per-item OpenAI token usage ~3× — the processor sent the full source text (up to 12k tokens) three times (classification, summary, obligations); merged into one combined structured call on the narrative model, with a `max_completion_tokens` output cap (2000 / 3000 deep) and `estimateAiCost()` realigned to the single-call profile (previous estimate also billed a phantom relevance call that never existed).
+- Files: `src/agents/ai-regulation/prompts/regulatoryAnalysisPrompt.ts` (new), `versions.ts`, `processors/openaiProcessor.ts`, `processors/aiPlanning.ts`, `processors/pipeline.ts`, `processors/aiSmokeTest.ts` (prompt-version strings v1→v2), tests (`openaiProcessor.test.ts`, `citationPolicy.test.ts`, `pipeline.harness.test.ts`); deleted orphaned `classificationPrompt.ts`, `regulatorySummaryPrompt.ts`, `obligationExtractionPrompt.ts`.
+- Graph anchors: `processRegulatoryItemWithOpenAi()`, `estimateAiCost()`, `buildRegulatoryAnalysisPrompt()` (new node — rebuild graph), community "Scan Pipeline". `prompts/templates.ts` is pre-existing dead code (no importers) — left untouched.
+- Verification: `npm test` PASS (689), `npm run lint` PASS, `npm run typecheck` PASS, `npm run build` PASS (with local dummy env; build requires prod secrets regardless of this change).
+- Branch/commit: `claude/optimize-token-usage-xff2yg`
+- Next: Codex may want to re-tune `AI_MAX_ITEMS_PER_SCAN` upward since per-item cost dropped ~2×; guardrails/budget envelope unchanged.
+
 2026-07-19 - Claude Code - T-FRANCE-LIVE-EMPTY-FIX - REVIEW
 - Intent:        Production France live-monitoring section rendered empty: `getFranceLiveLegalIntelligenceData()` reads the GLOBAL latest-N public news list (ordered publication_date desc, nulls last) and filters to France afterwards — recent multi-country/international publishing volume evicted France items from the 80-item window (France items with null publication_date sort last and are evicted first). Widened the window to 500 in the France agent + quiet empty-state row on the page instead of an empty box.
 - Files:         `src/agents/ai-regulation/franceLegalNewsAgent.ts` (one call-site), `src/app/[lang]/ai-regulation/europe/[country]/page.tsx`.
