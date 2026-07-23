@@ -15,9 +15,11 @@ Run: python worker.py  (default port 8765)
 """
 
 import hashlib
+import hmac
 import json
 import os
 import sys
+from functools import wraps
 from typing import Any
 
 from dotenv import load_dotenv
@@ -42,6 +44,26 @@ ALLOW_INSECURE_SSL_FALLBACK = (
 
 # Per-source extractor configs loaded from extractors/ directory
 _extractor_configs: dict[str, dict[str, Any]] = {}
+
+
+def require_worker_token(handler: Any) -> Any:
+    """Require the configured bearer token for extraction endpoints."""
+
+    @wraps(handler)
+    def wrapped(*args: Any, **kwargs: Any) -> Any:
+        expected_token = os.getenv("SCRAPLING_WORKER_TOKEN", "").strip()
+        authorization = request.headers.get("Authorization", "")
+        scheme, _, provided_token = authorization.partition(" ")
+        if (
+            not expected_token
+            or scheme != "Bearer"
+            or not provided_token
+            or not hmac.compare_digest(provided_token, expected_token)
+        ):
+            return jsonify({"error": "unauthorized"}), 401
+        return handler(*args, **kwargs)
+
+    return wrapped
 
 
 def load_extractor_configs() -> None:
@@ -185,6 +207,7 @@ def health():
 
 
 @app.post("/extract")
+@require_worker_token
 def extract():
     payload = request.get_json(silent=True) or {}
     url = payload.get("url", "").strip()
@@ -202,6 +225,7 @@ def extract():
 
 
 @app.post("/extract/batch")
+@require_worker_token
 def extract_batch():
     payload = request.get_json(silent=True) or {}
     items = payload.get("items", [])

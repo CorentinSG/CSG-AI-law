@@ -2,7 +2,9 @@ import { mkdtemp, readFile, utimes, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
+
+import * as scanWorkerRuntime from "@/agents/ai-regulation/processors/scanWorkerRuntime";
 
 import {
   acquireScanWorkerLease,
@@ -61,6 +63,66 @@ describe("scanWorkerRuntime", () => {
 
     expect(config.schedulerEnabled).toBe(false);
     expect(config.schedulerIntervalMs).toBe(60_000);
+  });
+
+  it("configures scheduled workers to exit after the first empty cycle", () => {
+    const config = createScanWorkerConfig(
+      {
+        SCAN_JOB_WORKER_MODE: "scheduled",
+        SCAN_JOB_WORKER_EXPECTED_INTERVAL_MS: "900000",
+      } as unknown as NodeJS.ProcessEnv,
+      "C:\\repo",
+      42,
+    );
+
+    expect(config.workerMode).toBe("scheduled");
+    expect(config.expectedIntervalMs).toBe(900_000);
+    expect(config.idleExitAfter).toBe(1);
+  });
+
+  it("rechecks an external stop request immediately before scheduled completion", async () => {
+    const getTerminalHeartbeatState = (
+      scanWorkerRuntime as typeof scanWorkerRuntime & {
+        getScanWorkerTerminalHeartbeatState?: (
+          config: ReturnType<typeof createScanWorkerConfig>,
+          idleCycles: number,
+          stopRequested: boolean,
+          checkExternalStop: () => Promise<boolean>,
+        ) => Promise<string> | string;
+      }
+    ).getScanWorkerTerminalHeartbeatState;
+    const scheduledConfig = createScanWorkerConfig(
+      {
+        SCAN_JOB_WORKER_MODE: "scheduled",
+        SCAN_JOB_WORKER_IDLE_EXIT_AFTER: "1",
+      } as unknown as NodeJS.ProcessEnv,
+      "C:\\repo",
+      42,
+    );
+    const continuousConfig = createScanWorkerConfig(
+      {} as NodeJS.ProcessEnv,
+      "C:\\repo",
+      42,
+    );
+    const completionCheck = vi.fn().mockResolvedValue(false);
+    const lateStopCheck = vi.fn().mockResolvedValue(true);
+    const signalStopCheck = vi.fn().mockResolvedValue(false);
+
+    expect(
+      await getTerminalHeartbeatState?.(scheduledConfig, 1, false, completionCheck),
+    ).toBe("completed");
+    expect(completionCheck).toHaveBeenCalledOnce();
+    expect(
+      await getTerminalHeartbeatState?.(scheduledConfig, 1, false, lateStopCheck),
+    ).toBe("stopped");
+    expect(lateStopCheck).toHaveBeenCalledOnce();
+    expect(
+      await getTerminalHeartbeatState?.(scheduledConfig, 1, true, signalStopCheck),
+    ).toBe("stopped");
+    expect(signalStopCheck).not.toHaveBeenCalled();
+    expect(
+      await getTerminalHeartbeatState?.(continuousConfig, 1, false, completionCheck),
+    ).toBe("stopped");
   });
 
   it("refuses a second fresh worker lease but allows takeover after stale state", async () => {
