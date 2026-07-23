@@ -10,6 +10,7 @@ Each agent edits only its own rows. Status vocabulary: `CLAIMED` · `WIP` · `BL
 
 | Task ID | Owner | Status | Branch @ sha | Locked files | Graph anchor | Updated |
 |---|---|---|---|---|---|---|
+| T-NY-CORPUS-PARITY | Codex | REVIEW | `codex/new-york-corpus-parity` @ working tree | `src/content/ai-regulation/new-york-ai-law-depth.ts`, related test | `newYorkAiLawDepthEntries` | 2026-07-23 |
 | T-RECOVERY-GITHUB-MONITORING | Codex | DONE-LOCAL | `codex/project-recovery-2026-07-23` @ `1dde0dc` | GitHub monitoring workflow, scan worker runtime, health, Scrapling client, operations docs | `createScanWorkerConfig()`, `getScraplingWorkerUrl()`, communities "Scan Job Management" and "Source Runtime Health" | 2026-07-23 |
 | TOOLING-GRAPH-PROTOCOL | Claude Code | REVIEW | `ops/t-ops9-ux` @ `30bc31c` | `AGENTS.md`, `AI_TASKS.md`, `.gitignore`, `.git/hooks/*` | n/a (tooling, no app code) | 2026-06-20 |
 | T-OPS9-UX | Claude Code | WIP | `ops/t-ops9-ux` @ `30bc31c` | `src/app/**`, shared UI components | community "UI Components and Utilities", "Intelligence Hub UI" | 2026-06-20 |
@@ -1107,3 +1108,12 @@ Every non-trivial task should have:
 - Live data:     Supabase has 48 `published` New York AI Law Watch updates tagged `new-york-ai-law-watch`; 10 New York live sources exist and are active.
 - Notes:         Secondary/commentary work-product comparators remain discovery leads unless a New York primary source is verified. Claude-owned Standards UI files remain untouched.
 - Verification:  Targeted NY tests PASS; dry-run PASS; live write PASS; replay idempotence PASS (`skipped_existing_update` x48); direct DB check confirms 48/48 published + 10 active sources. Full verification follows in current handoff.
+
+### 2026-07-23 - Codex - T-NY-CORPUS-PARITY - REVIEW
+
+- Intent:        Restore the 60-entry New York corpus to main without the unrelated contact/banner changes, and correct legal overstatements found during independent review.
+- Files:         `src/content/ai-regulation/new-york-ai-law-depth.ts`, its test, `AI_TASKS.md`.
+- Graph anchors: `newYorkAiLawDepthEntries`.
+- Corrections:    RAISE tiering, S7676B date/scope, Election Law knowledge standard, SAFE effective status, section 50-f historical source, NYS-P24-001 scope/date, and SDNY authority/DMCA description.
+- Verification:  713/713 tests, lint and typecheck pass; two independent legal review rounds end with MERGE verdict; 60 unique titles and URLs.
+- Follow-up:     Run a corrective idempotent Supabase replay after merge because the earlier 60-entry production backfill contains the superseded wording.
