@@ -10,7 +10,8 @@ Each agent edits only its own rows. Status vocabulary: `CLAIMED` · `WIP` · `BL
 
 | Task ID | Owner | Status | Branch @ sha | Locked files | Graph anchor | Updated |
 |---|---|---|---|---|---|---|
-| T-WORKER-HEALTH-CONTRACT | Codex | REVIEW | `codex/worker-health-contract` @ working tree | health API route/test | `GET()`, `buildHealthSnapshot()`, community "Source Runtime Health" | 2026-07-23 |
+| T-AUTOMATIC-CORROBORATION-CONTAINMENT | Codex | REVIEW | `codex/automatic-corroboration-containment` @ working tree | automatic corroboration, citation classification, news projection, tests | `findCorroboratingUpdates()`, `buildCorroborationMetadataPatch()`, `buildNewsItemFromUpdate()` | 2026-07-23 |
+| T-WORKER-HEALTH-CONTRACT | Codex | MERGED | `main` @ `49d4e49` | health API route/test | `GET()`, `buildHealthSnapshot()`, community "Source Runtime Health" | 2026-07-23 |
 | T-MIGRATION-031 | Codex | MERGED | `main` @ `2566a16` | migration 031 and schema invariants | `evaluateSchemaIntegrity()`, `REQUIRED_SCHEMA_INVARIANTS` | 2026-07-23 |
 | T-NY-PROD-CORRECTION | Codex | MERGED | `main` @ `7689187` | New York reconciliation module/backfill, editable update fields | `findExistingNewYorkUpdate()`, `listChangedUpdateFields()` | 2026-07-23 |
 | T-NY-CORPUS-PARITY | Codex | MERGED | `main` @ `9148879` | `src/content/ai-regulation/new-york-ai-law-depth.ts`, related test | `newYorkAiLawDepthEntries` | 2026-07-23 |
@@ -97,6 +98,22 @@ YYYY-MM-DD · <Agent> · <TASK-ID> · <STATUS>
 ```
 
 ## Current status
+
+2026-07-23 - Codex - T-AUTOMATIC-CORROBORATION-CONTAINMENT - REVIEW
+- Intent: Keep fuzzy same-story matches as AI-ranking evidence without letting them manufacture verification or public corroboration.
+- Files: `src/agents/ai-regulation/citations.ts`, `src/agents/ai-regulation/processors/crossSourceCorroboration.ts`, `src/content/ai-regulation/news.ts`, related tests, `AI_TASKS.md`.
+- Graph anchors: `findCorroboratingUpdates()`, `buildCorroborationMetadataPatch()`, `buildNewsItemFromUpdate()`.
+- Verification: four expected RED failures; GREEN with 723/723 tests, lint, typecheck, and production build.
+- Branch/commit: `codex/automatic-corroboration-containment` @ working tree.
+- Next: Independent review, focused PR, then merge if CI remains green.
+
+2026-07-23 - Codex - T-WORKER-HEALTH-CONTRACT - MERGED
+- Intent: Make the dedicated worker health check fail visibly when the scheduled heartbeat is stale.
+- Files: `src/app/api/health/route.ts`, route test, `AI_TASKS.md`.
+- Graph anchors: `GET()`, `buildHealthSnapshot()`, community "Source Runtime Health".
+- Verification: 720/720 tests, lint, typecheck, production build, independent review, and PR checks passed.
+- Branch/commit: `main` @ `49d4e49`.
+- Next: Configure GitHub Actions secrets before expecting scheduled monitoring to become healthy.
 
 2026-07-23 - Codex - T-WORKER-HEALTH-CONTRACT - REVIEW
 - Intent: Make the dedicated worker health check fail visibly when the scheduled heartbeat is stale.

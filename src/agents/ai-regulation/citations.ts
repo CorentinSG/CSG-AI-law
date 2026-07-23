@@ -77,6 +77,22 @@ export interface SourceReference {
   notes?: string | null;
 }
 
+export const AUTOMATIC_STORY_SIMILARITY_STATUS =
+  "automatic_story_similarity";
+
+export function isPublicationGradeCorroboratingReference(
+  reference: SourceReference,
+) {
+  const hasCorroboratingRole =
+    reference.sourceRole === "supporting" ||
+    reference.sourceRole === "official_confirmation";
+  const isAutomaticSimilarity =
+    reference.verificationStatus === AUTOMATIC_STORY_SIMILARITY_STATUS ||
+    /matched automatically by story similarity/i.test(reference.notes ?? "");
+
+  return hasCorroboratingRole && !isAutomaticSimilarity;
+}
+
 export interface CitationAssessment {
   qualityStatus: CitationQualityStatus;
   publicationEligible: boolean;
