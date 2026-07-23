@@ -90,6 +90,14 @@ YYYY-MM-DD · <Agent> · <TASK-ID> · <STATUS>
 
 ## Current status
 
+2026-07-23 · Codex · T-NY-AI-LAW-WATCH-WAVE-2 · LIVE-SUPABASE
+- Intent: audit Claude's New York wave 2 against official sources, correct legal/date overstatements, and publish the complete 60-entry corpus without duplicating the 48 existing records.
+- Files: `src/content/ai-regulation/new-york-ai-law-depth.ts`, `src/content/ai-regulation/new-york-ai-law-depth.test.ts`, `scripts/backfill-new-york-ai-law-depth.ts`, `scripts/backfill-new-york-ai-law-depth-sync.ts`, `scripts/backfill-new-york-ai-law-depth-sync.test.ts`.
+- Graph anchors: `newYorkAiLawDepthEntries`, `diffEditableUpdate()`, `collectAllPages()`, `updateRepository.saveUpdateEdits()`.
+- Verification: dry-run `entryCount=60`; first prod run created 12, skipped 47 and updated the existing RAISE entry; final replay skipped all 60; direct Supabase recount confirms 60/60 published. `npm test` PASS (129 files / 694 tests), lint PASS, typecheck PASS, build PASS.
+- Branch/commit: `codex/ny-prod-backfill-review` @ `1c8ba2d`.
+- Next: merge the isolated commit; separately harden the shared Supabase partial-update mapper, whose array defaults can erase omitted fields.
+
 2026-07-23 · Claude Code · T-NY-DEPTH-WAVE-2 · DONE-LOCAL
 - Intent: user-requested enrichment of the New York AI-law corpus — 11 new verified entries (48 → 59): LOADinG Act, GBL Art 47 AI companions, S7676B digital-replica contracts, CRL 50-f, Penal Law 245.15 deepfakes, Election Law 14-106, SAFE for Kids Act + OAG NPRM, NYS-P24-001, NYC AI Action Plan, NYT v OpenAI MTD ruling (2025-04-04)
 - Files: `src/content/ai-regulation/new-york-ai-law-depth.ts` (Codex-owned per T-NY-AI-LAW-WATCH — edited on explicit user instruction); also this session on same branch: contact page redesign, `contact-channel.tsx`, `construction-banner.tsx`, `shell.tsx`
@@ -1052,6 +1060,6 @@ Every non-trivial task should have:
 - Date:          2026-07-19
 - Intent:        Build a New York-specific AI-law watch layer covering NY Courts/Part 161, state and federal AI litigation decisions, Heppner work-product/privilege, NYC Local Law 144/AEDT, NYC OTI/Local Law 35, RAISE Act, NYDFS guidance, and state AI bills.
 - Files:         `src/content/ai-regulation/new-york-ai-law-depth.ts`, `src/content/ai-regulation/new-york-ai-law-depth.test.ts`, `scripts/backfill-new-york-ai-law-depth.ts`, `src/agents/ai-regulation/newYorkAiLawWatch.test.ts`, `src/agents/ai-regulation/usMonitoringAgentDefinitions.ts`, `src/db/seed/ai-regulation-seed.ts`, `docs/agent-ny-reports/*`, design/plan docs.
-- Live data:     Supabase has 48 `published` New York AI Law Watch updates tagged `new-york-ai-law-watch`; 10 New York live sources exist and are active.
+- Live data:     Supabase has 60 `published` New York AI Law Watch updates tagged `new-york-ai-law-watch`; 10 New York live sources exist and are active.
 - Notes:         Secondary/commentary work-product comparators remain discovery leads unless a New York primary source is verified. Claude-owned Standards UI files remain untouched.
-- Verification:  Targeted NY tests PASS; dry-run PASS; live write PASS; replay idempotence PASS (`skipped_existing_update` x48); direct DB check confirms 48/48 published + 10 active sources. Full verification follows in current handoff.
+- Verification:  Official-source audit PASS; dry-run reports 60 entries; live wave-2 write created 12, skipped 47 and updated the existing RAISE entry; final replay idempotence PASS (`skipped_existing_update` x60); direct DB check confirms 60/60 published. Full suite PASS (129 files / 694 tests), lint PASS, typecheck PASS, build PASS.
