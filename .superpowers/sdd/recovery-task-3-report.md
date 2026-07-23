@@ -177,3 +177,61 @@ Result: exit 0; Next route types generated and TypeScript completed without
 errors.
 
 `git diff --check` completed without whitespace errors before the fix commit.
+
+## Stop-File Race Follow-up
+
+The late stop-file recheck is committed in
+`1dde0dc1299e714e07ba920297e2317ab3c77ca2`
+(`fix(ops): recheck stop file before completion`).
+
+### Changed Files
+
+- Updated `src/agents/ai-regulation/processors/scanWorkerRuntime.ts` so the
+  terminal selector asynchronously rechecks an external stop request before it
+  returns `completed` for a scheduled idle exit.
+- Updated `scripts/run-scan-job-worker.ts` to use that recheck immediately
+  before its final heartbeat and call `requestStop` when the stop file appears.
+- Updated `src/agents/ai-regulation/processors/scanWorkerRuntime.test.ts` to
+  prove the external checker is invoked before completion, a late stop changes
+  the terminal heartbeat to `stopped`, and a SIGTERM-style requested stop
+  remains `stopped` without an external check.
+- Updated `AI_TASKS.md` with the final recovery-task handoff.
+
+### RED Evidence
+
+```text
+npm test -- src/agents/ai-regulation/processors/scanWorkerRuntime.test.ts
+```
+
+Result: exit 1; 1 file failed with 1 intended failure and 5 passing tests.
+The scheduled completion path returned `completed` without invoking the
+late-stop checker.
+
+### GREEN Evidence
+
+```text
+npm test -- src/agents/ai-regulation/processors/scanWorkerRuntime.test.ts
+```
+
+Result: exit 0; 1 file and 6 tests passed.
+
+### Follow-up Verification
+
+```text
+npm test
+```
+
+Result: exit 0; 130 files and 712 tests passed.
+
+```text
+npm run lint
+```
+
+Result: exit 0.
+
+```text
+npm run typecheck
+```
+
+Result: exit 0; Next route types generated and TypeScript completed without
+errors.

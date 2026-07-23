@@ -10,7 +10,7 @@ Each agent edits only its own rows. Status vocabulary: `CLAIMED` · `WIP` · `BL
 
 | Task ID | Owner | Status | Branch @ sha | Locked files | Graph anchor | Updated |
 |---|---|---|---|---|---|---|
-| T-RECOVERY-GITHUB-MONITORING | Codex | DONE-LOCAL | `codex/project-recovery-2026-07-23` @ `bb71efc` | GitHub monitoring workflow, scan worker runtime, health, Scrapling client, operations docs | `createScanWorkerConfig()`, `getScraplingWorkerUrl()`, communities "Scan Job Management" and "Source Runtime Health" | 2026-07-23 |
+| T-RECOVERY-GITHUB-MONITORING | Codex | DONE-LOCAL | `codex/project-recovery-2026-07-23` @ `1dde0dc` | GitHub monitoring workflow, scan worker runtime, health, Scrapling client, operations docs | `createScanWorkerConfig()`, `getScraplingWorkerUrl()`, communities "Scan Job Management" and "Source Runtime Health" | 2026-07-23 |
 | TOOLING-GRAPH-PROTOCOL | Claude Code | REVIEW | `ops/t-ops9-ux` @ `30bc31c` | `AGENTS.md`, `AI_TASKS.md`, `.gitignore`, `.git/hooks/*` | n/a (tooling, no app code) | 2026-06-20 |
 | T-OPS9-UX | Claude Code | WIP | `ops/t-ops9-ux` @ `30bc31c` | `src/app/**`, shared UI components | community "UI Components and Utilities", "Intelligence Hub UI" | 2026-06-20 |
 | T-LEGALDB-UI | Claude Code | DONE-LOCAL | `ops/t-ops9-ux` @ `0f2809d` | `src/app/admin/ai-regulation/legal-database/**`, `src/app/admin/ai-regulation/page.tsx` | `deriveUpdateAuthorityType()`, `getAuthorityPriorityRank()`, `FilterBar`, community "News and Regulation Admin" | 2026-06-20 |
@@ -93,6 +93,14 @@ YYYY-MM-DD · <Agent> · <TASK-ID> · <STATUS>
 ```
 
 ## Current status
+
+2026-07-23 - Codex - T-RECOVERY-GITHUB-MONITORING - DONE-LOCAL
+- Intent: Recheck the stop file immediately before marking a scheduled idle worker completed.
+- Files: scan worker terminal-state runtime + test and `scripts/run-scan-job-worker.ts`.
+- Graph anchors: `createScanWorkerConfig()`, community "Scan Job Management".
+- Verification: RED/GREEN captured; 712/712 Vitest, lint, and typecheck pass.
+- Branch/commit: `codex/project-recovery-2026-07-23` @ `1dde0dc`.
+- Next: operator configures required GitHub repository secrets and manually dispatches the workflow.
 
 2026-07-23 - Codex - T-RECOVERY-GITHUB-MONITORING - DONE-LOCAL
 - Intent: Apply review fixes for end-to-end local Scrapling authentication and requested-stop heartbeats.
