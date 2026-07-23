@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import { getFranceLiveLegalIntelligenceData } from "@/agents/ai-regulation/franceLegalNewsAgent";
+import { getCountryLiveIntelligenceLoader } from "@/agents/ai-regulation/countryLiveDataRegistry";
 import { getStoryPhaseDisplay } from "@/agents/ai-regulation/storyClustering";
 import { getGermanyLiveLegalIntelligenceData } from "@/agents/ai-regulation/germanyLegalNewsAgent";
 import { getNetherlandsLiveLegalIntelligenceData } from "@/agents/ai-regulation/netherlandsLegalNewsAgent";
@@ -147,7 +148,10 @@ export default async function EuropeCountryPage({
   const profile = getEuropeCountryProfileBySlug(country);
   if (!profile) notFound();
 
-  const [updates, franceLiveData, germanyLiveData, spainLiveData, italyLiveData, netherlandsLiveData, belgiumLiveData, austriaLiveData, swedenLiveData, irelandLiveData, dbCountry, dbCountrySources] =
+  // Countries without a bespoke live block below get the shared factory
+  // agent's live intelligence (clustered stories included) via the registry.
+  const genericLiveLoader = getCountryLiveIntelligenceLoader(profile.slug);
+  const [updates, franceLiveData, germanyLiveData, spainLiveData, italyLiveData, netherlandsLiveData, belgiumLiveData, austriaLiveData, swedenLiveData, irelandLiveData, genericLiveData, dbCountry, dbCountrySources] =
     await Promise.all([
     updateRepository.listPublicUpdates(),
     profile.slug === "france" ? getFranceLiveLegalIntelligenceData(6) : Promise.resolve(null),
@@ -159,6 +163,7 @@ export default async function EuropeCountryPage({
     profile.slug === "austria" ? getAustriaLiveLegalIntelligenceData(6) : Promise.resolve(null),
     profile.slug === "sweden" ? getSwedenLiveLegalIntelligenceData(6) : Promise.resolve(null),
     profile.slug === "ireland" ? getIrelandLiveLegalIntelligenceData(6) : Promise.resolve(null),
+    genericLiveLoader ? genericLiveLoader(6) : Promise.resolve(null),
     updateRepository.getCountryIntelligenceBySlug(profile.slug),
     updateRepository.listCountryIntelligenceSources(`country-${profile.slug}`),
     ]);
@@ -524,6 +529,31 @@ export default async function EuropeCountryPage({
 
       {/* Jump target for the country-specific intelligence zone below. */}
       <div id="intel" aria-hidden className="-mt-6 scroll-mt-28" />
+
+      {genericLiveData ? (
+        <section className="space-y-6">
+          <SectionHeading
+            eyebrow={`${profile.countryName} live legal intelligence`}
+            title={`Monitoring ${profile.countryName} AI law now`}
+            description={`Recent official ${profile.countryName} AI-law developments visible to the public layer, grouped into cross-source stories with dates, source attribution, and verification signals shown directly.`}
+          />
+          <LiveLegalIntelligencePanel
+            title={`${profile.countryName} AI legal developments`}
+            description={`${profile.countryName} live monitoring prioritises official legal and institutional sources; independent sources reporting the same development are grouped into one corroborated story.`}
+            regionLabel={profile.countryName}
+            items={genericLiveData.items.map((entry) => entry.item)}
+            stories={genericLiveData.stories}
+            lastCheckedAt={genericLiveData.lastCheckedAt}
+            activity={genericLiveData.activity}
+            itemFreshnessById={Object.fromEntries(
+              genericLiveData.items.map((entry) => [
+                entry.item.id,
+                entry.currentness.freshnessLabel,
+              ]),
+            )}
+          />
+        </section>
+      ) : null}
 
       {profile.slug === "germany" && germanyLiveData ? (
         <section className="space-y-6">

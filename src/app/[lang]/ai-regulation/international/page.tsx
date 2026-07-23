@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { ExternalLink } from "lucide-react";
 
 import { updateRepository } from "@/agents/ai-regulation/processors/updateRepository";
+import { buildLiveStoryFeed } from "@/agents/ai-regulation/storyClustering";
 import { MotionReveal } from "@/components/site/motion-reveal";
 import { MotionStagger } from "@/components/site/motion-stagger";
 import { SectionHeading } from "@/components/site/section-heading";
@@ -73,16 +74,20 @@ export default async function InternationalAiRegulationPage({
   if (!isLocale(lang)) notFound();
   const fr = lang === "fr";
 
+  // Window widened from 40 so story clustering sees enough items to group
+  // cross-source duplicates instead of a thin top-of-feed slice.
   const [updates, newsItems] = await Promise.all([
     updateRepository.listPublicUpdates(),
-    updateRepository.getPublicNewsItems(40),
+    updateRepository.getPublicNewsItems(120),
   ]);
 
   const internationalUpdates = updates.filter(isInternationalSignal).slice(0, 6);
-  const internationalNews = newsItems
-    .map(normalizeNewsItemRecord)
-    .filter(isInternationalSignal)
-    .slice(0, 6);
+  // Clustered into cross-source stories before the display cap, so the same
+  // development reported by several sources renders as one corroborated row.
+  const internationalStories = buildLiveStoryFeed(
+    newsItems.map(normalizeNewsItemRecord).filter(isInternationalSignal),
+    { limit: 6 },
+  );
   const instruments = buildInternationalInstruments();
 
   return (
@@ -127,14 +132,32 @@ export default async function InternationalAiRegulationPage({
               </span>
             </div>
 
-            {internationalNews.length > 0 ? (
+            {internationalStories.length > 0 ? (
               <ol className="flex-1 divide-y divide-white/8">
-                {internationalNews.map((item) => (
-                  <li key={item.id} className="group py-3.5">
+                {internationalStories.map((story) => {
+                  const item = story.primary;
+                  return (
+                  <li key={story.id} className="group py-3.5">
                     <p className="line-clamp-2 text-[15px] font-medium leading-6 text-white/90">
                       {item.title}
                     </p>
                     <p className="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1 font-mono text-[9.5px] uppercase tracking-[0.14em] text-white/45">
+                      {(story.phase === "breaking" || story.phase === "developing") && (
+                        <>
+                          <span className={story.phase === "breaking" ? "text-emerald-300" : "text-sky-300"}>
+                            {story.phase === "breaking" ? "Breaking" : "Developing"}
+                          </span>
+                          <span aria-hidden className="text-white/25">-</span>
+                        </>
+                      )}
+                      {story.corroboration.sourceCount > 1 && (
+                        <>
+                          <span className="text-[color:var(--color-accent-strong,#c4882a)]">
+                            {story.corroboration.sourceCount} sources
+                          </span>
+                          <span aria-hidden className="text-white/25">-</span>
+                        </>
+                      )}
                       <span className="text-white/60">{item.jurisdiction || item.region}</span>
                       <span aria-hidden className="text-white/25">-</span>
                       <span>{item.publicationDate ? formatDisplayDate(item.publicationDate) : "-"}</span>
@@ -154,7 +177,8 @@ export default async function InternationalAiRegulationPage({
                       )}
                     </p>
                   </li>
-                ))}
+                  );
+                })}
               </ol>
             ) : (
               <div className="flex flex-1 items-center py-10">
