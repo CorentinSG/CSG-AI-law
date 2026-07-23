@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useRef, useState } from "react";
-import Image from "next/image";
 import {
   ArrowUpRight,
   Check,
@@ -171,59 +170,6 @@ function MagneticCta({ email }: { email: string }) {
   );
 }
 
-/* ── Portrait — frameless, dissolves into the page background ──── */
-
-// Portrait as a true background layer: it bleeds off the right of the section
-// and dissolves into the page — no card, no border. The contact console
-// floats over its faded left side.
-function ContactBackdrop() {
-  const reduced = useReducedMotion();
-
-  return (
-    <div className="pointer-events-none absolute inset-0 overflow-hidden">
-      {/* Warm gold spotlight living in the page, behind the head */}
-      <motion.div
-        aria-hidden
-        className="absolute right-[4%] top-0 h-[80%] w-[60%] bg-[radial-gradient(45%_45%_at_62%_28%,rgba(196,136,42,0.13),transparent_72%)]"
-        animate={reduced ? undefined : { opacity: [0.7, 1, 0.7], scale: [1, 1.05, 1] }}
-        transition={{ duration: 9, repeat: Infinity, ease: "easeInOut" }}
-      />
-
-      {/* The subject, woven deep into the page background — a low-contrast,
-          low-opacity atmospheric presence rather than a foreground portrait.
-          Darkened, desaturated and heavily faded so it reads as part of the
-          dark environment, only just perceptible. */}
-      <motion.div
-        className="absolute inset-y-0 right-[-12%] w-[85%] opacity-[0.11] sm:right-[-4%] sm:w-[80%] sm:opacity-[0.13] lg:right-0 lg:w-[68%] lg:opacity-[0.2]"
-        animate={reduced ? undefined : { y: [0, -12, 0] }}
-        transition={{ duration: 11, repeat: Infinity, ease: "easeInOut" }}
-      >
-        <Image
-          src="/images/profile/corentin-saint-girons-cutout.png"
-          alt="Portrait of Corentin Saint-Girons"
-          fill
-          sizes="(max-width: 1024px) 100vw, 62vw"
-          priority
-          className="object-contain object-right-top brightness-[0.45] contrast-[1.02] grayscale-[0.6]"
-        />
-        {/* Dissolve the figure into the page: fade its left edge, base and
-            top into the near-black body colour so it has no visible border. */}
-        <div
-          aria-hidden
-          className="absolute inset-0 bg-gradient-to-r from-[#080808] via-[#080808]/70 to-transparent lg:via-[#080808]/35"
-        />
-        <div
-          aria-hidden
-          className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-[#080808] via-[#080808]/70 to-transparent"
-        />
-        <div
-          aria-hidden
-          className="absolute inset-x-0 top-0 h-1/4 bg-gradient-to-b from-[#080808] to-transparent"
-        />
-      </motion.div>
-    </div>
-  );
-}
 
 /* ── Ambient background — slow gold orbs + faint grid ─────────── */
 
@@ -279,15 +225,9 @@ export function ContactExperience({ email }: { email: string }) {
         </motion.p>
       </section>
 
-      {/* ── Channel over portrait-as-background ── */}
-      <motion.section
-        {...fadeUp(0.45)}
-        className="relative isolate flex min-h-[32rem] items-center overflow-hidden py-4 md:min-h-[40rem]"
-      >
-        <ContactBackdrop />
-
-        {/* Direct channel console — floats over the faded left of the portrait */}
-        <div className="glass-panel noise-overlay relative z-10 flex w-full max-w-xl flex-col justify-between gap-10 overflow-hidden rounded-[2rem] p-8 md:p-10">
+      {/* ── Direct channel ── */}
+      <motion.section {...fadeUp(0.45)} className="relative">
+        <div className="glass-panel noise-overlay relative flex w-full max-w-2xl flex-col justify-between gap-10 overflow-hidden rounded-[2rem] p-8 md:p-10">
           <div
             aria-hidden
             className="absolute -right-24 -top-24 size-64 rounded-full bg-[radial-gradient(circle,rgba(196,136,42,0.12),transparent_70%)] blur-xl"
