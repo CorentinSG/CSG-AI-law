@@ -1016,22 +1016,44 @@ export const newYorkAiLawDepthEntries: NewYorkAiLawDepthEntry[] = [
     sourceUrl:
       "https://www.governor.ny.gov/news/governor-hochul-signs-nation-leading-legislation-require-ai-frameworks-ai-frontier-models",
     sourceType: "government",
-    publicationDate: "2025-12-01",
+    publicationDate: "2025-12-19",
     developmentType: "Statute",
     legalArea: "AI governance",
     authorityType: "Binding law",
     summary:
-      "Governor Hochul announced signature of the RAISE Act, creating frontier AI model safety-framework and incident-reporting obligations.",
+      "Governor Hochul signed the RAISE Act on December 19, 2025, creating frontier AI model safety-framework and incident-reporting obligations that take effect January 1, 2027.",
     whatHappened:
-      "The legislation requires covered frontier AI developers to create and publish safety protocol information and report critical-harm incidents.",
+      "The legislation requires covered frontier AI developers to create and publish safety protocol information and report critical-harm incidents. It makes New York the second US state after California to enact comprehensive frontier-model safety legislation, and its substantive obligations become effective January 1, 2027.",
     whyItMatters:
-      "RAISE makes New York one of the most important US state jurisdictions for frontier-model transparency and safety compliance.",
+      "RAISE makes New York one of the most important US state jurisdictions for frontier-model transparency and safety compliance, with a firm January 1, 2027 compliance deadline for covered developers.",
     practicalImpact:
-      "Frontier-model developers should monitor chapter amendments, DFS oversight-office implementation, safety protocol publication duties and critical-harm reporting procedures.",
+      "Frontier-model developers should build toward the January 1, 2027 effective date now — standing up safety-protocol publication, transparency reporting and critical-harm incident procedures, and tracking the S8828 chapter amendment that finalized the thresholds and duties.",
     excerpt:
       "The Governor announcement describes legislation requiring AI frameworks for frontier models and incident reporting for critical harms.",
     pinpoint: { section: "Governor announcement", billNumber: "S6953B/A6453B" },
-    tags: ["raise-act", "frontier-ai", "incident-reporting", "safety-frameworks"],
+    tags: ["raise-act", "frontier-ai", "incident-reporting", "safety-frameworks", "effective-2027"],
+  }),
+  entry({
+    title: "RAISE Act chapter amendment finalizes frontier-developer duties before the 2027 effective date",
+    sourceName: "New York State Senate",
+    sourceUrl: "https://www.nysenate.gov/legislation/bills/2025/S8828",
+    sourceType: "parliament",
+    publicationDate: "2026-03-27",
+    developmentType: "Statute",
+    legalArea: "AI governance",
+    authorityType: "Binding law",
+    summary:
+      "S8828, signed March 27, 2026, is the chapter amendment that finalizes the RAISE Act's frontier-model transparency and safety requirements ahead of its January 1, 2027 effective date.",
+    whatHappened:
+      "The amendment adds compute- and revenue-based thresholds distinguishing frontier developers from large frontier developers (annual revenue over $500 million), requires a transparency report at or before deployment of a new frontier model, and sets critical safety incident reporting within 72 hours (24 hours where there is imminent risk of death or serious physical injury). It aligns New York more closely with California's frontier-AI transparency law and keeps the January 1, 2027 effective date.",
+    whyItMatters:
+      "This is the operative final text frontier developers must comply with — the version that controls what the January 1, 2027 obligations actually require in New York.",
+    practicalImpact:
+      "Large frontier developers should classify themselves against the revenue and compute thresholds, prepare pre-deployment transparency reports, and stand up 24/72-hour incident-reporting pipelines before January 1, 2027.",
+    excerpt:
+      "S8828 amends the general business law transparency and safety requirements for developers of artificial intelligence frontier models and addresses the effectiveness of the 2025 RAISE Act.",
+    pinpoint: { billNumber: "S8828" },
+    tags: ["raise-act", "frontier-ai", "incident-reporting", "transparency-report", "effective-2027", "state-legislation"],
   }),
   entry({
     title: "NYDFS Circular Letter No. 7 governs AI and external data in insurance",
