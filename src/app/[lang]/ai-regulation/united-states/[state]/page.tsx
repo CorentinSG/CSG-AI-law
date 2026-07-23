@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import { updateRepository } from "@/agents/ai-regulation/processors/updateRepository";
+import { buildLiveStoryFeed } from "@/agents/ai-regulation/storyClustering";
 import { BreadcrumbNav } from "@/components/site/breadcrumb-nav";
 import { CompactNewsCard } from "@/components/site/compact-news-card";
 import { ImplementationProgressBar } from "@/components/site/implementation-progress-bar";
@@ -85,24 +86,31 @@ export default async function UsStatePage({
   const profile = getUsStateAiLawProfileBySlug(state);
   if (!profile) notFound();
 
+  // Window widened from 30 so story clustering sees enough items to group
+  // cross-source duplicates instead of a thin top-of-feed slice.
   const [allUpdates, newsItems] = await Promise.all([
     updateRepository.listPublicUpdates(),
-    updateRepository.getPublicNewsItems(30),
+    updateRepository.getPublicNewsItems(120),
   ]);
   const updates = allUpdates.filter(
     (update) =>
       update.country === "United States" &&
       (update.jurisdiction === profile.stateName || update.title.includes(profile.stateName)),
   );
-  const stateNews = newsItems
-    .map(normalizeNewsItemRecord)
-    .filter(
-      (item) =>
-        item.jurisdiction === profile.stateName ||
-        item.countryOrState === profile.stateName ||
-        item.title.toLowerCase().includes(profile.stateName.toLowerCase()),
-    )
-    .slice(0, 5);
+  // Clustered into cross-source stories before the display cap: only the most
+  // authoritative report of each development is rendered, instead of one card
+  // per source repeating the same story.
+  const stateNews = buildLiveStoryFeed(
+    newsItems
+      .map(normalizeNewsItemRecord)
+      .filter(
+        (item) =>
+          item.jurisdiction === profile.stateName ||
+          item.countryOrState === profile.stateName ||
+          item.title.toLowerCase().includes(profile.stateName.toLowerCase()),
+      ),
+    { limit: 5 },
+  ).map((story) => story.primary);
 
   return (
     <SiteShell className="space-y-10">

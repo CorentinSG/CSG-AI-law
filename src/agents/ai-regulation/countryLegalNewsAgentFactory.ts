@@ -11,6 +11,7 @@ import {
 import { runAiRegulationScan, type ScanTrigger } from "@/agents/ai-regulation/processors/pipeline";
 import { updateRepository } from "@/agents/ai-regulation/processors/updateRepository";
 import type { ScanProfileId } from "@/agents/ai-regulation/scanProfiles";
+import { buildLiveStoryFeed } from "@/agents/ai-regulation/storyClustering";
 import type { RegulationSource } from "@/agents/ai-regulation/types";
 import { normalizeNewsItemRecord, type AiLawNewsItem } from "@/content/ai-regulation/news";
 
@@ -401,6 +402,12 @@ export function createCountryLegalNewsAgent(
         reviewPriority: getReviewPriority(entry),
         currentness: entry.currentness,
       })),
+      // Clustered before the display cap so the same development reported by
+      // several sources counts as one corroborated story, not N rows.
+      stories: buildLiveStoryFeed(
+        rankedItems.map((entry) => entry.item),
+        { limit },
+      ),
       summary: buildCountryNewsSummary(rankedItems),
       lastCheckedAt: getLastCheckedAtForSourceIds(sourceIds, sourceHealthChecks),
       activity: getSourceActivityForSourceIds(

@@ -6,6 +6,7 @@ import { assessEuNewsVerification } from "@/agents/ai-regulation/euNewsVerificat
 import { runAiRegulationScan, type ScanTrigger } from "@/agents/ai-regulation/processors/pipeline";
 import { updateRepository } from "@/agents/ai-regulation/processors/updateRepository";
 import type { ScanProfileId } from "@/agents/ai-regulation/scanProfiles";
+import { buildLiveStoryFeed } from "@/agents/ai-regulation/storyClustering";
 import {
   filterRegionalLiveItems,
   getRegionalLastCheckedAt,
@@ -33,8 +34,10 @@ export async function runEuLegalNewsAgentScan(options?: {
 }
 
 export async function getEuropeLiveLegalIntelligenceData(limit = 6) {
+  // Window widened from 40 so Europe-wide story clustering sees enough items
+  // to group cross-source duplicates instead of a thin top-of-feed slice.
   const [newsItems, sources, sourceHealthChecks] = await Promise.all([
-    updateRepository.getPublicNewsItems(40),
+    updateRepository.getPublicNewsItems(120),
     updateRepository.getSources(),
     updateRepository.getSourceHealthChecks(undefined, 40),
   ]);
@@ -60,6 +63,12 @@ export async function getEuropeLiveLegalIntelligenceData(limit = 6) {
 
   return {
     items: rankedItems.slice(0, limit),
+    // Clustered before the display cap so the same development reported by
+    // several sources counts as one corroborated story, not N rows.
+    stories: buildLiveStoryFeed(
+      rankedItems.map((entry) => entry.item),
+      { limit },
+    ),
     lastCheckedAt: getRegionalLastCheckedAt(sourceHealthChecks, sources, "Europe"),
     activity: getRegionalSourceActivity(sourceHealthChecks, sources, "Europe"),
   };

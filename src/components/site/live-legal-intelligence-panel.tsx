@@ -5,6 +5,11 @@ import {
   type NewsFreshnessLabel,
   type SourceFreshnessStatus,
 } from "@/agents/ai-regulation/newsCurrentness";
+import {
+  getStoryPhaseDisplay,
+  type LegalStory,
+  type LegalStoryPhase,
+} from "@/agents/ai-regulation/storyClustering";
 import type { AiLawNewsItem } from "@/content/ai-regulation/news";
 import {
   getLiveReliabilityLabel,
@@ -38,10 +43,29 @@ interface LiveLegalIntelligencePanelProps {
   description: string;
   regionLabel: string;
   items: AiLawNewsItem[];
+  /**
+   * Cross-source story clusters. When provided, one corroborated story renders
+   * as a single row (phase + source count) instead of N duplicate item rows.
+   */
+  stories?: LegalStory[];
   lastCheckedAt: string | null;
   activity: LiveSourceActivityItem[];
   itemFreshnessById?: Record<string, NewsFreshnessLabel>;
   lang?: Locale;
+}
+
+function getPhaseToneClass(phase: LegalStoryPhase): string {
+  switch (phase) {
+    case "breaking":
+      return "text-emerald-300";
+    case "developing":
+      return "text-sky-300";
+    case "sustained":
+      return "text-white/55";
+    case "fading":
+    default:
+      return "text-white/35";
+  }
 }
 
 function getActivitySummary(activity: LiveSourceActivityItem[]) {
@@ -77,12 +101,34 @@ export function LiveLegalIntelligencePanel({
   description,
   regionLabel,
   items,
+  stories,
   lastCheckedAt,
   activity,
   itemFreshnessById,
   lang = DEFAULT_LOCALE,
 }: LiveLegalIntelligencePanelProps) {
   const emptyState = getActivitySummary(activity);
+  const rows =
+    stories && stories.length > 0
+      ? stories.map((story) => ({
+          item: story.primary,
+          phase: story.phase,
+          corroboration: story.corroboration,
+          extraSources: story.members
+            .slice(1)
+            .filter(
+              (member, index, all) =>
+                member.sourceName !== story.primary.sourceName &&
+                all.findIndex((entry) => entry.sourceName === member.sourceName) === index,
+            )
+            .slice(0, 3),
+        }))
+      : items.map((item) => ({
+          item,
+          phase: null,
+          corroboration: null,
+          extraSources: [] as AiLawNewsItem[],
+        }));
 
   return (
     <section className="space-y-5">
@@ -107,17 +153,33 @@ export function LiveLegalIntelligencePanel({
       </div>
 
       {/* Signals — card rows with region accent */}
-      {items.length > 0 ? (
+      {rows.length > 0 ? (
         <ol className="space-y-3 border-b border-white/8 pb-3">
-          {items.map((item) => (
+          {rows.map(({ item, phase, corroboration, extraSources }) => (
             <li
               key={item.id}
               className={`group rounded-xl border border-white/8 bg-white/[0.03] px-4 py-4 transition-all duration-200 hover:-translate-y-0.5 hover:bg-white/[0.06] border-l-2 ${getRegionBorderClass(item.region)}`}
             >
               <div className="mb-2 flex flex-wrap items-center gap-x-2 gap-y-1 font-mono text-[9.5px] uppercase tracking-[0.16em] text-white/45">
+                {phase ? (
+                  <>
+                    <span className={getPhaseToneClass(phase)}>
+                      {getStoryPhaseDisplay(phase)}
+                    </span>
+                    <span aria-hidden className="text-white/25">·</span>
+                  </>
+                ) : null}
                 <span className="text-white/65">{getLiveStatusBadgeLabel(item)}</span>
                 <span aria-hidden className="text-white/25">·</span>
                 <span>{getLiveReliabilityLabel(item.sourceReliability)}</span>
+                {corroboration && corroboration.sourceCount > 1 ? (
+                  <>
+                    <span aria-hidden className="text-white/25">·</span>
+                    <span className="text-[color:var(--color-accent-strong,#c4882a)]">
+                      Corroboré · {corroboration.sourceCount} sources
+                    </span>
+                  </>
+                ) : null}
                 {itemFreshnessById?.[item.id] ? (
                   <>
                     <span aria-hidden className="text-white/25">·</span>
@@ -157,6 +219,19 @@ export function LiveLegalIntelligencePanel({
                     <span className="text-amber-300/80">vérification officielle en attente</span>
                   </>
                 )}
+                {extraSources.map((member) => (
+                  <span key={member.id} className="contents">
+                    <span aria-hidden className="text-white/25">·</span>
+                    <a
+                      href={member.sourceUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="text-white/55 transition-colors hover:text-white/80"
+                    >
+                      aussi via {member.sourceName} ↗
+                    </a>
+                  </span>
+                ))}
               </div>
             </li>
           ))}
