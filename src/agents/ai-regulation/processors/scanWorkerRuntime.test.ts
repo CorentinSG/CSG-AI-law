@@ -4,6 +4,8 @@ import path from "node:path";
 
 import { afterEach, describe, expect, it } from "vitest";
 
+import * as scanWorkerRuntime from "@/agents/ai-regulation/processors/scanWorkerRuntime";
+
 import {
   acquireScanWorkerLease,
   clearScanWorkerStopRequest,
@@ -76,6 +78,35 @@ describe("scanWorkerRuntime", () => {
     expect(config.workerMode).toBe("scheduled");
     expect(config.expectedIntervalMs).toBe(900_000);
     expect(config.idleExitAfter).toBe(1);
+  });
+
+  it("only marks an unrequested scheduled idle exit as completed", () => {
+    const getTerminalHeartbeatState = (
+      scanWorkerRuntime as typeof scanWorkerRuntime & {
+        getScanWorkerTerminalHeartbeatState?: (
+          config: ReturnType<typeof createScanWorkerConfig>,
+          idleCycles: number,
+          stopRequested: boolean,
+        ) => string;
+      }
+    ).getScanWorkerTerminalHeartbeatState;
+    const scheduledConfig = createScanWorkerConfig(
+      {
+        SCAN_JOB_WORKER_MODE: "scheduled",
+        SCAN_JOB_WORKER_IDLE_EXIT_AFTER: "1",
+      } as unknown as NodeJS.ProcessEnv,
+      "C:\\repo",
+      42,
+    );
+    const continuousConfig = createScanWorkerConfig(
+      {} as NodeJS.ProcessEnv,
+      "C:\\repo",
+      42,
+    );
+
+    expect(getTerminalHeartbeatState?.(scheduledConfig, 1, false)).toBe("completed");
+    expect(getTerminalHeartbeatState?.(scheduledConfig, 1, true)).toBe("stopped");
+    expect(getTerminalHeartbeatState?.(continuousConfig, 1, false)).toBe("stopped");
   });
 
   it("refuses a second fresh worker lease but allows takeover after stale state", async () => {

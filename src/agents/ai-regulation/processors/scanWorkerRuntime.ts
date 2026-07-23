@@ -58,6 +58,21 @@ export type ScanWorkerStatus = {
   lastError?: string | null;
 };
 
+export type ScanWorkerTerminalHeartbeatState = "completed" | "stopped";
+
+export function getScanWorkerTerminalHeartbeatState(
+  config: Pick<ScanWorkerConfig, "workerMode" | "idleExitAfter">,
+  idleCycles: number,
+  stopRequested: boolean,
+): ScanWorkerTerminalHeartbeatState {
+  return config.workerMode === "scheduled" &&
+    !stopRequested &&
+    config.idleExitAfter > 0 &&
+    idleCycles >= config.idleExitAfter
+    ? "completed"
+    : "stopped";
+}
+
 export function createScanWorkerConfig(
   env: NodeJS.ProcessEnv,
   cwd = process.cwd(),

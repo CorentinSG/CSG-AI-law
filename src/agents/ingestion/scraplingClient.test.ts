@@ -15,6 +15,7 @@ describe("scrapling client", () => {
 
   it("passes source_id so the worker can load per-source extractor config", async () => {
     vi.stubEnv("SCRAPLING_WORKER_URL", "http://localhost:8765");
+    vi.stubEnv("SCRAPLING_WORKER_TOKEN", "test-worker-token");
     const fetchMock = vi.fn().mockResolvedValue({
       ok: true,
       json: async () => ({
@@ -34,6 +35,10 @@ describe("scrapling client", () => {
       "http://localhost:8765/extract",
       expect.objectContaining({
         method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: "Bearer test-worker-token",
+        },
         body: JSON.stringify({
           url: "https://example.com/legal",
           source_id: "src-edpb",
@@ -46,6 +51,16 @@ describe("scrapling client", () => {
       source_id: "src-edpb",
       extraction_method: "scrapling",
     });
+  });
+
+  it("requires a worker token before requesting protected extraction routes", async () => {
+    vi.stubEnv("SCRAPLING_WORKER_URL", "http://localhost:8765");
+    vi.stubEnv("SCRAPLING_WORKER_TOKEN", "");
+    vi.stubGlobal("fetch", vi.fn());
+
+    await expect(scraplingExtract("https://example.com/legal", "src-edpb")).rejects.toThrow(
+      "Scrapling worker token is not configured",
+    );
   });
 
   it("reports worker health without throwing when the sidecar is down", async () => {

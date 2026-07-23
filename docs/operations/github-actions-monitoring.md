@@ -33,8 +33,10 @@ Do not add `OPENAI_API_KEY` to this workflow. It runs with
 
 The workflow generates `SCRAPLING_WORKER_TOKEN` at runtime, shares it only
 with the local gunicorn process and the Node worker environment, and does not
-store or print it. Scrapling binds only to `127.0.0.1:8765`; the Node worker
-uses `SCRAPLING_WORKER_URL=http://127.0.0.1:8765` for that run.
+store or print it. The token protects Scrapling's extraction endpoints; its
+health endpoint remains open for startup probing. Scrapling binds only to
+`127.0.0.1:8765`; the Node worker uses
+`SCRAPLING_WORKER_URL=http://127.0.0.1:8765` for that run.
 
 ## Manual Dispatch
 

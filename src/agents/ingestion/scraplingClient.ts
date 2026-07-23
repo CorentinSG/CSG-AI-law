@@ -19,6 +19,10 @@ export function isScraplingRuntimeAvailable() {
   return Boolean(getScraplingWorkerUrl());
 }
 
+function getScraplingWorkerToken() {
+  return process.env.SCRAPLING_WORKER_TOKEN?.trim() || null;
+}
+
 /** Extract a single URL via the Scrapling worker. */
 export async function scraplingExtract(
   url: string,
@@ -30,12 +34,19 @@ export async function scraplingExtract(
   if (!workerUrl) {
     throw new Error("Scrapling worker is not configured: set SCRAPLING_WORKER_URL.");
   }
+  const workerToken = getScraplingWorkerToken();
+  if (!workerToken) {
+    throw new Error("Scrapling worker token is not configured: set SCRAPLING_WORKER_TOKEN.");
+  }
 
   let res: Response;
   try {
     res = await fetch(`${workerUrl}/extract`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${workerToken}`,
+      },
       body: JSON.stringify({
         url: normalized,
         source_id: sourceId,

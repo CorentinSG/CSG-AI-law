@@ -52,7 +52,8 @@ project and private networking is enabled.
 | `PORT` | unset | Railway-provided port; takes precedence over `SCRAPLING_WORKER_PORT` |
 | `SCRAPLING_WORKER_PORT` | `8765` | Port the worker listens on |
 | `SCRAPLING_WORKER_HOST` | `0.0.0.0` | Host/interface the worker binds to |
-| `SCRAPLING_WORKER_URL` | `http://localhost:8765` | URL used by Next.js to reach the worker |
+| `SCRAPLING_WORKER_URL` | required | URL used by Next.js to reach the worker |
+| `SCRAPLING_WORKER_TOKEN` | required | Bearer token required by `/extract` and `/extract/batch`; health stays unauthenticated |
 | `SCRAPING_USER_AGENT` | CSG-Law-AI-Intelligence/1.0 | HTTP user agent sent to target sites |
 | `SCRAPING_RATE_LIMIT_PER_DOMAIN` | `5` | Max requests per domain per run |
 | `SCRAPLING_ALLOW_INSECURE_SSL_FALLBACK` | `true` | Retry once with TLS certificate verification disabled when an official site fails certificate-chain validation |

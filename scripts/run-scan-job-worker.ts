@@ -11,6 +11,7 @@ import {
   acquireScanWorkerLease,
   clearScanWorkerStopRequest,
   createScanWorkerConfig,
+  getScanWorkerTerminalHeartbeatState,
   refreshScanWorkerLeaseHeartbeat,
   releaseScanWorkerLease,
   scanWorkerStopRequested,
@@ -253,7 +254,7 @@ async function main() {
 
     await writeStatus("stopped");
     await writePersistentHeartbeat(
-      config.workerMode === "scheduled" ? "completed" : "stopped",
+      getScanWorkerTerminalHeartbeatState(config, idleCycles, stopRequested),
     );
   } catch (error) {
     await writeStatus("failed", {
