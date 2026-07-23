@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from "react";
+import { useSyncExternalStore } from "react";
 import { usePathname } from "next/navigation";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { Construction, X } from "lucide-react";
@@ -22,35 +22,37 @@ const COPY = {
 
 const STORAGE_KEY = "csg-construction-banner-dismissed";
 
+// Tiny external store over sessionStorage so the banner reads dismissal state
+// without setState-in-effect and stays hidden during SSR (server snapshot = dismissed).
+const listeners = new Set<() => void>();
+function subscribe(listener: () => void) {
+  listeners.add(listener);
+  return () => listeners.delete(listener);
+}
+function isDismissed() {
+  try {
+    return sessionStorage.getItem(STORAGE_KEY) === "1";
+  } catch {
+    return false;
+  }
+}
+
 export function ConstructionBanner() {
   const reduced = useReducedMotion();
   const pathname = usePathname();
   const locale = getLocaleFromPathname(pathname);
   const copy = COPY[locale] ?? COPY.en;
 
-  // Avoid hydration flicker: render nothing until we know the stored state.
-  const [ready, setReady] = useState(false);
-  const [visible, setVisible] = useState(false);
-
-  useEffect(() => {
-    try {
-      setVisible(sessionStorage.getItem(STORAGE_KEY) !== "1");
-    } catch {
-      setVisible(true);
-    }
-    setReady(true);
-  }, []);
+  const visible = !useSyncExternalStore(subscribe, isDismissed, () => true);
 
   function dismiss() {
-    setVisible(false);
     try {
       sessionStorage.setItem(STORAGE_KEY, "1");
     } catch {
       // Storage unavailable — banner simply reappears next load.
     }
+    listeners.forEach((listener) => listener());
   }
-
-  if (!ready) return null;
 
   return (
     <AnimatePresence initial={false}>

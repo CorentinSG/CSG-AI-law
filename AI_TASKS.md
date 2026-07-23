@@ -90,6 +90,14 @@ YYYY-MM-DD · <Agent> · <TASK-ID> · <STATUS>
 
 ## Current status
 
+2026-07-23 · Claude Code · T-NY-DEPTH-WAVE-2 · DONE-LOCAL
+- Intent: user-requested enrichment of the New York AI-law corpus — 11 new verified entries (48 → 59): LOADinG Act, GBL Art 47 AI companions, S7676B digital-replica contracts, CRL 50-f, Penal Law 245.15 deepfakes, Election Law 14-106, SAFE for Kids Act + OAG NPRM, NYS-P24-001, NYC AI Action Plan, NYT v OpenAI MTD ruling (2025-04-04)
+- Files: `src/content/ai-regulation/new-york-ai-law-depth.ts` (Codex-owned per T-NY-AI-LAW-WATCH — edited on explicit user instruction); also this session on same branch: contact page redesign, `contact-channel.tsx`, `construction-banner.tsx`, `shell.tsx`
+- Graph anchors: `newYorkAiLawDepthEntries` (graph not rebuilt this session — remote env, no graphify)
+- Verification: `npm test` PASS (128 files / 689 tests) · lint PASS · typecheck PASS · build PASS (memory-mode local env vars)
+- Branch/commit: `claude/contact-page-redesign-1m9ssa` (see git log for shas)
+- Next: HANDOFF→Codex — replay `backfill-new-york-ai-law-depth` against Supabase so the 11 new entries publish; all sources verified via official pages/web corroboration (Raw Story v OpenAI deliberately excluded: no stable official URL verified)
+
 2026-07-19 - Claude Code - T-FRANCE-LIVE-EMPTY-FIX - REVIEW
 - Intent:        Production France live-monitoring section rendered empty: `getFranceLiveLegalIntelligenceData()` reads the GLOBAL latest-N public news list (ordered publication_date desc, nulls last) and filters to France afterwards — recent multi-country/international publishing volume evicted France items from the 80-item window (France items with null publication_date sort last and are evicted first). Widened the window to 500 in the France agent + quiet empty-state row on the page instead of an empty box.
 - Files:         `src/agents/ai-regulation/franceLegalNewsAgent.ts` (one call-site), `src/app/[lang]/ai-regulation/europe/[country]/page.tsx`.
