@@ -18,6 +18,7 @@ const ease: [number, number, number, number] = [0.16, 1, 0.3, 1];
 
 export function SiteFooter() {
   const lang = getLocaleFromPathname(usePathname());
+  const fr = lang === "fr";
 
   return (
     <footer className="relative mt-8">
@@ -42,7 +43,14 @@ export function SiteFooter() {
               Attorney-led AI law research, regulatory monitoring, and legal intelligence.
             </p>
             <p className="max-w-sm text-xs leading-6 text-zinc-400">
-              For informational purposes only — not legal advice.
+              {fr
+                ? "À titre informatif uniquement — ne constitue pas un conseil juridique."
+                : "For informational purposes only — not legal advice."}
+            </p>
+            <p className="max-w-sm text-xs leading-6 text-amber-200/70">
+              {fr
+                ? "Site en construction : les informations peuvent ne pas être fiables à 100 % et sont susceptibles d'évoluer."
+                : "Site under construction: information may not be fully reliable yet and is subject to change."}
             </p>
           </div>
 
