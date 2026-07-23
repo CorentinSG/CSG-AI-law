@@ -8,7 +8,7 @@ const ease: [number, number, number, number] = [0.16, 1, 0.3, 1];
 
 // Assembled at runtime so the plain address never sits in the static markup —
 // keeps it out of naive scrapers and hidden until the visitor acts.
-const USER = "corentin.stigrons";
+const USER = "corentin.stgirons";
 const DOMAIN = "gmail.com";
 const address = `${USER}@${DOMAIN}`;
 
