@@ -4,6 +4,7 @@ import { CursorBot } from "@/components/site/cursor-bot";
 import { PageTransition } from "@/components/site/page-transition";
 import { SiteFooter } from "@/components/site/site-footer";
 import { SiteHeader } from "@/components/site/site-header";
+import { SiteNotice } from "@/components/site/site-notice";
 import { cn } from "@/lib/utils";
 
 export function SiteShell({
@@ -29,6 +30,7 @@ export function SiteShell({
       )}
     >
       {!isAdmin ? <CursorBot /> : null}
+      {!isAdmin ? <SiteNotice /> : null}
       <SiteHeader variant={variant} />
       <PageTransition>
         <main
