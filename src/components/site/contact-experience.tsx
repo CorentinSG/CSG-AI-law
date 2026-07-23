@@ -184,16 +184,17 @@ function ContactBackdrop() {
       {/* Warm gold spotlight living in the page, behind the head */}
       <motion.div
         aria-hidden
-        className="absolute right-[4%] top-0 h-[80%] w-[60%] bg-[radial-gradient(45%_45%_at_62%_28%,rgba(196,136,42,0.20),transparent_70%)]"
+        className="absolute right-[4%] top-0 h-[80%] w-[60%] bg-[radial-gradient(45%_45%_at_62%_28%,rgba(196,136,42,0.13),transparent_72%)]"
         animate={reduced ? undefined : { opacity: [0.7, 1, 0.7], scale: [1, 1.05, 1] }}
         transition={{ duration: 9, repeat: Infinity, ease: "easeInOut" }}
       />
 
-      {/* The subject, anchored to the right and bleeding off-frame. On small
-          screens it sits behind the full-width console, so it is dialled right
-          back to a faint backdrop; at lg it takes the stage at full presence. */}
+      {/* The subject, woven deep into the page background — a low-contrast,
+          low-opacity atmospheric presence rather than a foreground portrait.
+          Darkened, desaturated and heavily faded so it reads as part of the
+          dark environment, only just perceptible. */}
       <motion.div
-        className="absolute inset-y-0 right-[-12%] w-[85%] opacity-30 sm:right-0 sm:w-[78%] sm:opacity-45 lg:w-[62%] lg:opacity-100"
+        className="absolute inset-y-0 right-[-12%] w-[85%] opacity-[0.18] sm:right-[-4%] sm:w-[80%] sm:opacity-[0.22] lg:right-0 lg:w-[68%] lg:opacity-[0.32]"
         animate={reduced ? undefined : { y: [0, -12, 0] }}
         transition={{ duration: 11, repeat: Infinity, ease: "easeInOut" }}
       >
@@ -203,21 +204,21 @@ function ContactBackdrop() {
           fill
           sizes="(max-width: 1024px) 100vw, 62vw"
           priority
-          className="object-contain object-right-top brightness-[0.9] contrast-[1.03] grayscale-[0.15]"
+          className="object-contain object-right-top brightness-[0.62] contrast-[1.02] grayscale-[0.5]"
         />
         {/* Dissolve the figure into the page: fade its left edge, base and
             top into the near-black body colour so it has no visible border. */}
         <div
           aria-hidden
-          className="absolute inset-0 bg-gradient-to-r from-[#080808] via-[#080808]/55 to-transparent lg:via-[#080808]/15"
+          className="absolute inset-0 bg-gradient-to-r from-[#080808] via-[#080808]/70 to-transparent lg:via-[#080808]/35"
         />
         <div
           aria-hidden
-          className="absolute inset-x-0 bottom-0 h-2/5 bg-gradient-to-t from-[#080808] via-[#080808]/60 to-transparent"
+          className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-[#080808] via-[#080808]/70 to-transparent"
         />
         <div
           aria-hidden
-          className="absolute inset-x-0 top-0 h-1/5 bg-gradient-to-b from-[#080808]/70 to-transparent"
+          className="absolute inset-x-0 top-0 h-1/4 bg-gradient-to-b from-[#080808] to-transparent"
         />
       </motion.div>
     </div>
