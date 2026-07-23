@@ -1,0 +1,102 @@
+name: Legal Monitoring
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "7,22,37,52 * * * *"
+
+concurrency:
+  group: legal-monitoring-production
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: npm ci
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install Scrapling worker dependencies
+        run: python -m pip install -r scrapling_worker/requirements.txt
+
+      - name: Validate required Supabase secrets
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: |
+          missing=()
+          for name in NEXT_PUBLIC_SUPABASE_URL NEXT_PUBLIC_SUPABASE_ANON_KEY SUPABASE_SERVICE_ROLE_KEY; do
+            if [ -z "${!name}" ]; then
+              missing+=("$name")
+            fi
+          done
+          if [ "${#missing[@]}" -gt 0 ]; then
+            printf 'Missing required GitHub secrets: %s\n' "${missing[*]}" >&2
+            exit 1
+          fi
+
+      - name: Start local Scrapling worker
+        run: |
+          token="$(openssl rand -hex 32)"
+          printf 'SCRAPLING_WORKER_TOKEN=%s\n' "$token" >> "$GITHUB_ENV"
+          SCRAPLING_WORKER_TOKEN="$token" \
+            gunicorn --chdir scrapling_worker worker:app \
+            --bind 127.0.0.1:8765 --workers 2 --threads 4 --timeout 120 \
+            > "$RUNNER_TEMP/scrapling-worker.log" 2>&1 &
+          echo "$!" > "$RUNNER_TEMP/scrapling-worker.pid"
+          for attempt in {1..30}; do
+            if curl --fail --silent --show-error http://127.0.0.1:8765/health > /dev/null; then
+              exit 0
+            fi
+            sleep 1
+          done
+          cat "$RUNNER_TEMP/scrapling-worker.log" >&2
+          exit 1
+
+      - name: Drain the production monitoring queue
+        env:
+          APP_DATA_MODE: supabase
+          SCAN_JOB_WORKER_MODE: scheduled
+          SCAN_JOB_WORKER_ENABLE_SCHEDULER: "true"
+          SCAN_JOB_WORKER_SCHEDULER_INTERVAL_MS: "900000"
+          SCAN_JOB_WORKER_EXPECTED_INTERVAL_MS: "900000"
+          SCAN_JOB_WORKER_POLL_MS: "1000"
+          SCAN_JOB_WORKER_MAX_JOBS_PER_CYCLE: "5"
+          SCAN_JOB_WORKER_IDLE_EXIT_AFTER: "1"
+          AI_ENABLE_PROCESSING: "false"
+          SCRAPLING_WORKER_URL: http://127.0.0.1:8765
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          NEWSAPI_API_KEY: ${{ secrets.NEWSAPI_API_KEY }}
+          FIRECRAWL_API_KEY: ${{ secrets.FIRECRAWL_API_KEY }}
+          COURTLISTENER_API_KEY: ${{ secrets.COURTLISTENER_API_KEY }}
+          LEGIFRANCE_PISTE_CLIENT_ID: ${{ secrets.LEGIFRANCE_PISTE_CLIENT_ID }}
+          LEGIFRANCE_PISTE_CLIENT_SECRET: ${{ secrets.LEGIFRANCE_PISTE_CLIENT_SECRET }}
+          JUDILIBRE_API_KEYID: ${{ secrets.JUDILIBRE_API_KEYID }}
+          EURLEX_USERNAME: ${{ secrets.EURLEX_USERNAME }}
+          EURLEX_PASSWORD: ${{ secrets.EURLEX_PASSWORD }}
+          ALERT_WEBHOOK_URL: ${{ secrets.ALERT_WEBHOOK_URL }}
+        run: npm run worker:scan
+
+      - name: Stop local Scrapling worker
+        if: always()
+        run: |
+          if [ -f "$RUNNER_TEMP/scrapling-worker.pid" ]; then
+            kill "$(cat "$RUNNER_TEMP/scrapling-worker.pid")" || true
+          fi

@@ -11,6 +11,7 @@ import {
   acquireScanWorkerLease,
   clearScanWorkerStopRequest,
   createScanWorkerConfig,
+  getScanWorkerTerminalHeartbeatState,
   refreshScanWorkerLeaseHeartbeat,
   releaseScanWorkerLease,
   scanWorkerStopRequested,
@@ -71,7 +72,7 @@ async function main() {
   };
 
   const writePersistentHeartbeat = async (
-    state: ScanWorkerStatus["state"],
+    state: ScanWorkerStatus["state"] | "completed",
     extras?: Record<string, unknown>,
   ) => {
     const heartbeatAt = new Date().toISOString();
@@ -81,6 +82,8 @@ async function main() {
         config.pollMs + config.heartbeatTimeoutMs,
         config.pollMs * 2,
       ),
+      workerMode: config.workerMode,
+      workerExpectedIntervalMs: config.expectedIntervalMs,
       workerId: config.workerId,
       hostname: hostname(),
       pid: process.pid,
@@ -250,7 +253,20 @@ async function main() {
     }
 
     await writeStatus("stopped");
-    await writePersistentHeartbeat("stopped");
+    await writePersistentHeartbeat(
+      await getScanWorkerTerminalHeartbeatState(
+        config,
+        idleCycles,
+        stopRequested,
+        async () => {
+          const externalStopRequested = await scanWorkerStopRequested(config);
+          if (externalStopRequested) {
+            requestStop("stop-file-before-scheduled-completion");
+          }
+          return externalStopRequested;
+        },
+      ),
+    );
   } catch (error) {
     await writeStatus("failed", {
       lastError: error instanceof Error ? error.message : "Unknown error",

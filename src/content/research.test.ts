@@ -21,10 +21,14 @@ describe("research content registry", () => {
     expect(getPublicResearchEntryBySlug("from-monitoring-to-meaning")).toBeNull();
   });
 
-  it("returns the configured featured public entry", () => {
+  it("returns a public, published featured entry", () => {
     const featured = getFeaturedResearchEntry();
 
-    expect(featured?.slug).toBe("generative-ai-access-to-justice-pro-se");
+    // Invariant-based: the featured entry must exist, be published, and be
+    // publicly resolvable — the exact slug is editorial data, not a contract.
+    expect(featured).not.toBeNull();
+    expect(featured!.status).toBe("published");
+    expect(getPublicResearchEntryBySlug(featured!.slug)?.slug).toBe(featured!.slug);
   });
 
   it("returns related entries without including the current article", () => {

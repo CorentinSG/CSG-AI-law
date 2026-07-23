@@ -298,6 +298,44 @@ describe("buildHealthSnapshot", () => {
     });
   });
 
+  it("keeps a recently completed scheduled worker healthy between runs", async () => {
+    mocks.updateRepository.getScanJobs.mockResolvedValueOnce([
+      makeJob({
+        id: "job-scheduled-worker-heartbeat",
+        trigger: "worker_heartbeat",
+        requestedBy: "github-actions-worker-1",
+        status: "succeeded",
+        startedAt: "2026-06-18T10:00:00.000Z",
+        finishedAt: "2026-06-18T10:00:00.000Z",
+        updatedAt: "2026-06-18T10:00:00.000Z",
+        resultSummary: {
+          workerHeartbeatAt: "2026-06-18T10:00:00.000Z",
+          workerHeartbeatTimeoutMs: 45_000,
+          workerMode: "scheduled",
+          workerExpectedIntervalMs: 900_000,
+          state: "completed",
+          workerId: "github-actions-worker-1",
+        },
+      }),
+    ]);
+    const { buildHealthSnapshot } = await import("@/lib/health");
+
+    const snapshot = await buildHealthSnapshot({
+      access: "authenticated",
+      now: new Date("2026-06-18T10:19:00.000Z"),
+    });
+
+    expect(snapshot.worker).toMatchObject({
+      state: "idle",
+      alive: true,
+      heartbeatAt: "2026-06-18T10:00:00.000Z",
+      heartbeatAgeMs: 1_140_000,
+      lastActivityAt: "2026-06-18T10:00:00.000Z",
+      lastActivityAgeMs: 1_140_000,
+      runningJobs: 0,
+    });
+  });
+
   it("does not treat a stopped worker heartbeat sentinel as alive", async () => {
     mocks.updateRepository.getScanJobs.mockResolvedValueOnce([
       makeJob({

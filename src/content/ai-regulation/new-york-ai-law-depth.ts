@@ -1016,22 +1016,44 @@ export const newYorkAiLawDepthEntries: NewYorkAiLawDepthEntry[] = [
     sourceUrl:
       "https://www.governor.ny.gov/news/governor-hochul-signs-nation-leading-legislation-require-ai-frameworks-ai-frontier-models",
     sourceType: "government",
-    publicationDate: "2025-12-01",
+    publicationDate: "2025-12-19",
     developmentType: "Statute",
     legalArea: "AI governance",
     authorityType: "Binding law",
     summary:
-      "Governor Hochul announced signature of the RAISE Act, creating frontier AI model safety-framework and incident-reporting obligations.",
+      "Governor Hochul signed the RAISE Act on December 19, 2025, creating tiered transparency and safety obligations for frontier-model developers that take effect January 1, 2027.",
     whatHappened:
-      "The legislation requires covered frontier AI developers to create and publish safety protocol information and report critical-harm incidents.",
+      "The law covers developers of models trained above 10^26 operations. All covered frontier developers must publish model transparency reports and report critical safety incidents; developers with more than $500 million in annual gross revenue must also publish and maintain a frontier AI framework and provide additional risk information.",
     whyItMatters:
-      "RAISE makes New York one of the most important US state jurisdictions for frontier-model transparency and safety compliance.",
+      "RAISE makes New York one of the most important US state jurisdictions for frontier-model transparency and safety compliance, with a firm January 1, 2027 compliance deadline for covered developers.",
     practicalImpact:
-      "Frontier-model developers should monitor chapter amendments, DFS oversight-office implementation, safety protocol publication duties and critical-harm reporting procedures.",
+      "Covered developers should build toward January 1, 2027 by mapping the compute and revenue thresholds, preparing model transparency reports and incident procedures, and, where the large-developer threshold applies, implementing the frontier AI framework duties.",
     excerpt:
       "The Governor announcement describes legislation requiring AI frameworks for frontier models and incident reporting for critical harms.",
     pinpoint: { section: "Governor announcement", billNumber: "S6953B/A6453B" },
-    tags: ["raise-act", "frontier-ai", "incident-reporting", "safety-frameworks"],
+    tags: ["raise-act", "frontier-ai", "incident-reporting", "safety-frameworks", "effective-2027"],
+  }),
+  entry({
+    title: "RAISE Act chapter amendment finalizes frontier-developer duties before the 2027 effective date",
+    sourceName: "New York State Senate",
+    sourceUrl: "https://www.nysenate.gov/legislation/bills/2025/S8828",
+    sourceType: "parliament",
+    publicationDate: "2026-03-27",
+    developmentType: "Statute",
+    legalArea: "AI governance",
+    authorityType: "Binding law",
+    summary:
+      "S8828, signed March 27, 2026, is the chapter amendment that finalizes the RAISE Act's frontier-model transparency and safety requirements ahead of its January 1, 2027 effective date.",
+    whatHappened:
+      "The amendment defines frontier models using a training threshold above 10^26 operations and large frontier developers using annual gross revenue above $500 million. All frontier developers must publish a transparency report before or when deploying a new or substantially modified frontier model and report critical safety incidents within 72 hours, with a 24-hour disclosure to an appropriate authority for imminent risk of death or serious physical injury. Large frontier developers face additional framework, assessment and disclosure duties.",
+    whyItMatters:
+      "This is the operative final text frontier developers must comply with — the version that controls what the January 1, 2027 obligations actually require in New York.",
+    practicalImpact:
+      "All covered frontier developers should classify models against the compute threshold and prepare transparency and 24/72-hour incident-reporting processes; those above the revenue threshold must also implement the additional large-developer framework and disclosure duties.",
+    excerpt:
+      "S8828 amends the general business law transparency and safety requirements for developers of artificial intelligence frontier models and addresses the effectiveness of the 2025 RAISE Act.",
+    pinpoint: { billNumber: "S8828" },
+    tags: ["raise-act", "frontier-ai", "incident-reporting", "transparency-report", "effective-2027", "state-legislation"],
   }),
   entry({
     title: "NYDFS Circular Letter No. 7 governs AI and external data in insurance",
@@ -1167,5 +1189,249 @@ export const newYorkAiLawDepthEntries: NewYorkAiLawDepthEntry[] = [
       "The bill text states that comprehensive regulations are needed to protect New Yorkers from AI risks and algorithmic discrimination.",
     pinpoint: { billNumber: "S1169B" },
     tags: ["state-legislation", "new-york-ai-act", "high-risk-ai", "algorithmic-discrimination"],
+  }),
+  entry({
+    title: "LOADinG Act requires human oversight of state-agency automated decision-making",
+    sourceName: "New York State Senate",
+    sourceUrl: "https://www.nysenate.gov/legislation/bills/2023/S7543/amendment/B",
+    sourceType: "parliament",
+    publicationDate: "2024-12-21",
+    developmentType: "Statute",
+    legalArea: "Public sector use of AI",
+    authorityType: "Binding law",
+    summary:
+      "The Legislative Oversight of Automated Decision-making in Government (LOADinG) Act, S7543B, was signed on December 21, 2024 and regulates automated decision-making systems used by New York state agencies.",
+    whatHappened:
+      "The enacted bill requires meaningful human review of covered automated decision-making systems, periodic impact assessments revisited on a recurring cycle, and evaluation of bias, discrimination, privacy and cybersecurity risks.",
+    whyItMatters:
+      "It is New York's core statutory layer for public-sector algorithmic accountability, complementing the state ITS acceptable-use policy and the S822 inventory proposal already tracked in this corpus.",
+    practicalImpact:
+      "State agencies and their vendors should inventory ADMS in scope, document human-review checkpoints, and build recurring impact-assessment workflows covering benefits eligibility and rights-affecting decisions.",
+    excerpt:
+      "S7543B enacts the legislative oversight of automated decision-making in government act requiring oversight of automated decision-making systems used by state agencies.",
+    pinpoint: { billNumber: "S7543B" },
+    tags: ["loading-act", "state-legislation", "automated-decision-making", "public-sector-ai", "impact-assessment"],
+  }),
+  entry({
+    title: "GBL Article 47 imposes safeguards on AI companion models",
+    sourceName: "New York State Senate — Consolidated Laws",
+    sourceUrl: "https://www.nysenate.gov/legislation/laws/GBS/A47",
+    sourceType: "parliament",
+    publicationDate: "2025-11-05",
+    developmentType: "Statute",
+    legalArea: "Consumer protection",
+    authorityType: "Binding law",
+    summary:
+      "General Business Law Article 47, effective November 5, 2025, requires operators of AI companion models to deploy suicidal-ideation safeguards and recurring not-a-human disclosures.",
+    whatHappened:
+      "The provisions, enacted through the FY2026 state budget, require AI companion operators to make reasonable efforts to detect user expressions of suicidal ideation or self-harm and refer users to crisis services, and to disclose at the start of interactions and at recurring intervals that the user is not communicating with a human. The Governor notified companies of the requirements by letter on November 10, 2025, and the Attorney General may seek civil penalties.",
+    whyItMatters:
+      "It is among the first binding US state laws targeting emotional-companion AI specifically, making New York a lead jurisdiction for chatbot safety compliance.",
+    practicalImpact:
+      "Companion-AI operators serving New York users need crisis-detection protocols, crisis-referral flows, interval-based AI disclosures, and enforcement-readiness for Attorney General scrutiny.",
+    excerpt:
+      "Article 47 of the General Business Law addresses artificial intelligence companion models, including safeguards for suicidal ideation and disclosures that the user is not communicating with a human.",
+    pinpoint: { section: "GBL Article 47" },
+    tags: ["ai-companions", "chatbot-safety", "consumer-protection", "state-legislation", "mental-health"],
+  }),
+  entry({
+    title: "Digital replica contract law conditions performer voice and likeness agreements",
+    sourceName: "New York State Senate",
+    sourceUrl: "https://www.nysenate.gov/legislation/bills/2023/S7676/amendment/B",
+    sourceType: "parliament",
+    publicationDate: "2024-12-13",
+    developmentType: "Statute",
+    legalArea: "Employment",
+    authorityType: "Binding law",
+    summary:
+      "S7676B, signed December 13, 2024 and effective January 1, 2025, restricts contract provisions for the creation and use of digital replicas of performers' voices and likenesses.",
+    whatHappened:
+      "A provision is void as to a new digitally replicated performance only when three conditions are met together: it substitutes a replica for work the individual otherwise would perform, it lacks a reasonably specific intended-use description, and the individual lacked qualifying counsel or labor-organization representation. A consistency exception protects certain uses aligned with the contract and the recorded performance's fundamental character.",
+    whyItMatters:
+      "It is New York's binding contract-law answer to generative-AI voice and likeness cloning in entertainment and media work, parallel to California's AB 2602 approach.",
+    practicalImpact:
+      "Studios, agencies, game and audio producers should test clauses entered or modified from January 1, 2025 against the three cumulative conditions, document intended uses and representation, and assess the statutory consistency exception.",
+    excerpt:
+      "S7676B addresses contract provisions for the creation and use of digital replicas of the voice or likeness of an individual in place of work the individual would otherwise have performed.",
+    pinpoint: { billNumber: "S7676B" },
+    tags: ["digital-replica", "performers", "entertainment", "state-legislation", "voice-cloning"],
+  }),
+  entry({
+    title: "Civil Rights Law 50-f protects deceased performers against unauthorized digital replicas",
+    sourceName: "New York State Senate",
+    sourceUrl: "https://www.nysenate.gov/legislation/bills/2019/S5959/amendment/D",
+    sourceType: "parliament",
+    publicationDate: "2021-05-29",
+    developmentType: "Statute",
+    legalArea: "Copyright and generative AI",
+    authorityType: "Binding law",
+    summary:
+      "Civil Rights Law section 50-f, effective May 29, 2021, creates post-mortem publicity rights including damages for unauthorized realistic digital replicas of deceased performers.",
+    whatHappened:
+      "The statute allows claims for commercial use of a deceased personality's likeness and for use of a deceased performer's computer-generated digital replica in scripted audiovisual works or live musical performances when likely to deceive the public, with a conspicuous-disclaimer safe harbor and a forty-year post-death limit.",
+    whyItMatters:
+      "It is the pre-generative-AI foundation of New York digital-replica law and the baseline against which the 2024 performer-contract law and synthetic-performer proposals operate.",
+    practicalImpact:
+      "Producers using digital resurrection or de-aging of New York-domiciled deceased performers need estate consent or clear disclaimers, and should track the interaction with newer AI-specific legislation.",
+    excerpt:
+      "Section 50-f establishes a right of publicity for deceased personalities and addresses digital replicas of deceased performers so realistic that a reasonable observer would believe the performance is by the portrayed individual.",
+    pinpoint: { section: "Civil Rights Law § 50-f" },
+    tags: ["digital-replica", "right-of-publicity", "deceased-performers", "entertainment"],
+  }),
+  entry({
+    title: "Penal Law 245.15 criminalizes dissemination of deepfake intimate images",
+    sourceName: "New York State Senate — Consolidated Laws",
+    sourceUrl: "https://www.nysenate.gov/legislation/laws/PEN/245.15",
+    sourceType: "parliament",
+    publicationDate: "2023-09-29",
+    developmentType: "Statute",
+    legalArea: "Criminal justice",
+    authorityType: "Binding law",
+    summary:
+      "A 2023 amendment to Penal Law section 245.15 (S1042A) extends the crime of unlawful dissemination of intimate images to images created or altered by digitization, covering AI-generated deepfakes.",
+    whatHappened:
+      "The amendment, signed in September 2023, added digitization language so that realistic AI-altered or computer-generated intimate images fall within the class A misdemeanor of unlawful dissemination or publication of an intimate image when shared with intent to harm and without consent.",
+    whyItMatters:
+      "It is New York's principal criminal-law response to sexual deepfakes and one of the earliest US state deepfake criminal amendments in force.",
+    practicalImpact:
+      "Platforms and trust-and-safety teams should treat AI-generated intimate imagery of identifiable New Yorkers as potential criminal-law material, and litigators should pair section 245.15 with civil remedies for victims.",
+    excerpt:
+      "Section 245.15 covers dissemination of intimate images including images created or altered by digitization where a reasonable person would believe the depicted person is the victim.",
+    pinpoint: { section: "Penal Law § 245.15" },
+    tags: ["deepfakes", "intimate-images", "criminal-law", "state-legislation"],
+  }),
+  entry({
+    title: "Election Law 14-106 requires disclosure of AI-manipulated political communications",
+    sourceName: "New York State Senate — Consolidated Laws",
+    sourceUrl: "https://www.nysenate.gov/legislation/laws/ELN/14-106",
+    sourceType: "parliament",
+    publicationDate: "2024-04-20",
+    developmentType: "Statute",
+    legalArea: "AI governance",
+    authorityType: "Binding law",
+    summary:
+      "Amendments to Election Law section 14-106 enacted through the FY2025 state budget require disclosure when a person has actual knowledge that a political communication uses materially deceptive AI-manipulated or synthetic media.",
+    whatHappened:
+      "The amended section requires a person who uses or distributes a political communication with actual knowledge that it includes materially deceptive media to provide the statutory disclosure. The separate knew-or-should-have-known standard applies to a candidate's judicial remedy, not to the disclosure trigger itself.",
+    whyItMatters:
+      "It places New York among the US states with binding election-deepfake disclosure rules ahead of the 2024-2026 election cycles.",
+    practicalImpact:
+      "Campaigns, committees and political-ad vendors operating in New York need synthetic-media review and disclaimer insertion workflows for communications they actually know contain materially deceptive media.",
+    excerpt:
+      "Section 14-106 addresses political communications and requires disclosure obligations related to synthetic media and materially deceptive AI-manipulated content.",
+    pinpoint: { section: "Election Law § 14-106" },
+    tags: ["elections", "deepfakes", "synthetic-media", "disclosure", "state-legislation"],
+  }),
+  entry({
+    title: "SAFE for Kids Act regulates addictive algorithmic feeds for minors",
+    sourceName: "New York Governor",
+    sourceUrl:
+      "https://www.governor.ny.gov/news/governor-hochul-joins-attorney-general-james-and-bill-sponsors-sign-nation-leading-legislation",
+    sourceType: "government",
+    publicationDate: "2024-06-20",
+    developmentType: "Statute",
+    legalArea: "Consumer protection",
+    authorityType: "Binding law",
+    summary:
+      "The Stop Addictive Feeds Exploitation (SAFE) for Kids Act was signed June 20, 2024 but is not yet effective; its restrictions begin 180 days after the Attorney General promulgates final implementing rules.",
+    whatHappened:
+      "Once effective, the law will require covered platforms to use commercially reasonable age-determination methods and obtain verifiable parental consent before providing addictive algorithmic feeds to users under 18, with Attorney General enforcement and civil penalties. As of July 23, 2026, the official rulemaking remained at the proposed-rule stage.",
+    whyItMatters:
+      "It regulates recommender-system design directly — an algorithmic-governance layer adjacent to AI law that shapes how personalization systems may be deployed to New York minors.",
+    practicalImpact:
+      "Social platforms should prepare age-assurance, default non-addictive feeds for minors, parental-consent flows and a compliance timeline keyed to publication of the Attorney General's final rules.",
+    excerpt:
+      "The Governor announcement describes nation-leading legislation restricting addictive social media feeds for minors, enforced by the Attorney General.",
+    pinpoint: { billNumber: "S7694A" },
+    tags: ["algorithmic-feeds", "minors", "recommender-systems", "consumer-protection", "state-legislation"],
+  }),
+  entry({
+    title: "Attorney General proposes implementing rules for the SAFE for Kids Act",
+    sourceName: "New York State Office of the Attorney General",
+    sourceUrl: "https://ag.ny.gov/sites/default/files/regulatory-documents/safe-for-kids-act-nprm.pdf",
+    sourceType: "regulator",
+    publicationDate: "2025-09-15",
+    developmentType: "Proposed rule",
+    legalArea: "Consumer protection",
+    authorityType: "Proposed law",
+    summary:
+      "On September 15, 2025 the Attorney General issued a notice of proposed rulemaking implementing the SAFE for Kids Act's age-assurance and parental-consent requirements.",
+    whatHappened:
+      "The proposed rules define covered operators and set standards for commercially reasonable age determination and parental consent for addictive feeds; the public-comment period ran through December 1, 2025.",
+    whyItMatters:
+      "The rulemaking will determine the operational compliance model for algorithmic-feed restrictions, including which age-assurance technologies are acceptable.",
+    practicalImpact:
+      "Platforms should map their age-assurance and consent stack against the proposed standards and monitor final-rule adoption, which will start enforcement countdown clocks.",
+    excerpt:
+      "The Attorney General's notice of proposed rulemaking sets out proposed rules under the Stop Addictive Feeds Exploitation for Kids Act.",
+    pinpoint: { section: "SAFE for Kids Act NPRM" },
+    tags: ["rulemaking", "age-assurance", "algorithmic-feeds", "minors", "attorney-general"],
+  }),
+  entry({
+    title: "NYS-P24-001 sets AI acceptable-use rules for covered state agencies",
+    sourceName: "New York State Office of Information Technology Services",
+    sourceUrl: "https://its.ny.gov/acceptable-use-artificial-intelligence-technologies",
+    sourceType: "government",
+    publicationDate: "2026-06-24",
+    developmentType: "Agency guidance",
+    legalArea: "Public sector use of AI",
+    authorityType: "Agency guidance",
+    summary:
+      "The June 24, 2026 revision of state IT policy NYS-P24-001 governs acceptable use of AI technologies by covered New York state agencies and certain third parties using their IT resources, including oversight requirements for public-impact systems.",
+    whatHappened:
+      "The Office of Information Technology Services policy applies to state agencies defined by State Technology Law section 101 and certain third parties using their IT resources. It requires approval and governance controls for covered AI uses, mandates state privacy and cybersecurity standards, and addresses human oversight for systems capable of directly affecting the public; other public bodies are encouraged to consider it.",
+    whyItMatters:
+      "Together with the LOADinG Act it forms a central governance layer for public-impact AI systems used by covered New York state agencies.",
+    practicalImpact:
+      "Covered state agencies and third parties using their IT resources should map relevant deployments to NYS-P24-001 approval, oversight, privacy and open-standards requirements, including the companion AI inventory guidance.",
+    excerpt:
+      "The revised ITS policy establishes acceptable use requirements for artificial intelligence technologies used by covered state agencies and certain third parties, including governance of systems capable of directly affecting the public.",
+    pinpoint: { section: "NYS-P24-001" },
+    tags: ["state-it-policy", "public-sector-ai", "human-oversight", "nist-ai-rmf"],
+  }),
+  entry({
+    title: "NYC AI Action Plan structures citywide responsible-AI governance",
+    sourceName: "New York City Office of Technology and Innovation",
+    sourceUrl: "https://a860-gpp.nyc.gov/concern/nyc_government_publications/5h73q020f",
+    sourceType: "government",
+    publicationDate: "2023-10-31",
+    developmentType: "Policy report",
+    legalArea: "Public sector use of AI",
+    authorityType: "Policy report",
+    summary:
+      "The New York City AI Action Plan, published on the official city portal in October 2023 by the Office of Technology and Innovation, sets 37 actions for responsible AI use across city government.",
+    whatHappened:
+      "The plan created a citywide AI governance framework spanning policy, guidance, capacity-building and external engagement; OTI's annual progress reports track implementation, with the year-two report published October 16, 2025.",
+    whyItMatters:
+      "It is the governance umbrella above the NYC-specific instruments already in this corpus — Local Law 144 enforcement, the Local Law 35 algorithmic-tool reporting and the city GenAI usage guidance.",
+    practicalImpact:
+      "Vendors and agencies working with NYC should track the plan's implementation reports for procurement standards, AI-use policies and risk-assessment expectations flowing from the 37 actions.",
+    excerpt:
+      "The New York City Artificial Intelligence Action Plan outlines actions to promote responsible and innovative use of AI across city government.",
+    pinpoint: { section: "NYC AI Action Plan (2023)" },
+    tags: ["nyc", "ai-action-plan", "public-sector-ai", "ai-governance"],
+  }),
+  entry({
+    title: "NYT v OpenAI motion-to-dismiss ruling lets core copyright claims proceed",
+    sourceName: "US District Court, Southern District of New York",
+    sourceUrl:
+      "https://www.nysd.uscourts.gov/sites/default/files/2025-04/yf%2023cv11195%20OpenAI%20MTD%20opinion%20april%204%202025.pdf",
+    sourceType: "court",
+    publicationDate: "2025-04-04",
+    developmentType: "Other official regulatory development",
+    legalArea: "Copyright and generative AI",
+    authorityType: "Other",
+    summary:
+      "Judge Stein's April 4, 2025 opinion in the consolidated New York Times/Daily News/CIR litigation against OpenAI and Microsoft allows the core copyright claims to proceed.",
+    whatHappened:
+      "The court let the principal direct and contributory infringement claims proceed. It dismissed without prejudice the Times's section 1202(b)(1) claim and the three actions' section 1202(b)(3) claims, while allowing the Daily News and CIR section 1202(b)(1) claims against OpenAI to proceed; it also addressed trademark-dilution and common-law claims separately.",
+    whyItMatters:
+      "It is the central New York federal ruling on whether LLM training and outputs on news content support infringement liability, and it now anchors the consolidated OpenAI copyright docket before one judge.",
+    practicalImpact:
+      "AI developers litigating in SDNY should account for training-data claims surviving an early motion to dismiss and calibrate licensing, retention and output-similarity controls accordingly; the district-court ruling is not binding circuit precedent.",
+    excerpt:
+      "The opinion resolves motions to dismiss in the New York Times and consolidated news-plaintiff copyright actions against Microsoft and OpenAI, permitting the principal infringement claims to proceed.",
+    pinpoint: { docket: "1:23-cv-11195" },
+    tags: ["federal-case-law", "sdny", "copyright", "training-data", "llm-litigation"],
   }),
 ];

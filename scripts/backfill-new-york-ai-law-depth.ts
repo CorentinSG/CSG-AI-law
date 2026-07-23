@@ -9,8 +9,17 @@ import {
   newYorkAiLawDepthEntries,
   type NewYorkAiLawDepthEntry,
 } from "@/content/ai-regulation/new-york-ai-law-depth";
+import {
+  findExistingNewYorkUpdate,
+  isCorrectedNewYorkEntry,
+  listChangedUpdateFields,
+} from "@/content/ai-regulation/new-york-ai-law-depth-reconciliation";
 import { regulationSourcesSeed } from "@/db/seed/ai-regulation-seed";
-import type { RawRegulatoryItemInput, RegulatoryUpdateDraftInput } from "@/db/repository-types";
+import type {
+  EditableRegulatoryUpdateFields,
+  RawRegulatoryItemInput,
+  RegulatoryUpdateDraftInput,
+} from "@/db/repository-types";
 import { env } from "@/lib/env";
 
 const SOURCE_ID = "new-york-ai-law-depth";
@@ -170,6 +179,37 @@ function buildUpdate(entry: NewYorkAiLawDepthEntry, rawItemId: string): Regulato
   };
 }
 
+function buildEditableUpdatePatch(
+  entry: NewYorkAiLawDepthEntry,
+  rawItemId: string,
+): EditableRegulatoryUpdateFields {
+  const draft = buildUpdate(entry, rawItemId);
+  return {
+    title: draft.title,
+    sourceName: draft.sourceName,
+    sourceUrl: draft.sourceUrl,
+    jurisdiction: draft.jurisdiction,
+    region: draft.region,
+    country: draft.country,
+    publicationDate: draft.publicationDate,
+    oneSentenceSummary: draft.oneSentenceSummary,
+    summary: draft.summary,
+    whatHappened: draft.whatHappened,
+    whyItMatters: draft.whyItMatters,
+    practicalImpact: draft.practicalImpact,
+    affectedParties: draft.affectedParties,
+    keyObligations: draft.keyObligations,
+    complianceDeadlines: draft.complianceDeadlines,
+    enforcementRisk: draft.enforcementRisk,
+    importanceLevel: draft.importanceLevel,
+    confidenceLevel: draft.confidenceLevel,
+    tags: draft.tags,
+    developmentType: draft.developmentType,
+    legalArea: draft.legalArea,
+    authorityType: draft.authorityType,
+  };
+}
+
 async function ensureSource() {
   const existing = await updateRepository.getSource(SOURCE_ID);
   if (existing) return existing;
@@ -231,8 +271,26 @@ async function ensureLiveSources() {
 
 async function main() {
   const dryRun = boolEnv(process.env.NEW_YORK_AI_LAW_DEPTH_DRY_RUN, true);
+  const existingOnly = boolEnv(
+    process.env.NEW_YORK_AI_LAW_DEPTH_EXISTING_ONLY,
+    false,
+  );
   const existingRawItems = dryRun ? [] : await updateRepository.getRawItems(60000);
-  const existingUpdates = dryRun ? [] : await updateRepository.listUpdates();
+  const existingUpdates = await updateRepository.listUpdates({ tag: BACKFILL_TAG });
+  const existingUpdateByEntryTitle = new Map(
+    newYorkAiLawDepthEntries.map((entry) => [
+      entry.title,
+      findExistingNewYorkUpdate(entry, existingUpdates),
+    ]),
+  );
+  const missingEntryTitles = newYorkAiLawDepthEntries
+    .filter((entry) => !existingUpdateByEntryTitle.get(entry.title))
+    .map((entry) => entry.title);
+  if (existingOnly && missingEntryTitles.length > 0) {
+    throw new Error(
+      `Existing-only replay found ${missingEntryTitles.length} missing entries: ${missingEntryTitles.join("; ")}`,
+    );
+  }
   const updateByRawItemId = new Map(existingUpdates.map((update) => [update.rawItemId, update]));
   const results = [];
 
@@ -243,12 +301,61 @@ async function main() {
 
   for (const entry of newYorkAiLawDepthEntries) {
     const rawItem = buildRawItem(entry);
+    const existingUpdate = existingUpdateByEntryTitle.get(entry.title) ?? null;
+
+    if (existingUpdate) {
+      if (!isCorrectedNewYorkEntry(entry)) {
+        results.push({
+          title: entry.title,
+          status: "skipped_existing_update",
+          updateId: existingUpdate.id,
+        });
+        continue;
+      }
+
+      const patch = buildEditableUpdatePatch(entry, existingUpdate.rawItemId);
+      const changedFields = listChangedUpdateFields(existingUpdate, patch);
+      if (changedFields.length === 0) {
+        results.push({
+          title: entry.title,
+          status: "skipped_already_current",
+          updateId: existingUpdate.id,
+        });
+        continue;
+      }
+
+      if (dryRun) {
+        results.push({
+          title: entry.title,
+          status: "would_update_existing",
+          updateId: existingUpdate.id,
+          changedFields,
+        });
+        continue;
+      }
+
+      // Raw items remain immutable evidence of the original backfill. The
+      // corrected derived record can be retried independently without
+      // rewriting provenance or source-reference audit identifiers.
+      const corrected = await updateRepository.saveUpdateEdits(
+        existingUpdate.id,
+        patch,
+      );
+      results.push({
+        title: entry.title,
+        status: "updated_existing",
+        updateId: corrected.id,
+        changedFields,
+      });
+      continue;
+    }
+
     const existingRaw = existingRawItems.find((item) => item.hash === rawItem.hash);
 
     if (dryRun) {
       results.push({
         title: entry.title,
-        status: "dry_run",
+        status: "would_create_or_link",
         legalArea: entry.legalArea,
         authorityType: entry.authorityType,
       });
@@ -284,6 +391,7 @@ async function main() {
       {
         ok: true,
         dryRun,
+        existingOnly,
         appDataMode: env.APP_DATA_MODE,
         jurisdiction: "New York",
         entryCount: newYorkAiLawDepthEntries.length,

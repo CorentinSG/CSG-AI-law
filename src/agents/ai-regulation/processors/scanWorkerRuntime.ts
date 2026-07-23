@@ -11,6 +11,8 @@ function parseNonNegativeInt(value: string | undefined, fallback: number) {
 }
 
 export type ScanWorkerConfig = {
+  workerMode: "continuous" | "scheduled";
+  expectedIntervalMs: number;
   pollMs: number;
   maxJobsPerCycle: number;
   idleExitAfter: number;
@@ -56,11 +58,35 @@ export type ScanWorkerStatus = {
   lastError?: string | null;
 };
 
+export type ScanWorkerTerminalHeartbeatState = "completed" | "stopped";
+
+export async function getScanWorkerTerminalHeartbeatState(
+  config: Pick<ScanWorkerConfig, "workerMode" | "idleExitAfter">,
+  idleCycles: number,
+  stopRequested: boolean,
+  checkExternalStop: () => Promise<boolean> = async () => false,
+): Promise<ScanWorkerTerminalHeartbeatState> {
+  const completedScheduledIdleCycle =
+    config.workerMode === "scheduled" &&
+    !stopRequested &&
+    config.idleExitAfter > 0 &&
+    idleCycles >= config.idleExitAfter;
+  if (!completedScheduledIdleCycle) {
+    return "stopped";
+  }
+
+  return (await checkExternalStop()) ? "stopped" : "completed";
+}
+
 export function createScanWorkerConfig(
   env: NodeJS.ProcessEnv,
   cwd = process.cwd(),
   pid = process.pid,
 ): ScanWorkerConfig {
+  const workerMode =
+    env.SCAN_JOB_WORKER_MODE?.trim().toLowerCase() === "scheduled"
+      ? "scheduled"
+      : "continuous";
   const pollMs = parseNonNegativeInt(env.SCAN_JOB_WORKER_POLL_MS, 30_000);
   const heartbeatIntervalMs = Math.max(
     1,
@@ -80,23 +106,36 @@ export function createScanWorkerConfig(
       Math.max(120_000, heartbeatTimeoutMs * 3),
     ),
   );
+  const schedulerIntervalMs = Math.max(
+    60_000,
+    parseNonNegativeInt(
+      env.SCAN_JOB_WORKER_SCHEDULER_INTERVAL_MS,
+      15 * 60 * 1000,
+    ),
+  );
+  const expectedIntervalMs = Math.max(
+    60_000,
+    parseNonNegativeInt(
+      env.SCAN_JOB_WORKER_EXPECTED_INTERVAL_MS,
+      schedulerIntervalMs,
+    ),
+  );
 
   return {
+    workerMode,
+    expectedIntervalMs,
     pollMs,
     maxJobsPerCycle: Math.max(
       1,
       parseNonNegativeInt(env.SCAN_JOB_WORKER_MAX_JOBS_PER_CYCLE, 5),
     ),
-    idleExitAfter: parseNonNegativeInt(env.SCAN_JOB_WORKER_IDLE_EXIT_AFTER, 0),
+    idleExitAfter: parseNonNegativeInt(
+      env.SCAN_JOB_WORKER_IDLE_EXIT_AFTER,
+      workerMode === "scheduled" ? 1 : 0,
+    ),
     continueOnError: env.SCAN_JOB_WORKER_CONTINUE_ON_ERROR !== "false",
     schedulerEnabled: env.SCAN_JOB_WORKER_ENABLE_SCHEDULER !== "false",
-    schedulerIntervalMs: Math.max(
-      60_000,
-      parseNonNegativeInt(
-        env.SCAN_JOB_WORKER_SCHEDULER_INTERVAL_MS,
-        15 * 60 * 1000,
-      ),
-    ),
+    schedulerIntervalMs,
     heartbeatIntervalMs,
     heartbeatTimeoutMs,
     singletonStaleMs,

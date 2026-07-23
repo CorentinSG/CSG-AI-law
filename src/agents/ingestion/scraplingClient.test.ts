@@ -14,6 +14,8 @@ describe("scrapling client", () => {
   });
 
   it("passes source_id so the worker can load per-source extractor config", async () => {
+    vi.stubEnv("SCRAPLING_WORKER_URL", "http://localhost:8765");
+    vi.stubEnv("SCRAPLING_WORKER_TOKEN", "test-worker-token");
     const fetchMock = vi.fn().mockResolvedValue({
       ok: true,
       json: async () => ({
@@ -33,6 +35,10 @@ describe("scrapling client", () => {
       "http://localhost:8765/extract",
       expect.objectContaining({
         method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: "Bearer test-worker-token",
+        },
         body: JSON.stringify({
           url: "https://example.com/legal",
           source_id: "src-edpb",
@@ -47,30 +53,28 @@ describe("scrapling client", () => {
     });
   });
 
+  it("requires a worker token before requesting protected extraction routes", async () => {
+    vi.stubEnv("SCRAPLING_WORKER_URL", "http://localhost:8765");
+    vi.stubEnv("SCRAPLING_WORKER_TOKEN", "");
+    vi.stubGlobal("fetch", vi.fn());
+
+    await expect(scraplingExtract("https://example.com/legal", "src-edpb")).rejects.toThrow(
+      "Scrapling worker token is not configured",
+    );
+  });
+
   it("reports worker health without throwing when the sidecar is down", async () => {
     vi.stubGlobal("fetch", vi.fn().mockRejectedValue(new Error("connection refused")));
 
     await expect(checkScraplingHealth()).resolves.toEqual({ status: "error" });
   });
 
-  it("uses the public Railway sidecar as a production fallback when the env var is missing", () => {
+  it("only enables Scrapling when its worker URL is explicitly configured", () => {
     vi.stubEnv("NODE_ENV", "production");
-    vi.stubEnv("SCRAPLING_WORKER_URL", "");
-
-    expect(isScraplingRuntimeAvailable()).toBe(true);
-    expect(getScraplingWorkerUrl()).toBe(
-      "https://fantastic-nourishment-production-6d34.up.railway.app",
-    );
-  });
-
-  it("uses the public Railway sidecar in Supabase data mode even outside NODE_ENV production", () => {
-    vi.stubEnv("NODE_ENV", "development");
     vi.stubEnv("APP_DATA_MODE", "supabase");
     vi.stubEnv("SCRAPLING_WORKER_URL", "");
 
-    expect(isScraplingRuntimeAvailable()).toBe(true);
-    expect(getScraplingWorkerUrl()).toBe(
-      "https://fantastic-nourishment-production-6d34.up.railway.app",
-    );
+    expect(isScraplingRuntimeAvailable()).toBe(false);
+    expect(getScraplingWorkerUrl()).toBeNull();
   });
 });

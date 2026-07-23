@@ -10,6 +10,9 @@ Each agent edits only its own rows. Status vocabulary: `CLAIMED` · `WIP` · `BL
 
 | Task ID | Owner | Status | Branch @ sha | Locked files | Graph anchor | Updated |
 |---|---|---|---|---|---|---|
+| T-NY-PROD-CORRECTION | Codex | REVIEW | `codex/new-york-production-correction` @ working tree | New York reconciliation module/backfill, editable update fields | `findExistingNewYorkUpdate()`, `listChangedUpdateFields()` | 2026-07-23 |
+| T-NY-CORPUS-PARITY | Codex | MERGED | `main` @ `9148879` | `src/content/ai-regulation/new-york-ai-law-depth.ts`, related test | `newYorkAiLawDepthEntries` | 2026-07-23 |
+| T-RECOVERY-GITHUB-MONITORING | Codex | DONE-LOCAL | `codex/project-recovery-2026-07-23` @ `1dde0dc` | GitHub monitoring workflow, scan worker runtime, health, Scrapling client, operations docs | `createScanWorkerConfig()`, `getScraplingWorkerUrl()`, communities "Scan Job Management" and "Source Runtime Health" | 2026-07-23 |
 | TOOLING-GRAPH-PROTOCOL | Claude Code | REVIEW | `ops/t-ops9-ux` @ `30bc31c` | `AGENTS.md`, `AI_TASKS.md`, `.gitignore`, `.git/hooks/*` | n/a (tooling, no app code) | 2026-06-20 |
 | T-OPS9-UX | Claude Code | WIP | `ops/t-ops9-ux` @ `30bc31c` | `src/app/**`, shared UI components | community "UI Components and Utilities", "Intelligence Hub UI" | 2026-06-20 |
 | T-LEGALDB-UI | Claude Code | DONE-LOCAL | `ops/t-ops9-ux` @ `0f2809d` | `src/app/admin/ai-regulation/legal-database/**`, `src/app/admin/ai-regulation/page.tsx` | `deriveUpdateAuthorityType()`, `getAuthorityPriorityRank()`, `FilterBar`, community "News and Regulation Admin" | 2026-06-20 |
@@ -95,12 +98,36 @@ YYYY-MM-DD · <Agent> · <TASK-ID> · <STATUS>
 ## Current status
 
 2026-07-23 · Claude Code · T-CONTACT-REDESIGN · REVIEW
-- Intent:        Full contact-page redesign per user. Iterated live with the user: published email changed to corentin.stgirons@gmail.com and no longer shown in clear text (mailto "Write to me" + copy-to-clipboard button); several portrait treatments tried (framed → frameless → page-background layer, progressively darker) and finally the portrait was removed entirely at the user's request (read as "creepy"). Page now = staggered hero, ambient orbs backdrop, glass direct-channel console with live Paris clock, spotlight inquiry cards; reduced-motion safe.
+- Intent:        Full contact-page redesign per user. Iterated live with the user: published email changed to corentin.stgirons@gmail.com and no longer shown in clear text (mailto "Write to me" + copy-to-clipboard button); several portrait treatments tried (framed → frameless → page-background layer, progressively darker) and finally the portrait was removed entirely at the user's request (read as "creepy"). Page now = staggered hero, ambient orbs backdrop, glass direct-channel console with live Paris clock, spotlight inquiry cards; reduced-motion safe. NOTE: a parallel contact redesign (#24, with portrait + ContactChannel) landed on main; per the user this branch's no-portrait version wins — conflict in `contact/page.tsx` resolved to ContactExperience. `src/components/site/contact-channel.tsx` from #24 is now orphaned (no importers).
 - Files:         `src/app/[lang]/contact/page.tsx` (thin server page: metadata + email const), `src/components/site/contact-experience.tsx` (new client component). Removed the cutout asset `public/images/profile/corentin-saint-girons-cutout.png`.
 - Graph anchors: `ContactPage`, `ContactExperience` (new node — graph rebuild pending on this branch), `SpotlightHover`, community "UI Components and Utilities".
 - Verification:  `npm test` PASS (689), `npm run lint` PASS, `npm run typecheck` PASS, `npm run build` PASS (with local env stubs); Playwright screenshots verified at 1440px and 390px, zero console errors.
-- Branch/commit: `claude/contact-page-redesign-u2sh6q` @ `f1f884a` (frontend-only; merged origin/main to stay current for the PR).
+- Branch/commit: `claude/contact-page-redesign-u2sh6q` @ `f1f884a` (frontend-only; merged origin/main twice to stay current for the PR).
 - Next:          PR to main opened for production; no backend impact, nothing for Codex.
+
+2026-07-23 - Codex - T-RECOVERY-GITHUB-MONITORING - DONE-LOCAL
+- Intent: Recheck the stop file immediately before marking a scheduled idle worker completed.
+- Files: scan worker terminal-state runtime + test and `scripts/run-scan-job-worker.ts`.
+- Graph anchors: `createScanWorkerConfig()`, community "Scan Job Management".
+- Verification: RED/GREEN captured; 712/712 Vitest, lint, and typecheck pass.
+- Branch/commit: `codex/project-recovery-2026-07-23` @ `1dde0dc`.
+- Next: operator configures required GitHub repository secrets and manually dispatches the workflow.
+
+2026-07-23 - Codex - T-RECOVERY-GITHUB-MONITORING - DONE-LOCAL
+- Intent: Apply review fixes for end-to-end local Scrapling authentication and requested-stop heartbeats.
+- Files: `scrapling_worker/worker.py` + test, Scrapling client + test, worker terminal-state runtime + test, configuration and operations docs.
+- Graph anchors: `createScanWorkerConfig()`, `getScraplingWorkerUrl()`, community "Scan Job Management", community "Source Runtime Health".
+- Verification: RED/GREEN captured; 3/3 Python auth tests; 712/712 Vitest, lint, and typecheck pass.
+- Branch/commit: `codex/project-recovery-2026-07-23` @ `bb71efc`.
+- Next: operator configures required GitHub repository secrets and manually dispatches the workflow.
+
+2026-07-23 - Codex - T-RECOVERY-GITHUB-MONITORING - DONE-LOCAL
+- Intent: Replace expired Railway worker services with the scheduled GitHub Actions monitoring run.
+- Files: `.github/workflows/legal-monitoring.yml`, worker/health/Scrapling runtime and tests, `.env.example`, `docs/operations/github-actions-monitoring.md`.
+- Graph anchors: `createScanWorkerConfig()`, `getScraplingWorkerUrl()`, community "Scan Job Management", community "Source Runtime Health".
+- Verification: targeted RED/GREEN recorded; 710/710 Vitest, lint, and typecheck pass.
+- Branch/commit: `codex/project-recovery-2026-07-23` @ `c3945bb`.
+- Next: operator configures required GitHub repository secrets and manually dispatches the workflow.
 
 2026-07-23 - Claude Code - T-STORY-CLUSTERING-SITEWIDE - DONE-LOCAL
 - Intent:        Site-wide rollout of the story-clustering system (user instruction "applique ce système pour tout le site et tous les pays"): every EU country page now has live monitoring with clustered stories — the 18 countries without bespoke live blocks get the shared `LiveLegalIntelligencePanel` via a new slug→loader registry over the factory agents; the Europe, United States, US-state, and International live feeds are clustered before their display caps with phase (Breaking/Developing) and source-count markers; feed windows widened (40/30 → 120) so clustering sees enough items to group cross-source duplicates. The paginated global news tab already surfaces ingestion-time corroboration through its verification labels, so it was deliberately left unclustered (clusters split across pages would mislead).
@@ -1091,3 +1118,22 @@ Every non-trivial task should have:
 - Live data:     Supabase has 48 `published` New York AI Law Watch updates tagged `new-york-ai-law-watch`; 10 New York live sources exist and are active.
 - Notes:         Secondary/commentary work-product comparators remain discovery leads unless a New York primary source is verified. Claude-owned Standards UI files remain untouched.
 - Verification:  Targeted NY tests PASS; dry-run PASS; live write PASS; replay idempotence PASS (`skipped_existing_update` x48); direct DB check confirms 48/48 published + 10 active sources. Full verification follows in current handoff.
+
+### 2026-07-23 - Codex - T-NY-CORPUS-PARITY - REVIEW
+
+- Intent:        Restore the 60-entry New York corpus to main without the unrelated contact/banner changes, and correct legal overstatements found during independent review.
+- Files:         `src/content/ai-regulation/new-york-ai-law-depth.ts`, its test, `AI_TASKS.md`.
+- Graph anchors: `newYorkAiLawDepthEntries`.
+- Corrections:    RAISE tiering, S7676B date/scope, Election Law knowledge standard, SAFE effective status, section 50-f historical source, NYS-P24-001 scope/date, and SDNY authority/DMCA description.
+- Verification:  713/713 tests, lint and typecheck pass; two independent legal review rounds end with MERGE verdict; 60 unique titles and URLs.
+- Follow-up:     Run a corrective idempotent Supabase replay after merge because the earlier 60-entry production backfill contains the superseded wording.
+
+### 2026-07-23 - Codex - T-NY-PROD-CORRECTION - REVIEW
+
+- Intent:        Make the New York backfill reconcile corrected derived updates instead of skipping them or creating title-variant duplicates.
+- Files:         backfill script, reconciliation module/tests, repository editable-field contract/test, `AI_TASKS.md`.
+- Graph anchors: `findExistingNewYorkUpdate()`, `listChangedUpdateFields()`, `updateAiRegulatoryUpdate()`.
+- Safety:        Existing-only mode preflights all 60 matches in dry-run and write mode, rejects ambiguous duplicates, and mutates only derived updates; raw evidence and audit-reference IDs remain immutable.
+- Dry-run:       Supabase found 60/60 existing entries, 49 unchanged and 11 requiring correction, with zero creates.
+- Verification:  718/718 tests, lint, typecheck and production build pass; final backend review verdict MERGE with no P1/P2 findings.
+- Follow-up:     Merge first, then run the existing-only production write and an immediate idempotence/recount check.
