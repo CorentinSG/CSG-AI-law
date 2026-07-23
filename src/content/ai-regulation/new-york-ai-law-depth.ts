@@ -1191,7 +1191,7 @@ export const newYorkAiLawDepthEntries: NewYorkAiLawDepthEntry[] = [
     tags: ["state-legislation", "new-york-ai-act", "high-risk-ai", "algorithmic-discrimination"],
   }),
   entry({
-    title: "LOADinG Act requires human oversight of state-agency automated decision-making",
+    title: "LOADinG Act limits unauthorized state-agency automated decision-making",
     sourceName: "New York State Senate",
     sourceUrl: "https://www.nysenate.gov/legislation/bills/2023/S7543/amendment/B",
     sourceType: "parliament",
@@ -1202,11 +1202,11 @@ export const newYorkAiLawDepthEntries: NewYorkAiLawDepthEntry[] = [
     summary:
       "The Legislative Oversight of Automated Decision-making in Government (LOADinG) Act, S7543B, was signed on December 21, 2024 and regulates automated decision-making systems used by New York state agencies.",
     whatHappened:
-      "The enacted bill requires meaningful human review of covered automated decision-making systems, periodic impact assessments revisited on a recurring cycle, and evaluation of bias, discrimination, privacy and cybersecurity risks.",
+      "The enacted bill prohibits covered state-agency use and procurement of automated decision-making unless specifically authorized in law. When authorized, the agency must publish an impact assessment at least 30 days before covered use, test accuracy, fairness, bias and discrimination, and refrain from using a system found to produce discriminatory or biased outcomes.",
     whyItMatters:
       "It is New York's core statutory layer for public-sector algorithmic accountability, complementing the state ITS acceptable-use policy and the S822 inventory proposal already tracked in this corpus.",
     practicalImpact:
-      "State agencies and their vendors should inventory ADMS in scope, document human-review checkpoints, and build recurring impact-assessment workflows covering benefits eligibility and rights-affecting decisions.",
+      "State agencies and their vendors should inventory covered systems, identify the legal authorization for each use, and prepare public pre-use impact assessments for rights- or public-service-affecting deployments.",
     excerpt:
       "S7543B enacts the legislative oversight of automated decision-making in government act requiring oversight of automated decision-making systems used by state agencies.",
     pinpoint: { billNumber: "S7543B" },
@@ -1239,12 +1239,12 @@ export const newYorkAiLawDepthEntries: NewYorkAiLawDepthEntry[] = [
     sourceName: "New York State Senate",
     sourceUrl: "https://www.nysenate.gov/legislation/bills/2023/S7676/amendment/B",
     sourceType: "parliament",
-    publicationDate: "2024-12-02",
+    publicationDate: "2024-12-13",
     developmentType: "Statute",
     legalArea: "Employment",
     authorityType: "Binding law",
     summary:
-      "S7676B, signed December 2, 2024 and effective January 1, 2025, restricts contract provisions for the creation and use of digital replicas of performers' voices and likenesses.",
+      "S7676B, signed December 13, 2024 and effective January 1, 2025, restricts contract provisions for the creation and use of digital replicas of performers' voices and likenesses.",
     whatHappened:
       "The enacted bill makes digital-replica provisions in personal or professional services agreements unenforceable unless the use is clearly and conspicuously specified and the performer had legal representation or coverage under a collective bargaining agreement addressing digital replicas.",
     whyItMatters:
@@ -1372,14 +1372,14 @@ export const newYorkAiLawDepthEntries: NewYorkAiLawDepthEntry[] = [
     sourceName: "New York State Office of Information Technology Services",
     sourceUrl: "https://its.ny.gov/acceptable-use-artificial-intelligence-technologies",
     sourceType: "government",
-    publicationDate: null,
+    publicationDate: "2026-06-24",
     developmentType: "Agency guidance",
     legalArea: "Public sector use of AI",
     authorityType: "Agency guidance",
     summary:
       "State IT policy NYS-P24-001 governs acceptable use of AI technologies by New York state entities, requiring human oversight of automated decisions.",
     whatHappened:
-      "The Office of Information Technology Services policy, issued in January 2024, requires leadership approval for AI systems, prohibits automated decision-making without human oversight, mandates adherence to state privacy and cybersecurity standards, and aligns with NIST AI RMF-style principles of transparency, equity and explainability.",
+      "The current official revision, updated June 24, 2026, requires leadership approval for covered AI systems, prohibits automated final decisions that affect the public, mandates adherence to state privacy and cybersecurity standards, and aligns with NIST AI RMF-style principles of transparency, equity and explainability.",
     whyItMatters:
       "Together with the LOADinG Act it forms the operative governance frame for every AI deployment inside New York state government.",
     practicalImpact:

@@ -9,6 +9,10 @@ import {
   newYorkAiLawDepthEntries,
   type NewYorkAiLawDepthEntry,
 } from "@/content/ai-regulation/new-york-ai-law-depth";
+import {
+  collectAllPages,
+  diffEditableUpdate,
+} from "./backfill-new-york-ai-law-depth-sync";
 import { regulationSourcesSeed } from "@/db/seed/ai-regulation-seed";
 import type { RawRegulatoryItemInput, RegulatoryUpdateDraftInput } from "@/db/repository-types";
 import { env } from "@/lib/env";
@@ -231,8 +235,11 @@ async function ensureLiveSources() {
 
 async function main() {
   const dryRun = boolEnv(process.env.NEW_YORK_AI_LAW_DEPTH_DRY_RUN, true);
-  const existingRawItems = dryRun ? [] : await updateRepository.getRawItems(60000);
-  const existingUpdates = dryRun ? [] : await updateRepository.listUpdates();
+  const existingUpdates = dryRun
+    ? []
+    : await collectAllPages((offset, limit) =>
+        updateRepository.listUpdatesPage(undefined, { limit, offset }),
+      );
   const updateByRawItemId = new Map(existingUpdates.map((update) => [update.rawItemId, update]));
   const results = [];
 
@@ -243,7 +250,6 @@ async function main() {
 
   for (const entry of newYorkAiLawDepthEntries) {
     const rawItem = buildRawItem(entry);
-    const existingRaw = existingRawItems.find((item) => item.hash === rawItem.hash);
 
     if (dryRun) {
       results.push({
@@ -255,11 +261,30 @@ async function main() {
       continue;
     }
 
+    const existingRaw = await updateRepository.findRawItemByHash(rawItem.hash);
     if (existingRaw) {
       await updateRepository.updateRawItemMetadata(existingRaw.id, rawItem.rawMetadata);
       const existingUpdate = updateByRawItemId.get(existingRaw.id);
       if (existingUpdate) {
-        results.push({ title: entry.title, status: "skipped_existing_update", updateId: existingUpdate.id });
+        const updatePatch = diffEditableUpdate(
+          existingUpdate,
+          buildUpdate(entry, existingRaw.id),
+        );
+        if (updatePatch) {
+          await updateRepository.saveUpdateEdits(existingUpdate.id, updatePatch);
+          results.push({
+            title: entry.title,
+            status: "updated_existing_update",
+            updateId: existingUpdate.id,
+            updatedFields: Object.keys(updatePatch),
+          });
+          continue;
+        }
+        results.push({
+          title: entry.title,
+          status: "skipped_existing_update",
+          updateId: existingUpdate.id,
+        });
         continue;
       }
       const created = await updateRepository.createUpdate(buildUpdate(entry, existingRaw.id));
@@ -269,7 +294,6 @@ async function main() {
 
     const createdRaw = await updateRepository.createRawItem(rawItem);
     const createdUpdate = await updateRepository.createUpdate(buildUpdate(entry, createdRaw.id));
-    existingRawItems.push(createdRaw);
     updateByRawItemId.set(createdRaw.id, createdUpdate);
     results.push({
       title: entry.title,

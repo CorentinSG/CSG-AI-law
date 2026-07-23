@@ -42,4 +42,30 @@ describe("newYorkAiLawDepthEntries", () => {
       expect(entry.sourceReference.reliabilityLevel).toBe("high");
     }
   });
+
+  it("pins the enacted dates and duties for the 2024 New York additions", () => {
+    const loadingAct = newYorkAiLawDepthEntries.find((entry) =>
+      entry.tags.includes("loading-act"),
+    );
+    const digitalReplicaContracts = newYorkAiLawDepthEntries.find((entry) =>
+      entry.tags.includes("performers") && entry.tags.includes("voice-cloning"),
+    );
+
+    expect(loadingAct?.publicationDate).toBe("2024-12-21");
+    expect(loadingAct?.whatHappened).toContain("specifically authorized in law");
+    expect(loadingAct?.whatHappened).toContain("before covered use");
+    expect(loadingAct?.whatHappened).not.toMatch(/meaningful human review|recurring cycle/i);
+
+    expect(digitalReplicaContracts?.publicationDate).toBe("2024-12-13");
+    expect(digitalReplicaContracts?.summary).toContain("signed December 13, 2024");
+  });
+
+  it("records the current official revision date for the statewide AI use policy", () => {
+    const stateAiPolicy = newYorkAiLawDepthEntries.find((entry) =>
+      entry.tags.includes("state-it-policy"),
+    );
+
+    expect(stateAiPolicy?.publicationDate).toBe("2026-06-24");
+    expect(stateAiPolicy?.whatHappened).toContain("updated June 24, 2026");
+  });
 });
