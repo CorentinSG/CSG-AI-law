@@ -102,7 +102,7 @@ YYYY-MM-DD · <Agent> · <TASK-ID> · <STATUS>
 - Intent: Make the dedicated worker health check fail visibly when the scheduled heartbeat is stale.
 - Files: `src/app/api/health/route.ts`, route test, `AI_TASKS.md`.
 - Graph anchors: `GET()`, `buildHealthSnapshot()`, community "Source Runtime Health".
-- Verification: RED at 200 vs expected 503; GREEN with 719/719 tests, lint, typecheck, and production build.
+- Verification: RED at 200 vs expected 503; GREEN with 720/720 tests, lint, typecheck, and production build.
 - Branch/commit: `codex/worker-health-contract` @ working tree.
 - Next: Run complete verification and merge as a focused operational fix.
 

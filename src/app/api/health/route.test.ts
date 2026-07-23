@@ -92,6 +92,7 @@ describe("health route", () => {
       ok: true,
       worker: {
         alive: false,
+        heartbeatFresh: false,
       },
     });
 

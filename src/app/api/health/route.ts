@@ -9,7 +9,7 @@ export async function GET(request: Request) {
   const snapshot = await buildHealthSnapshot({ access });
   const workerCheckFailed =
     new URL(request.url).searchParams.get("check") === "worker" &&
-    !snapshot.worker.alive;
+    !snapshot.worker.heartbeatFresh;
   const ok = snapshot.ok && !workerCheckFailed;
 
   return NextResponse.json(

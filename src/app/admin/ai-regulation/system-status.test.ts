@@ -32,6 +32,7 @@ function worker(overrides: Partial<HealthSnapshot["worker"]>): HealthSnapshot["w
   return {
     state: "idle",
     alive: false,
+    heartbeatFresh: false,
     heartbeatAgeMs: null,
     heartbeatAt: null,
     lastActivityAgeMs: null,
