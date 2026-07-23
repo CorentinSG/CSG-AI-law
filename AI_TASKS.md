@@ -93,6 +93,14 @@ YYYY-MM-DD · <Agent> · <TASK-ID> · <STATUS>
 
 ## Current status
 
+2026-07-21 · Claude Code · T-W17-W114-W62-ROBUSTNESS · MERGED
+- Intent: Continue covering Codex: W1.7 (Zod-guarded verification metadata + normalized legacy references, crash regression test), W1.14 (loud [schema-drift] logs on every legacy in-memory fallback write), W6.2 (15-test pytest suite for scrapling_worker guards + ruff + fast CI job).
+- Files: src/agents/ai-regulation/{verification.ts,citations.ts(+test)}, src/db/repositories/supabase-repository.ts, scrapling_worker/{test_worker.py,requirements-dev.txt,worker.py}, .github/workflows/ci.yml.
+- Graph anchors: extractVerificationMetadata(), parseSourceReferences(), assessCitationQuality().
+- Verification: 752/752 vitest · 15/15 pytest · ruff clean · typecheck · lint PASS.
+- Branch/commit: main @ HEAD (local, 37 commits ahead; origin diverged by 3).
+- Next: **CRITICAL ENVIRONMENT WARNING**: OneDrive deleted freshly-created files 3× today, served stale file content (518-file/92-fail phantom test run on an identical tree), and a phantom half-merge with origin/main appeared then vanished — consistent with a second machine syncing this same OneDrive folder. DO NOT trust local verification until the checkout moves outside OneDrive (or sync is paused). The origin/main merge (3 commits: France v3 CountryLegalDatabase #16, news-window fix #17, update-card fix #18) is deliberately NOT done: it conflicts with the console generalization on [country]/page.tsx and must be resolved in a stable environment — graft CountryLegalDatabase into the console template, keep the invariant research test, append-both AI_TASKS.
+
 2026-07-21 · Claude Code · T-W1B-GATE-W23-FREQUENCY · MERGED
 - Intent: Owner directive — Claude covers Codex work during his multi-day absence (app-code items only; his operator/migration gates stay respected). Shipped W1.6 (publication gate at creation, downgrade-to-needs_review, max-auto preserved) and W2.3 (scanFrequency honored on official_only sweeps via isSourceDueByFrequency).
 - Files: src/agents/ai-regulation/processors/updateRepository.ts, src/agents/ai-regulation/scanProfiles.ts(+test).
