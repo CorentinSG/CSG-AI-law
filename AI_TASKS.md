@@ -72,6 +72,7 @@ Each agent edits only its own rows. Status vocabulary: `CLAIMED` · `WIP` · `BL
 | T-COUNTRY-CONSOLE-FRANCE-V2 | Claude Code | MERGED | `main` @ `d9a496f` | `src/app/[lang]/ai-regulation/europe/[country]/page.tsx`, `src/components/site/country-console.tsx` | `EuropeCountryPage`, `CountryConsoleHero`, `CountryLedger`, `CorpusExplorer`, community "Intelligence Hub UI" | 2026-07-18 |
 | T-LEGALDB-EXPLORER-UX | Claude Code | MERGED | `main` @ `fefe433` | `src/components/site/legal-database-explorer.tsx`, `src/app/[lang]/ai-regulation/page.tsx` | `LegalDatabaseExplorer`, `deriveUpdateAuthorityType()`, community "Intelligence Hub UI" | 2026-07-18 |
 | T-COUNTRY-CONSOLE-FRANCE-V3 | Claude Code | REVIEW | `claude/csg-law-design-review-70zota` | `src/app/[lang]/ai-regulation/europe/[country]/page.tsx`, `src/components/site/country-console.tsx` | `EuropeCountryPage`, `CountryConsoleHero`, `CountryLedger`, `CountryLegalDatabase`, community "Intelligence Hub UI" | 2026-07-19 |
+| T-LIVE-STORY-CLUSTERING | Claude Code | DONE-LOCAL | `claude/worldmonitor-csg-architecture-cj0by1` @ `5f00f9d` | `src/agents/ai-regulation/storyClustering.ts`, nine `*LegalNewsAgent.ts` + `countryLegalNewsAgentFactory.ts` (additive `stories` field only), `src/components/site/live-legal-intelligence-panel.tsx`, `src/app/[lang]/ai-regulation/europe/[country]/page.tsx` | `buildLiveStoryFeed()`, `clusterNewsIntoStories()`, `LiveLegalIntelligencePanel`, `EuropeCountryPage`, community "Intelligence Hub UI", community "Scan Pipeline" | 2026-07-23 |
 
 - **Graph freshness:** built from `30bc31ca` — in sync with HEAD `30bc31c`. If these diverge, run `py -m graphify update .` before trusting the graph.
 - Move a task to `MERGED` only once it is in `main`; delete its row one entry after it merges (the log keeps the history).
@@ -89,6 +90,14 @@ YYYY-MM-DD · <Agent> · <TASK-ID> · <STATUS>
 ```
 
 ## Current status
+
+2026-07-23 - Claude Code - T-LIVE-STORY-CLUSTERING - DONE-LOCAL
+- Intent:        Transplant worldmonitor's intelligence layer into the live lanes: fuzzy title clustering groups the same development across sources into one "story" with corroboration count, composite importance score (authority 0.55 / source tier 0.2 / corroboration 0.15 / recency 0.1) and lifecycle phase (breaking/developing/sustained/fading). Deterministic heuristics only — AI-off default untouched.
+- Files:         `src/agents/ai-regulation/storyClustering.ts` (+ test), additive `stories` field in `countryLegalNewsAgentFactory.ts` and the 9 hand-written `*LegalNewsAgent.ts`, `src/components/site/live-legal-intelligence-panel.tsx`, `src/app/[lang]/ai-regulation/europe/[country]/page.tsx` (8 panel call sites + France console ledger).
+- Graph anchors: `buildLiveStoryFeed()`, `clusterNewsIntoStories()`, `getNewsSourceTier()`, `LiveLegalIntelligencePanel`, `EuropeCountryPage`, community "Intelligence Hub UI". (New nodes — graph rebuild pending post-commit hook; hook absent in this remote container, rebuild on next local checkout.)
+- Verification:  `npm test` PASS (700 / 129 files), `npm run lint` PASS, `npm run typecheck` PASS, `npm run build` PASS (memory verification env).
+- Branch/commit: `claude/worldmonitor-csg-architecture-cj0by1` @ `5f00f9d`.
+- Next:          HANDOFF→Codex for the backend half of the worldmonitor blueprint: (1) persist story identity across scans (mention count, source set, first/last seen) so phases survive re-renders — DB table or update tags; (2) per-source freshness SLA + healthy-vs-empty TTL split in `conditional-fetch.ts`; (3) lower the worker live-cadence floor (env-overridable below 15 min) and add an incremental high-water-mark per source so >10-item bursts are not missed; (4) optionally feed `importanceScore` into `aiPlanning.rankCandidateForAi` so the capped AI budget goes to corroborated stories first.
 
 2026-07-19 - Claude Code - T-FRANCE-LIVE-EMPTY-FIX - REVIEW
 - Intent:        Production France live-monitoring section rendered empty: `getFranceLiveLegalIntelligenceData()` reads the GLOBAL latest-N public news list (ordered publication_date desc, nulls last) and filters to France afterwards — recent multi-country/international publishing volume evicted France items from the 80-item window (France items with null publication_date sort last and are evicted first). Widened the window to 500 in the France agent + quiet empty-state row on the page instead of an empty box.

@@ -6,6 +6,8 @@ Record only major project decisions that future agents must know.
 
 ## Decisions
 
+- 2026-07-23 — Live monitoring uses a worldmonitor-inspired story-clustering layer (`storyClustering.ts`), applied at serving time in the country legal-news agents: fuzzy title similarity groups the same development across sources into one story carrying corroboration count, a composite importance score (authority 0.55 / source tier 0.2 / corroboration 0.15 / recency 0.1) and a lifecycle phase (breaking/developing/sustained/fading). Deterministic heuristics only — no LLM, no embeddings; the AI-off cost rule is unchanged. Story persistence across scans and cadence upgrades are backend follow-ups owned by Codex.
+
 - 2026-06-20 — Legal-database canonical sort order is three-axis: (1) nature of the source (`authorityType`: Binding law → … → Other), (2) region of application, (3) legal area (AI-law domain). Admin exposes it as a sortable/filterable table at `/admin/ai-regulation/legal-database`; public country pages will expose the same axes as facet filters + full-text (non-AI) search. `authorityType` is to become a first-class indexed DB column (Codex) instead of the derived `authority:*` tag; `deriveUpdateAuthorityType` stays the fallback until then. Smart search stays plain full-text per the "AI disabled by default" cost rule — no embeddings.
 
 - 2026-06-19 - Publication policy changed: legal news may auto-publish from serious/reputable sources or multi-source corroboration; country/state legal database entries may auto-publish from official sources. Discovery-only or weak sources remain admin-only. Do not restore a blanket human-review gate.
