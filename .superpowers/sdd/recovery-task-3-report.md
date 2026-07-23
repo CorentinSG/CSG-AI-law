@@ -11,6 +11,7 @@ GitHub Actions monitoring worker. The implementation commit is
 
 - Created `.github/workflows/legal-monitoring.yml`.
 - Created `docs/operations/github-actions-monitoring.md`.
+- Updated `AI_TASKS.md` with the repository handoff status for this task.
 - Updated `.env.example`.
 - Updated `scripts/run-scan-job-worker.ts` to persist scheduled heartbeat
   metadata and record successful scheduled exits as `completed`.
@@ -100,3 +101,79 @@ No implementation defects were found in self-review.
 - No local `actionlint` or YAML parser is installed in this checkout. The
   workflow was manually reviewed, while automated TypeScript, lint, and test
   verification passed.
+
+## Review Follow-up
+
+The review fixes are committed in `bb71efc439f23df07d722b8c205d03b6be247ca2`
+(`fix(ops): secure scheduled Scrapling worker`).
+
+### Changed Files
+
+- Updated `.env.example`, `docs/operations/github-actions-monitoring.md`, and
+  `scrapling_worker/README.md` with the required matching worker URL and
+  bearer token configuration.
+- Updated `src/agents/ingestion/scraplingClient.ts` and its test to require
+  `SCRAPLING_WORKER_TOKEN` before extraction and send it as a Bearer token.
+- Updated `scrapling_worker/worker.py` and added
+  `scrapling_worker/test_worker.py` to fail closed when its token is absent
+  and reject missing or mismatched Bearer tokens on both extraction routes.
+- Updated `scripts/run-scan-job-worker.ts`,
+  `src/agents/ai-regulation/processors/scanWorkerRuntime.ts`, and its test so
+  only an unrequested scheduled idle exit writes `completed`; requested stops
+  write `stopped` and are unhealthy in the existing health semantics.
+- Updated `AI_TASKS.md` to record this reviewed fix in the repository handoff.
+
+### RED Evidence
+
+```text
+npm test -- src/agents/ingestion/scraplingClient.test.ts src/agents/ai-regulation/processors/scanWorkerRuntime.test.ts
+```
+
+Result: exit 1; 2 test files failed, with 3 intended failures and 7 passing
+tests. The client omitted `Authorization`, allowed an extraction request with
+no token to reach `fetch`, and did not expose terminal-state selection.
+
+```text
+py -m unittest scrapling_worker/test_worker.py
+```
+
+Result: exit 1; 2 intended auth failures and 1 passing test. The worker
+returned HTTP 200 when its server token was unset and when extraction requests
+had missing or mismatched Bearer tokens.
+
+### GREEN Evidence
+
+```text
+npm test -- src/agents/ingestion/scraplingClient.test.ts src/agents/ai-regulation/processors/scanWorkerRuntime.test.ts
+```
+
+Result: exit 0; 2 files and 10 tests passed.
+
+```text
+py -m unittest scrapling_worker/test_worker.py
+```
+
+Result: exit 0; 3 auth tests passed.
+
+### Follow-up Verification
+
+```text
+npm test
+```
+
+Result: exit 0; 130 files and 712 tests passed.
+
+```text
+npm run lint
+```
+
+Result: exit 0.
+
+```text
+npm run typecheck
+```
+
+Result: exit 0; Next route types generated and TypeScript completed without
+errors.
+
+`git diff --check` completed without whitespace errors before the fix commit.
