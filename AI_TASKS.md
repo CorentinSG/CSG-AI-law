@@ -10,6 +10,7 @@ Each agent edits only its own rows. Status vocabulary: `CLAIMED` · `WIP` · `BL
 
 | Task ID | Owner | Status | Branch @ sha | Locked files | Graph anchor | Updated |
 |---|---|---|---|---|---|---|
+| T-RECOVERY-GITHUB-MONITORING | Codex | DONE-LOCAL | `codex/project-recovery-2026-07-23` @ `c3945bb` | GitHub monitoring workflow, scan worker runtime, health, Scrapling client, operations docs | `createScanWorkerConfig()`, `getScraplingWorkerUrl()`, communities "Scan Job Management" and "Source Runtime Health" | 2026-07-23 |
 | TOOLING-GRAPH-PROTOCOL | Claude Code | REVIEW | `ops/t-ops9-ux` @ `30bc31c` | `AGENTS.md`, `AI_TASKS.md`, `.gitignore`, `.git/hooks/*` | n/a (tooling, no app code) | 2026-06-20 |
 | T-OPS9-UX | Claude Code | WIP | `ops/t-ops9-ux` @ `30bc31c` | `src/app/**`, shared UI components | community "UI Components and Utilities", "Intelligence Hub UI" | 2026-06-20 |
 | T-LEGALDB-UI | Claude Code | DONE-LOCAL | `ops/t-ops9-ux` @ `0f2809d` | `src/app/admin/ai-regulation/legal-database/**`, `src/app/admin/ai-regulation/page.tsx` | `deriveUpdateAuthorityType()`, `getAuthorityPriorityRank()`, `FilterBar`, community "News and Regulation Admin" | 2026-06-20 |
@@ -92,6 +93,14 @@ YYYY-MM-DD · <Agent> · <TASK-ID> · <STATUS>
 ```
 
 ## Current status
+
+2026-07-23 - Codex - T-RECOVERY-GITHUB-MONITORING - DONE-LOCAL
+- Intent: Replace expired Railway worker services with the scheduled GitHub Actions monitoring run.
+- Files: `.github/workflows/legal-monitoring.yml`, worker/health/Scrapling runtime and tests, `.env.example`, `docs/operations/github-actions-monitoring.md`.
+- Graph anchors: `createScanWorkerConfig()`, `getScraplingWorkerUrl()`, community "Scan Job Management", community "Source Runtime Health".
+- Verification: targeted RED/GREEN recorded; 710/710 Vitest, lint, and typecheck pass.
+- Branch/commit: `codex/project-recovery-2026-07-23` @ `c3945bb`.
+- Next: operator configures required GitHub repository secrets and manually dispatches the workflow.
 
 2026-07-23 - Claude Code - T-STORY-CLUSTERING-SITEWIDE - DONE-LOCAL
 - Intent:        Site-wide rollout of the story-clustering system (user instruction "applique ce système pour tout le site et tous les pays"): every EU country page now has live monitoring with clustered stories — the 18 countries without bespoke live blocks get the shared `LiveLegalIntelligencePanel` via a new slug→loader registry over the factory agents; the Europe, United States, US-state, and International live feeds are clustered before their display caps with phase (Breaking/Developing) and source-count markers; feed windows widened (40/30 → 120) so clustering sees enough items to group cross-source duplicates. The paginated global news tab already surfaces ingestion-time corroboration through its verification labels, so it was deliberately left unclustered (clusters split across pages would mislead).
