@@ -155,6 +155,41 @@ describe("findCorroboratingUpdates", () => {
     ).toHaveLength(0);
   });
 
+  it("does not match a different country that only shares the Europe region", () => {
+    const germanCounterpart = buildUpdate({
+      id: "u-germany",
+      sourceId: "src-legifrance",
+      jurisdiction: "Germany",
+      region: "Europe",
+      country: "Germany",
+    });
+
+    expect(
+      findCorroboratingUpdates({
+        update,
+        recentUpdates: [germanCounterpart],
+        sourcesById,
+      }),
+    ).toHaveLength(0);
+  });
+
+  it("rejects invalid timestamps instead of treating them as inside the window", () => {
+    const invalidDate = buildUpdate({
+      id: "u-invalid-date",
+      sourceId: "src-mlex",
+      publicationDate: "not-a-date",
+      detectedDate: "also-not-a-date",
+    });
+
+    expect(
+      findCorroboratingUpdates({
+        update,
+        recentUpdates: [invalidDate],
+        sourcesById,
+      }),
+    ).toHaveLength(0);
+  });
+
   it("counts each counterpart source only once", () => {
     const first = buildUpdate({ id: "u-a", sourceId: "src-mlex" });
     const second = buildUpdate({ id: "u-b", sourceId: "src-mlex" });
@@ -178,11 +213,12 @@ describe("buildCorroborationMetadataPatch", () => {
   const verification = {
     verificationStatus: "verified_for_review",
     officialSourceFound: true,
+    lastVerifiedAt: "2026-07-01T00:00:00.000Z",
     corroboratingSourcesCount: 0,
     corroboratingSourceUrls: [],
   } as unknown as VerificationMetadata;
 
-  it("appends a supporting reference and marks verification corroborated", () => {
+  it("records automatic similarity evidence without promoting verification", () => {
     const patch = buildCorroborationMetadataPatch({
       rawItem: { rawMetadata: { sourceReferences: [], verification } },
       matches: [{ update: counterpart, source: counterpartSource }],
@@ -193,12 +229,12 @@ describe("buildCorroborationMetadataPatch", () => {
     expect(patch?.addedReferences).toHaveLength(1);
     expect(patch?.addedReferences[0].sourceRole).toBe("supporting");
     expect(patch?.addedReferences[0].sourceType).toBe("media_source");
+    expect(patch?.addedReferences[0].verificationStatus).toBe(
+      "automatic_story_similarity",
+    );
+    expect(patch?.addedReferences[0].lastVerifiedAt).toBeNull();
     const patchedVerification = patch?.rawMetadata.verification as VerificationMetadata;
-    expect(patchedVerification.verificationStatus).toBe("corroborated");
-    expect(patchedVerification.corroboratingSourcesCount).toBe(1);
-    expect(patchedVerification.corroboratingSourceUrls).toEqual([
-      "https://mlex.example/article",
-    ]);
+    expect(patchedVerification).toEqual(verification);
   });
 
   it("is idempotent for an already-recorded corroborating URL", () => {
