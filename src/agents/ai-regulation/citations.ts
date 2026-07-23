@@ -94,19 +94,49 @@ function sourceTypeFor(source: RegulationSource): SourceReferenceType {
   return "official";
 }
 
+const SOURCE_REFERENCE_TYPES: readonly SourceReferenceType[] = [
+  "official", "court", "regulator", "government", "parliament", "legislation",
+  "policy", "standards_body", "discovery_source", "media_source", "tracker",
+];
+
 function parseSourceReferences(value: unknown): SourceReference[] {
   if (!Array.isArray(value)) return [];
 
-  return value.filter((entry): entry is SourceReference => {
-    if (!entry || typeof entry !== "object") return false;
-    const candidate = entry as Partial<SourceReference>;
-    return (
-      typeof candidate.title === "string" &&
-      typeof candidate.institution === "string" &&
-      typeof candidate.url === "string" &&
-      typeof candidate.sourceRole === "string"
-    );
-  });
+  return value
+    .filter((entry): entry is SourceReference => {
+      if (!entry || typeof entry !== "object") return false;
+      const candidate = entry as Partial<SourceReference>;
+      return (
+        typeof candidate.title === "string" &&
+        typeof candidate.institution === "string" &&
+        typeof candidate.url === "string" &&
+        typeof candidate.sourceRole === "string"
+      );
+    })
+    // W1.7: references come from JSON written across several script
+    // generations — a missing field used to crash assessCitationQuality
+    // (`verificationStatus.includes`). Normalize with fail-closed defaults:
+    // malformed data never gains official standing or trust.
+    .map((reference) => ({
+      ...reference,
+      verificationStatus:
+        typeof reference.verificationStatus === "string"
+          ? reference.verificationStatus
+          : "needs_manual_verification",
+      reliabilityLevel:
+        reference.reliabilityLevel === "high" ||
+        reference.reliabilityLevel === "medium" ||
+        reference.reliabilityLevel === "low"
+          ? reference.reliabilityLevel
+          : "low",
+      sourceType: SOURCE_REFERENCE_TYPES.includes(reference.sourceType)
+        ? reference.sourceType
+        : "media_source",
+      pinpoint:
+        reference.pinpoint && typeof reference.pinpoint === "object"
+          ? reference.pinpoint
+          : null,
+    }));
 }
 
 export function getSourceReferencesFromRawItem(

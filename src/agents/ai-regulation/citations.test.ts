@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   assessCitationQuality,
+  getSourceReferencesFromRawItem,
   buildCandidateSourceReference,
   getCitationReferences,
 } from "@/agents/ai-regulation/citations";
@@ -164,5 +165,28 @@ describe("source citations", () => {
 
     expect(references[0]?.institution).toBe(update.sourceName);
     expect(assessment.publicationEligible).toBe(true);
+  });
+
+  it("survives malformed legacy references and never grants them trust (W1.7)", () => {
+    const references = getSourceReferencesFromRawItem({
+      rawMetadata: {
+        sourceReferences: [
+          {
+            sourceRole: "primary",
+            title: "Malformed legacy reference",
+            institution: "Unknown",
+            url: "https://example.org/doc",
+            // verificationStatus / reliabilityLevel / sourceType absent
+          },
+        ],
+      },
+    });
+
+    expect(references).toHaveLength(1);
+    expect(references[0].verificationStatus).toBe("needs_manual_verification");
+    expect(references[0].reliabilityLevel).toBe("low");
+    expect(references[0].sourceType).toBe("media_source");
+    // The old blind cast crashed here (verificationStatus.includes).
+    expect(() => assessCitationQuality(references)).not.toThrow();
   });
 });

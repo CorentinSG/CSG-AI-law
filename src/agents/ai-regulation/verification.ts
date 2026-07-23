@@ -1,3 +1,5 @@
+import { z } from "zod";
+
 import type { RawRegulatoryItem, RegulationSource } from "@/agents/ai-regulation/types";
 import {
   extractDiscoveryLeadMetadata,
@@ -153,13 +155,38 @@ export function buildInitialVerificationMetadata(input: {
   };
 }
 
+// W1.7: rawMetadata.verification is JSON written by several script
+// generations — a blind cast let one malformed field crash citation
+// assessment and the data-steward report. Each field falls back to its
+// safest value instead (fail-closed: never grants official/public standing).
+const verificationMetadataSchema = z.object({
+  initialDetectionSource: z.string().catch(""),
+  initialSourceOfficial: z.boolean().catch(false),
+  initialSourceType: z.string().catch("unknown"),
+  sourceUrl: z.string().catch(""),
+  detectedAt: z.string().catch(""),
+  lastVerifiedAt: z.string().nullable().catch(null),
+  verificationStatus: z.enum(verificationStatuses).catch("needs_official_source"),
+  officialSourceFound: z.boolean().catch(false),
+  officialSourceUrl: z.string().nullable().catch(null),
+  corroboratingSourcesCount: z.number().catch(0),
+  corroboratingSourceUrls: z.array(z.string()).catch([]),
+  confidenceLevel: z.enum(["high", "medium", "low"]).catch("low"),
+  reviewerNotes: z.string().catch(""),
+  publicVisibilityAllowed: z.boolean().catch(false),
+  nextSuggestedVerificationSource: z.string().catch(""),
+  notPublishableReason: z.string().nullable().catch(null),
+  stale: z.boolean().catch(false),
+});
+
 export function extractVerificationMetadata(
   rawItem: Pick<RawRegulatoryItem, "rawMetadata">,
 ): VerificationMetadata | null {
   const value = rawItem.rawMetadata.verification;
   if (!value || typeof value !== "object") return null;
 
-  return value as VerificationMetadata;
+  const parsed = verificationMetadataSchema.safeParse(value);
+  return parsed.success ? parsed.data : null;
 }
 
 export function isVerificationStatus(input: string): input is VerificationStatus {

@@ -75,6 +75,20 @@ jobs:
       - run: npm run typecheck
       - run: npm run build
 
+  scrapling-worker:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      # Extraction deps (scrapling) are lazy-imported; the guards under test
+      # only need flask + dotenv, so CI stays fast.
+      - run: pip install -r scrapling_worker/requirements-dev.txt
+      - run: ruff check scrapling_worker
+      - run: python -m pytest scrapling_worker -q
+
   e2e:
     runs-on: ubuntu-latest
     timeout-minutes: 25

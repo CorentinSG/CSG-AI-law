@@ -1524,6 +1524,9 @@ export class SupabaseAiRegulationRepository implements AiRegulationRepository {
       const inserted = references.map((reference) =>
         sourceReferenceInputToRecord(reference),
       );
+      console.error(
+        `[schema-drift] ${"source_references"} table missing — audit data written to volatile memory and WILL BE LOST on restart. Apply the pending migrations (031+) and check npm run audit:database-schema.`,
+      );
       this.legacySourceReferences.set(rawItemId, inserted);
       return inserted;
     }
@@ -1543,6 +1546,9 @@ export class SupabaseAiRegulationRepository implements AiRegulationRepository {
     if (isMissingRelationError(error)) {
       const inserted = references.map((reference) =>
         sourceReferenceInputToRecord(reference),
+      );
+      console.error(
+        `[schema-drift] ${"source_references"} table missing — audit data written to volatile memory and WILL BE LOST on restart. Apply the pending migrations (031+) and check npm run audit:database-schema.`,
       );
       this.legacySourceReferences.set(rawItemId, inserted);
       return inserted;
@@ -1587,6 +1593,9 @@ export class SupabaseAiRegulationRepository implements AiRegulationRepository {
       .single();
     if (isMissingRelationError(error)) {
       const record = this.createLegacyVerificationAttemptRecord(input);
+      console.error(
+        `[schema-drift] ${"verification_attempts"} table missing — audit data written to volatile memory and WILL BE LOST on restart. Apply the pending migrations (031+) and check npm run audit:database-schema.`,
+      );
       this.legacyVerificationAttempts.set(record.id, record);
       return record;
     }
@@ -1630,6 +1639,9 @@ export class SupabaseAiRegulationRepository implements AiRegulationRepository {
       .single();
     if (isMissingRelationError(error)) {
       const record = this.createLegacyReviewEventRecord(input);
+      console.error(
+        `[schema-drift] ${"review_events"} table missing — audit data written to volatile memory and WILL BE LOST on restart. Apply the pending migrations (031+) and check npm run audit:database-schema.`,
+      );
       this.legacyReviewEvents.set(record.id, record);
       return record;
     }
@@ -1713,6 +1725,9 @@ export class SupabaseAiRegulationRepository implements AiRegulationRepository {
       .single();
     if (isMissingRelationError(error)) {
       const record = this.createLegacyDataQualityFindingRecord(input);
+      console.error(
+        `[schema-drift] ${"data_quality_findings"} table missing — audit data written to volatile memory and WILL BE LOST on restart. Apply the pending migrations (031+) and check npm run audit:database-schema.`,
+      );
       this.legacyDataQualityFindings.set(record.id, record);
       return record;
     }
@@ -2502,6 +2517,9 @@ export class SupabaseAiRegulationRepository implements AiRegulationRepository {
       .single();
     if (isMissingRelationError(error)) {
       const record = this.createLegacyCountryProfileReviewEventRecord(input);
+      console.error(
+        `[schema-drift] ${"country_profile_review_events"} table missing — audit data written to volatile memory and WILL BE LOST on restart. Apply the pending migrations (031+) and check npm run audit:database-schema.`,
+      );
       this.legacyCountryProfileReviewEvents.set(record.id, record);
       return record;
     }

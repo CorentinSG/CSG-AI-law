@@ -14,7 +14,6 @@ Required: Python 3.10+, see requirements.txt
 Run: python worker.py  (default port 8765)
 """
 
-import hashlib
 import hmac
 import ipaddress
 import json
