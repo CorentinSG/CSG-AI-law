@@ -71,7 +71,7 @@ async function main() {
   };
 
   const writePersistentHeartbeat = async (
-    state: ScanWorkerStatus["state"],
+    state: ScanWorkerStatus["state"] | "completed",
     extras?: Record<string, unknown>,
   ) => {
     const heartbeatAt = new Date().toISOString();
@@ -81,6 +81,8 @@ async function main() {
         config.pollMs + config.heartbeatTimeoutMs,
         config.pollMs * 2,
       ),
+      workerMode: config.workerMode,
+      workerExpectedIntervalMs: config.expectedIntervalMs,
       workerId: config.workerId,
       hostname: hostname(),
       pid: process.pid,
@@ -250,7 +252,9 @@ async function main() {
     }
 
     await writeStatus("stopped");
-    await writePersistentHeartbeat("stopped");
+    await writePersistentHeartbeat(
+      config.workerMode === "scheduled" ? "completed" : "stopped",
+    );
   } catch (error) {
     await writeStatus("failed", {
       lastError: error instanceof Error ? error.message : "Unknown error",

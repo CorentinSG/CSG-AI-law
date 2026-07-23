@@ -2,7 +2,7 @@
  * Node.js HTTP client for the Scrapling Python sidecar worker.
  *
  * The Scrapling library is Python-only. This client calls the Python
- * worker service at SCRAPLING_WORKER_URL (default: http://localhost:8765).
+ * worker service at SCRAPLING_WORKER_URL.
  *
  * See scrapling_worker/README.md for setup instructions.
  */
@@ -10,25 +10,13 @@
 import { computeContentHash, normalizeUrl } from "./deduplication";
 import type { NormalizedDocument, ScraplingConfig, ScraplingExtractResult, ScraplingHealthResult } from "./types";
 
-const LOCAL_SCRAPLING_WORKER_URL = "http://localhost:8765";
-const PRODUCTION_SCRAPLING_WORKER_URL =
-  "https://fantastic-nourishment-production-6d34.up.railway.app";
-
 export function getScraplingWorkerUrl() {
   const configuredUrl = process.env.SCRAPLING_WORKER_URL?.trim();
-  if (configuredUrl) return configuredUrl;
-
-  return isProductionLikeRuntime()
-    ? PRODUCTION_SCRAPLING_WORKER_URL
-    : LOCAL_SCRAPLING_WORKER_URL;
-}
-
-function isProductionLikeRuntime() {
-  return process.env.NODE_ENV === "production" || process.env.APP_DATA_MODE === "supabase";
+  return configuredUrl || null;
 }
 
 export function isScraplingRuntimeAvailable() {
-  return Boolean(process.env.SCRAPLING_WORKER_URL?.trim()) || isProductionLikeRuntime();
+  return Boolean(getScraplingWorkerUrl());
 }
 
 /** Extract a single URL via the Scrapling worker. */
@@ -39,6 +27,9 @@ export async function scraplingExtract(
 ): Promise<NormalizedDocument | null> {
   const normalized = normalizeUrl(url);
   const workerUrl = getScraplingWorkerUrl();
+  if (!workerUrl) {
+    throw new Error("Scrapling worker is not configured: set SCRAPLING_WORKER_URL.");
+  }
 
   let res: Response;
   try {
@@ -94,6 +85,7 @@ export async function scraplingExtract(
 /** Check if the Scrapling worker is healthy. */
 export async function checkScraplingHealth(): Promise<ScraplingHealthResult> {
   const workerUrl = getScraplingWorkerUrl();
+  if (!workerUrl) return { status: "error" };
   try {
     const res = await fetch(`${workerUrl}/health`, {
       signal: AbortSignal.timeout(5_000),

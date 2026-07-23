@@ -57,6 +57,7 @@ const MAX_RECENT_JOBS = 100;
 const MAX_REVIEW_ITEMS = 500;
 const RECENT_IDLE_WORKER_ACTIVITY_MS = 15 * 60 * 1000;
 const DEFAULT_WORKER_HEARTBEAT_TIMEOUT_MS = 45_000;
+const SCHEDULED_WORKER_HEARTBEAT_GRACE_MS = 5 * 60 * 1000;
 const WORKER_HEARTBEAT_TRIGGER = "worker_heartbeat";
 
 function toTimestamp(value: string | null | undefined) {
@@ -100,6 +101,17 @@ function getWorkerHeartbeatState(job: ScanJob) {
 }
 
 function getWorkerHeartbeatTimeoutMs(job: ScanJob) {
+  const workerMode = job.resultSummary?.workerMode;
+  const expectedIntervalMs = job.resultSummary?.workerExpectedIntervalMs;
+  if (
+    workerMode === "scheduled" &&
+    typeof expectedIntervalMs === "number" &&
+    Number.isFinite(expectedIntervalMs) &&
+    expectedIntervalMs > 0
+  ) {
+    return expectedIntervalMs + SCHEDULED_WORKER_HEARTBEAT_GRACE_MS;
+  }
+
   const value = job.resultSummary?.workerHeartbeatTimeoutMs;
   return typeof value === "number" && Number.isFinite(value) && value > 0
     ? value

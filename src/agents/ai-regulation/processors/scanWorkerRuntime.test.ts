@@ -63,6 +63,21 @@ describe("scanWorkerRuntime", () => {
     expect(config.schedulerIntervalMs).toBe(60_000);
   });
 
+  it("configures scheduled workers to exit after the first empty cycle", () => {
+    const config = createScanWorkerConfig(
+      {
+        SCAN_JOB_WORKER_MODE: "scheduled",
+        SCAN_JOB_WORKER_EXPECTED_INTERVAL_MS: "900000",
+      } as unknown as NodeJS.ProcessEnv,
+      "C:\\repo",
+      42,
+    );
+
+    expect(config.workerMode).toBe("scheduled");
+    expect(config.expectedIntervalMs).toBe(900_000);
+    expect(config.idleExitAfter).toBe(1);
+  });
+
   it("refuses a second fresh worker lease but allows takeover after stale state", async () => {
     const stateDir = await mkdtemp(path.join(os.tmpdir(), "scan-worker-runtime-"));
     tempDirs.push(stateDir);
