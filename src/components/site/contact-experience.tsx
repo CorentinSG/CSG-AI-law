@@ -173,66 +173,53 @@ function MagneticCta({ email }: { email: string }) {
 
 /* ── Portrait — frameless, dissolves into the page background ──── */
 
-function PortraitFigure() {
+// Portrait as a true background layer: it bleeds off the right of the section
+// and dissolves into the page — no card, no border. The contact console
+// floats over its faded left side.
+function ContactBackdrop() {
   const reduced = useReducedMotion();
 
   return (
-    <div className="group relative flex min-h-[26rem] items-end justify-center lg:min-h-full">
-      {/* Ambient light living in the page — no card. A warm gold spotlight
-          behind the head, plus a cool base wash, so the figure reads as lit
-          by the environment rather than pasted onto a panel. */}
+    <div className="pointer-events-none absolute inset-0 overflow-hidden">
+      {/* Warm gold spotlight living in the page, behind the head */}
       <motion.div
         aria-hidden
-        className="pointer-events-none absolute inset-0 bg-[radial-gradient(42%_38%_at_50%_24%,rgba(196,136,42,0.20),transparent_70%)]"
-        animate={reduced ? undefined : { opacity: [0.75, 1, 0.75], scale: [1, 1.04, 1] }}
-        transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
-      />
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-x-0 bottom-0 h-2/3 bg-[radial-gradient(70%_80%_at_50%_110%,rgba(30,41,59,0.4),transparent_72%)]"
+        className="absolute right-[4%] top-0 h-[80%] w-[60%] bg-[radial-gradient(45%_45%_at_62%_28%,rgba(196,136,42,0.20),transparent_70%)]"
+        animate={reduced ? undefined : { opacity: [0.7, 1, 0.7], scale: [1, 1.05, 1] }}
+        transition={{ duration: 9, repeat: Infinity, ease: "easeInOut" }}
       />
 
-      {/* The subject. object-contain keeps the whole figure; the mask fades
-          the lower body straight into the background so there is no edge. */}
+      {/* The subject, anchored to the right and bleeding off-frame. On small
+          screens it sits behind the full-width console, so it is dialled right
+          back to a faint backdrop; at lg it takes the stage at full presence. */}
       <motion.div
-        className="relative aspect-[3/4] w-full max-w-[26rem]"
-        animate={reduced ? undefined : { y: [0, -10, 0] }}
-        transition={{ duration: 9, repeat: Infinity, ease: "easeInOut" }}
+        className="absolute inset-y-0 right-[-12%] w-[85%] opacity-30 sm:right-0 sm:w-[78%] sm:opacity-45 lg:w-[62%] lg:opacity-100"
+        animate={reduced ? undefined : { y: [0, -12, 0] }}
+        transition={{ duration: 11, repeat: Infinity, ease: "easeInOut" }}
       >
         <Image
           src="/images/profile/corentin-saint-girons-cutout.png"
           alt="Portrait of Corentin Saint-Girons"
           fill
-          sizes="(max-width: 1024px) 100vw, 40vw"
+          sizes="(max-width: 1024px) 100vw, 62vw"
           priority
-          style={{
-            maskImage:
-              "linear-gradient(to bottom, black 62%, transparent 90%)",
-            WebkitMaskImage:
-              "linear-gradient(to bottom, black 62%, transparent 90%)",
-          }}
-          className="object-contain object-bottom brightness-[0.98] contrast-[1.03] grayscale-[0.12] drop-shadow-[0_35px_60px_rgba(0,0,0,0.55)] transition-[filter,transform] duration-700 group-hover:brightness-100 group-hover:grayscale-0 group-hover:scale-[1.015]"
+          className="object-contain object-right-top brightness-[0.9] contrast-[1.03] grayscale-[0.15]"
+        />
+        {/* Dissolve the figure into the page: fade its left edge, base and
+            top into the near-black body colour so it has no visible border. */}
+        <div
+          aria-hidden
+          className="absolute inset-0 bg-gradient-to-r from-[#080808] via-[#080808]/55 to-transparent lg:via-[#080808]/15"
+        />
+        <div
+          aria-hidden
+          className="absolute inset-x-0 bottom-0 h-2/5 bg-gradient-to-t from-[#080808] via-[#080808]/60 to-transparent"
+        />
+        <div
+          aria-hidden
+          className="absolute inset-x-0 top-0 h-1/5 bg-gradient-to-b from-[#080808]/70 to-transparent"
         />
       </motion.div>
-
-      {/* Floating identity — sits over the dissolve, no chip behind the name. */}
-      <div className="pointer-events-none absolute inset-x-0 bottom-0 flex items-end justify-between gap-4">
-        <div>
-          <p className="font-display text-xl font-medium tracking-[-0.02em] text-white drop-shadow-[0_2px_10px_rgba(0,0,0,0.6)]">
-            C. Saint-Girons, Esq
-          </p>
-          <p className="mt-1.5 font-mono text-[10px] uppercase tracking-[0.24em] text-white/60">
-            AI Law &amp; Legal Intelligence
-          </p>
-        </div>
-        <span className="mb-0.5 inline-flex items-center gap-1.5 rounded-full border border-white/12 bg-black/30 px-3 py-1 font-mono text-[9px] uppercase tracking-[0.18em] text-white/70 backdrop-blur-sm">
-          <span className="relative flex size-1.5">
-            <span className="absolute inline-flex size-full animate-ping rounded-full bg-emerald-400 opacity-60" />
-            <span className="relative inline-flex size-1.5 rounded-full bg-emerald-400" />
-          </span>
-          Open to inquiries
-        </span>
-      </div>
     </div>
   );
 }
@@ -291,13 +278,15 @@ export function ContactExperience({ email }: { email: string }) {
         </motion.p>
       </section>
 
-      {/* ── Channel + portrait ── */}
+      {/* ── Channel over portrait-as-background ── */}
       <motion.section
         {...fadeUp(0.45)}
-        className="grid gap-6 lg:grid-cols-[1.15fr_0.85fr] lg:items-stretch"
+        className="relative isolate flex min-h-[32rem] items-center overflow-hidden py-4 md:min-h-[40rem]"
       >
-        {/* Direct channel console */}
-        <div className="glass-panel noise-overlay relative flex flex-col justify-between gap-10 overflow-hidden rounded-[2rem] p-8 md:p-10">
+        <ContactBackdrop />
+
+        {/* Direct channel console — floats over the faded left of the portrait */}
+        <div className="glass-panel noise-overlay relative z-10 flex w-full max-w-xl flex-col justify-between gap-10 overflow-hidden rounded-[2rem] p-8 md:p-10">
           <div
             aria-hidden
             className="absolute -right-24 -top-24 size-64 rounded-full bg-[radial-gradient(circle,rgba(196,136,42,0.12),transparent_70%)] blur-xl"
@@ -349,8 +338,6 @@ export function ContactExperience({ email }: { email: string }) {
             </div>
           </div>
         </div>
-
-        <PortraitFigure />
       </motion.section>
 
       {/* ── What this covers ── */}
