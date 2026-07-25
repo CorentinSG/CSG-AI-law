@@ -16,6 +16,7 @@ interface RegionPortalCardProps {
   /** Kicker text override — e.g. "Transnational layer" for the international
    *  portal, which is a cross-cutting layer rather than a third territory. */
   kickerLabel?: string;
+  lang?: "en" | "fr";
 }
 
 // Dark frosted glass with a faint regional tint. The site renders on a near-black
@@ -45,10 +46,12 @@ export function RegionPortalCard({
   highlights,
   isLive = true,
   kickerLabel,
+  lang = "en",
 }: RegionPortalCardProps) {
+  const fr = lang === "fr";
   const stats = [
-    liveCount !== undefined ? `${liveCount} news` : null,
-    dbCount !== undefined ? `${dbCount} entries` : null,
+    liveCount !== undefined ? `${liveCount} ${fr ? "actus" : "news"}` : null,
+    dbCount !== undefined ? `${dbCount} ${fr ? "entrées" : "entries"}` : null,
   ].filter(Boolean);
 
   return (
@@ -66,7 +69,7 @@ export function RegionPortalCard({
             </span>
           ) : null}
           <p className={`font-mono text-[10px] uppercase tracking-[0.28em] ${regionAccent[region]}`}>
-            {kickerLabel ?? (isLive ? "Live monitoring" : "Monitoring")}
+            {kickerLabel ?? (isLive ? (fr ? "Veille en direct" : "Live monitoring") : fr ? "Veille" : "Monitoring")}
           </p>
         </div>
         <ArrowUpRight

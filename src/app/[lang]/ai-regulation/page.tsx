@@ -34,11 +34,20 @@ import { getPriorityUsStateProfiles } from "@/content/ai-regulation/us-state-ai-
 import { encodeCursor, parseCursorParam } from "@/lib/pagination";
 import type { RegulatoryUpdateFilters } from "@/db/repository-types";
 
-export const metadata: Metadata = {
-  title: "AI Legal Intelligence Hub",
-  description:
-    "A unified AI legal intelligence hub combining legal developments, source-backed monitoring, and region-structured AI law database coverage.",
-};
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ lang: string }>;
+}): Promise<Metadata> {
+  const { lang } = await params;
+  const fr = lang === "fr";
+  return {
+    title: fr ? "Hub d'intelligence juridique IA" : "AI Legal Intelligence Hub",
+    description: fr
+      ? "Un hub unifié d'intelligence juridique sur l'IA combinant développements légaux, veille sourcée et couverture de base de données structurée par région."
+      : "A unified AI legal intelligence hub combining legal developments, source-backed monitoring, and region-structured AI law database coverage.",
+  };
+}
 
 // Stays dynamic (not ISR like the other public /ai-regulation pages, T-RT0C):
 // this hub renders from searchParams (filters, tabs, cursor pagination), which
@@ -54,6 +63,19 @@ const newsFilters = [
   { key: "developmentType", label: "Development" },
   { key: "date", label: "Date" },
 ];
+
+const buildNewsFilters = (fr: boolean) =>
+  fr
+    ? [
+        { key: "region", label: "Région" },
+        { key: "jurisdiction", label: "Juridiction" },
+        { key: "sourceType", label: "Type de source" },
+        { key: "verificationStatus", label: "Vérification" },
+        { key: "topic", label: "Thème" },
+        { key: "developmentType", label: "Développement" },
+        { key: "date", label: "Date" },
+      ]
+    : newsFilters;
 
 const pageSize = 18;
 // The database view loads a larger page: filtering and search run instantly
@@ -122,10 +144,14 @@ function collectNewsOptions(items: NormalizedNewsItemRecord[]) {
 }
 
 export default async function AiRegulationPage({
+  params: routeParams,
   searchParams,
 }: {
+  params: Promise<{ lang: string }>;
   searchParams?: Promise<Record<string, string | string[] | undefined>>;
 }) {
+  const { lang } = await routeParams;
+  const fr = lang === "fr";
   const params = ((await searchParams) ?? {}) as Record<string, string>;
   const activeView = parseView(params.view);
   const afterCursor = parseCursorParam(params.after);
@@ -144,9 +170,9 @@ export default async function AiRegulationPage({
   const newsItems = filterNewsItems(newsPage.items, params);
 
   const hubTabs = [
-    { label: "Overview", value: "overview", href: "/ai-regulation?view=overview" },
-    { label: "AI Law News", value: "news", href: "/ai-regulation?view=news" },
-    { label: "Legal Database", value: "database", href: "/ai-regulation?view=database" },
+    { label: fr ? "Aperçu" : "Overview", value: "overview", href: "/ai-regulation?view=overview" },
+    { label: fr ? "Actualités IA" : "AI Law News", value: "news", href: "/ai-regulation?view=news" },
+    { label: fr ? "Base de données" : "Legal Database", value: "database", href: "/ai-regulation?view=database" },
   ] as const;
 
   const europeProfiles = getPriorityEuropeCountryProfiles();
@@ -198,9 +224,9 @@ export default async function AiRegulationPage({
   });
 
   const regionHubs = [
-    { label: "Europe", kicker: "EU framework · member states", href: "/ai-regulation/europe" },
-    { label: "United States", kicker: "Federal · state layers", href: "/ai-regulation/united-states" },
-    { label: "International", kicker: "Standards · global governance", href: "/ai-regulation/international" },
+    { label: "Europe", kicker: fr ? "Cadre UE · États membres" : "EU framework · member states", href: "/ai-regulation/europe" },
+    { label: fr ? "États-Unis" : "United States", kicker: fr ? "Fédéral · niveaux étatiques" : "Federal · state layers", href: "/ai-regulation/united-states" },
+    { label: "International", kicker: fr ? "Standards · gouvernance mondiale" : "Standards · global governance", href: "/ai-regulation/international" },
   ];
 
   const dbLoadMoreHref = updatesPage.nextCursor
@@ -212,14 +238,20 @@ export default async function AiRegulationPage({
     <SiteShell className="space-y-10">
       <section className="space-y-6">
         <SectionHeading
-          eyebrow="AI law hub"
-          title="AI legal intelligence"
+          eyebrow={fr ? "Hub Droit de l'IA" : "AI law hub"}
+          title={fr ? "Intelligence juridique IA" : "AI legal intelligence"}
           actions={
             <Link
               href={activeView === "news" ? "/ai-regulation?view=database" : "/ai-regulation?view=news"}
               className="text-sm uppercase tracking-[0.16em] text-zinc-800 underline decoration-black/15 underline-offset-4"
             >
-              {activeView === "news" ? "Open legal database" : "Open legal developments"}
+              {activeView === "news"
+                ? fr
+                  ? "Ouvrir la base de données"
+                  : "Open legal database"
+                : fr
+                  ? "Ouvrir les développements légaux"
+                  : "Open legal developments"}
             </Link>
           }
         />
@@ -233,14 +265,14 @@ export default async function AiRegulationPage({
           <section className="space-y-4">
             <div className="flex items-center justify-between gap-4">
               <SectionHeading
-                eyebrow="Latest AI law news"
-                title="Recent legal developments"
+                eyebrow={fr ? "Dernières actualités IA" : "Latest AI law news"}
+                title={fr ? "Développements juridiques récents" : "Recent legal developments"}
               />
               <Link
                 href="/ai-regulation?view=news"
                 className="shrink-0 text-sm uppercase tracking-[0.16em] text-zinc-600 underline decoration-black/15 underline-offset-4"
               >
-                All news →
+                {fr ? "Toutes les actualités →" : "All news →"}
               </Link>
             </div>
 
@@ -258,7 +290,9 @@ export default async function AiRegulationPage({
                   <div className="flex items-center gap-3">
                     <span className="h-2 w-2 rounded-full bg-zinc-200" />
                     <p className="text-sm text-zinc-500">
-                      No public legal developments yet. The intelligence layer is monitoring — source-backed items will appear here once published.
+                      {fr
+                        ? "Aucun développement juridique public pour l'instant. La couche d'intelligence surveille — les éléments sourcés apparaîtront ici une fois publiés."
+                        : "No public legal developments yet. The intelligence layer is monitoring — source-backed items will appear here once published."}
                     </p>
                   </div>
                 </CardContent>
@@ -269,14 +303,15 @@ export default async function AiRegulationPage({
           {/* --- Section 2: Region portals — two territories + the transnational layer --- */}
           <section className="space-y-4">
             <SectionHeading
-              eyebrow="Regional intelligence"
-              title="Two territories, one transnational layer"
+              eyebrow={fr ? "Intelligence régionale" : "Regional intelligence"}
+              title={fr ? "Deux territoires, une couche transnationale" : "Two territories, one transnational layer"}
             />
             <MotionStagger className="grid gap-5 lg:grid-cols-3" stagger={0.12}>
               <MotionStaggerItem>
                 <RegionPortalCard
                   region="europe"
                   title="Europe"
+                  lang={fr ? "fr" : "en"}
                   description="EU AI Act and Member State implementation."
                   href="/ai-regulation/europe"
                   liveLabel="Europe news"
@@ -289,7 +324,8 @@ export default async function AiRegulationPage({
               <MotionStaggerItem>
                 <RegionPortalCard
                   region="united-states"
-                  title="United States"
+                  title={fr ? "États-Unis" : "United States"}
+                  lang={fr ? "fr" : "en"}
                   description="Federal and 50-state AI law coverage."
                   href="/ai-regulation/united-states"
                   liveLabel="U.S. news"
@@ -303,7 +339,8 @@ export default async function AiRegulationPage({
                 <RegionPortalCard
                   region="international"
                   title="International"
-                  kickerLabel="Transnational layer"
+                  lang={fr ? "fr" : "en"}
+                  kickerLabel={fr ? "Couche transnationale" : "Transnational layer"}
                   description="ISO/IEC, OECD, UNESCO, IEEE, and cross-border AI governance instruments."
                   href="/ai-regulation/international"
                   liveLabel="International news"
@@ -322,14 +359,14 @@ export default async function AiRegulationPage({
           <section className="space-y-4">
             <div className="flex items-center justify-between gap-4">
               <SectionHeading
-                eyebrow="Legal database"
-                title="Latest published monitor entries"
+                eyebrow={fr ? "Base de données juridique" : "Legal database"}
+                title={fr ? "Dernières entrées publiées" : "Latest published monitor entries"}
               />
               <Link
                 href="/ai-regulation?view=database"
                 className="shrink-0 text-sm uppercase tracking-[0.16em] text-zinc-600 underline decoration-black/15 underline-offset-4"
               >
-                Full database →
+                {fr ? "Base complète →" : "Full database →"}
               </Link>
             </div>
             <MotionStagger className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
@@ -345,7 +382,9 @@ export default async function AiRegulationPage({
                 <Card className="rounded-[1.8rem] border-black/6 bg-white/90 shadow-sm md:col-span-2 xl:col-span-3">
                   <CardContent className="p-6">
                     <p className="text-sm text-zinc-500">
-                      No published database entries yet. The structured legal database stays intentionally empty until an entry is source-verified and published.
+                      {fr
+                        ? "Aucune entrée publiée pour l'instant. La base de données juridique reste volontairement vide tant qu'une entrée n'est pas vérifiée par source et publiée."
+                        : "No published database entries yet. The structured legal database stays intentionally empty until an entry is source-verified and published."}
                     </p>
                   </CardContent>
                 </Card>
@@ -358,16 +397,16 @@ export default async function AiRegulationPage({
             <Card className="rounded-[2rem] border-black/6 bg-white/90 shadow-[0_18px_50px_rgba(15,15,15,0.04)]">
               <CardContent className="space-y-4 p-6">
                 <p className="font-mono text-[11px] uppercase tracking-[0.28em] text-zinc-600">
-                  Source posture
+                  {fr ? "Posture des sources" : "Source posture"}
                 </p>
                 <div className="grid gap-3 sm:grid-cols-2">
                   <IntelligenceSignal
-                    label="Officially verified"
+                    label={fr ? "Vérifié officiellement" : "Officially verified"}
                     value={String(verifiedNewsCount)}
                     tone="positive"
                   />
                   <IntelligenceSignal
-                    label="Discovery / media"
+                    label={fr ? "Découverte / média" : "Discovery / media"}
                     value={String(discoveryNewsCount)}
                     tone="warning"
                   />
@@ -380,15 +419,16 @@ export default async function AiRegulationPage({
             >
               <div className="space-y-2">
                 <p className="font-mono text-[11px] uppercase tracking-[0.28em] text-zinc-600">
-                  How to read this hub
+                  {fr ? "Comment lire ce hub" : "How to read this hub"}
                 </p>
                 <p className="text-sm leading-6 text-zinc-500">
-                  Verification levels, authority classification, and the source-and-review
-                  posture behind every published item.
+                  {fr
+                    ? "Niveaux de vérification, classification d'autorité et posture de sourçage et de revue derrière chaque élément publié."
+                    : "Verification levels, authority classification, and the source-and-review posture behind every published item."}
                 </p>
               </div>
               <span className="inline-flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-[0.2em] text-zinc-500 transition-colors group-hover:text-white/80">
-                Read the methodology →
+                {fr ? "Lire la méthodologie →" : "Read the methodology →"}
               </span>
             </Link>
           </section>
@@ -399,28 +439,36 @@ export default async function AiRegulationPage({
         <>
           <section className="space-y-6">
             <SectionHeading
-              eyebrow="AI Law News"
-              title="Legal developments"
+              eyebrow={fr ? "Actualités IA" : "AI Law News"}
+              title={fr ? "Développements juridiques" : "Legal developments"}
             />
             <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
               <IntelligenceSignal
-                label={newsPage.hasMore ? "News items shown" : "News items"}
+                label={
+                  newsPage.hasMore
+                    ? fr
+                      ? "Éléments affichés"
+                      : "News items shown"
+                    : fr
+                      ? "Éléments d'actualité"
+                      : "News items"
+                }
                 value={String(newsPage.items.length)}
                 tone="informative"
               />
               <IntelligenceSignal
-                label="Officially supported"
+                label={fr ? "Appuyé officiellement" : "Officially supported"}
                 value={String(verifiedNewsCount)}
                 tone="positive"
               />
               <IntelligenceSignal
-                label="Discovery-led"
+                label={fr ? "Issu de découverte" : "Discovery-led"}
                 value={String(discoveryNewsCount)}
                 tone="warning"
               />
               <IntelligenceSignal
-                label="Regions"
-                value="EU + U.S. + Intl"
+                label={fr ? "Régions" : "Regions"}
+                value={fr ? "UE + É.-U. + Intl" : "EU + U.S. + Intl"}
                 tone="neutral"
               />
             </div>
@@ -430,20 +478,22 @@ export default async function AiRegulationPage({
             searchParams={params}
             options={newsOptions}
             basePath="/ai-regulation"
-            filters={newsFilters}
+            filters={buildNewsFilters(fr)}
+            lang={fr ? "fr" : "en"}
             persistentParams={{ view: "news" }}
           />
 
           {newsItems.length > 0 ? (
             <MotionStagger className="mx-auto max-w-3xl divide-y divide-white/8 border-y border-white/8">
               {newsItems.map((item) => (
-                <NewsCard key={item.id} item={item} />
+                <NewsCard key={item.id} item={item} lang={fr ? "fr" : "en"} />
               ))}
             </MotionStagger>
           ) : (
             <EmptyFilterState
               resetHref="/ai-regulation?view=news"
               hasActiveFilters={hasActiveFilterParams(params, newsFilters.map((f) => f.key))}
+              lang={fr ? "fr" : "en"}
             />
           )}
 
@@ -452,6 +502,7 @@ export default async function AiRegulationPage({
             searchParams={params}
             nextCursorEncoded={newsPage.nextCursor ? encodeCursor(newsPage.nextCursor) : null}
             cursorParamKey="after"
+            lang={fr ? "fr" : "en"}
           />
         </>
       ) : null}
@@ -459,9 +510,13 @@ export default async function AiRegulationPage({
       {activeView === "database" ? (
         <>
           <SectionHeading
-            eyebrow="Structured legal database"
-            title="The AI law database"
-            description="Search and filter source-verified entries across Europe, the United States, and the transnational layer — instantly."
+            eyebrow={fr ? "Base de données juridique structurée" : "Structured legal database"}
+            title={fr ? "La base de données du droit de l'IA" : "The AI law database"}
+            description={
+              fr
+                ? "Recherchez et filtrez instantanément les entrées vérifiées par source à travers l'Europe, les États-Unis et la couche transnationale."
+                : "Search and filter source-verified entries across Europe, the United States, and the transnational layer — instantly."
+            }
           />
 
           {updates.length > 0 ? (
@@ -470,14 +525,18 @@ export default async function AiRegulationPage({
               regionHubs={regionHubs}
               loadMoreHref={dbLoadMoreHref}
               todayIso={todayIso}
+              lang={fr ? "fr" : "en"}
             />
           ) : (
             <EmptyFilterState
               resetHref="/ai-regulation?view=database"
               hasActiveFilters={Boolean(dbAfterCursor)}
-              title={!dbAfterCursor ? "No published database entries yet" : undefined}
+              lang={fr ? "fr" : "en"}
+              title={!dbAfterCursor ? (fr ? "Aucune entrée publiée pour l'instant" : "No published database entries yet") : undefined}
               body={!dbAfterCursor
-                ? "The structured legal database stays intentionally empty until an entry is source-verified and published."
+                ? fr
+                  ? "La base de données juridique reste volontairement vide tant qu'une entrée n'est pas vérifiée par source et publiée."
+                  : "The structured legal database stays intentionally empty until an entry is source-verified and published."
                 : undefined}
             />
           )}

@@ -65,13 +65,16 @@ export function CursorPaginationControls({
   searchParams,
   nextCursorEncoded,
   cursorParamKey = "after",
+  lang = "en",
 }: {
   basePath: string;
   searchParams: Record<string, string | string[] | undefined>;
   /** Base64url-encoded next cursor. Null when there are no more pages. */
   nextCursorEncoded: string | null;
   cursorParamKey?: string;
+  lang?: "en" | "fr";
 }) {
+  const fr = lang === "fr";
   const isFirstPage = !searchParams[cursorParamKey];
   const nextHref = nextCursorEncoded
     ? buildCursorHref(basePath, searchParams, nextCursorEncoded, cursorParamKey)
@@ -89,18 +92,18 @@ export function CursorPaginationControls({
 
   return (
     <div className="flex flex-col gap-3 rounded-[1.6rem] border border-black/6 bg-white/70 p-4 text-sm text-zinc-700 md:flex-row md:items-center md:justify-between">
-      <p>{nextHref ? "More items available" : "End of results"}</p>
+      <p>{nextHref ? (fr ? "Plus d'éléments disponibles" : "More items available") : fr ? "Fin des résultats" : "End of results"}</p>
       <div className="flex items-center gap-3">
         {!isFirstPage ? (
           <Link
             href={firstPageHref}
             className="rounded-xl border border-black/8 px-4 py-2 text-zinc-900 transition-colors duration-150 hover:bg-zinc-50 active:scale-[0.98]"
           >
-            &larr; Back to start
+            {fr ? "\u2190 Retour au début" : "\u2190 Back to start"}
           </Link>
         ) : (
           <span className="rounded-xl border border-black/8 px-4 py-2 text-zinc-400">
-            &larr; Back to start
+            {fr ? "\u2190 Retour au début" : "\u2190 Back to start"}
           </span>
         )}
         {nextHref ? (
@@ -108,11 +111,11 @@ export function CursorPaginationControls({
             href={nextHref}
             className="rounded-xl bg-zinc-950 px-4 py-2 text-white transition-colors duration-150 hover:bg-zinc-800 active:scale-[0.98]"
           >
-            Next &rarr;
+            {fr ? "Suivant \u2192" : "Next \u2192"}
           </Link>
         ) : (
           <span className="rounded-xl border border-black/8 px-4 py-2 text-zinc-400">
-            Next &rarr;
+            {fr ? "Suivant \u2192" : "Next \u2192"}
           </span>
         )}
       </div>
