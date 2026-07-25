@@ -11,12 +11,20 @@ Before non-trivial work: check `AI_TASKS.md` (ownership/locks) and `DECISIONS.md
 `AI_AGENT_MASTER_CONTEXT.md` is the deep architecture reference — consult it when touching unfamiliar areas.
 `AGENT_COORDINATION.md` and `PROJECT_LOGBOOK.md` are historical archives; do not append to them.
 
+## Current ownership
+
+Effective 2026-07-25, Claude Code is the sole project owner for frontend,
+backend, database, operations, content, testing, and coordination. Codex has no
+active tasks, file locks, or standing ownership. Historical ownership statements
+remain archival only and are superseded by this section. Codex must not begin
+new project work unless the user explicitly reassigns a task.
+
 ## Project purpose
 
 Professional site for `C. Saint-Girons, Esq — AI Law & Legal Intelligence`:
 professional identity, blog/editorial legal-AI analysis, and an AI Regulation
-Monitor (multi-country legal/news ingestion with human review before
-publication). The monitor is one feature among others — the site must not be
+Monitor (multi-country legal/news ingestion with policy-governed
+auto-publication and protected review workflows). The monitor is one feature among others — the site must not be
 centered on it alone.
 
 ## Tech stack and commands
@@ -71,7 +79,7 @@ This section supersedes any older blanket "human review before publication" word
 
 - Never invent publications, speaking engagements, research, dates, achievements, or unsupported source-backed claims.
 - Prefer official sources; distinguish binding law, proposed law, regulation, guidance, enforcement, soft law, standards, frameworks, policy reports, commentary.
-- No auto-publishing of legal updates — human review stays in the loop; public pages expose only published items; admin/review workflows stay protected.
+- Follow the current publication policy above: eligible official and reputable-source items may auto-publish; discovery-only or unverified items remain admin-only; admin/review workflows stay protected.
 - AI processing stays disabled by default; never weaken cost controls, token limits, scan limits, or monthly budgets.
 
 ## Security rules
@@ -93,8 +101,8 @@ This is the default coordination and context layer between Claude Code and Codex
 
 ## Claude Code + Codex collaboration rules
 
-- Claude Code generally owns: frontend structure, UX, high-level architecture, product flow, large refactors.
-- Codex generally owns: backend implementation, APIs, database schema, scripts, tests, focused bug fixes.
+- Claude Code currently owns the entire repository and all project work.
+- Codex currently owns nothing and must remain inactive unless the user explicitly reassigns work.
 - Before editing, check `AI_TASKS.md` for ownership and locked files. Do not edit files assigned to the other agent unless the user explicitly asks.
 - Do not use markdown files as chat logs. Keep handoffs under 15 bullet points.
 - Do not duplicate instructions already in this file.
