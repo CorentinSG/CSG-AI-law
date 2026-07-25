@@ -27,6 +27,7 @@ export interface HealthSnapshot {
   worker: {
     state: "active" | "idle" | "unknown";
     alive: boolean;
+    heartbeatFresh: boolean;
     heartbeatAgeMs: number | null;
     heartbeatAt: string | null;
     lastActivityAgeMs: number | null;
@@ -271,6 +272,7 @@ function buildWorkerSummary(jobs: ScanJob[], now: number) {
       (state === "idle" &&
         lastActivityAgeMs !== null &&
         lastActivityAgeMs <= RECENT_IDLE_WORKER_ACTIVITY_MS),
+    heartbeatFresh: hasFreshWorkerHeartbeat,
     heartbeatAgeMs: ageMs(findNewestIso([heartbeatAt, workerHeartbeatAt]), now),
     heartbeatAt: findNewestIso([heartbeatAt, workerHeartbeatAt]),
     lastActivityAgeMs: ageMs(workerLastActivityAt, now),
@@ -406,6 +408,7 @@ export async function buildHealthSnapshot(options?: {
       worker: {
         state: "unknown",
         alive: false,
+        heartbeatFresh: false,
         heartbeatAgeMs: null,
         heartbeatAt: null,
         lastActivityAgeMs: null,

@@ -53,9 +53,159 @@ export type ResearchEntry = {
 const author = "Corentin Saint-Girons";
 export const researchEntries: ResearchEntry[] = [
   {
+    slug: "when-ai-makes-legal-filings-easier-but-justice-harder",
+    title: "When AI makes legal filings easier but justice harder",
+    subtitle:
+      "A Florida appellate decision on a pro se brief containing a phantom case and fabricated quotations shows how far a polished filing can sit from a viable legal argument.",
+    author,
+    status: "published",
+    category: "Access to Justice",
+    tags: [
+      "Access to Justice",
+      "Pro se litigation",
+      "Generative AI",
+      "Hallucinated citations",
+      "Sanctions",
+      "Florida",
+    ],
+    jurisdiction: "United States / Florida",
+    readingTime: "12 min read",
+    summary:
+      "In Gouldy v. Chiasson, Florida's Fourth District Court of Appeal affirmed the rejection of a self-represented litigant's appeal after finding a nonexistent case, fabricated quotations, and misrepresentations of the record — and issued an order to show cause on barring further pro se filings. The decision illustrates the distance between producing something that looks like a legal brief and presenting a legally viable argument.",
+    abstract:
+      "On July 22, 2026, the Florida Fourth District Court of Appeal issued a decision that offers a striking illustration of a growing problem in American courts. The decision is more than another warning about artificial intelligence hallucinations: it illustrates the growing distance between the ability to produce something that looks like a legal brief and the ability to present a legally viable argument.",
+    image: "/images/research/gouldy-chiasson-ai-filings.png",
+    publishedAt: "2026-07-24",
+    featured: true,
+    relatedSlugs: [
+      "generative-ai-access-to-justice-pro-se",
+      "ai-summaries-rule-1006-admissibility",
+      "ai-legal-ethics-early-questions-lawyers",
+    ],
+    body: [
+      {
+        heading: "What the Florida decision illustrates",
+        paragraphs: [
+          "On July 22, 2026, the Florida Fourth District Court of Appeal issued a decision that offers a striking illustration of a growing problem in American courts. In Gouldy v. Chiasson, the court affirmed the rejection of a self-represented litigant's appeal after finding that her brief contained a nonexistent case, fabricated quotations, misrepresentations of the record, and authorities that did not support the arguments for which they were cited. The judges also issued a separate order requiring her to explain why she should not be barred from making further pro se filings before the court.[1]",
+          "The decision is more than another warning about artificial intelligence hallucinations. It illustrates the growing distance between the ability to produce something that looks like a legal brief and the ability to present a legally viable argument.",
+          "Generative AI can help people create documents that appear organized, professional, and authoritative. But the ability to generate convincing legal prose is not the same as the ability to identify a valid claim, preserve an issue for appeal, apply the correct law, or provide reliable legal authority.",
+          "In some cases, the technology may not simply fail to improve a litigant's position. It may make the filing more difficult for the court to evaluate and expose the person who submitted it to serious sanctions.",
+        ],
+      },
+      {
+        heading: "The case before the Florida court",
+        paragraphs: [
+          "The appeal arose from a long-running dispute involving Rose Lannquist Gouldy and Timothy Chiasson, an attorney who had represented other parties in a related probate matter.",
+          "Gouldy had sued Chiasson and others for fraud upon the court, civil theft, economic extortion, and tortious interference. The trial court entered summary judgment in Chiasson's favor, found that her claims were frivolous, and awarded attorney's fees and costs against her.",
+          "The Fourth District Court of Appeal previously affirmed that judgment and awarded additional appellate attorney's fees. On remand, the trial court determined that Chiasson was entitled to $54,780 in appellate fees and $10,882.23 in costs, for a total of $65,662.23. Gouldy then appealed that award.",
+          "Her appellate brief raised fifteen issues, several of which included additional sub-issues. The court concluded that her arguments were either unpreserved, inadequately presented, or entirely without merit. More troublingly, the judges found that the authorities used to support those arguments were, in several instances, unreliable or fabricated.",
+          "The brief cited a case that did not exist, attributed invented language to real judicial decisions, misrepresented parts of the record, and relied on cases that did not support the propositions for which they were cited.",
+          "One of the clearest examples involved a supposed decision called Barton v. McGovern, cited as a 2020 Florida case. No such decision existed. There was a real case with that name from 1987, but it did not contain the language attributed to it in Gouldy's brief.[2]",
+          "The brief also used a false quotation from an actual Florida Supreme Court decision and included additional fabricated quotations from other Florida cases. At another point, Gouldy stated that the fee award was approximately $125,000, even though the actual amount was $65,662.23.[3]",
+          "The opinion does not establish that Gouldy used a particular generative AI platform to prepare her brief. The court nevertheless connected the filing to a wider trend it says it has observed across Florida's appellate courts.",
+          "According to the judges, many self-represented litigants now appear to be using artificial intelligence platforms to generate appellate briefs and motions. Those filings are generally readable, but they may contain phantom authorities, inaccurate descriptions of the record, and fabricated quotations.",
+          "The court affirmed the appeal in full. It also issued a separate order to show cause, requiring Gouldy to explain why she should not be barred from making further pro se filings in that court. The judges noted that she had already been warned twice about frivolous submissions.",
+          "The restriction has therefore not yet been finally imposed. An order to show cause gives Gouldy an opportunity to respond before the court decides whether to limit her future filings. Still, the possibility of such a sanction demonstrates how seriously courts may treat repeated reliance on fabricated legal material.",
+        ],
+      },
+      {
+        heading: "A polished document can still be legally empty",
+        paragraphs: [
+          "The most important aspect of the decision is not simply that the brief contained mistakes. Self-represented legal filings have always contained factual, procedural, and legal errors.",
+          "What is different is the appearance of reliability.",
+          "Generative AI can produce a document that resembles professional legal work. The prose may be fluent. The issues may be divided into carefully labeled sections. The document may refer to jurisdiction, due process, preservation, standards of review, statutory interpretation, and constitutional principles. The citations may even appear to follow the correct format.",
+          "That surface quality can make the filing look far more credible than it really is.",
+          "A poorly drafted argument is often relatively easy to identify. A polished but false argument is more burdensome. A judge or law clerk may need to search for the cited decision, confirm whether it exists, locate the quoted language, review the procedural posture, and determine whether the case actually supports the proposition advanced.",
+          "Where a filing contains one doubtful citation, this may take only a short amount of time. Where it contains numerous invented quotations and mischaracterized authorities, the verification process can consume significant judicial resources.",
+          "The Florida court expressly identified this institutional cost. Because appellate courts must examine the issues presented by the parties, investigating AI-generated filings consumes time that could otherwise be devoted to other cases.",
+          "This is why hallucinated citations cannot be treated as harmless technological mistakes. Once a document is filed, the false authority no longer remains between the user and the machine. It becomes a problem for the opposing party, the court, and the administration of justice.",
+          "It can also obscure whatever legitimate argument the litigant may have had. The court acknowledged that one of Gouldy's arguments might have contained at least a small degree of arguable merit. But it concluded that any potentially valid issue was overwhelmed by the volume of frivolous arguments surrounding it.",
+          "That is one of the central risks of unguided AI use in litigation. The technology may help a person produce more arguments, more citations, and more pages. But more legal language does not necessarily result in a stronger case.",
+          "It may instead bury a potentially relevant issue beneath arguments that were never preserved, legal doctrines that do not apply, and authorities that do not exist.",
+        ],
+      },
+      {
+        heading: "From access to filing to access to justice",
+        paragraphs: [
+          "The decision also resonates with a distinction I examined in an earlier article, Generative AI, self-representation, and the distance between access to courts and access to justice.[4]",
+          "That article discussed research suggesting that the widespread availability of generative AI may be associated with an increase in self-represented federal civil litigation and with changes in the style of pro se complaints. Filings identified as potentially AI-assisted tended to appear more polished and to contain more legal citations, but they did not achieve better outcomes.",
+          "The broader question was whether generative AI is expanding access to justice or merely lowering the barrier to filing a lawsuit. Gouldy v. Chiasson provides a concrete example of that distinction.",
+          "The litigant was able to produce a lengthy appellate brief raising fifteen separate issues. The filing used legal terminology and cited numerous authorities. In one sense, AI may have made it easier to participate in an appellate process that would otherwise be difficult to navigate without counsel.",
+          "But participation did not create a viable appeal.",
+          "The court found that the arguments were unpreserved, inadequately briefed, or meritless. The additional legal language did not correct the underlying procedural and substantive deficiencies. Instead, the fabricated authorities increased the burden on the court and contributed to the possibility that the litigant could lose the ability to file future appeals without counsel.",
+          "The case therefore sharpens the difference between several forms of access that are sometimes treated as interchangeable.",
+          "A person may have access to legal information. That person may have access to a tool capable of producing a legal document. The person may also have formal access to the courthouse through the ability to file that document.",
+          "None of those things necessarily provides access to an effective legal remedy.",
+          "A generative system can help organize facts, identify possible legal concepts, or transform an informal narrative into the structure of a complaint or brief. But it cannot automatically establish jurisdiction, preserve an objection in the trial court, satisfy the elements of a cause of action, determine the correct standard of review, produce admissible evidence, or decide whether a cited case truly supports a proposition.",
+          "Those tasks require legal judgment, procedural awareness, knowledge of the record, and independent verification.",
+          "The danger is that a person may confuse the ability to reproduce the appearance of legal reasoning with the ability to perform legal reasoning.",
+        ],
+      },
+      {
+        heading: "Responsibility stays with the person who signs the filing",
+        paragraphs: [
+          "The Florida court also made clear that reliance on generative AI does not change the standard applied to fabricated authorities.",
+          "Quoting its earlier decisions, the court explained that submitting fictitious or fabricated case law may be sanctioned whether the error results from carelessness, misunderstanding, or reliance on generative artificial-intelligence tools.[5]",
+          "This principle matters because AI hallucinations are sometimes described as though they were errors committed by the technology alone. But courts do not receive filings from software systems. They receive documents signed and submitted by litigants and attorneys.",
+          "The person whose name appears on the filing remains responsible for confirming that the authorities exist, that the quotations are accurate, and that the cases support the argument being made.",
+          "For lawyers, this responsibility is reinforced by professional duties concerning competence, candor to the tribunal, supervision, and the certification of court filings. An attorney who submits invented case law may face monetary sanctions, disciplinary proceedings, reputational harm, and consequences for the client.",
+          "Self-represented litigants are not subject to bar discipline, but they are not exempt from procedural rules or judicial sanctions. Courts may strike filings, dismiss claims, award fees, impose monetary penalties, or restrict a litigant's ability to submit future documents without counsel.",
+          "That difference partly explains the court's concern. Licensed attorneys operate within a professional disciplinary system. Pro se litigants do not. When repeated warnings are ineffective, a filing restriction may become one of the limited tools available to prevent continued abuse.",
+        ],
+      },
+      {
+        heading: "Better tools, not fewer users",
+        paragraphs: [
+          "The lesson from Gouldy should not be that self-represented litigants must be prevented from using generative AI.",
+          "For people who cannot afford a lawyer, these tools may offer meaningful assistance. They can help users understand unfamiliar terminology, organize a chronology, identify relevant documents, prepare questions, and express their position more clearly.",
+          "The real problem is the gap between general-purpose text generation and reliable legal assistance.",
+          "A public chatbot is generally designed to produce an answer, even where the relevant legal information is uncertain, incomplete, or unavailable. A responsible legal tool should instead be capable of recognizing uncertainty, limiting unsupported conclusions, linking propositions to verifiable sources, distinguishing between jurisdictions, and warning users when human review is necessary.",
+          "Better systems would not merely help users generate longer briefs. They would help them identify which facts matter, which arguments are legally available, which issues have been preserved, and which authorities can be independently verified.",
+          "Courts may also need new forms of triage. Legal-aid organizations may need systems allowing lawyers to review AI-assisted filings before they are submitted. Developers may need to design products around the realities of legal procedure rather than the appearance of legal fluency.",
+          "The goal should not be to make every litigant sound like a lawyer. It should be to help people understand what the legal system requires and when automated assistance is no longer sufficient.",
+        ],
+      },
+      {
+        heading: "The distance between appearance and substance",
+        paragraphs: [
+          "The July 22, 2026 decision in Gouldy v. Chiasson demonstrates the danger of confusing access to legal drafting with access to justice.",
+          "Generative AI may make it easier to create a brief. It may make it easier to raise fifteen arguments instead of one. It may make a filing appear more professional than the litigant could have produced alone.",
+          "But it cannot make an unpreserved argument preserved. It cannot make an irrelevant decision controlling. It cannot make an invented quotation real.",
+          "And when the distance between appearance and substance becomes too great, the technology that seemed to open the courthouse door may ultimately help close it.",
+        ],
+      },
+    ],
+    references: [
+      {
+        label:
+          "[1] Gouldy v. Chiasson, No. 4D2025-1289 (Fla. 4th DCA July 22, 2026).",
+        href: "https://flcourts-media.flcourts.gov/content/download/2492735/opinion/Opinion_2025-1289.pdf",
+        note: "Opinion of the Florida Fourth District Court of Appeal.",
+      },
+      {
+        label:
+          "[2] Barton v. McGovern, 302 So. 3d 1042 (Fla. 2d DCA 2020) — the nonexistent decision cited in the brief; the actual case is Barton v. McGovern, 504 So. 2d 457 (Fla. 1st DCA 1987).",
+      },
+      {
+        label: "[3] Stockman v. Downs, 573 So. 2d 835 (Fla. 1991).",
+        note: "Florida Supreme Court decision from which the brief quoted language that does not appear in it.",
+      },
+      {
+        label:
+          "[4] Generative AI, self-representation, and the distance between access to courts and access to justice.",
+        href: "/research/generative-ai-access-to-justice-pro-se",
+        note: "Earlier note on the federal civil filing data behind this distinction.",
+      },
+      {
+        label:
+          "[5] Eclectic Synergy, LLC v. Seredin, No. 4D2026-0781 (Fla. 4th DCA May 27, 2026), quoting Francois v. Vive Fin., LLC, 51 Fla. L. Weekly D500 (Fla. 4th DCA Mar. 18, 2026).",
+      },
+    ],
+  },
+  {
     slug: "ai-summaries-rule-1006-admissibility",
     title:
-      "How AI-Generated Summaries Could Make Their Way Into the Courtroom Under Federal Rule of Evidence 1006",
+      "How AI-generated summaries could make their way into the courtroom under Federal Rule of Evidence 1006",
     subtitle:
       "AI-generated summaries may soon have a clearer path into evidence — provided the underlying records and the process behind them are properly handled.",
     author,
@@ -76,7 +226,6 @@ export const researchEntries: ResearchEntry[] = [
       "AI-generated summaries may soon have a clearer path into the courtroom. A recent legal development explores how Federal Rule of Evidence 1006 could support the admissibility of AI-generated summaries, provided the underlying evidence is properly handled. This note breaks down what this means, why it matters, and the safeguards that will still be required.",
     image: "/images/research/rule-1006-ai-summaries.png",
     publishedAt: "2026-07-20",
-    featured: true,
     relatedSlugs: [
       "generative-ai-access-to-justice-pro-se",
       "ai-legal-ethics-early-questions-lawyers",
@@ -155,7 +304,7 @@ export const researchEntries: ResearchEntry[] = [
   {
     slug: "generative-ai-access-to-justice-pro-se",
     title:
-      "Generative AI, Self-Representation, and the Distance Between Access to Courts and Access to Justice",
+      "Generative AI, self-representation, and the distance between access to courts and access to justice",
     subtitle:
       "A new study on 2.8 million federal civil filings suggests AI is helping more people reach the courthouse — without necessarily helping them prevail once inside.",
     author,
@@ -242,7 +391,7 @@ export const researchEntries: ResearchEntry[] = [
   {
     slug: "white-collar-revolution-law-firms-ai",
     title:
-      "The White Collar Revolution: The Transformation of Law Firms in the Age of Artificial Intelligence",
+      "The white collar revolution: the transformation of law firms in the age of artificial intelligence",
     subtitle:
       "Why the shift from a labor-based model to a system-based model is reshaping the economics, organization, and role of the modern law firm.",
     author,
@@ -341,7 +490,7 @@ export const researchEntries: ResearchEntry[] = [
   },
   {
     slug: "emerging-architecture-ai-regulation",
-    title: "The Emerging Architecture of AI Regulation",
+    title: "The emerging architecture of AI regulation",
     subtitle:
       "Why AI compliance now depends on reading statutes, supervisory guidance, and governance frameworks together rather than in isolation.",
     author,
@@ -410,7 +559,7 @@ export const researchEntries: ResearchEntry[] = [
   },
   {
     slug: "why-soft-law-matters-ai-compliance",
-    title: "Why Soft Law Matters in AI Compliance",
+    title: "Why soft law matters in AI compliance",
     subtitle:
       "Non-binding frameworks frequently become the operational language of AI governance long before formal law answers every question.",
     author,
@@ -478,7 +627,7 @@ export const researchEntries: ResearchEntry[] = [
   {
     slug: "ai-legal-ethics-early-questions-lawyers",
     title:
-      "Early Questions on AI, Legal Ethics, and Professional Responsibility",
+      "Early questions on AI, legal ethics, and professional responsibility",
     subtitle:
       "A forthcoming note on supervision, transparency, diligence, and risk framing when AI tools move into legal work.",
     author,
@@ -507,7 +656,7 @@ export const researchEntries: ResearchEntry[] = [
   },
   {
     slug: "eu-us-ai-governance-comparative-note",
-    title: "EU and U.S. Approaches to AI Governance",
+    title: "EU and U.S. approaches to AI governance",
     subtitle:
       "A structured comparison of how regulatory architecture differs when jurisdictions rely on legislation, sectoral oversight, and governance frameworks in different proportions.",
     author,
@@ -536,7 +685,7 @@ export const researchEntries: ResearchEntry[] = [
   },
   {
     slug: "legal-intelligence-systems-future-regulatory-monitoring",
-    title: "Legal Intelligence Systems and Regulatory Monitoring",
+    title: "Legal intelligence systems and regulatory monitoring",
     subtitle:
       "Why legal monitoring becomes more useful when sources, authority levels, and verification workflows are structured rather than merely aggregated.",
     author,
@@ -570,7 +719,7 @@ export const researchEntries: ResearchEntry[] = [
   },
   {
     slug: "ai-regulation-access-to-justice",
-    title: "AI Regulation and Access to Justice",
+    title: "AI regulation and access to justice",
     subtitle:
       "A note on why AI law infrastructure should also be evaluated through public-interest use, institutional access, and practical legal accessibility.",
     author,
@@ -598,7 +747,7 @@ export const researchEntries: ResearchEntry[] = [
   },
   {
     slug: "from-monitoring-to-meaning",
-    title: "From Monitoring to Meaning",
+    title: "From monitoring to meaning",
     subtitle:
       "An internal draft on how editorial systems can turn regulatory signals into legal understanding without collapsing into generic commentary.",
     author,

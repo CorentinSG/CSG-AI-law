@@ -159,7 +159,7 @@ export default async function LegalUpdateDetailPage({
           <CardHeader>
             <CardTitle>Legal intelligence summary</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-6 text-sm leading-7 text-zinc-700">
+          <CardContent className="space-y-6 text-sm leading-7 text-zinc-700 hyphens-auto text-justify">
             {update.summary ? (
               <section>
                 <p className="mb-2 font-mono text-[10px] uppercase tracking-[0.24em] text-zinc-500">Summary</p>

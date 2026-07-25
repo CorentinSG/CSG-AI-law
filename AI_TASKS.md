@@ -3,6 +3,7 @@
 > **How to use this file (read `AGENTS.md` → "Coordination protocol" for the full rules).**
 > This is the single source of truth for project progress. Two layers, never mixed: progress lives here; code structure lives in the Graphify graph / Obsidian vault (query it, do not restate it here).
 > Start every session with the **Sync ritual**; end every unit of work with a **Handoff entry**. Append-only, own-rows-only.
+> **Ownership override (2026-07-25):** Claude Code owns the entire project. Codex has no active tasks or file locks. Historical ownership statements below are archival and superseded by `docs/handoffs/2026-07-25-codex-to-claude-total-handoff.md`.
 
 ## Status board (live — at-a-glance project state)
 
@@ -10,64 +11,12 @@ Each agent edits only its own rows. Status vocabulary: `CLAIMED` · `WIP` · `BL
 
 | Task ID | Owner | Status | Branch @ sha | Locked files | Graph anchor | Updated |
 |---|---|---|---|---|---|---|
-| T-NY-PROD-CORRECTION | Codex | REVIEW | `codex/new-york-production-correction` @ working tree | New York reconciliation module/backfill, editable update fields | `findExistingNewYorkUpdate()`, `listChangedUpdateFields()` | 2026-07-23 |
-| T-NY-CORPUS-PARITY | Codex | MERGED | `main` @ `9148879` | `src/content/ai-regulation/new-york-ai-law-depth.ts`, related test | `newYorkAiLawDepthEntries` | 2026-07-23 |
-| T-RECOVERY-GITHUB-MONITORING | Codex | DONE-LOCAL | `codex/project-recovery-2026-07-23` @ `1dde0dc` | GitHub monitoring workflow, scan worker runtime, health, Scrapling client, operations docs | `createScanWorkerConfig()`, `getScraplingWorkerUrl()`, communities "Scan Job Management" and "Source Runtime Health" | 2026-07-23 |
+| T-TOTAL-PROJECT-OWNERSHIP | Claude Code | MERGED | `main` | entire repository | all Graphify communities; start with the total handoff document | 2026-07-25 |
 | TOOLING-GRAPH-PROTOCOL | Claude Code | REVIEW | `ops/t-ops9-ux` @ `30bc31c` | `AGENTS.md`, `AI_TASKS.md`, `.gitignore`, `.git/hooks/*` | n/a (tooling, no app code) | 2026-06-20 |
 | T-OPS9-UX | Claude Code | WIP | `ops/t-ops9-ux` @ `30bc31c` | `src/app/**`, shared UI components | community "UI Components and Utilities", "Intelligence Hub UI" | 2026-06-20 |
 | T-LEGALDB-UI | Claude Code | DONE-LOCAL | `ops/t-ops9-ux` @ `0f2809d` | `src/app/admin/ai-regulation/legal-database/**`, `src/app/admin/ai-regulation/page.tsx` | `deriveUpdateAuthorityType()`, `getAuthorityPriorityRank()`, `FilterBar`, community "News and Regulation Admin" | 2026-06-20 |
-| T-LEGALDB-DB | Codex | DONE-LOCAL | `ops/t-ops9-ux` @ `cbf3eed` | `src/db/migrations/**`, `src/db/repository-types.ts`, repositories, ingestion agents | `RegulatoryUpdateFilters`, `AiRegulatoryUpdate`, community "DB Repository Layer", "Scan Pipeline" | 2026-06-20 |
 | T-ADMIN-DASH | Claude Code | DONE-LOCAL | `ops/t-ops9-ux` @ `0f2809d` | `src/app/admin/page.tsx`, `src/app/admin/ai-regulation/page.tsx` | `listGlobalMonitoringAgents()`, `getSourceRuntimeHealthSummaries()`, `listAgentApiCapabilities()`, community "News and Regulation Admin" | 2026-06-20 |
 | T-ADMIN-OPS (P1) | Claude Code | DONE-LOCAL | `ops/t-ops9-ux` @ `0f2809d` | `src/app/admin/operations/**`, `src/components/site/ops-health-band.tsx`, `src/app/admin/page.tsx` | `buildHealthSnapshot()`, `getSourceRuntimeHealthSummaries()`, `listAgentApiCapabilities()`, community "Source Runtime Health" | 2026-06-20 |
-| T-ADMIN-OPS-API (P5a) | Codex | DONE-LOCAL | `ops/t-ops9-ux` @ `e264572` | `src/lib/admin-operations-summary.ts`, `src/app/api/admin/operations/summary/route.ts`, related tests | `buildAdminOperationsSummary()`, `buildHealthSnapshot()`, `getSourceRuntimeHealthSummaries()`, community "Source Runtime Health", community "Admin Authentication" | 2026-06-20 |
-| T-BATCH-REVIEW-API (P2a) | Codex | DONE-LOCAL | `ops/t-ops9-ux` @ `069210e` | `src/lib/admin-review-batch.ts`, `src/app/api/admin/review/batch/route.ts`, related tests | `batchTransitionReviewStatus()`, `listPrioritizedReviewQueue()`, `reviewWorkflow`, community "Admin Authentication", community "Admin Review and Summaries" | 2026-06-21 |
-| T-COURTLISTENER-CONNECTOR (P3a) | Codex | DONE-LOCAL | `ops/t-ops9-ux` @ `155bc08` | `src/agents/ai-regulation/connectors/api-connector.ts`, `src/lib/env.ts`, `src/agents/ai-regulation/agentApiCapabilities.ts`, tests | `ApiConnector`, `listAgentApiCapabilities()`, community "API Connectors and Legal Docs", community "Agent API Capabilities" | 2026-06-21 |
-| T-LEGAL-DATA-HUNTER-CONNECTOR (P3b) | Codex | DONE-LOCAL | `ops/t-ops9-ux` @ `f78c9e4` | `src/agents/ai-regulation/connectors/api-connector.ts`, `src/lib/env.ts`, `src/agents/ai-regulation/agentApiCapabilities.ts`, tests | `ApiConnector`, `listAgentApiCapabilities()`, community "API Connectors and Legal Docs", community "Agent API Capabilities" | 2026-06-21 |
-| T-CENTRAL-SCHEDULER (P4) | Codex | DONE-LOCAL | `ops/t-ops9-ux` @ `c8af9d4` | `src/agents/ai-regulation/scheduler/**`, `src/app/api/cron/ai-regulation-central-scheduler/**`, `src/agents/ai-regulation/processors/scanJobs.ts` | `buildCentralMonitoringSchedule()`, `enqueueCentralMonitoringSchedule()`, `queueScanJob()`, community "Scheduler Implementation", community "Scan Job Management" | 2026-06-21 |
-| T-WORKER-RAILWAY (P0) | Codex | DONE-LOCAL | `ops/t-ops9-ux` @ `ab63d39` | `package.json`, `package-lock.json`, `railway.json`, Railway/Vercel/Supabase runtime config | `drainQueuedScanJobs()`, `createScanWorkerConfig()`, community "Scan Job Management" | 2026-06-22 |
-| T-AUDIT-HARDENING | Codex | DONE-LOCAL | `ops/t-ops9-ux` @ `ab63d39` | `src/content/ai-regulation/news.ts`, `src/lib/health.ts`, `src/agents/ai-regulation/agentApiCapabilities.ts`, `src/lib/admin-review-batch.ts`, related tests | `buildNewsItemFromUpdate()`, `buildHealthSnapshot()`, `listAgentApiCapabilities()`, `listPrioritizedReviewQueue()`, community "Source Runtime Health", community "Admin Review and Summaries" | 2026-06-22 |
-| T-DURABLE-DATA | Codex | MERGED | `main` @ `2125242` | migrations 013-015 awaiting production apply; Railway branch repoint awaiting console access | `evaluateSchemaIntegrity()`, `AiRegulationRepository`, `executeClaimedScanJob()`, community "DB Repository Layer", community "Scan Job Management", community "Data Ingestion Pipeline" | 2026-07-04 |
-| T-AT-BE-COVERAGE | Codex | MERGED | `main` @ `b7948cf` | production replay blocked only by existing `discovery_leads` service-role grant | `getAustriaAgentSourceIds()`, `getBelgiumAgentSourceIds()`, `selectSourcesForScanProfile()`, community "Community 32" | 2026-07-05 |
-| T-IE-NL-SE-COVERAGE | Codex | MERGED | `main` @ `f65331c` | `src/db/seed/ai-regulation-seed.ts`, `src/db/migrations/018_ie_nl_se_monitoring_sources.sql`, `src/db/seed/ireland-netherlands-sweden-sources.test.ts` | `getIrelandAgentSourceIds()`, `getNetherlandsAgentSourceIds()`, `getSwedenAgentSourceIds()`, `selectSourcesForScanProfile()`, `buildHealthSnapshot()` | 2026-07-06 |
-| T-REMAINING-EU-COVERAGE | Codex | MERGED | `main` @ `48cdf90` | `src/db/seed/ai-regulation-seed.ts`, `src/db/migrations/019_remaining_eu_member_state_monitoring_sources.sql`, `src/db/migrations/020_remaining_eu_source_url_canonicals.sql`, `src/agents/ai-regulation/remainingEuMemberStateSources.test.ts` | `missingEuMemberStateAgentDefinitions`, `buildDefaultCountrySourceRegistry()`, `createCountryNewsSourceModule()`, community "Scan Pipeline" | 2026-07-09 |
-| T-STATIC-SCRAPER-FALLBACK | Codex | MERGED | `main` @ `5dad1a7` | `src/agents/ai-regulation/processors/sourceScanner.ts`, `src/agents/ai-regulation/processors/sourceScanner.test.ts` | `sourceScanner`, `StaticPageConnector`, `scraplingExtract()`, `scrapeUrl()`, community "Scan Pipeline", community "Data Ingestion Pipeline", community "Scrapling Extraction Service" | 2026-07-09 |
-| T-SCRAPLING-SSL-FALLBACK | Codex | MERGED | `main` @ `05725b5` | `scrapling_worker/worker.py`, `scrapling_worker/README.md`, `src/agents/ingestion/scraplingClient.ts`, `src/agents/ingestion/scraplingClient.test.ts`, `src/agents/ai-regulation/processors/sourceScanner.ts`, `src/agents/ai-regulation/processors/sourceScanner.test.ts` | `scraplingExtract()`, `sourceScanner`, community "Scrapling Extraction Service", community "Data Ingestion Pipeline", community "Scan Pipeline" | 2026-07-09 |
-| T-NON-EU-EUROPE-COVERAGE | Codex | MERGED | `main` @ `f763e26` | `src/db/schema.ts`, `src/db/seed/ai-regulation-seed.ts`, `src/db/migrations/021_non_eu_western_balkan_europe_sources.sql`, `src/agents/ai-regulation/nonEuEuropeAgentDefinitions.ts`, `src/agents/ai-regulation/nonEuEuropeSources.test.ts` | `nonEuEuropeAgentDefinitions`, `buildDefaultCountrySourceRegistry()`, `buildCountryMonitoringSources()`, community "Scan Pipeline", community "DB Repository Layer" | 2026-07-14 |
-| T-COUNTRY-MONITORING-RELIABILITY | Codex | MERGED | `main` @ `9ece786` | `src/lib/country-database-readiness.ts`, `scripts/backfill-country-baselines.ts`, `src/lib/admin-operations-summary.ts`, `src/db/seed/ai-regulation-seed.ts`, `src/db/migrations/022_repair_bulgaria_government_ai_source.sql` | `getCountryDatabaseReadiness()`, `buildCountryDatabaseReadiness()`, `buildAdminOperationsSummary()`, `runAiRegulationScan()`, `sourceScanner`, community "Source Runtime Health", community "Scan Pipeline", community "DB Repository Layer" | 2026-07-15 |
-| T-PILOT-COUNTRY-DEEP-ENTRIES | Codex | MERGED | `main` @ `56c544f` | `scripts/backfill-pilot-country-deep-entries.ts`, `package.json` | `updateRepository.createRawItem()`, `updateRepository.createUpdate()`, `SourceReference`, community "DB Repository Layer", community "Scan Pipeline" | 2026-07-15 |
-| T-WORKER-PERSISTENT-HEARTBEAT | Codex | MERGED | `main` @ `a464cb7` | `scripts/run-scan-job-worker.ts`, `src/lib/health.ts`, `src/lib/health.test.ts` | `buildHealthSnapshot()`, `createScanWorkerConfig()`, `updateRepository.createScanJob()`, `updateRepository.updateScanJob()`, community "Source Runtime Health", community "Scan Job Management" | 2026-07-15 |
-| T-OFFICIAL-SOURCE-AUTOPUBLISH-PILOTS | Codex | MERGED | `main` @ `b67fa42` | `scripts/backfill-pilot-country-deep-entries.ts` | `evaluatePublicationEligibility()`, `updateRepository.updateReviewStatus()`, community "DB Repository Layer", community "Scan Pipeline" | 2026-07-15 |
-| T-EU-DEEP-ENTRIES-WAVE-2 | Codex | MERGED | `main` @ `be880ec` | `scripts/backfill-pilot-country-deep-entries.ts`, `package.json` | `backfill-pilot-country-deep-entries.ts`, `SourceReference`, community "Data Repository and Pagination", community "Scan Pipeline" | 2026-07-15 |
-| T-EU-OFFICIAL-WAVE-3 | Codex | MERGED | `main` @ `4fbab00` | `scripts/backfill-eu-official-wave3.ts`, `src/agents/ai-regulation/dataSteward.test.ts`, `package.json` | `backfill-eu-official-wave3.ts`, `dataSteward.test.ts`, `SourceReference`, community "Data Repository and Pagination", community "Scan Pipeline", community "Data Quality Assessment" | 2026-07-15 |
-| T-EU-OFFICIAL-WAVE-4 | Codex | MERGED | `main` @ `0ae9d4b` | `scripts/backfill-eu-official-wave4.ts`, `package.json` | `backfill-eu-official-wave4.ts`, `SourceReference`, community "Data Repository and Pagination", community "Scan Pipeline" | 2026-07-15 |
-| T-EU-OFFICIAL-WAVE-5 | Codex | MERGED | `main` @ `d31686b` | `scripts/backfill-eu-official-wave5.ts`, `package.json` | `backfill-eu-official-wave5.ts`, `SourceReference`, community "Data Repository and Pagination", community "Scan Pipeline" | 2026-07-15 |
-| T-EU-OFFICIAL-WAVE-6 | Codex | MERGED | `main` @ `4df13d9` | `scripts/backfill-eu-official-wave6.ts`, `package.json` | `backfill-eu-official-wave6.ts`, `SourceReference`, community "Data Repository and Pagination", community "Scan Pipeline" | 2026-07-15 |
-| T-EU-DEPTH-WAVE-7 | Codex | MERGED | `main` @ `8ca3ecd` | `scripts/backfill-eu-depth-wave7.ts`, `package.json` | `backfill-eu-depth-wave7.ts`, `SourceReference`, community "Data Repository and Pagination", community "Scan Pipeline" | 2026-07-15 |
-| T-EU-DEPTH-WAVE-8 | Codex | MERGED | `main` @ `7c6bc28` | `scripts/backfill-eu-depth-wave8.ts`, `package.json` | `backfill-eu-depth-wave8.ts`, `SourceReference`, community "Data Repository and Pagination", community "Scan Pipeline" | 2026-07-15 |
-| T-EU-DEPTH-WAVE-9 | Codex | MERGED | `main` @ `07a2b72` | `scripts/backfill-eu-depth-wave9.ts`, `package.json` | `backfill-eu-depth-wave9.ts`, `SourceReference`, community "Data Repository and Pagination", community "Scan Pipeline" | 2026-07-16 |
-| T-LIVE-LEGAL-NEWS-AUTOPUBLISH | Codex | MERGED | `main` @ `9f4c7df` | `src/content/ai-regulation/news.ts`, `src/content/ai-regulation/news.test.ts`, `src/agents/ai-regulation/utils/discovery.ts` | `buildNewsItemFromUpdate()`, `isDiscoveryOnlySource()`, `isMediaDiscoverySource()`, community "News and Regulation Admin", community "Scan Pipeline" | 2026-07-16 |
-| T-CRON-AUTH-CI | Codex | MERGED | `main` @ `230c8e3` | `src/lib/cron-auth.test.ts` | `getCronAuthStatus()`, community "Admin Authentication" | 2026-07-15 |
-| T-REVIEW-BACKLOG-REDUCTION | Codex | MERGED | `main` @ `9df039e` | `scripts/reduce-review-backlog.ts`, `package.json` | `evaluatePublicationEligibility()`, `updateRepository.updateReviewStatus()`, community "Admin Review and Summaries", community "DB Repository Layer" | 2026-07-15 |
-| T-US-LOCUS-DISCOVERY | Codex | MERGED | `main` @ `e8a1b24` | `src/agents/ai-regulation/usLocusDiscovery.ts`, `src/agents/ai-regulation/usLocusDiscovery.test.ts`, `README.md`, `PROJECT_LOGBOOK.md`, `AI_AGENT_MASTER_CONTEXT.md`, `docs/superpowers/plans/2026-07-15-locus-us-discovery-corpus.md` | `buildLocusDiscoveryLead()`, `DiscoveryLead`, community "Scan Pipeline", community "DB Repository Layer" | 2026-07-16 |
-| T-COURTLISTENER-RUNTIME-READINESS | Codex | DONE-LOCAL | `main` @ `2c274e4` | `src/lib/env.ts`, `src/agents/ai-regulation/connectors/api-connector.ts`, `src/agents/ai-regulation/agentApiCapabilities.ts`, `scripts/verify-ingestion-runtime.ts`, `src/db/seed/ai-regulation-seed.ts`, `src/db/migrations/024_add_us_courtlistener_case_law_source.sql`, docs/tests | `env`, `ApiConnector`, `listAgentApiCapabilities()`, `regulationSourcesSeed`, community "API Connectors and Legal Docs", community "Agent API Capabilities", community "DB Repository Layer" | 2026-07-16 |
-| T-INTERNATIONAL-STANDARDS | Codex | DONE-LOCAL | `main` @ `4b170f9` | `src/content/ai-regulation/international-ai-standards.ts`, `src/app/[lang]/standards/page.tsx`, `src/components/site/standards-explorer.tsx`, docs/tests | `internationalAiStandardsBaseline`, `StandardsExplorer`, community "Intelligence Hub UI", community "News and Regulation Admin" | 2026-07-16 |
-| T-INTERNATIONAL-HUB | Codex | DONE-LOCAL | `main` @ `2669c09` | `src/app/[lang]/ai-regulation/international/page.tsx`, `src/app/[lang]/ai-regulation/page.tsx`, `src/components/site/region-portal-card.tsx`, `src/app/sitemap.ts`, `e2e/smoke.spec.ts`, docs | `InternationalAiRegulationPage`, `RegionPortalCard`, `internationalAiStandardsBaseline`, community "Intelligence Hub UI", community "News and Regulation Admin" | 2026-07-16 |
-| T-JUDILIBRE-OAUTH-FALLBACK | Codex | DONE-LOCAL | `main` @ working tree | `src/agents/ai-regulation/connectors/api-connector.ts`, `src/agents/ai-regulation/agentApiCapabilities.ts`, `scripts/verify-ingestion-runtime.ts`, docs/tests | `ApiConnector`, `listAgentApiCapabilities()`, community "API Connectors and Legal Docs", community "Agent API Capabilities" | 2026-07-16 |
-| T-PISTE-SANDBOX-FALLBACK | Codex | DONE-LOCAL | `main` @ working tree | `src/agents/ai-regulation/connectors/api-connector.ts`, `scripts/verify-ingestion-runtime.ts`, `src/db/migrations/025_activate_legifrance_piste_source.sql`, `src/db/seed/ai-regulation-seed.ts`, docs | `ApiConnector`, community "API Connectors and Legal Docs", community "DB Repository Layer" | 2026-07-16 |
-| T-INTERNATIONAL-MONITORING-BACKEND | Codex | DONE-LOCAL | `main` @ committed | `src/agents/ai-regulation/international*.ts`, `src/agents/ai-regulation/scanProfiles.ts`, `src/agents/ai-regulation/scheduler/**`, `src/db/seed/ai-regulation-seed.ts`, migration 026, docs/tests | `internationalMonitoringSourceRegistry`, `buildCentralMonitoringSchedule()`, `selectSourcesForScanProfile()`, community "Scan Pipeline", community "DB Repository Layer" | 2026-07-16 |
-| T-NEWS-BACKFILL-INTEGRITY | Codex | DONE-LOCAL | `ops/t-ops9-ux` @ working tree | `src/content/ai-regulation/news.ts`, `src/lib/news-backfill.ts`, `scripts/backfill-news-items.ts`, `src/db/seed/seed-profiles.ts`, related tests | `buildNewsItemFromUpdate()`, `backfillNewsItemsFromUpdates()`, `buildLegalDatabaseIntegrityReport()`, community "News and Regulation Admin", community "DB Repository Layer" | 2026-06-22 |
-| T-INGESTION-RUNTIME | Codex | DONE-LOCAL | `ops/t-ops9-ux` @ working tree | `src/agents/ingestion/**`, `scrapling_worker/**`, `src/agents/ai-regulation/agentApiCapabilities.ts` | `scraplingExtract()`, `firecrawlService.ts`, `listAgentApiCapabilities()`, community "Data Ingestion Pipeline", community "Scrapling Extraction Service", community "Agent API Capabilities" | 2026-06-22 |
-| T-EU-CASE-LAW-BASELINE | Codex | DONE-LOCAL | `main` @ working tree | `scripts/backfill-europe-case-law-baseline.ts`, `package.json`, docs | `europeAiCaseLawEntries`, `updateRepository.createRawItem()`, `updateRepository.createUpdate()`, `SourceReference`, community "DB Repository Layer", community "Scan Pipeline" | 2026-07-18 |
-| T-EU-AI-ENTERTAINMENT | Codex | DONE-LOCAL | `main` @ working tree | `scripts/backfill-eu-ai-entertainment.ts`, `package.json`, docs | `updateRepository.createRawItem()`, `updateRepository.createUpdate()`, `SourceReference`, community "DB Repository Layer", community "Scan Pipeline" | 2026-07-18 |
-| T-LEGALAREA-LABOR-SOCIAL | Codex | DONE-LOCAL | `main` @ working tree | `src/db/schema.ts`, `src/db/migrations/029_add_labor_social_law_legal_area.sql`, classifiers/connectors, docs | `legalAreas`, `inferLegalArea()`, `classifyEurLexLegalArea()`, community "DB Repository Layer", community "Scan Pipeline" | 2026-07-18 |
-| T-LABOR-SOCIAL-BASELINE | Codex | DONE-LOCAL | `main` @ working tree | `scripts/backfill-labor-social-law-baseline.ts`, `package.json`, docs | `updateRepository.createRawItem()`, `updateRepository.createUpdate()`, `SourceReference`, community "DB Repository Layer", community "Scan Pipeline" | 2026-07-18 |
-| T-EU-COUNTRY-DOMAIN-BASELINE | Codex | DONE-LOCAL | `main` @ working tree | `scripts/backfill-eu-country-domain-baseline.ts`, `src/db/migrations/030_add_cloud_infrastructure_legal_area.sql`, `src/db/schema.ts`, classifiers/connectors, docs | `legalAreas`, `inferLegalArea()`, `classifyEurLexLegalArea()`, `updateRepository.createRawItem()`, `updateRepository.createUpdate()`, `SourceReference`, community "DB Repository Layer", community "Scan Pipeline" | 2026-07-18 |
-| T-AUSTRIA-NATIONAL-DEPTH | Codex | DONE-LOCAL | `main` @ working tree | `src/content/ai-regulation/austria-national-depth.ts`, `src/content/ai-regulation/austria-national-depth.test.ts`, `scripts/backfill-austria-national-depth.ts`, `package.json`, docs | `austriaNationalDepthEntries`, `updateRepository.createRawItem()`, `updateRepository.createUpdate()`, `SourceReference`, community "DB Repository Layer", community "Scan Pipeline" | 2026-07-18 |
-| T-BELGIUM-NATIONAL-DEPTH | Codex | DONE-LOCAL | `main` @ working tree | `src/content/ai-regulation/belgium-national-depth.ts`, `src/content/ai-regulation/belgium-national-depth.test.ts`, `scripts/backfill-belgium-national-depth.ts`, `package.json`, docs | `belgiumNationalDepthEntries`, `updateRepository.createRawItem()`, `updateRepository.createUpdate()`, `SourceReference`, community "DB Repository Layer", community "Scan Pipeline" | 2026-07-19 |
-| T-BULGARIA-NATIONAL-DEPTH | Codex | DONE-LOCAL | `main` @ working tree | `src/content/ai-regulation/bulgaria-national-depth.ts`, `src/content/ai-regulation/bulgaria-national-depth.test.ts`, `scripts/backfill-bulgaria-national-depth.ts`, `package.json`, docs | `bulgariaNationalDepthEntries`, `updateRepository.createRawItem()`, `updateRepository.createUpdate()`, `SourceReference`, community "DB Repository Layer", community "Scan Pipeline" | 2026-07-19 |
-| T-CROATIA-NATIONAL-DEPTH | Codex | DONE-LOCAL | `main` @ working tree | `src/content/ai-regulation/croatia-national-depth.ts`, `src/content/ai-regulation/croatia-national-depth.test.ts`, `scripts/backfill-croatia-national-depth.ts`, `package.json`, docs | `croatiaNationalDepthEntries`, `updateRepository.createRawItem()`, `updateRepository.createUpdate()`, `SourceReference`, community "DB Repository Layer", community "Scan Pipeline" | 2026-07-19 |
-| T-CYPRUS-NATIONAL-DEPTH | Codex | DONE-LOCAL | `main` @ working tree | `src/content/ai-regulation/cyprus-national-depth.ts`, `src/content/ai-regulation/cyprus-national-depth.test.ts`, `scripts/backfill-cyprus-national-depth.ts`, `package.json`, docs | `cyprusNationalDepthEntries`, `updateRepository.createRawItem()`, `updateRepository.createUpdate()`, `SourceReference`, community "DB Repository Layer", community "Scan Pipeline" | 2026-07-19 |
-| T-CZ-DK-EE-NATIONAL-DEPTH | Codex + subagents | DONE-LOCAL | `main` @ working tree | `src/content/ai-regulation/{czechia,denmark,estonia}-national-depth.ts`, tests, scripts, `package.json`, docs | `czechiaNationalDepthEntries`, `denmarkNationalDepthEntries`, `estoniaNationalDepthEntries`, `updateRepository.createRawItem()`, `updateRepository.createUpdate()`, `SourceReference`, community "DB Repository Layer", community "Scan Pipeline" | 2026-07-19 |
 | T-BATCH-REVIEW-UI (P2b) | Claude Code | DONE-LOCAL | `ops/t-ops9-ux` @ `0f2809d` | `src/app/admin/ai-regulation/review/**`, `src/app/admin/ai-regulation/actions.ts`, `src/app/admin/page.tsx` | `listPrioritizedReviewQueue()`, `batchTransitionReviewStatus()`, `bulkUpdateReviewStatus`, community "Admin Review and Summaries" | 2026-06-21 |
 | T-BUILD-FIX | Claude Code | DONE-LOCAL | `ops/t-ops9-ux` @ `bf0d746` | `src/app/page.tsx`, `src/components/site/update-card.tsx` | `UpdateCard`, community "UI Components and Visual Elements" | 2026-06-21 |
 | T-E2E (P6) | Claude Code | DONE-LOCAL | `ops/t-ops9-ux` @ `aa0346c` | `playwright.config.ts`, `e2e/**`, `vitest.config.ts`, `package.json`, `.gitignore` | n/a (test harness) | 2026-06-21 |
@@ -80,7 +29,7 @@ Each agent edits only its own rows. Status vocabulary: `CLAIMED` · `WIP` · `BL
 | T-CROSS-SOURCE-CORROBORATION | Claude Code (backend, Codex absent) | DONE-LOCAL | `claude/worldmonitor-csg-architecture-cj0by1` @ `054d52c` | `src/agents/ai-regulation/processors/crossSourceCorroboration.ts`, `processors/pipeline.ts`, `processors/aiPlanning.ts`, `scripts/run-scan-job-worker.ts`, related tests | `findCorroboratingUpdates()`, `buildCorroborationMetadataPatch()`, `rankCandidateForAi()`, `runAiRegulationScan()`, community "Scan Pipeline", community "Data Ingestion Pipeline" | 2026-07-23 |
 | T-STORY-CLUSTERING-SITEWIDE | Claude Code | DONE-LOCAL | `claude/worldmonitor-csg-architecture-cj0by1` @ `1929be0` | `src/agents/ai-regulation/countryLiveDataRegistry.ts`, `euLegalNewsAgent.ts`, `src/app/[lang]/ai-regulation/{europe,international,united-states}/**` live sections | `getCountryLiveIntelligenceLoader()`, `getEuropeLiveLegalIntelligenceData()`, `buildLiveStoryFeed()`, `LiveLegalIntelligencePanel`, community "Intelligence Hub UI" | 2026-07-23 |
 
-- **Graph freshness:** built from `30bc31ca` — in sync with HEAD `30bc31c`. If these diverge, run `py -m graphify update .` before trusting the graph.
+- **Graph freshness:** never trust the historical commit recorded in old entries. Run `pwsh -File agent-sync.ps1`; rebuild with `py -m graphify update .` whenever `GRAPH_REPORT.md` differs from `HEAD`.
 - Move a task to `MERGED` only once it is in `main`; delete its row one entry after it merges (the log keeps the history).
 
 ## Handoff entry format (copy this for every new log entry below)
@@ -102,8 +51,48 @@ YYYY-MM-DD · <Agent> · <TASK-ID> · <STATUS>
 - Files:         `src/app/[lang]/contact/page.tsx` (thin server page: metadata + email const), `src/components/site/contact-experience.tsx` (new client component). Removed the cutout asset `public/images/profile/corentin-saint-girons-cutout.png`.
 - Graph anchors: `ContactPage`, `ContactExperience` (new node — graph rebuild pending on this branch), `SpotlightHover`, community "UI Components and Utilities".
 - Verification:  `npm test` PASS (689), `npm run lint` PASS, `npm run typecheck` PASS, `npm run build` PASS (with local env stubs); Playwright screenshots verified at 1440px and 390px, zero console errors.
-- Branch/commit: `claude/contact-page-redesign-u2sh6q` @ `f1f884a` (frontend-only; merged origin/main twice to stay current for the PR).
-- Next:          PR to main opened for production; no backend impact, nothing for Codex.
+- Branch/commit: `claude/contact-page-redesign-u2sh6q` @ `f1f884a` (frontend-only; merged origin/main repeatedly to stay current for the PR).
+- Next:          PR to main opened for production; no backend impact.
+
+2026-07-25 - Codex -> Claude Code - T-TOTAL-PROJECT-OWNERSHIP - HANDOFF→Claude Code
+- Intent: Transfer sole responsibility for the entire project to Claude Code and close every Codex task and file lock.
+- Files: `AGENTS.md`, `CLAUDE.md`, `AI_TASKS.md`, `DECISIONS.md`, `AI_AGENT_MASTER_CONTEXT.md`, `docs/handoffs/2026-07-25-codex-to-claude-total-handoff.md`.
+- Graph anchors: all communities; operational starting points are `buildHealthSnapshot()`, `buildCentralMonitoringSchedule()`, `evaluateSchemaIntegrity()`, `buildNewsItemFromUpdate()`, and `findCorroboratingUpdates()`.
+- Verification: all former Codex DONE-LOCAL commits/files were confirmed in `origin/main`; 723 tests, lint, typecheck, production build, PR checks, and the Vercel production deployment passed.
+- Branch/commit: merged to `main` through PR #34; the temporary Codex branch was deleted locally and remotely.
+- Next: Claude Code is sole owner. Begin with the total handoff document; no Codex coordination or approval is required.
+
+2026-07-23 - Codex - T-AUTOMATIC-CORROBORATION-CONTAINMENT - REVIEW
+- Intent: Keep fuzzy same-story matches as AI-ranking evidence without letting them manufacture verification or public corroboration.
+- Files: `src/agents/ai-regulation/citations.ts`, `src/agents/ai-regulation/processors/crossSourceCorroboration.ts`, `src/content/ai-regulation/news.ts`, related tests, `AI_TASKS.md`.
+- Graph anchors: `findCorroboratingUpdates()`, `buildCorroborationMetadataPatch()`, `buildNewsItemFromUpdate()`.
+- Verification: four expected RED failures; GREEN with 723/723 tests, lint, typecheck, and production build.
+- Branch/commit: `codex/automatic-corroboration-containment` @ working tree.
+- Next: Independent review, focused PR, then merge if CI remains green.
+
+2026-07-23 - Codex - T-WORKER-HEALTH-CONTRACT - MERGED
+- Intent: Make the dedicated worker health check fail visibly when the scheduled heartbeat is stale.
+- Files: `src/app/api/health/route.ts`, route test, `AI_TASKS.md`.
+- Graph anchors: `GET()`, `buildHealthSnapshot()`, community "Source Runtime Health".
+- Verification: 720/720 tests, lint, typecheck, production build, independent review, and PR checks passed.
+- Branch/commit: `main` @ `49d4e49`.
+- Next: Configure GitHub Actions secrets before expecting scheduled monitoring to become healthy.
+
+2026-07-23 - Codex - T-WORKER-HEALTH-CONTRACT - REVIEW
+- Intent: Make the dedicated worker health check fail visibly when the scheduled heartbeat is stale.
+- Files: `src/app/api/health/route.ts`, route test, `AI_TASKS.md`.
+- Graph anchors: `GET()`, `buildHealthSnapshot()`, community "Source Runtime Health".
+- Verification: RED at 200 vs expected 503; GREEN with 720/720 tests, lint, typecheck, and production build.
+- Branch/commit: `codex/worker-health-contract` @ working tree.
+- Next: Run complete verification and merge as a focused operational fix.
+
+2026-07-23 - Codex - T-MIGRATION-031 - REVIEW
+- Intent: Ship the isolated CHECK-constraint repair and schema tripwires before adopting the migration runner.
+- Files: `src/db/migrations/031_repair_check_constraint_drift.sql`, schema integrity code/test, `AI_TASKS.md`.
+- Graph anchors: `evaluateSchemaIntegrity()`, `REQUIRED_SCHEMA_INVARIANTS`, community "DB Repository Layer".
+- Verification: 718/718 Vitest, lint, typecheck, and production build pass.
+- Branch/commit: `codex/db-migration-031` @ working tree.
+- Next: Merge source only; production application remains a separate operator-approved step after read-only audit.
 
 2026-07-23 - Codex - T-RECOVERY-GITHUB-MONITORING - DONE-LOCAL
 - Intent: Recheck the stop file immediately before marking a scheduled idle worker completed.
@@ -958,28 +947,20 @@ YYYY-MM-DD · <Agent> · <TASK-ID> · <STATUS>
 
 2026-06-10 — Claude Code delivered the minimal agent harness (`src/agents/harness/`, `scripts/replay-failure.ts`). Future wiring into `processors/pipeline.ts` is unassigned.
 
-## Claude Code owns
+## Historical ownership snapshot (superseded 2026-07-25)
 
-- Frontend structure
-- UX and product flow
-- High-level architecture
-- Large refactors when assigned
-
-## Codex owns
-
-- Backend routes
-- Database schema
-- Tests
-- Scripts
-- Focused implementation patches when assigned
+The split below governed the June 2026 program only. It is no longer active:
+Claude Code now owns the entire project, and Codex owns nothing.
 
 ## Locked files
 
-None currently. (`src/agents/harness/` was authored by Claude Code; Codex may extend it via the wiring task below.)
+None currently. Historical file boundaries below are archival only.
 
 ## Active task
 
-Codex completed T-OPS2, T-OPS6, T-OPS8, and T-OPS4 on `ops/t-ops9-ux`: outbound alerting + production health endpoint + focused security hardening + test reliability/golden fixtures. T-OPS1 complete (branch pushed; PR awaiting user open+merge). Codex P-OPS sequence is complete locally. Claude Code next: T-OPS3 (blocked on user hosting choice) -> T-OPS5 -> T-OPS9 -> T-OPS7.
+See the live Status board and
+`docs/handoffs/2026-07-25-codex-to-claude-total-handoff.md`. Claude Code is the
+sole active owner; the program notes below are retained only as history.
 
 ## Program P-OPS — production hardening (planned 2026-06-11, user-approved)
 

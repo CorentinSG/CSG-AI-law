@@ -328,11 +328,53 @@ describe("buildHealthSnapshot", () => {
     expect(snapshot.worker).toMatchObject({
       state: "idle",
       alive: true,
+      heartbeatFresh: true,
       heartbeatAt: "2026-06-18T10:00:00.000Z",
       heartbeatAgeMs: 1_140_000,
       lastActivityAt: "2026-06-18T10:00:00.000Z",
       lastActivityAgeMs: 1_140_000,
       runningJobs: 0,
+    });
+  });
+
+  it("reports a stale scheduled heartbeat despite recent scan activity", async () => {
+    mocks.updateRepository.getScanJobs.mockResolvedValueOnce([
+      makeJob({
+        id: "job-scheduled-worker-heartbeat-stale",
+        trigger: "worker_heartbeat",
+        requestedBy: "github-actions-worker-1",
+        status: "succeeded",
+        startedAt: "2026-06-18T09:40:00.000Z",
+        finishedAt: "2026-06-18T09:40:00.000Z",
+        updatedAt: "2026-06-18T09:40:00.000Z",
+        resultSummary: {
+          workerHeartbeatAt: "2026-06-18T09:40:00.000Z",
+          workerHeartbeatTimeoutMs: 45_000,
+          workerMode: "scheduled",
+          workerExpectedIntervalMs: 900_000,
+          state: "completed",
+          workerId: "github-actions-worker-1",
+        },
+      }),
+      makeJob({
+        id: "job-recent-scan",
+        status: "succeeded",
+        finishedAt: "2026-06-18T10:04:00.000Z",
+        updatedAt: "2026-06-18T10:04:00.000Z",
+      }),
+    ]);
+    const { buildHealthSnapshot } = await import("@/lib/health");
+
+    const snapshot = await buildHealthSnapshot({
+      access: "authenticated",
+      now: new Date("2026-06-18T10:05:00.000Z"),
+    });
+
+    expect(snapshot.worker).toMatchObject({
+      alive: true,
+      heartbeatFresh: false,
+      heartbeatAt: "2026-06-18T09:40:00.000Z",
+      lastActivityAt: "2026-06-18T10:04:00.000Z",
     });
   });
 

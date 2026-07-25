@@ -4,27 +4,24 @@ import type {
   RegulationSource,
 } from "@/agents/ai-regulation/types";
 import type { SourceReference, SourceReferenceType } from "@/agents/ai-regulation/citations";
-import { getSourceReferencesFromRawItem } from "@/agents/ai-regulation/citations";
+import {
+  AUTOMATIC_STORY_SIMILARITY_STATUS,
+  getSourceReferencesFromRawItem,
+} from "@/agents/ai-regulation/citations";
 import { isSameStoryTitle } from "@/agents/ai-regulation/storyClustering";
 import {
   isDiscoveryOnlySource,
   isMediaDiscoverySource,
 } from "@/agents/ai-regulation/utils/discovery";
-import {
-  extractVerificationMetadata,
-  type VerificationMetadata,
-} from "@/agents/ai-regulation/verification";
 
 /**
  * Cross-source corroboration at ingestion time (worldmonitor pattern).
  *
  * When a freshly created update fuzzy-matches a recent update from a
  * DIFFERENT serious source (official, regulator, or reputable press), both
- * items gain a "supporting" source reference. The news projection then
- * derives verificationStatus "corroborated", which feeds the standing
- * publication policy: legal news corroborated by multiple sources may become
- * public. Informal discovery-only sources never count as corroboration and
- * never gain visibility from it.
+ * items gain a "supporting" evidence reference. Automatic title similarity
+ * helps prioritise AI processing, but it is not publication-grade
+ * corroboration and never promotes verification by itself.
  */
 
 export const CORROBORATION_WINDOW_DAYS = 14;
@@ -66,15 +63,24 @@ function updateTimestamp(update: CorroborationProbe) {
 function withinWindow(a: CorroborationProbe, b: CorroborationProbe, windowDays: number) {
   const aMs = Date.parse(updateTimestamp(a));
   const bMs = Date.parse(updateTimestamp(b));
-  if (!Number.isFinite(aMs) || !Number.isFinite(bMs)) return true;
+  if (!Number.isFinite(aMs) || !Number.isFinite(bMs)) return false;
   return Math.abs(aMs - bMs) <= windowDays * 24 * 60 * 60 * 1000;
 }
 
 function sameGeography(a: CorroborationProbe, b: CorroborationProbe) {
+  const aJurisdiction = a.jurisdiction.trim().toLowerCase();
+  const bJurisdiction = b.jurisdiction.trim().toLowerCase();
+  const aCountry = a.country.trim().toLowerCase();
+  const bCountry = b.country.trim().toLowerCase();
+
+  if (aJurisdiction && bJurisdiction && aJurisdiction !== bJurisdiction) {
+    return false;
+  }
+  if (aCountry && bCountry && aCountry !== bCountry) return false;
+
   return (
-    a.region === b.region ||
-    a.jurisdiction === b.jurisdiction ||
-    (Boolean(a.country) && a.country === b.country)
+    (Boolean(aJurisdiction) && aJurisdiction === bJurisdiction) ||
+    (Boolean(aCountry) && aCountry === bCountry)
   );
 }
 
@@ -134,13 +140,13 @@ export function buildCorroboratingReference(input: {
     publicationDate: input.counterpart.publicationDate,
     detectedAt: input.counterpart.detectedDate,
     retrievedAt: input.now,
-    lastVerifiedAt: input.now,
+    lastVerifiedAt: null,
     jurisdiction: input.counterpart.jurisdiction,
     documentType: input.counterpart.developmentType,
     excerpt: null,
     pinpoint: {},
     reliabilityLevel: input.counterpartSource?.reliabilityLevel ?? "medium",
-    verificationStatus: "corroborated",
+    verificationStatus: AUTOMATIC_STORY_SIMILARITY_STATUS,
     archivedUrl: null,
     notes:
       "Cross-source corroboration: an independent monitored source reported the same development (matched automatically by story similarity).",
@@ -157,28 +163,9 @@ function mergeSupportingReferences(
   return { merged: [...existing, ...additions], additions };
 }
 
-function mergeCorroborationVerification(
-  rawMetadata: Record<string, unknown>,
-  corroboratingUrls: string[],
-  now: string,
-): VerificationMetadata | null {
-  const existing = extractVerificationMetadata({ rawMetadata });
-  if (!existing) return null;
-  const urls = Array.from(
-    new Set([...(existing.corroboratingSourceUrls ?? []), ...corroboratingUrls]),
-  );
-  return {
-    ...existing,
-    lastVerifiedAt: now,
-    verificationStatus: urls.length > 0 ? "corroborated" : existing.verificationStatus,
-    corroboratingSourcesCount: urls.length,
-    corroboratingSourceUrls: urls,
-  };
-}
-
 /**
- * Returns the raw-metadata patch marking this item as corroborated by the
- * given counterpart updates. Pure — the caller persists the returned metadata.
+ * Returns a raw-metadata patch recording automatic same-story evidence from
+ * counterpart updates. Pure: the caller persists the returned metadata.
  */
 export function buildCorroborationMetadataPatch(input: {
   rawItem: Pick<RawRegulatoryItem, "rawMetadata">;
@@ -200,17 +187,10 @@ export function buildCorroborationMetadataPatch(input: {
   );
   if (additions.length === 0) return null;
 
-  const verification = mergeCorroborationVerification(
-    input.rawItem.rawMetadata,
-    additions.map((reference) => reference.url),
-    input.now,
-  );
-
   return {
     rawMetadata: {
       ...input.rawItem.rawMetadata,
       sourceReferences: merged,
-      ...(verification ? { verification } : {}),
     },
     addedReferences: additions,
   };

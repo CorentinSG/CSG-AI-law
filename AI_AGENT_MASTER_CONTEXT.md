@@ -2,7 +2,16 @@
 
 Project: `c-saint-girons-ai-law-intelligence` — C. Saint-Girons, Esq | AI Law & Legal Intelligence
 Purpose: fast-start machine context for AI agents resuming work. Repository code is the final authority over this file.
-Last synchronized: 2026-06-20 (Cowork A–F hardening: HTTP security headers, timingSafeEqual admin auth, error.tsx boundaries, listDistinctFilterValues perf, explicit DB selects, pipeline refactor + finalizeSourceScan extraction, TraceabilityMetadata typed interface, 19 integration tests, IntelligenceSummaryBand, EmptyFilterState, migrations 006+007 authored, AI_PROCESSING_ENABLED deprecated, upstash-rate-limit.ts scaffolded; tsc+lint+tests all green; changes uncommitted in working tree — Claude Code must commit + apply migrations to Supabase)
+Last synchronized: 2026-07-25 (total Codex-to-Claude project handoff)
+
+## Current control plane
+
+- Claude Code is the sole owner of the entire project until the user explicitly reassigns work.
+- Codex has no active tasks, file locks, operations duties, or standing backend ownership.
+- Start with `docs/handoffs/2026-07-25-codex-to-claude-total-handoff.md`.
+- Railway is no longer available. Scheduled monitoring now uses `.github/workflows/legal-monitoring.yml`, but the required GitHub Actions Supabase secrets were not configured by Codex.
+- Production migration history was not audited. Migration 031 is in source control but was not applied by Codex.
+- Older status and roadmap sections below are historical context and may be stale; repository code, `AI_TASKS.md`, `DECISIONS.md`, and the total handoff take precedence.
 
 ---
 
@@ -62,7 +71,7 @@ Last synchronized: 2026-06-20 (Cowork A–F hardening: HTTP security headers, ti
 - AI processing must remain disabled by default (`AI_ENABLE_PROCESSING` env var defaults to off)
 - Do not enable OpenAI processing by default
 - Do not remove or weaken token limits, scan limits, or monthly budget limits
-- Never auto-publish anything; human review is required before status=published
+- Apply the current policy: official-source legal database items and eligible serious-source legal news may auto-publish; discovery-only, weak, or unverified items remain admin-only
 - Never expose API keys or secrets
 
 ### Auth + visibility
@@ -85,7 +94,7 @@ Distinguish: binding law / proposed law / regulation / agency guidance / enforce
 - Never invent a pinpoint; if no pinpoint detected → blank + warning, not fabricated precision
 - `citationQualityStatus: complete` only when exact pinpoints are actually extracted from the official source
 - EU AI Act baseline stays `partial`; EUR-Lex parser at `eurLexAiActParser.ts` not yet full article-by-article
-- Publication blocked unless: explicit human approval + official/authoritative primary source + complete core source metadata + citation quality sufficient
+- Publication requires the policy-appropriate source tier, complete core source metadata, and sufficient citation quality; automatic story similarity alone is never publication-grade corroboration
 
 ### Source hierarchy (do not collapse)
 1. official primary sources (legislative, court databases)
