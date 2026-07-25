@@ -31,16 +31,16 @@ type NavNode = NavLeaf | NavGroup;
 
 const isGroup = (node: NavNode): node is NavGroup => "children" in node;
 
-const publicNav: NavNode[] = [
-  { href: "/", label: "Home", icon: Home },
+const buildPublicNav = (fr: boolean): NavNode[] => [
+  { href: "/", label: fr ? "Accueil" : "Home", icon: Home },
   {
-    label: "AI Law",
+    label: fr ? "Droit de l'IA" : "AI Law",
     icon: Scale,
     match: "/ai-regulation",
     children: [
-      { href: "/ai-regulation", label: "Hub overview", icon: Scale },
+      { href: "/ai-regulation", label: fr ? "Vue d'ensemble" : "Hub overview", icon: Scale },
       { href: "/ai-regulation/europe", label: "Europe", icon: Globe },
-      { href: "/ai-regulation/united-states", label: "United States", icon: Landmark },
+      { href: "/ai-regulation/united-states", label: fr ? "États-Unis" : "United States", icon: Landmark },
     ],
   },
   { href: "/research", label: "Notes", icon: FileText },
@@ -71,7 +71,8 @@ export function SiteHeader({
   // Admin paths are unprefixed already; stripping is a no-op there, so this
   // is safe for both variants.
   const pathname = stripLocaleFromPathname(rawPathname);
-  const nav = variant === "admin" ? adminNav : publicNav;
+  const fr = lang === "fr";
+  const nav = variant === "admin" ? adminNav : buildPublicNav(fr);
   const isAdmin = variant === "admin";
   const href = (path: string) => (isAdmin ? path : localeHref(lang, path));
 
@@ -290,10 +291,10 @@ export function SiteHeader({
             type="button"
             onClick={openSearch}
             className="hidden items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-2 text-[12px] text-zinc-300 transition hover:text-white lg:flex"
-            aria-label="Search the site"
+            aria-label={fr ? "Rechercher sur le site" : "Search the site"}
           >
             <Search className="h-4 w-4" />
-            <span>Search</span>
+            <span>{fr ? "Rechercher" : "Search"}</span>
             <span className="rounded border border-white/10 px-1.5 py-0.5 font-mono text-[10px] text-zinc-500">
               ⌘K
             </span>
@@ -304,7 +305,7 @@ export function SiteHeader({
             type="button"
             onClick={openSearch}
             className="flex h-10 w-10 items-center justify-center rounded-full border border-white/15 bg-white/5 text-white lg:hidden"
-            aria-label="Search the site"
+            aria-label={fr ? "Rechercher sur le site" : "Search the site"}
           >
             <Search className="h-5 w-5" />
           </button>
@@ -312,7 +313,7 @@ export function SiteHeader({
             type="button"
             onClick={() => setMenuOpen((v) => !v)}
             className="relative flex h-10 w-10 items-center justify-center rounded-full border border-white/15 bg-white/5 text-white lg:hidden"
-            aria-label={menuOpen ? "Close menu" : "Open menu"}
+            aria-label={menuOpen ? (fr ? "Fermer le menu" : "Close menu") : fr ? "Ouvrir le menu" : "Open menu"}
             aria-expanded={menuOpen}
           >
             <motion.span

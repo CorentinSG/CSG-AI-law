@@ -110,16 +110,30 @@ const implementationLabels: Record<string, string> = {
   not_applicable: "Not applicable",
 };
 
+const implementationLabelsFr: Record<string, string> = {
+  competent_authority_designated: "Autorité désignée",
+  national_implementation_identified: "Loi nationale identifiée",
+  implementation_in_progress: "En cours",
+  consultation_or_draft_identified: "Consultation / projet",
+  eu_framework_applies: "Cadre UE applicable",
+  no_specific_national_implementation_verified: "Pas encore vérifié",
+  needs_review: "À revoir",
+  not_applicable: "Non applicable",
+};
+
 export function ImplementationBadge({
   status,
   className,
+  lang = "en",
 }: {
   status: string;
   className?: string;
+  lang?: "en" | "fr";
 }) {
   const colors =
     implementationColors[status] ?? "border-zinc-200 bg-zinc-50 text-zinc-600";
-  const label = implementationLabels[status] ?? status.replaceAll("_", " ");
+  const labels = lang === "fr" ? implementationLabelsFr : implementationLabels;
+  const label = labels[status] ?? status.replaceAll("_", " ");
   return (
     <span
       className={cn(
@@ -186,14 +200,25 @@ const confidenceColors: Record<string, string> = {
   needs_review: "border-zinc-200 bg-zinc-50 text-zinc-600",
 };
 
+const confidenceLabelsFr: Record<string, string> = {
+  high: "confiance élevée",
+  medium: "confiance moyenne",
+  low: "confiance faible",
+  needs_review: "à revoir",
+};
+
 export function ConfidenceBadge({
   level,
   className,
+  lang = "en",
 }: {
   level: string;
   className?: string;
+  lang?: "en" | "fr";
 }) {
   const colors = confidenceColors[level] ?? "border-zinc-200 bg-zinc-50 text-zinc-600";
+  const label =
+    lang === "fr" ? confidenceLabelsFr[level] ?? `confiance ${level}` : `${level} confidence`;
   return (
     <span
       className={cn(
@@ -202,7 +227,7 @@ export function ConfidenceBadge({
         className,
       )}
     >
-      {level} confidence
+      {label}
     </span>
   );
 }

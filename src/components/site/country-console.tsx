@@ -53,6 +53,7 @@ export function CountryConsoleHero({
   gaugeLabel,
   stats,
   lastReviewed,
+  lang = "en",
 }: {
   region: keyof typeof REGION_TINT;
   /** Short jurisdiction code for the roundel, e.g. "FR", "DE", "CA". */
@@ -64,7 +65,9 @@ export function CountryConsoleHero({
   /** 3–4 count-up stats. Labels must be self-explanatory — no footnotes. */
   stats: { value: number; label: string }[];
   lastReviewed?: string;
+  lang?: "en" | "fr";
 }) {
+  const fr = lang === "fr";
   const reduce = useReducedMotion() ?? false;
   const tint = REGION_TINT[region];
 
@@ -92,7 +95,7 @@ export function CountryConsoleHero({
               <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
             </span>
             <p className={`font-mono text-[10px] uppercase tracking-[0.28em] ${tint.text}`}>
-              Live monitoring
+              {fr ? "Veille en direct" : "Live monitoring"}
             </p>
           </div>
           <motion.h1
@@ -114,11 +117,11 @@ export function CountryConsoleHero({
         className="space-y-3"
       >
         <div className="flex flex-wrap items-center gap-2">
-          <ImplementationBadge status={implementationStatus} />
-          <ConfidenceBadge level={implementationConfidence} />
+          <ImplementationBadge status={implementationStatus} lang={lang} />
+          <ConfidenceBadge level={implementationConfidence} lang={lang} />
           {lastReviewed ? (
             <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-zinc-500">
-              Reviewed {lastReviewed}
+              {fr ? "Revu le" : "Reviewed"} {lastReviewed}
             </span>
           ) : null}
         </div>
@@ -126,6 +129,7 @@ export function CountryConsoleHero({
           status={implementationStatus}
           confidence={implementationConfidence}
           label={gaugeLabel}
+          lang={lang}
           className="max-w-md"
         />
       </motion.div>
@@ -264,11 +268,14 @@ export function CountryLegalDatabase({
   families,
   entries,
   searchPlaceholder = "Search the database…",
+  lang = "en",
 }: {
   families: { id: string; label: string }[];
   entries: LegalDatabaseEntry[];
   searchPlaceholder?: string;
+  lang?: "en" | "fr";
 }) {
+  const fr = lang === "fr";
   const reduce = useReducedMotion() ?? false;
   const [query, setQuery] = useState("");
   const [family, setFamily] = useState("");
@@ -283,7 +290,7 @@ export function CountryLegalDatabase({
   });
 
   const pills = [
-    { id: "", label: "All", count: entries.length },
+    { id: "", label: fr ? "Tout" : "All", count: entries.length },
     ...families.map((f) => ({
       id: f.id,
       label: f.label,
@@ -308,7 +315,7 @@ export function CountryLegalDatabase({
             <button
               type="button"
               onClick={() => setQuery("")}
-              aria-label="Clear search"
+              aria-label={fr ? "Effacer la recherche" : "Clear search"}
               className="shrink-0 rounded-full p-0.5 text-white/40 transition-colors hover:text-white/80"
             >
               <X className="size-3.5" />
@@ -350,7 +357,8 @@ export function CountryLegalDatabase({
 
       {/* Live result count */}
       <p aria-live="polite" className="font-mono text-[9.5px] uppercase tracking-[0.2em] text-zinc-500">
-        {results.length} {results.length === 1 ? "entry" : "entries"}
+        {results.length}{" "}
+        {fr ? (results.length === 1 ? "entrée" : "entrées") : results.length === 1 ? "entry" : "entries"}
       </p>
 
       {/* Rows */}
@@ -405,7 +413,7 @@ export function CountryLegalDatabase({
         </div>
       ) : (
         <p className="rounded-[1.8rem] border border-white/8 bg-white/[0.02] px-5 py-8 text-center font-mono text-[10px] uppercase tracking-[0.2em] text-zinc-500">
-          No match — adjust the search or filters
+          {fr ? "Aucun résultat — ajustez la recherche ou les filtres" : "No match — adjust the search or filters"}
         </p>
       )}
     </div>
