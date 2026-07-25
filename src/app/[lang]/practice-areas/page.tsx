@@ -13,11 +13,20 @@ import {
   type LegalDomainStatus,
 } from "@/content/legal-domains";
 
-export const metadata: Metadata = {
-  title: "Practice Areas",
-  description:
-    "Legal-intelligence practice areas: AI law and governance, privacy and data protection, and cloud law — monitored and verified from official sources.",
-};
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ lang: string }>;
+}): Promise<Metadata> {
+  const { lang } = await params;
+  const fr = lang === "fr";
+  return {
+    title: fr ? "Domaines de pratique" : "Practice Areas",
+    description: fr
+      ? "Domaines de pratique en intelligence juridique : droit et gouvernance de l'IA, vie privée et protection des données, et droit du cloud — surveillés et vérifiés à partir de sources officielles."
+      : "Legal-intelligence practice areas: AI law and governance, privacy and data protection, and cloud law — monitored and verified from official sources.",
+  };
+}
 
 // Static taxonomy content; served as cached HTML via ISR like the other public pages.
 export const revalidate = 300;
@@ -28,16 +37,26 @@ const statusStyles: Record<LegalDomainStatus, string> = {
   planned: "border-zinc-400/30 bg-zinc-400/10 text-zinc-600",
 };
 
-export default function PracticeAreasPage() {
+export default async function PracticeAreasPage({
+  params,
+}: {
+  params: Promise<{ lang: string }>;
+}) {
+  const { lang } = await params;
+  const fr = lang === "fr";
   const domains = getLegalDomains();
 
   return (
     <SiteShell className="space-y-12 md:space-y-16">
       <section className="space-y-4">
         <SectionHeading
-          eyebrow="Legal intelligence"
-          title="Practice areas"
-          description="The legal domains this platform covers, each built on the same official-source, source-verified model. Domains still in development are clearly marked and never imply coverage that does not yet exist."
+          eyebrow={fr ? "Intelligence juridique" : "Legal intelligence"}
+          title={fr ? "Domaines de pratique" : "Practice areas"}
+          description={
+            fr
+              ? "Les domaines juridiques couverts par cette plateforme, chacun construit sur le même modèle vérifié à partir de sources officielles. Les domaines encore en développement sont clairement signalés et n'impliquent jamais une couverture qui n'existe pas encore."
+              : "The legal domains this platform covers, each built on the same official-source, source-verified model. Domains still in development are clearly marked and never imply coverage that does not yet exist."
+          }
         />
       </section>
 
@@ -54,7 +73,7 @@ export default function PracticeAreasPage() {
                   </span>
                   {domain.hubHref ? (
                     <span className="inline-flex items-center gap-1 text-xs uppercase tracking-[0.16em] text-zinc-600">
-                      Open hub
+                      {fr ? "Ouvrir le hub" : "Open hub"}
                       <ArrowUpRight className="size-3.5" />
                     </span>
                   ) : null}
@@ -89,7 +108,7 @@ export default function PracticeAreasPage() {
       <MotionReveal>
       <section className="rounded-[2rem] border border-black/5 bg-white/60 px-6 py-6 md:px-8">
         <p className="font-mono text-[10px] uppercase tracking-[0.24em] text-zinc-500">
-          How sourcing works
+          {fr ? "Comment fonctionne le sourçage" : "How sourcing works"}
         </p>
         <p className="mt-3 max-w-3xl text-sm leading-7 text-zinc-700">
           {legalDomainSourcingPrinciple}

@@ -16,24 +16,30 @@ import { SpotlightHover } from "@/components/ui/spotlight-hover";
 
 const ease: [number, number, number, number] = [0.16, 1, 0.3, 1];
 
-const INQUIRY_TYPES = [
+const buildInquiryTypes = (fr: boolean) => [
   {
     icon: Scale,
     index: "01",
-    title: "Research collaborations",
-    desc: "Comparative AI law, regulatory monitoring, and legal intelligence systems.",
+    title: fr ? "Collaborations de recherche" : "Research collaborations",
+    desc: fr
+      ? "Droit comparé de l'IA, veille réglementaire et systèmes d'intelligence juridique."
+      : "Comparative AI law, regulatory monitoring, and legal intelligence systems.",
   },
   {
     icon: FileText,
     index: "02",
-    title: "Writing & commentary",
-    desc: "Editorial contributions, legal analysis, and co-authored notes.",
+    title: fr ? "Écriture & commentaire" : "Writing & commentary",
+    desc: fr
+      ? "Contributions éditoriales, analyses juridiques et notes co-écrites."
+      : "Editorial contributions, legal analysis, and co-authored notes.",
   },
   {
     icon: Mic,
     index: "03",
-    title: "Speaking & teaching",
-    desc: "Panels, seminars, and guest lectures on AI regulation and legal technology.",
+    title: fr ? "Interventions & enseignement" : "Speaking & teaching",
+    desc: fr
+      ? "Tables rondes, séminaires et cours invités sur la régulation de l'IA et la legal tech."
+      : "Panels, seminars, and guest lectures on AI regulation and legal technology.",
   },
 ];
 
@@ -93,7 +99,7 @@ function ParisClock() {
 
 /* ── Copy-email button — copies the address without displaying it ─── */
 
-function CopyEmailButton({ email }: { email: string }) {
+function CopyEmailButton({ email, fr }: { email: string; fr: boolean }) {
   const [copied, setCopied] = useState(false);
 
   const copy = async () => {
@@ -111,7 +117,15 @@ function CopyEmailButton({ email }: { email: string }) {
     <button
       type="button"
       onClick={copy}
-      aria-label={copied ? "Email address copied to clipboard" : "Copy email address to clipboard"}
+      aria-label={
+        copied
+          ? fr
+            ? "Adresse e-mail copiée dans le presse-papiers"
+            : "Email address copied to clipboard"
+          : fr
+            ? "Copier l'adresse e-mail dans le presse-papiers"
+            : "Copy email address to clipboard"
+      }
       className="group inline-flex items-center gap-2.5 rounded-xl border border-white/10 bg-white/[0.03] px-5 py-3.5 text-sm font-medium text-zinc-700 transition hover:border-white/20 hover:text-zinc-900 active:scale-[0.98]"
     >
       <motion.span
@@ -127,14 +141,14 @@ function CopyEmailButton({ email }: { email: string }) {
           <Copy className="size-4" aria-hidden />
         )}
       </motion.span>
-      {copied ? "Address copied" : "Copy address"}
+      {copied ? (fr ? "Adresse copiée" : "Address copied") : fr ? "Copier l'adresse" : "Copy address"}
     </button>
   );
 }
 
 /* ── Magnetic CTA — drifts a few px toward the cursor ─────────── */
 
-function MagneticCta({ email }: { email: string }) {
+function MagneticCta({ email, fr }: { email: string; fr: boolean }) {
   const reduced = useReducedMotion();
   const ref = useRef<HTMLAnchorElement>(null);
   const x = useSpring(0, { stiffness: 220, damping: 18 });
@@ -161,7 +175,7 @@ function MagneticCta({ email }: { email: string }) {
       style={{ x, y }}
       className="premium-sheen group inline-flex items-center gap-2.5 rounded-xl bg-accent-strong px-7 py-3.5 text-sm font-semibold text-[#0a0a0a] shadow-[0_8px_30px_rgba(196,136,42,0.25)] transition hover:bg-[#d69a3f] active:scale-[0.98]"
     >
-      Write to me
+      {fr ? "Écrivez-moi" : "Write to me"}
       <ArrowUpRight
         className="size-4 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
         aria-hidden
@@ -195,8 +209,10 @@ function AmbientBackdrop() {
 
 /* ── Page experience ──────────────────────────────────────────── */
 
-export function ContactExperience({ email }: { email: string }) {
+export function ContactExperience({ email, lang = "en" }: { email: string; lang?: "en" | "fr" }) {
   const reduced = useReducedMotion();
+  const fr = lang === "fr";
+  const inquiryTypes = buildInquiryTypes(fr);
 
   const fadeUp = (delay: number) => ({
     initial: reduced ? false : { opacity: 0, y: 18 },
@@ -217,11 +233,11 @@ export function ContactExperience({ email }: { email: string }) {
           <span className="accent-rule w-10" aria-hidden />
           Contact
         </motion.p>
-        <StaggeredTitle text="Start a conversation" />
+        <StaggeredTitle text={fr ? "Entamer la conversation" : "Start a conversation"} />
         <motion.p {...fadeUp(0.35)} className="max-w-2xl text-lg leading-8 text-zinc-600">
-          For professional inquiries at the intersection of artificial
-          intelligence, law, and legal intelligence — research, writing,
-          speaking, and collaborations.
+          {fr
+            ? "Pour toute demande professionnelle à l'intersection de l'intelligence artificielle, du droit et de l'intelligence juridique — recherche, écriture, interventions et collaborations."
+            : "For professional inquiries at the intersection of artificial intelligence, law, and legal intelligence — research, writing, speaking, and collaborations."}
         </motion.p>
       </section>
 
@@ -238,23 +254,27 @@ export function ContactExperience({ email }: { email: string }) {
                 <span className="absolute inline-flex size-full animate-ping rounded-full bg-accent-strong/60" />
                 <span className="relative inline-flex size-2 rounded-full bg-accent-strong" />
               </span>
-              Direct channel
+              {fr ? "Canal direct" : "Direct channel"}
             </p>
             <p className="font-display text-2xl font-medium tracking-[-0.03em] text-zinc-950 md:text-3xl">
-              One inbox, read personally.
+              {fr ? "Une boîte mail, lue personnellement." : "One inbox, read personally."}
             </p>
             <p className="max-w-md text-sm leading-7 text-zinc-600">
-              Write in English or French. Include who you are, the context, and
-              what you have in mind — a focused paragraph beats a long brief.
+              {fr
+                ? "Écrivez en français ou en anglais. Indiquez qui vous êtes, le contexte et ce que vous avez en tête — un paragraphe précis vaut mieux qu'un long brief."
+                : "Write in English or French. Include who you are, the context, and what you have in mind — a focused paragraph beats a long brief."}
             </p>
           </div>
 
           <div className="space-y-3">
             <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-zinc-500">
-              A good first email
+              {fr ? "Un bon premier e-mail" : "A good first email"}
             </p>
             <ul className="space-y-2.5 border-l border-white/8 pl-5">
-              {["Who you are", "The context", "What you have in mind"].map((line) => (
+              {(fr
+                ? ["Qui vous êtes", "Le contexte", "Ce que vous avez en tête"]
+                : ["Who you are", "The context", "What you have in mind"]
+              ).map((line) => (
                 <li key={line} className="flex items-center gap-3 text-sm text-zinc-600">
                   <span
                     aria-hidden
@@ -268,12 +288,12 @@ export function ContactExperience({ email }: { email: string }) {
 
           <div className="space-y-5">
             <div className="flex flex-wrap items-center gap-3">
-              <MagneticCta email={email} />
-              <CopyEmailButton email={email} />
+              <MagneticCta email={email} fr={fr} />
+              <CopyEmailButton email={email} fr={fr} />
             </div>
             <div className="flex items-center justify-between gap-4 border-t border-white/8 pt-4">
               <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-zinc-500">
-                Replies within a few days · EN / FR
+                {fr ? "Réponse sous quelques jours · EN / FR" : "Replies within a few days · EN / FR"}
               </span>
               <ParisClock />
             </div>
@@ -285,12 +305,12 @@ export function ContactExperience({ email }: { email: string }) {
       <section className="space-y-8">
         <motion.div {...fadeUp(0.1)} className="flex items-center gap-4">
           <p className="font-mono text-[10px] uppercase tracking-[0.32em] text-accent-strong">
-            What this covers
+            {fr ? "Ce que cela couvre" : "What this covers"}
           </p>
           <span className="accent-rule flex-1" aria-hidden />
         </motion.div>
         <div className="grid gap-4 sm:grid-cols-3">
-          {INQUIRY_TYPES.map((item, i) => (
+          {inquiryTypes.map((item, i) => (
             <motion.div
               key={item.title}
               initial={reduced ? false : { opacity: 0, y: 22 }}
@@ -325,9 +345,9 @@ export function ContactExperience({ email }: { email: string }) {
         {...fadeUp(0.15)}
         className="border-t border-white/8 pt-8 text-xs leading-6 text-zinc-500"
       >
-        Contacting this address does not create an attorney–client
-        relationship. Content on this site is provided for research and
-        informational purposes only and does not constitute legal advice.
+        {fr
+          ? "Contacter cette adresse ne crée pas de relation avocat–client. Le contenu de ce site est fourni à des fins de recherche et d'information uniquement et ne constitue pas un conseil juridique."
+          : "Contacting this address does not create an attorney–client relationship. Content on this site is provided for research and informational purposes only and does not constitute legal advice."}
       </motion.p>
     </div>
   );
