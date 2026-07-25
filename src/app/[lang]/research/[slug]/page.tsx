@@ -162,7 +162,7 @@ export default async function ResearchArticlePage({
             <p className="text-xs uppercase tracking-[0.26em] text-zinc-500">
               {t.abstract}
             </p>
-            <p className="max-w-4xl text-base leading-8 text-zinc-700 md:text-lg">
+            <p className="max-w-4xl text-base leading-8 text-zinc-700 hyphens-auto text-justify md:text-lg">
               {entry.abstract}
             </p>
           </div>
@@ -173,7 +173,7 @@ export default async function ResearchArticlePage({
                 <h2 className="font-serif text-3xl text-zinc-950">
                   {section.heading}
                 </h2>
-                <div className="space-y-4 text-base leading-8 text-zinc-700">
+                <div className="space-y-4 text-base leading-8 text-zinc-700 hyphens-auto text-justify">
                   {section.paragraphs.map((paragraph) => (
                     <p key={paragraph}>{paragraph}</p>
                   ))}
