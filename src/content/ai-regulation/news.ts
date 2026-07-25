@@ -1,6 +1,7 @@
 import {
   assessCitationQuality,
   getCitationReferences,
+  isPublicationGradeCorroboratingReference,
   type SourceReference,
 } from "@/agents/ai-regulation/citations";
 import type {
@@ -258,9 +259,7 @@ export function buildNewsItemFromUpdate(input: {
   const sourceType = sourceTypeFor(input.source);
   const sourceReliability = reliabilityFor(input.source);
   const corroboratingSources = sourceReferences.filter(
-    (reference) =>
-      reference.sourceRole === "supporting" ||
-      reference.sourceRole === "official_confirmation",
+    isPublicationGradeCorroboratingReference,
   );
   const publicBySourceQuality = isNewsPublicBySourceQuality({
     update: input.update,
