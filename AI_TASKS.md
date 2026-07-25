@@ -11,7 +11,7 @@ Each agent edits only its own rows. Status vocabulary: `CLAIMED` · `WIP` · `BL
 
 | Task ID | Owner | Status | Branch @ sha | Locked files | Graph anchor | Updated |
 |---|---|---|---|---|---|---|
-| T-TOTAL-PROJECT-OWNERSHIP | Claude Code | HANDOFF→Claude Code | `codex/final-claude-handoff` @ working tree | entire repository | all Graphify communities; start with the total handoff document | 2026-07-25 |
+| T-TOTAL-PROJECT-OWNERSHIP | Claude Code | MERGED | `main` | entire repository | all Graphify communities; start with the total handoff document | 2026-07-25 |
 | TOOLING-GRAPH-PROTOCOL | Claude Code | REVIEW | `ops/t-ops9-ux` @ `30bc31c` | `AGENTS.md`, `AI_TASKS.md`, `.gitignore`, `.git/hooks/*` | n/a (tooling, no app code) | 2026-06-20 |
 | T-OPS9-UX | Claude Code | WIP | `ops/t-ops9-ux` @ `30bc31c` | `src/app/**`, shared UI components | community "UI Components and Utilities", "Intelligence Hub UI" | 2026-06-20 |
 | T-LEGALDB-UI | Claude Code | DONE-LOCAL | `ops/t-ops9-ux` @ `0f2809d` | `src/app/admin/ai-regulation/legal-database/**`, `src/app/admin/ai-regulation/page.tsx` | `deriveUpdateAuthorityType()`, `getAuthorityPriorityRank()`, `FilterBar`, community "News and Regulation Admin" | 2026-06-20 |
@@ -49,8 +49,8 @@ YYYY-MM-DD · <Agent> · <TASK-ID> · <STATUS>
 - Intent: Transfer sole responsibility for the entire project to Claude Code and close every Codex task and file lock.
 - Files: `AGENTS.md`, `CLAUDE.md`, `AI_TASKS.md`, `DECISIONS.md`, `AI_AGENT_MASTER_CONTEXT.md`, `docs/handoffs/2026-07-25-codex-to-claude-total-handoff.md`.
 - Graph anchors: all communities; operational starting points are `buildHealthSnapshot()`, `buildCentralMonitoringSchedule()`, `evaluateSchemaIntegrity()`, `buildNewsItemFromUpdate()`, and `findCorroboratingUpdates()`.
-- Verification: all former Codex DONE-LOCAL commits/files were confirmed in `origin/main`; the final documentation-only change will run the complete project verification before merge.
-- Branch/commit: `codex/final-claude-handoff` @ working tree.
+- Verification: all former Codex DONE-LOCAL commits/files were confirmed in `origin/main`; 723 tests, lint, typecheck, production build, PR checks, and the Vercel production deployment passed.
+- Branch/commit: merged to `main` through PR #34; the temporary Codex branch was deleted locally and remotely.
 - Next: Claude Code is sole owner. Begin with the total handoff document; no Codex coordination or approval is required.
 
 2026-07-23 - Codex - T-AUTOMATIC-CORROBORATION-CONTAINMENT - REVIEW
