@@ -169,15 +169,28 @@ const usStatusLabels: Record<string, string> = {
   needs_review: "Needs review",
 };
 
+const usStatusLabelsFr: Record<string, string> = {
+  enacted_comprehensive_ai_law: "Loi IA globale",
+  enacted_sector_specific_ai_law: "Loi IA sectorielle",
+  pending_ai_legislation: "Législation en cours",
+  agency_guidance_or_enforcement: "Guidance d'agence",
+  ai_related_privacy_or_automated_decision_rules: "Règles vie privée/DA",
+  no_specific_ai_law_verified: "Pas encore vérifié",
+  needs_review: "À revoir",
+};
+
 export function UsAiStatusBadge({
   status,
   className,
+  lang = "en",
 }: {
   status: string;
   className?: string;
+  lang?: "en" | "fr";
 }) {
   const colors = usStatusColors[status] ?? "border-zinc-200 bg-zinc-50 text-zinc-600";
-  const label = usStatusLabels[status] ?? status.replaceAll("_", " ");
+  const labels = lang === "fr" ? usStatusLabelsFr : usStatusLabels;
+  const label = labels[status] ?? status.replaceAll("_", " ");
   return (
     <span
       className={cn(
