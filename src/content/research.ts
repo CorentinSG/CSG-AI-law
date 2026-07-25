@@ -54,7 +54,7 @@ const author = "Corentin Saint-Girons";
 export const researchEntries: ResearchEntry[] = [
   {
     slug: "when-ai-makes-legal-filings-easier-but-justice-harder",
-    title: "When AI Makes Legal Filings Easier but Justice Harder",
+    title: "When AI makes legal filings easier but justice harder",
     subtitle:
       "A Florida appellate decision on a pro se brief containing a phantom case and fabricated quotations shows how far a polished filing can sit from a viable legal argument.",
     author,
@@ -127,7 +127,7 @@ export const researchEntries: ResearchEntry[] = [
       {
         heading: "From access to filing to access to justice",
         paragraphs: [
-          "The decision also resonates with a distinction I examined in an earlier article, Generative AI, Self-Representation, and the Distance Between Access to Courts and Access to Justice.[4]",
+          "The decision also resonates with a distinction I examined in an earlier article, Generative AI, self-representation, and the distance between access to courts and access to justice.[4]",
           "That article discussed research suggesting that the widespread availability of generative AI may be associated with an increase in self-represented federal civil litigation and with changes in the style of pro se complaints. Filings identified as potentially AI-assisted tended to appear more polished and to contain more legal citations, but they did not achieve better outcomes.",
           "The broader question was whether generative AI is expanding access to justice or merely lowering the barrier to filing a lawsuit. Gouldy v. Chiasson provides a concrete example of that distinction.",
           "The litigant was able to produce a lengthy appellate brief raising fifteen separate issues. The filing used legal terminology and cited numerous authorities. In one sense, AI may have made it easier to participate in an appellate process that would otherwise be difficult to navigate without counsel.",
@@ -192,7 +192,7 @@ export const researchEntries: ResearchEntry[] = [
       },
       {
         label:
-          "[4] Generative AI, Self-Representation, and the Distance Between Access to Courts and Access to Justice.",
+          "[4] Generative AI, self-representation, and the distance between access to courts and access to justice.",
         href: "/research/generative-ai-access-to-justice-pro-se",
         note: "Earlier note on the federal civil filing data behind this distinction.",
       },
@@ -205,7 +205,7 @@ export const researchEntries: ResearchEntry[] = [
   {
     slug: "ai-summaries-rule-1006-admissibility",
     title:
-      "How AI-Generated Summaries Could Make Their Way Into the Courtroom Under Federal Rule of Evidence 1006",
+      "How AI-generated summaries could make their way into the courtroom under Federal Rule of Evidence 1006",
     subtitle:
       "AI-generated summaries may soon have a clearer path into evidence — provided the underlying records and the process behind them are properly handled.",
     author,
@@ -304,7 +304,7 @@ export const researchEntries: ResearchEntry[] = [
   {
     slug: "generative-ai-access-to-justice-pro-se",
     title:
-      "Generative AI, Self-Representation, and the Distance Between Access to Courts and Access to Justice",
+      "Generative AI, self-representation, and the distance between access to courts and access to justice",
     subtitle:
       "A new study on 2.8 million federal civil filings suggests AI is helping more people reach the courthouse — without necessarily helping them prevail once inside.",
     author,
@@ -391,7 +391,7 @@ export const researchEntries: ResearchEntry[] = [
   {
     slug: "white-collar-revolution-law-firms-ai",
     title:
-      "The White Collar Revolution: The Transformation of Law Firms in the Age of Artificial Intelligence",
+      "The white collar revolution: the transformation of law firms in the age of artificial intelligence",
     subtitle:
       "Why the shift from a labor-based model to a system-based model is reshaping the economics, organization, and role of the modern law firm.",
     author,
@@ -490,7 +490,7 @@ export const researchEntries: ResearchEntry[] = [
   },
   {
     slug: "emerging-architecture-ai-regulation",
-    title: "The Emerging Architecture of AI Regulation",
+    title: "The emerging architecture of AI regulation",
     subtitle:
       "Why AI compliance now depends on reading statutes, supervisory guidance, and governance frameworks together rather than in isolation.",
     author,
@@ -559,7 +559,7 @@ export const researchEntries: ResearchEntry[] = [
   },
   {
     slug: "why-soft-law-matters-ai-compliance",
-    title: "Why Soft Law Matters in AI Compliance",
+    title: "Why soft law matters in AI compliance",
     subtitle:
       "Non-binding frameworks frequently become the operational language of AI governance long before formal law answers every question.",
     author,
@@ -627,7 +627,7 @@ export const researchEntries: ResearchEntry[] = [
   {
     slug: "ai-legal-ethics-early-questions-lawyers",
     title:
-      "Early Questions on AI, Legal Ethics, and Professional Responsibility",
+      "Early questions on AI, legal ethics, and professional responsibility",
     subtitle:
       "A forthcoming note on supervision, transparency, diligence, and risk framing when AI tools move into legal work.",
     author,
@@ -656,7 +656,7 @@ export const researchEntries: ResearchEntry[] = [
   },
   {
     slug: "eu-us-ai-governance-comparative-note",
-    title: "EU and U.S. Approaches to AI Governance",
+    title: "EU and U.S. approaches to AI governance",
     subtitle:
       "A structured comparison of how regulatory architecture differs when jurisdictions rely on legislation, sectoral oversight, and governance frameworks in different proportions.",
     author,
@@ -685,7 +685,7 @@ export const researchEntries: ResearchEntry[] = [
   },
   {
     slug: "legal-intelligence-systems-future-regulatory-monitoring",
-    title: "Legal Intelligence Systems and Regulatory Monitoring",
+    title: "Legal intelligence systems and regulatory monitoring",
     subtitle:
       "Why legal monitoring becomes more useful when sources, authority levels, and verification workflows are structured rather than merely aggregated.",
     author,
@@ -719,7 +719,7 @@ export const researchEntries: ResearchEntry[] = [
   },
   {
     slug: "ai-regulation-access-to-justice",
-    title: "AI Regulation and Access to Justice",
+    title: "AI regulation and access to justice",
     subtitle:
       "A note on why AI law infrastructure should also be evaluated through public-interest use, institutional access, and practical legal accessibility.",
     author,
@@ -747,7 +747,7 @@ export const researchEntries: ResearchEntry[] = [
   },
   {
     slug: "from-monitoring-to-meaning",
-    title: "From Monitoring to Meaning",
+    title: "From monitoring to meaning",
     subtitle:
       "An internal draft on how editorial systems can turn regulatory signals into legal understanding without collapsing into generic commentary.",
     author,
