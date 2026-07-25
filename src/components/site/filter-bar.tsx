@@ -40,13 +40,16 @@ export function FilterBar({
   basePath,
   filters = defaultFilters,
   persistentParams,
+  lang = "en",
 }: {
   searchParams: Record<string, string | string[] | undefined>;
   options: Record<string, string[]>;
   basePath: string;
   filters?: Array<{ key: string; label: string }>;
   persistentParams?: Record<string, string>;
+  lang?: "en" | "fr";
 }) {
+  const fr = lang === "fr";
   const resetParams = new URLSearchParams(persistentParams);
 
   // Active filters: params that are set and not "all", excluding persistent params and pagination
@@ -65,7 +68,7 @@ export function FilterBar({
       {activeFilters.length > 0 ? (
         <div className="flex flex-wrap items-center gap-2">
           <p className="font-mono text-[9px] uppercase tracking-[0.22em] text-zinc-400">
-            Active filters
+            {fr ? "Filtres actifs" : "Active filters"}
           </p>
           {activeFilters.map((f) => (
             <Link
@@ -82,7 +85,7 @@ export function FilterBar({
             href={resetParams.size > 0 ? `${basePath}?${resetParams.toString()}` : basePath}
             className="rounded-full border border-black/8 bg-white px-3 py-1 text-xs text-zinc-500 transition hover:bg-zinc-50"
           >
-            Clear all
+            {fr ? "Tout effacer" : "Clear all"}
           </Link>
         </div>
       ) : null}
@@ -110,7 +113,7 @@ export function FilterBar({
               className="w-full rounded-xl border border-black/8 bg-white/70 px-3 py-2 text-sm text-zinc-900 backdrop-blur-sm transition-colors duration-150 hover:border-black/16 focus:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900/20"
             >
               <option value="all" style={{ backgroundColor: "#141418", color: "#e9e9ea" }}>
-                All
+                {fr ? "Tout" : "All"}
               </option>
               {(options[filter.key] ?? []).map((value) => (
                 <option key={value} value={value} style={{ backgroundColor: "#141418", color: "#f4f4f5" }}>
@@ -125,13 +128,13 @@ export function FilterBar({
             type="submit"
             className="rounded-xl bg-zinc-950 px-4 py-2 text-sm font-medium text-white transition-colors duration-150 hover:bg-zinc-800 active:scale-[0.98]"
           >
-            Apply
+            {fr ? "Appliquer" : "Apply"}
           </button>
           <Link
             href={resetParams.size > 0 ? `${basePath}?${resetParams.toString()}` : basePath}
             className="rounded-xl border border-black/8 px-4 py-2 text-sm text-zinc-800 transition-colors duration-150 hover:bg-zinc-50 active:scale-[0.98]"
           >
-            Reset
+            {fr ? "Réinitialiser" : "Reset"}
           </Link>
         </div>
       </form>

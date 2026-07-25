@@ -63,6 +63,13 @@ const periodOptions = [
   { key: "1y", label: "1 year", days: 365 },
 ] as const;
 
+const periodLabelFr: Record<string, string> = {
+  all: "Toute période",
+  "30d": "30 jours",
+  "6m": "6 mois",
+  "1y": "1 an",
+};
+
 type PeriodKey = (typeof periodOptions)[number]["key"];
 type Mode = "atlas" | "timeline";
 
@@ -72,9 +79,9 @@ function monthKey(date: string | null) {
   return date ? date.slice(0, 7) : "undated";
 }
 
-function monthLabel(key: string) {
-  if (key === "undated") return "Undated";
-  return new Date(`${key}-01T00:00:00`).toLocaleDateString("en-GB", {
+function monthLabel(key: string, fr = false) {
+  if (key === "undated") return fr ? "Non daté" : "Undated";
+  return new Date(`${key}-01T00:00:00`).toLocaleDateString(fr ? "fr-FR" : "en-GB", {
     month: "long",
     year: "numeric",
   });
@@ -140,12 +147,14 @@ function Ledger({
   openRow,
   setOpenRow,
   showJurisdiction,
+  fr = false,
 }: {
   entries: ExplorerEntry[];
   reduced: boolean;
   openRow: string | null;
   setOpenRow: (id: string | null) => void;
   showJurisdiction: boolean;
+  fr?: boolean;
 }) {
   const groups = useMemo(() => {
     const map = new Map<string, ExplorerEntry[]>();
@@ -172,7 +181,7 @@ function Ledger({
           >
             <div className="mb-1 flex items-baseline gap-2.5">
               <h3 className="font-mono text-[10px] uppercase tracking-[0.22em] text-zinc-500">
-                {monthLabel(key)}
+                {monthLabel(key, fr)}
               </h3>
               <span className="font-mono text-[10px] tabular-nums text-[color:var(--accent-strong)]/80">
                 {items.length}
@@ -220,7 +229,7 @@ function Ledger({
                             {entry.date ? (
                               <>
                                 <span aria-hidden className="mx-1.5 text-zinc-300">·</span>
-                                {new Date(entry.date).toLocaleDateString("en-GB", {
+                                {new Date(entry.date).toLocaleDateString(fr ? "fr-FR" : "en-GB", {
                                   day: "numeric",
                                   month: "short",
                                 })}
@@ -314,12 +323,15 @@ export function LegalDatabaseExplorer({
   regionHubs,
   loadMoreHref,
   todayIso,
+  lang = "en",
 }: {
   entries: ExplorerEntry[];
   regionHubs: Array<{ label: string; kicker: string; href: string }>;
   loadMoreHref: string | null;
   todayIso: string;
+  lang?: "en" | "fr";
 }) {
+  const fr = lang === "fr";
   const reduced = useReducedMotion() ?? false;
   const [query, setQuery] = useState("");
   const [mode, setMode] = useState<Mode>("atlas");
@@ -507,7 +519,7 @@ export function LegalDatabaseExplorer({
               type="search"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search the database…"
+              placeholder={fr ? "Rechercher dans la base…" : "Search the database…"}
               className="w-full rounded-xl border border-white/10 bg-white/[0.04] py-2.5 pl-11 pr-4 text-sm text-zinc-950 placeholder:text-zinc-400 transition-colors duration-200 focus:border-[color:var(--accent-strong)]/50 focus:outline-none"
             />
           </div>
@@ -516,8 +528,8 @@ export function LegalDatabaseExplorer({
             <div className="relative flex rounded-full border border-white/10 bg-white/[0.03] p-0.5">
               {(
                 [
-                  { key: "atlas", label: "Jurisdictions" },
-                  { key: "timeline", label: "Timeline" },
+                  { key: "atlas", label: fr ? "Juridictions" : "Jurisdictions" },
+                  { key: "timeline", label: fr ? "Chronologie" : "Timeline" },
                 ] as const
               ).map((m) => {
                 const active = mode === m.key && !selectedJurisdiction && !searchResults;
@@ -558,7 +570,7 @@ export function LegalDatabaseExplorer({
               }`}
             >
               <SlidersHorizontal aria-hidden className="size-3" />
-              Filters
+              {fr ? "Filtres" : "Filters"}
               {panelFilterCount > 0 ? (
                 <span className="tabular-nums">{panelFilterCount}</span>
               ) : null}
@@ -580,7 +592,7 @@ export function LegalDatabaseExplorer({
               <div className="space-y-4 rounded-2xl border border-white/8 bg-white/[0.02] p-5">
                 <div className="flex flex-wrap items-center gap-2">
                   <span className="mr-1 font-mono text-[9px] uppercase tracking-[0.22em] text-zinc-400">
-                    Authority
+                    {fr ? "Autorité" : "Authority"}
                   </span>
                   {authorities.map((type) => (
                     <Pill
@@ -596,7 +608,7 @@ export function LegalDatabaseExplorer({
                 {legalAreas.length > 1 ? (
                   <div className="flex flex-wrap items-center gap-2">
                     <span className="mr-1 font-mono text-[9px] uppercase tracking-[0.22em] text-zinc-400">
-                      Legal area
+                      {fr ? "Domaine juridique" : "Legal area"}
                     </span>
                     <div className="relative">
                       <select
@@ -605,7 +617,7 @@ export function LegalDatabaseExplorer({
                           setLegalArea(e.target.value === "all" ? null : e.target.value)
                         }
                         style={{ colorScheme: "dark" }}
-                        aria-label="Filter by legal area"
+                        aria-label={fr ? "Filtrer par domaine juridique" : "Filter by legal area"}
                         className={`cursor-pointer appearance-none rounded-full border py-1.5 pl-3 pr-8 font-mono text-[10px] uppercase tracking-[0.14em] transition-colors duration-200 focus:outline-none ${
                           legalArea
                             ? "border-[color:var(--accent-strong)]/60 bg-[color:var(--accent-soft)] text-[color:var(--accent-strong)]"
@@ -613,7 +625,7 @@ export function LegalDatabaseExplorer({
                         }`}
                       >
                         <option value="all" style={{ backgroundColor: "#141418", color: "#e9e9ea" }}>
-                          All areas
+                          {fr ? "Tous les domaines" : "All areas"}
                         </option>
                         {legalAreas.map((area) => (
                           <option
@@ -636,11 +648,11 @@ export function LegalDatabaseExplorer({
                 ) : null}
                 <div className="flex flex-wrap items-center gap-2">
                   <span className="mr-1 font-mono text-[9px] uppercase tracking-[0.22em] text-zinc-400">
-                    Period
+                    {fr ? "Période" : "Period"}
                   </span>
                   {periodOptions.map((p) => (
                     <Pill key={p.key} active={period === p.key} onClick={() => setPeriod(p.key)}>
-                      {p.label}
+                      {fr ? periodLabelFr[p.key] ?? p.label : p.label}
                     </Pill>
                   ))}
                   <span aria-hidden className="mx-1 h-4 w-px bg-white/10" />
@@ -649,7 +661,7 @@ export function LegalDatabaseExplorer({
                     onClick={() => setHighSignalOnly(!highSignalOnly)}
                     dotColor="#c4882a"
                   >
-                    High signal
+                    {fr ? "Signal fort" : "High signal"}
                   </Pill>
                 </div>
               </div>
@@ -669,10 +681,10 @@ export function LegalDatabaseExplorer({
             >
               {visibleCount}
             </motion.span>{" "}
-            {visibleCount === 1 ? "entry" : "entries"}
-            {view === "search" ? " · search" : ""}
+            {fr ? (visibleCount === 1 ? "entrée" : "entrées") : visibleCount === 1 ? "entry" : "entries"}
+            {view === "search" ? (fr ? " · recherche" : " · search") : ""}
             {view === "jurisdiction" ? ` · ${selectedJurisdiction}` : ""}
-            {entries.length !== visibleCount ? ` · of ${entries.length} loaded` : ""}
+            {entries.length !== visibleCount ? (fr ? ` · sur ${entries.length} chargées` : ` · of ${entries.length} loaded`) : ""}
           </p>
           <AnimatePresence>
             {hasActiveFilters ? (
@@ -685,7 +697,7 @@ export function LegalDatabaseExplorer({
                 transition={{ duration: 0.2 }}
                 className="inline-flex cursor-pointer items-center gap-1 rounded-full border border-white/10 px-3 py-1 font-mono text-[10px] uppercase tracking-[0.14em] text-zinc-500 transition-colors hover:border-white/25 hover:text-zinc-900"
               >
-                Clear all
+                {fr ? "Tout effacer" : "Clear all"}
                 <X aria-hidden className="size-3" />
               </motion.button>
             ) : null}
@@ -710,19 +722,20 @@ export function LegalDatabaseExplorer({
                 openRow={openRow}
                 setOpenRow={setOpenRow}
                 showJurisdiction
+              fr={fr}
               />
             ) : (
               <div className="rounded-2xl border border-white/8 bg-white/[0.02] p-10 text-center">
-                <p className="font-display text-lg text-zinc-800">No entries match</p>
+                <p className="font-display text-lg text-zinc-800">{fr ? "Aucune entrée ne correspond" : "No entries match"}</p>
                 <p className="mt-2 text-sm text-zinc-500">
-                  Try another term or clear the filters.
+                  {fr ? "Essayez un autre terme ou effacez les filtres." : "Try another term or clear the filters."}
                 </p>
                 <button
                   type="button"
                   onClick={clearAll}
                   className="mt-5 cursor-pointer rounded-full border border-[color:var(--accent-strong)]/40 bg-[color:var(--accent-soft)] px-4 py-1.5 font-mono text-[10px] uppercase tracking-[0.16em] text-[color:var(--accent-strong)] transition-transform hover:scale-[1.03]"
                 >
-                  Clear all
+                  {fr ? "Tout effacer" : "Clear all"}
                 </button>
               </div>
             )}
@@ -746,7 +759,7 @@ export function LegalDatabaseExplorer({
                 className="inline-flex cursor-pointer items-center gap-1.5 rounded-full border border-white/10 px-3 py-1.5 font-mono text-[10px] uppercase tracking-[0.14em] text-zinc-500 transition-colors hover:border-white/25 hover:text-zinc-900"
               >
                 <ArrowLeft aria-hidden className="size-3" />
-                All jurisdictions
+                {fr ? "Toutes les juridictions" : "All jurisdictions"}
               </button>
               <h3 className="font-display text-xl font-medium tracking-[-0.02em] text-zinc-950">
                 {selectedJurisdiction}
@@ -759,10 +772,11 @@ export function LegalDatabaseExplorer({
                 openRow={openRow}
                 setOpenRow={setOpenRow}
                 showJurisdiction={false}
+              fr={fr}
               />
             ) : (
               <p className="rounded-2xl border border-white/8 bg-white/[0.02] p-8 text-center text-sm text-zinc-500">
-                No entries for {selectedJurisdiction} with these filters.
+                {fr ? `Aucune entrée pour ${selectedJurisdiction} avec ces filtres.` : `No entries for ${selectedJurisdiction} with these filters.`}
               </p>
             )}
           </motion.div>
@@ -780,6 +794,7 @@ export function LegalDatabaseExplorer({
               openRow={openRow}
               setOpenRow={setOpenRow}
               showJurisdiction
+            fr={fr}
             />
           </motion.div>
         ) : (
@@ -838,13 +853,13 @@ export function LegalDatabaseExplorer({
             ))}
             {atlasClusters.length === 0 ? (
               <div className="rounded-2xl border border-white/8 bg-white/[0.02] p-10 text-center">
-                <p className="font-display text-lg text-zinc-800">No entries match these filters</p>
+                <p className="font-display text-lg text-zinc-800">{fr ? "Aucune entrée ne correspond à ces filtres" : "No entries match these filters"}</p>
                 <button
                   type="button"
                   onClick={clearAll}
                   className="mt-5 cursor-pointer rounded-full border border-[color:var(--accent-strong)]/40 bg-[color:var(--accent-soft)] px-4 py-1.5 font-mono text-[10px] uppercase tracking-[0.16em] text-[color:var(--accent-strong)] transition-transform hover:scale-[1.03]"
                 >
-                  Clear all
+                  {fr ? "Tout effacer" : "Clear all"}
                 </button>
               </div>
             ) : null}
@@ -875,13 +890,13 @@ export function LegalDatabaseExplorer({
             href={loadMoreHref}
             className="rounded-full border border-white/10 bg-white/[0.03] px-6 py-2.5 font-mono text-[10px] uppercase tracking-[0.18em] text-zinc-600 transition-all duration-300 hover:-translate-y-0.5 hover:border-[color:var(--accent-strong)]/40 hover:text-zinc-900"
           >
-            Load next entries →
+            {fr ? "Charger les entrées suivantes →" : "Load next entries →"}
           </Link>
         </div>
       ) : null}
       {loadMoreHref && (hasActiveFilters || view === "jurisdiction") ? (
         <p className="text-center font-mono text-[10px] uppercase tracking-[0.18em] text-zinc-400">
-          Showing the {entries.length} loaded entries — load more from the unfiltered view to widen the set.
+          {fr ? `Affichage des ${entries.length} entrées chargées — chargez-en plus depuis la vue non filtrée pour élargir l\u2019ensemble.` : `Showing the ${entries.length} loaded entries — load more from the unfiltered view to widen the set.`}
         </p>
       ) : null}
     </div>
