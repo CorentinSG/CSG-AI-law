@@ -44,7 +44,15 @@ interface ImplementationProgressBarProps {
   label?: string;
   showLabel?: boolean;
   className?: string;
+  lang?: "en" | "fr";
 }
+
+const confidenceLabelFr: Record<string, string> = {
+  high: "confiance élevée",
+  medium: "confiance moyenne",
+  low: "confiance faible",
+  needs_review: "à revoir",
+};
 
 /**
  * Visual progress bar for AI Act / AI law implementation status.
@@ -58,7 +66,12 @@ export function ImplementationProgressBar({
   label,
   showLabel = true,
   className,
+  lang = "en",
 }: ImplementationProgressBarProps) {
+  const fr = lang === "fr";
+  const confidenceText = fr
+    ? confidenceLabelFr[confidence] ?? `confiance ${confidence}`
+    : `${confidence} confidence`;
   const { value, tier } = statusProgress[status] ?? { value: 0, tier: "none" as const };
   const barColor = tierColors[tier];
   const opacity = confidenceOpacity[confidence as keyof typeof confidenceOpacity] ?? "opacity-60";
@@ -71,10 +84,10 @@ export function ImplementationProgressBar({
       {showLabel ? (
         <div className="flex items-center justify-between gap-3">
           <p className="font-mono text-[9px] uppercase tracking-[0.22em] text-zinc-500">
-            {label ?? "AI Act implementation"}
+            {label ?? (fr ? "Mise en œuvre du règlement IA" : "AI Act implementation")}
           </p>
           <p className="font-mono text-[9px] uppercase tracking-[0.18em] text-zinc-400">
-            {confidence} confidence
+            {confidenceText}
           </p>
         </div>
       ) : null}
@@ -88,12 +101,14 @@ export function ImplementationProgressBar({
           aria-valuenow={value}
           aria-valuemin={0}
           aria-valuemax={100}
-          aria-label={`${label ?? "Implementation"}: ${value}% (${confidence} confidence)`}
+          aria-label={`${label ?? "Implementation"}: ${value}% (${confidenceText})`}
         />
       </div>
       {value === 0 || value === 5 ? (
         <p className="text-xs text-zinc-400">
-          Status not yet verifiable from official sources.
+          {fr
+            ? "Statut pas encore vérifiable à partir de sources officielles."
+            : "Status not yet verifiable from official sources."}
         </p>
       ) : null}
     </div>

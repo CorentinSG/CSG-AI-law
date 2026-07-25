@@ -5,11 +5,11 @@ import { usePathname } from "next/navigation";
 import { motion } from "framer-motion";
 import { getLocaleFromPathname, localeHref } from "@/lib/i18n/href";
 
-const footerNav = [
-  { href: "/", label: "Home" },
+const buildFooterNav = (fr: boolean) => [
+  { href: "/", label: fr ? "Accueil" : "Home" },
   { href: "/research", label: "Notes" },
-  { href: "/ai-regulation", label: "AI Law Hub" },
-  { href: "/ai-regulation/methodology", label: "Methodology" },
+  { href: "/ai-regulation", label: fr ? "Hub Droit de l'IA" : "AI Law Hub" },
+  { href: "/ai-regulation/methodology", label: fr ? "Méthodologie" : "Methodology" },
   { href: "/standards", label: "Standards" },
   { href: "/contact", label: "Contact" },
 ];
@@ -40,7 +40,9 @@ export function SiteFooter() {
               AI Law &amp; Legal Intelligence
             </p>
             <p className="max-w-sm text-sm leading-7 text-zinc-600">
-              Attorney-led AI law research, regulatory monitoring, and legal intelligence.
+              {fr
+                ? "Recherche en droit de l'IA, veille réglementaire et intelligence juridique, menées par un avocat."
+                : "Attorney-led AI law research, regulatory monitoring, and legal intelligence."}
             </p>
             <p className="max-w-sm text-xs leading-6 text-zinc-400">
               {fr
@@ -58,7 +60,7 @@ export function SiteFooter() {
             <p className="col-span-full font-mono text-[10px] uppercase tracking-[0.3em] text-zinc-400 sm:col-span-2 lg:col-span-1 xl:col-span-2">
               Navigation
             </p>
-            {footerNav.map((item) => (
+            {buildFooterNav(fr).map((item) => (
               <Link
                 key={item.href}
                 href={localeHref(lang, item.href)}

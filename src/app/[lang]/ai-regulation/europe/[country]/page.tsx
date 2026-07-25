@@ -142,9 +142,10 @@ function SourceList({
 export default async function EuropeCountryPage({
   params,
 }: {
-  params: Promise<{ country: string }>;
+  params: Promise<{ country: string; lang: string }>;
 }) {
-  const { country } = await params;
+  const { country, lang } = await params;
+  const fr = lang === "fr";
   const profile = getEuropeCountryProfileBySlug(country);
   if (!profile) notFound();
 
@@ -266,10 +267,20 @@ export default async function EuropeCountryPage({
         .filter((url): url is string => Boolean(url)),
     );
     const databaseFamilies = [
-      { id: "regulation", label: "Regulation" },
-      { id: "case-law", label: "Case law" },
-      { id: "soft-law", label: "Soft law" },
+      { id: "regulation", label: fr ? "Réglementation" : "Regulation" },
+      { id: "case-law", label: fr ? "Jurisprudence" : "Case law" },
+      { id: "soft-law", label: fr ? "Droit souple" : "Soft law" },
     ];
+    // French phase labels without touching the Codex-owned English helper
+    // (its tests assert English values).
+    const phaseLabelFr: Record<string, string> = {
+      breaking: "Urgent",
+      developing: "En cours",
+      sustained: "Confirmé",
+      fading: "En déclin",
+    };
+    const storyPhaseLabel = (phase: string) =>
+      fr ? phaseLabelFr[phase] ?? phase : getStoryPhaseDisplay(phase as never);
     const databaseEntries = [
       ...nationalAIRegulationSources.map((source) => ({
         id: `reg-${source.url}`,
@@ -287,7 +298,9 @@ export default async function EuropeCountryPage({
         detail:
           [
             decision.date ? formatDisplayDate(decision.date) : null,
-            decision.docketOrCaseNumber ? `no. ${decision.docketOrCaseNumber}` : null,
+            decision.docketOrCaseNumber
+              ? `${fr ? "n°" : "no."} ${decision.docketOrCaseNumber}`
+              : null,
           ]
             .filter(Boolean)
             .join(" · ") || undefined,
@@ -321,43 +334,45 @@ export default async function EuropeCountryPage({
         <section id="overview" className="scroll-mt-28 space-y-8">
           <MotionReveal>
             <BreadcrumbNav
+              lang={fr ? "fr" : "en"}
               items={[
-                { label: "AI Law Hub", href: "/ai-regulation" },
+                { label: fr ? "Hub Droit de l'IA" : "AI Law Hub", href: "/ai-regulation" },
                 { label: "Europe", href: "/ai-regulation/europe" },
                 { label: profile.countryName, href: `/ai-regulation/europe/${profile.slug}` },
               ]}
             />
           </MotionReveal>
           <CountryConsoleHero
+            lang={fr ? "fr" : "en"}
             region="europe"
             code="FR"
             name={profile.countryName}
             implementationStatus={profile.implementationStatus}
             implementationConfidence={profile.implementationConfidence}
-            gaugeLabel="EU AI Act implementation"
+            gaugeLabel={fr ? "Mise en œuvre du règlement IA (UE)" : "EU AI Act implementation"}
             lastReviewed={formatDisplayDate(profile.lastReviewedDate)}
             stats={[
-              { value: franceLiveData?.items.length ?? 0, label: "Live signals" },
-              { value: familyCount("regulation"), label: "Regulation" },
-              { value: familyCount("case-law"), label: "Case law" },
-              { value: familyCount("soft-law"), label: "Soft law" },
+              { value: franceLiveData?.items.length ?? 0, label: fr ? "Signaux en direct" : "Live signals" },
+              { value: familyCount("regulation"), label: fr ? "Réglementation" : "Regulation" },
+              { value: familyCount("case-law"), label: fr ? "Jurisprudence" : "Case law" },
+              { value: familyCount("soft-law"), label: fr ? "Droit souple" : "Soft law" },
             ]}
           />
         </section>
 
         <HubScrollNav
           sections={[
-            { id: "overview", label: "Overview" },
-            { id: "live", label: "Live" },
-            { id: "database", label: "Database" },
+            { id: "overview", label: fr ? "Aperçu" : "Overview" },
+            { id: "live", label: fr ? "En direct" : "Live" },
+            { id: "database", label: fr ? "Base de données" : "Database" },
           ]}
         />
 
         <section id="live" className="scroll-mt-28 space-y-6">
           <MotionReveal>
             <SectionHeading
-              eyebrow="Live monitoring"
-              title="French AI law, right now"
+              eyebrow={fr ? "Veille en direct" : "Live monitoring"}
+              title={fr ? "Le droit de l'IA en France, maintenant" : "French AI law, right now"}
             />
           </MotionReveal>
           {franceLiveData && franceLiveData.stories.length > 0 ? (
@@ -366,14 +381,16 @@ export default async function EuropeCountryPage({
                 id: story.id,
                 chips: [
                   { label: story.primary.developmentType.replaceAll("_", " ") },
-                  { label: getStoryPhaseDisplay(story.phase), tone: "info" as const },
+                  { label: storyPhaseLabel(story.phase), tone: "info" as const },
                   ...(story.primary.officialSourceFound
-                    ? [{ label: "official source", tone: "gold" as const }]
+                    ? [{ label: fr ? "source officielle" : "official source", tone: "gold" as const }]
                     : []),
                   ...(story.corroboration.sourceCount > 1
                     ? [
                         {
-                          label: `corroboré · ${story.corroboration.sourceCount} sources`,
+                          label: fr
+                            ? `corroboré · ${story.corroboration.sourceCount} sources`
+                            : `corroborated · ${story.corroboration.sourceCount} sources`,
                           tone: "gold" as const,
                         },
                       ]
@@ -384,14 +401,18 @@ export default async function EuropeCountryPage({
                 meta: `${
                   story.primary.publicationDate
                     ? formatDisplayDate(story.primary.publicationDate)
-                    : "Date under review"
+                    : fr
+                      ? "Date en cours de vérification"
+                      : "Date under review"
                 } · ${story.primary.sourceName}`,
                 href: story.primary.officialSourceUrl ?? story.primary.sourceUrl,
               }))}
             />
           ) : (
             <p className="rounded-[1.8rem] border border-white/8 bg-white/[0.02] px-5 py-8 text-center font-mono text-[10px] uppercase tracking-[0.2em] text-zinc-500">
-              No live signal right now — monitoring continues
+              {fr
+                ? "Aucun signal en direct pour l'instant — la veille continue"
+                : "No live signal right now — monitoring continues"}
             </p>
           )}
         </section>
@@ -399,22 +420,29 @@ export default async function EuropeCountryPage({
         <section id="database" className="scroll-mt-28 space-y-6">
           <MotionReveal>
             <SectionHeading
-              eyebrow="Legal database"
-              title="Search French AI law"
+              eyebrow={fr ? "Base de données juridique" : "Legal database"}
+              title={fr ? "Rechercher le droit de l'IA français" : "Search French AI law"}
             />
           </MotionReveal>
           <MotionReveal delay={0.06}>
             <CountryLegalDatabase
+              lang={fr ? "fr" : "en"}
               families={databaseFamilies}
               entries={databaseEntries}
-              searchPlaceholder="Search regulation, case law, guidance…"
+              searchPlaceholder={
+                fr
+                  ? "Rechercher réglementation, jurisprudence, guidance…"
+                  : "Search regulation, case law, guidance…"
+              }
             />
           </MotionReveal>
         </section>
 
         <MotionReveal>
           <p className="border-t border-white/8 pt-5 font-mono text-[9.5px] uppercase tracking-[0.2em] text-zinc-500">
-            Legal research &amp; monitoring only — not legal advice · Non-exhaustive profile under continuous verification
+            {fr
+              ? "Recherche et veille juridiques uniquement — ne constitue pas un conseil juridique · Profil non exhaustif, en vérification continue"
+              : "Legal research & monitoring only — not legal advice · Non-exhaustive profile under continuous verification"}
           </p>
         </MotionReveal>
       </SiteShell>

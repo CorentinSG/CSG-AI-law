@@ -22,7 +22,7 @@ export function BreadcrumbNav({ items, className, lang = DEFAULT_LOCALE }: Bread
   if (items.length === 0) return null;
 
   return (
-    <nav aria-label="Breadcrumb" className={cn("mb-3 flex flex-wrap items-center gap-2.5", className)}>
+    <nav aria-label={lang === "fr" ? "Fil d'Ariane" : "Breadcrumb"} className={cn("mb-3 flex flex-wrap items-center gap-2.5", className)}>
       {items.map((item, index) => {
         const isLast = index === items.length - 1;
         return (
