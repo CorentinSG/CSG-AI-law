@@ -153,7 +153,7 @@ export default async function NewsDetailPage({
       <div className="grid gap-6 lg:grid-cols-[1.3fr_0.7fr]">
         {/* Full summary */}
         <Card className="rounded-[2rem] border-black/6 bg-white/90 shadow-[0_18px_50px_rgba(15,15,15,0.04)]">
-          <CardContent className="space-y-4 p-7 text-sm leading-7 text-zinc-700">
+          <CardContent className="space-y-4 p-7 text-sm leading-7 text-zinc-700 hyphens-auto text-justify">
             <p className="font-mono text-[10px] uppercase tracking-[0.28em] text-zinc-500">
               Summary
             </p>
