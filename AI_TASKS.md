@@ -11,7 +11,7 @@ Each agent edits only its own rows. Status vocabulary: `CLAIMED` · `WIP` · `BL
 
 | Task ID | Owner | Status | Branch @ sha | Locked files | Graph anchor | Updated |
 |---|---|---|---|---|---|---|
-| T-GITHUB-MONITORING-RECOVERY | Claude Code | BLOCKED | `main` | GitHub Actions repository secrets and monitoring validation | `.github/workflows/legal-monitoring.yml`, `buildHealthSnapshot()`, community "Source Runtime Health" | 2026-07-26 |
+| T-GITHUB-MONITORING-RECOVERY | Claude Code | BLOCKED (operator action required — see 2026-07-26 log entry) | `claude/github-monitoring-recovery-lz4dos` | GitHub Actions repository secrets and monitoring validation | `.github/workflows/legal-monitoring.yml`, `buildHealthSnapshot()`, community "Source Runtime Health" | 2026-07-26 |
 | T-TOTAL-PROJECT-OWNERSHIP | Claude Code | MERGED | `main` | entire repository | all Graphify communities; start with the total handoff document | 2026-07-25 |
 | TOOLING-GRAPH-PROTOCOL | Claude Code | REVIEW | `ops/t-ops9-ux` @ `30bc31c` | `AGENTS.md`, `AI_TASKS.md`, `.gitignore`, `.git/hooks/*` | n/a (tooling, no app code) | 2026-06-20 |
 | T-OPS9-UX | Claude Code | WIP | `ops/t-ops9-ux` @ `30bc31c` | `src/app/**`, shared UI components | community "UI Components and Utilities", "Intelligence Hub UI" | 2026-06-20 |
@@ -46,6 +46,16 @@ YYYY-MM-DD · <Agent> · <TASK-ID> · <STATUS>
 ```
 
 ## Current status
+
+2026-07-26 · Claude Code · T-GITHUB-MONITORING-RECOVERY · BLOCKED
+- Intent:        Take over monitoring recovery, re-verify the live blocker, and establish who can clear it. No green run URL or healthcheck time can be recorded yet — the secrets are still absent, so acceptance steps 2-9 have not been reached.
+- Files:         `AI_TASKS.md`, `docs/operations/github-actions-monitoring.md` (status refresh only). No application or workflow code changed.
+- Graph anchors: `.github/workflows/legal-monitoring.yml`, `writeScanWorkerStatus()`, `getScanWorkerTerminalHeartbeatState()`, `buildHealthSnapshot()`, community "Source Runtime Health".
+- Verification:  Live re-check on 2026-07-26. Scheduled run `30215469867` (2026-07-26T18:47Z) still fails at `Validate required Supabase secrets`; its log prints all three names empty. Every recent scheduled run on `main` is `failure`. `/api/health?check=worker` returned HTTP 503 at 2026-07-26T19:32:29.891Z with `database.reachable: true`, `worker.heartbeatAt: null`, and newest successful scan still `2026-07-22T17:05:42.866+00:00` (production commit `c60d103`). Local baseline on `main` is healthy: `npm test` PASS (723/723, 131 files), `npm run lint` PASS, `npm run typecheck` PASS. Build not run — no application code changed, docs only.
+- Blocker:       Claude Code cannot set the three repository secrets. Two independent hard blocks: (a) no permission — `GET /repos/CorentinSG/CSG-AI-law/actions/secrets/public-key` and `GET .../actions/secrets` both return HTTP 403 for this session's token, `gh` CLI is absent, and the GitHub MCP server exposes no secret-writing tool; (b) no values — the Supabase credentials are not present in this environment (no `.env`, no environment variables). Writing an Actions secret requires the repository public key to seal the value, so both blocks must be cleared by the repository owner.
+- Workflow audit: `legal-monitoring.yml` itself looks correct for the green path — `/health` on the Scrapling worker is unauthenticated so the startup probe will pass, extraction endpoints stay token-guarded, and the CI log shows `scrapling_worker/requirements.txt` installing cleanly. Nothing downstream of the secret gate has ever executed, so Scrapling startup and queue drain remain unproven in Actions.
+- Branch/commit: `claude/github-monitoring-recovery-lz4dos`.
+- Next:          OPERATOR (repository owner) must add `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, and `SUPABASE_SERVICE_ROLE_KEY` under Settings → Secrets and variables → Actions → Repository secrets, copying values from the authoritative Supabase/Vercel configuration. Claude Code then owns acceptance steps 2-9 (manual dispatch from `main`, secret-validation/Scrapling/queue-drain confirmation, fresh heartbeat, HTTP 200 healthcheck, scan timestamp advancing past 2026-07-22T17:05:42.866Z, and recording the green run URL here). Do not describe the Railway migration as operational until then.
 
 2026-07-26 - Codex -> Claude Code - T-GITHUB-MONITORING-RECOVERY - HANDOFF->Claude Code
 - Intent: Transfer the live verification result for the GitHub Actions replacement of Railway; no implementation ownership returns to Codex.

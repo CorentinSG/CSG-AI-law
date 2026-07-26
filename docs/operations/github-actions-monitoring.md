@@ -8,14 +8,21 @@ cycle. Concurrent production runs queue rather than cancel one another.
 
 ## Current Production Status
 
-As verified on 2026-07-25, this workflow is **not operational**. The 10 most
-recent inspected scheduled runs failed at required-secret validation. All
-three required Supabase secrets below were missing; Scrapling startup and
-queue draining were therefore skipped. The public worker health endpoint
-returned HTTP 503 and the newest successful scan remained dated
-2026-07-22T17:05:42.866Z.
+Re-verified on 2026-07-26, this workflow is still **not operational** and the
+cause is unchanged. Scheduled run `30215469867` (2026-07-26T18:47Z) failed at
+`Validate required Supabase secrets` with all three required Supabase secrets
+below still empty, so Scrapling startup and queue draining were skipped again.
+`/api/health?check=worker` returned HTTP 503 at 2026-07-26T19:32:29.891Z with
+`database.reachable: true`, no worker heartbeat, and the newest successful scan
+still dated 2026-07-22T17:05:42.866Z.
 
-Claude Code owns recovery and final acceptance. Follow
+Adding the three secrets is an **operator action** and cannot be done by an
+agent session: writing a repository secret requires the repository Actions
+public key to seal the value, and that endpoint returns HTTP 403 to
+non-admin tokens. Add them in the GitHub UI under **Settings → Secrets and
+variables → Actions → Repository secrets**.
+
+Claude Code owns recovery and final acceptance once the secrets exist. Follow
 `docs/handoffs/2026-07-26-github-actions-monitoring-verification.md` and do not
 describe the Railway migration as operational until a manual run is green,
 the heartbeat is fresh, and the worker health endpoint returns HTTP 200.
