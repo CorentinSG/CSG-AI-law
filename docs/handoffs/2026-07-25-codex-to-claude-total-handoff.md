@@ -32,11 +32,12 @@ Historical references assigning work to Codex are superseded by this handoff.
 
 ## Operator Gates Still Open
 
-1. GitHub Actions monitoring is not operational until repository secrets are
-   configured. Required: `NEXT_PUBLIC_SUPABASE_URL`,
-   `NEXT_PUBLIC_SUPABASE_ANON_KEY`, and `SUPABASE_SERVICE_ROLE_KEY`. Optional
-   connector secrets are listed in `docs/operations/github-actions-monitoring.md`.
-   Do not add `OPENAI_API_KEY`; the workflow keeps AI processing disabled.
+1. Live verification confirmed that GitHub Actions monitoring is not
+   operational. The 10 most recent inspected scheduled runs failed because
+   `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, and
+   `SUPABASE_SERVICE_ROLE_KEY` are all missing. The worker health endpoint
+   returned HTTP 503. See
+   `docs/handoffs/2026-07-26-github-actions-monitoring-verification.md`.
 2. After adding secrets, manually dispatch **Legal Monitoring**, inspect its
    logs, then verify `/api/health?check=worker` becomes healthy.
 3. Production migration history remains unknown. Obtain a dedicated read-only

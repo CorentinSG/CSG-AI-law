@@ -6,6 +6,20 @@ Each run starts a local Scrapling worker, queues the central monitoring
 schedule, drains the Supabase scan queue, and exits after its first empty
 cycle. Concurrent production runs queue rather than cancel one another.
 
+## Current Production Status
+
+As verified on 2026-07-25, this workflow is **not operational**. The 10 most
+recent inspected scheduled runs failed at required-secret validation. All
+three required Supabase secrets below were missing; Scrapling startup and
+queue draining were therefore skipped. The public worker health endpoint
+returned HTTP 503 and the newest successful scan remained dated
+2026-07-22T17:05:42.866Z.
+
+Claude Code owns recovery and final acceptance. Follow
+`docs/handoffs/2026-07-26-github-actions-monitoring-verification.md` and do not
+describe the Railway migration as operational until a manual run is green,
+the heartbeat is fresh, and the worker health endpoint returns HTTP 200.
+
 ## Setup
 
 Add these required repository secrets before enabling the workflow:
