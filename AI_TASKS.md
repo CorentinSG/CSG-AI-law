@@ -11,6 +11,7 @@ Each agent edits only its own rows. Status vocabulary: `CLAIMED` · `WIP` · `BL
 
 | Task ID | Owner | Status | Branch @ sha | Locked files | Graph anchor | Updated |
 |---|---|---|---|---|---|---|
+| T-GITHUB-MONITORING-RECOVERY | Claude Code | BLOCKED | `main` | GitHub Actions repository secrets and monitoring validation | `.github/workflows/legal-monitoring.yml`, `buildHealthSnapshot()`, community "Source Runtime Health" | 2026-07-26 |
 | T-TOTAL-PROJECT-OWNERSHIP | Claude Code | MERGED | `main` | entire repository | all Graphify communities; start with the total handoff document | 2026-07-25 |
 | TOOLING-GRAPH-PROTOCOL | Claude Code | REVIEW | `ops/t-ops9-ux` @ `30bc31c` | `AGENTS.md`, `AI_TASKS.md`, `.gitignore`, `.git/hooks/*` | n/a (tooling, no app code) | 2026-06-20 |
 | T-OPS9-UX | Claude Code | WIP | `ops/t-ops9-ux` @ `30bc31c` | `src/app/**`, shared UI components | community "UI Components and Utilities", "Intelligence Hub UI" | 2026-06-20 |
@@ -45,6 +46,14 @@ YYYY-MM-DD · <Agent> · <TASK-ID> · <STATUS>
 ```
 
 ## Current status
+
+2026-07-26 - Codex -> Claude Code - T-GITHUB-MONITORING-RECOVERY - HANDOFF->Claude Code
+- Intent: Transfer the live verification result for the GitHub Actions replacement of Railway; no implementation ownership returns to Codex.
+- Files: `docs/handoffs/2026-07-26-github-actions-monitoring-verification.md`, `docs/handoffs/2026-07-25-codex-to-claude-total-handoff.md`, `docs/operations/github-actions-monitoring.md`, `AI_TASKS.md`.
+- Graph anchors: `.github/workflows/legal-monitoring.yml`, `buildHealthSnapshot()`, community "Source Runtime Health".
+- Verification: 10 recent scheduled runs were failures; run `30169915389` reported all three required Supabase secrets missing; `/api/health?check=worker` returned HTTP 503 with a reachable database, no heartbeat, and newest successful scan at `2026-07-22T17:05:42.866Z`.
+- Branch/commit: `handoff/monitoring-verification-2026-07-26` @ working tree.
+- Next: Claude Code owns secret configuration, manual dispatch, green-run verification, fresh heartbeat confirmation, and recording the successful run URL. Codex has no continuing task.
 
 2026-07-23 · Claude Code · T-CONTACT-REDESIGN · REVIEW
 - Intent:        Full contact-page redesign per user. Iterated live with the user: published email changed to corentin.stgirons@gmail.com and no longer shown in clear text (mailto "Write to me" + copy-to-clipboard button); several portrait treatments tried (framed → frameless → page-background layer, progressively darker) and finally the portrait was removed entirely at the user's request (read as "creepy"). Page now = staggered hero, ambient orbs backdrop, glass direct-channel console with live Paris clock, spotlight inquiry cards; reduced-motion safe. NOTE: a parallel contact redesign (#24, with portrait + ContactChannel) landed on main; per the user this branch's no-portrait version wins — conflict in `contact/page.tsx` resolved to ContactExperience. `src/components/site/contact-channel.tsx` from #24 is now orphaned (no importers).
