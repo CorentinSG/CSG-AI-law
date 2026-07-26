@@ -52,7 +52,7 @@ YYYY-MM-DD · <Agent> · <TASK-ID> · <STATUS>
 - Files: `docs/handoffs/2026-07-26-github-actions-monitoring-verification.md`, `docs/handoffs/2026-07-25-codex-to-claude-total-handoff.md`, `docs/operations/github-actions-monitoring.md`, `AI_TASKS.md`.
 - Graph anchors: `.github/workflows/legal-monitoring.yml`, `buildHealthSnapshot()`, community "Source Runtime Health".
 - Verification: 10 recent scheduled runs were failures; run `30169915389` reported all three required Supabase secrets missing; `/api/health?check=worker` returned HTTP 503 with a reachable database, no heartbeat, and newest successful scan at `2026-07-22T17:05:42.866Z`.
-- Branch/commit: `handoff/monitoring-verification-2026-07-26` @ working tree.
+- Branch/commit: merged to `main` through PR #39.
 - Next: Claude Code owns secret configuration, manual dispatch, green-run verification, fresh heartbeat confirmation, and recording the successful run URL. Codex has no continuing task.
 
 2026-07-23 · Claude Code · T-CONTACT-REDESIGN · REVIEW
