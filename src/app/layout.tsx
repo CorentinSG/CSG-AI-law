@@ -42,6 +42,12 @@ export const metadata: Metadata = {
       "Attorney-led AI regulation monitoring and legal intelligence platform.",
     type: "website",
   },
+  // The card image itself comes from the file-based `app/opengraph-image.tsx`
+  // route, which overrides the metadata object and so applies to every page.
+  // X falls back to `og:image` when no `twitter:image` is declared.
+  twitter: {
+    card: "summary_large_image",
+  },
 };
 
 export default function RootLayout({

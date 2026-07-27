@@ -126,6 +126,7 @@ export default async function UsStatePage({
             ]}
           />
           <SectionHeading
+            as="h1"
             eyebrow={fr ? "Profil d'État" : "State profile"}
             title={profile.stateName}
             description={profile.publicSummary}

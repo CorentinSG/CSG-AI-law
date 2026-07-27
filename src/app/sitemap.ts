@@ -1,5 +1,6 @@
 import type { MetadataRoute } from "next";
 
+import { updateRepository } from "@/agents/ai-regulation/processors/updateRepository";
 import {
   getPublicResearchEntries,
 } from "@/content/research";
@@ -34,7 +35,44 @@ function localizeEntries(siteUrl: string, entries: RouteEntry[]): MetadataRoute.
   );
 }
 
-export default function sitemap(): MetadataRoute.Sitemap {
+/** The sitemap protocol caps one file at 50,000 URLs, and every logical route
+ * is emitted once per locale. Keep the database-backed tail well under that. */
+const MAX_DB_ROUTES_PER_COLLECTION = 2000;
+
+/** Published news items and regulatory updates live in the database, so their
+ * routes cannot be enumerated statically. A missing or unreachable database
+ * must never break the build: on any failure the sitemap degrades to the
+ * static and file-backed routes instead of throwing. */
+async function getDatabaseRoutes(): Promise<RouteEntry[]> {
+  try {
+    const [newsItems, updates] = await Promise.all([
+      updateRepository.getPublicNewsItems(MAX_DB_ROUTES_PER_COLLECTION),
+      updateRepository.listPublicUpdates(),
+    ]);
+
+    const newsRoutes: RouteEntry[] = newsItems.map((item) => ({
+      path: `/news/${item.slug}`,
+      lastModified: item.updatedAt,
+      changeFrequency: "weekly",
+      priority: 0.7,
+    }));
+
+    const updateRoutes: RouteEntry[] = updates
+      .slice(0, MAX_DB_ROUTES_PER_COLLECTION)
+      .map((update) => ({
+        path: `/ai-regulation/${update.id}`,
+        lastModified: update.updatedAt,
+        changeFrequency: "weekly",
+        priority: 0.6,
+      }));
+
+    return [...newsRoutes, ...updateRoutes];
+  } catch {
+    return [];
+  }
+}
+
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const siteUrl = env.NEXT_PUBLIC_SITE_URL.replace(/\/$/, "");
   const now = new Date();
 
@@ -96,10 +134,13 @@ export default function sitemap(): MetadataRoute.Sitemap {
           : 0.55,
   }));
 
+  const databaseRoutes = await getDatabaseRoutes();
+
   return localizeEntries(siteUrl, [
     ...staticRoutes,
     ...researchRoutes,
     ...europeCountryRoutes,
     ...usStateRoutes,
+    ...databaseRoutes,
   ]);
 }

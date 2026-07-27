@@ -465,6 +465,7 @@ export default async function EuropeCountryPage({
         <MotionReveal>
         <div className="flex flex-wrap items-start gap-3">
           <SectionHeading
+            as="h1"
             eyebrow="Country profile"
             title={profile.countryName}
             description={publicSummary}
@@ -566,6 +567,7 @@ export default async function EuropeCountryPage({
             description={`Recent official ${profile.countryName} AI-law developments visible to the public layer, grouped into cross-source stories with dates, source attribution, and verification signals shown directly.`}
           />
           <LiveLegalIntelligencePanel
+            lang={fr ? "fr" : "en"}
             title={`${profile.countryName} AI legal developments`}
             description={`${profile.countryName} live monitoring prioritises official legal and institutional sources; independent sources reporting the same development are grouped into one corroborated story.`}
             regionLabel={profile.countryName}
@@ -591,6 +593,7 @@ export default async function EuropeCountryPage({
             description="This Germany-only panel surfaces recent official German AI-law developments visible to the public layer, with dates, source attribution, and verification signals shown directly."
           />
           <LiveLegalIntelligencePanel
+            lang={fr ? "fr" : "en"}
             title="Germany AI legal developments"
             description="Germany live monitoring prioritises BfDI and other official German legal or institutional sources. The architecture is built for frequent refresh, but only lightweight approved sources should be treated as near-real-time candidates."
             regionLabel="Germany"
@@ -844,6 +847,7 @@ export default async function EuropeCountryPage({
             description="This Netherlands-only panel surfaces recent official Dutch AI-law developments visible to the public layer, with dates, source attribution, and verification signals shown directly."
           />
           <LiveLegalIntelligencePanel
+            lang={fr ? "fr" : "en"}
             title="Netherlands AI legal developments"
             description="Netherlands live monitoring prioritises AP and RDI official Dutch sources. The architecture is built for frequent refresh, but only lightweight approved sources should be treated as near-real-time candidates."
             regionLabel="Netherlands"
@@ -1103,6 +1107,7 @@ export default async function EuropeCountryPage({
             description="This Belgium-only panel surfaces recent official Belgian AI-law developments visible to the public layer, with dates, source attribution, and verification signals shown directly."
           />
           <LiveLegalIntelligencePanel
+            lang={fr ? "fr" : "en"}
             title="Belgium AI legal developments"
             description="Belgium live monitoring prioritises APD/GBA official Belgian sources. The architecture is built for frequent refresh, but only lightweight approved sources should be treated as near-real-time candidates."
             regionLabel="Belgium"
@@ -1368,6 +1373,7 @@ export default async function EuropeCountryPage({
             description="This Austria-only panel surfaces recent official Austrian AI-law developments visible to the public layer, with dates, source attribution, and verification signals shown directly."
           />
           <LiveLegalIntelligencePanel
+            lang={fr ? "fr" : "en"}
             title="Austria AI legal developments"
             description="Austria live monitoring prioritises DSB official Austrian sources. The architecture is built for frequent refresh, but only lightweight approved sources should be treated as near-real-time candidates."
             regionLabel="Austria"
@@ -1633,6 +1639,7 @@ export default async function EuropeCountryPage({
             description="This Sweden-only panel surfaces recent official Swedish AI-law developments visible to the public layer, with dates, source attribution, and verification signals shown directly."
           />
           <LiveLegalIntelligencePanel
+            lang={fr ? "fr" : "en"}
             title="Sweden AI legal developments"
             description="Sweden live monitoring prioritises IMY official Swedish sources. The architecture is built for frequent refresh, but only lightweight approved sources should be treated as near-real-time candidates."
             regionLabel="Sweden"
@@ -1898,6 +1905,7 @@ export default async function EuropeCountryPage({
             description="This Ireland-only panel surfaces recent official Irish AI-law developments visible to the public layer, with dates, source attribution, and verification signals shown directly."
           />
           <LiveLegalIntelligencePanel
+            lang={fr ? "fr" : "en"}
             title="Ireland AI legal developments"
             description="Ireland live monitoring prioritises DPC guidance and official Irish sources. The DPC is the primary live anchor given its role as lead supervisory authority for many major AI and technology companies established in Ireland. The architecture is built for frequent refresh, but only lightweight approved sources should be treated as near-real-time candidates."
             regionLabel="Ireland"
@@ -2163,6 +2171,7 @@ export default async function EuropeCountryPage({
             description="This Spain-only panel surfaces recent official Spanish AI-law developments visible to the public layer, with dates, source attribution, and verification signals shown directly."
           />
           <LiveLegalIntelligencePanel
+            lang={fr ? "fr" : "en"}
             title="Spain AI legal developments"
             description="Spain live monitoring prioritises AEPD and other official Spanish legal or institutional sources. The architecture is built for frequent refresh, but only lightweight approved sources should be treated as near-real-time candidates."
             regionLabel="Spain"
@@ -2414,6 +2423,7 @@ export default async function EuropeCountryPage({
             description="This Italy-only panel surfaces recent official Italian AI-law developments visible to the public layer, with dates, source attribution, and verification signals shown directly."
           />
           <LiveLegalIntelligencePanel
+            lang={fr ? "fr" : "en"}
             title="Italy AI legal developments"
             description="Italy live monitoring prioritises the Garante and other official Italian legal or institutional sources. The architecture is built for frequent refresh, but only lightweight approved sources should be treated as near-real-time candidates."
             regionLabel="Italy"

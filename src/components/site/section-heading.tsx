@@ -10,12 +10,16 @@ export function SectionHeading({
   description,
   align = "left",
   actions,
+  as = "h2",
 }: {
   eyebrow?: string;
   title: string;
   description?: string;
   align?: "left" | "center";
   actions?: ReactNode;
+  /** Heading level for the title. Use `h1` for a page's primary heading —
+   * exactly one per page. Purely semantic: the styling is unchanged. */
+  as?: "h1" | "h2" | "h3";
 }) {
   return (
     <MotionReveal
@@ -38,7 +42,7 @@ export function SectionHeading({
       <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
         <div className={cn("space-y-3", align === "center" ? "mx-auto max-w-3xl" : "max-w-3xl")}>
           <ScrollTextReveal
-            as="h2"
+            as={as}
             text={title}
             mode="words"
             stagger={0.055}

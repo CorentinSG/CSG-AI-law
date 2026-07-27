@@ -36,7 +36,10 @@ function parseRegions(value: string | null): CentralSchedulerRegion[] | undefine
     .split(",")
     .map((entry) => entry.trim())
     .filter((entry): entry is CentralSchedulerRegion =>
-      entry === "eu" || entry === "us" || entry === "international",
+      entry === "eu" ||
+      entry === "us" ||
+      entry === "international" ||
+      entry === "country",
     );
   return regions.length > 0 ? regions : undefined;
 }

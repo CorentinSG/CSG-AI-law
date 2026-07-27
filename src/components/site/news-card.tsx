@@ -34,14 +34,14 @@ export function NewsCard({ item, lang = DEFAULT_LOCALE }: { item: AiLawNewsItem;
 
           <p className="mt-2 text-[14px] leading-6 text-white/55">{item.shortSummary}</p>
 
-          <div className="mt-3 flex flex-wrap items-center gap-x-2.5 gap-y-1 font-mono text-[10px] uppercase tracking-[0.16em] text-white/45">
-            <span className="text-white/60">{item.region}</span>
+          <div className="mt-3 flex flex-wrap items-center gap-x-2.5 gap-y-1 font-mono text-[10px] uppercase tracking-[0.16em] text-white/70">
+            <span className="text-white/90">{item.region}</span>
             <span aria-hidden className="text-white/25">·</span>
             <span>{formatDisplayDate(item.publicationDate)}</span>
             <span aria-hidden className="text-white/25">·</span>
             <span>{item.sourceName}</span>
             <span aria-hidden className="text-white/25">·</span>
-            <span className="text-white/60">{signal.label}</span>
+            <span className="text-white/90">{signal.label}</span>
             {item.sourceUrl ? (
               <>
                 <span aria-hidden className="text-white/25">·</span>
