@@ -486,6 +486,8 @@ function buildCountryMonitoringSources(inputs: readonly CountryMonitoringSourceI
           authorityTypeHint: "Agency guidance",
           itemSelector: "main a[href], article a[href], a[href]",
           linkSelector: "self",
+          requiresReview: true,
+          requiresReviewReason: "generated_catch_all_selector",
           includeAnyTerms: [
             "artificial intelligence",
             "AI Act",
@@ -497,6 +499,7 @@ function buildCountryMonitoringSources(inputs: readonly CountryMonitoringSourceI
           editorialNotes: [
             "Official DPA/regulator source.",
             "Regulator guidance and enforcement signals must be classified separately from binding legislation.",
+            "Extraction still uses a generated catch-all anchor selector, so an extracted item may be a navigation link rather than a legal development. Drop `requiresReview` once a verified listing selector or an official feed replaces it.",
           ],
         },
         ingestionMethod: "existing",
@@ -523,6 +526,8 @@ function buildCountryMonitoringSources(inputs: readonly CountryMonitoringSourceI
           authorityTypeHint: "Government policy",
           itemSelector: "main a[href], article a[href], a[href]",
           linkSelector: "self",
+          requiresReview: true,
+          requiresReviewReason: "generated_catch_all_selector",
           includeAnyTerms: [
             "artificial intelligence",
             "AI Act",
@@ -534,6 +539,7 @@ function buildCountryMonitoringSources(inputs: readonly CountryMonitoringSourceI
           editorialNotes: [
             "Official government or legal-database source.",
             "Use as authoritative legal-database input only when the item itself is an official legal or policy document.",
+            "Extraction still uses a generated catch-all anchor selector, so an extracted item may be a navigation link rather than a legal development. Drop `requiresReview` once a verified listing selector or an official feed replaces it.",
           ],
         },
         ingestionMethod: "existing",

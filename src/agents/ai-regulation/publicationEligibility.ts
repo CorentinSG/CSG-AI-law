@@ -33,6 +33,21 @@ function hasOfficialLikeSource(references: SourceReference[]) {
   );
 }
 
+/**
+ * Source-level gate for sources whose extraction is not verified yet — today the
+ * generated country DPA/government shells that scrape an index page with a
+ * catch-all `a[href]` selector and therefore yield navigation links as often as
+ * legal developments. Such a source is still official, so it is not a
+ * discovery-only lead: its items stay reviewable and publishable, they just may
+ * not ride the automatic-publication lane. Verified official lanes carry no flag
+ * and keep auto-publishing.
+ */
+export function requiresSourceReview(
+  source: Pick<RegulationSource, "config"> | null | undefined,
+) {
+  return source?.config?.requiresReview === true;
+}
+
 function isOfficialSourceConfirmed(input: {
   verification: ReturnType<typeof extractVerificationMetadata> | null;
   references: SourceReference[];
@@ -74,9 +89,19 @@ export function evaluatePublicationEligibility(input: {
     verification,
     references,
   });
+  const sourceReviewRequired = requiresSourceReview(input.source);
 
   const blockingReasons: string[] = [];
   const warnings = [...citation.warnings];
+
+  if (
+    sourceReviewRequired &&
+    !["approved", "published"].includes(input.update.status)
+  ) {
+    blockingReasons.push(
+      "Source extraction is an unverified catch-all, so the item must be confirmed as a real legal development before publication.",
+    );
+  }
 
   if (
     !officialSourceConfirmed &&
@@ -142,7 +167,7 @@ export function evaluatePublicationEligibility(input: {
     warnings,
     recommendedAction:
       blockingReasons.length === 0
-        ? officialSourceConfirmed
+        ? officialSourceConfirmed && !sourceReviewRequired
           ? "Item is eligible for automatic publication because an official source is confirmed."
           : "Item is eligible for manual publication when the reviewer is satisfied."
         : "Resolve the blocking reasons, attach precise official citations, and keep the item non-public until approval is complete.",

@@ -474,6 +474,8 @@ describe("ApiConnector", () => {
 
     const [, requestInit] = fetchMock.mock.calls[0] ?? [];
     expect(requestInit?.method).toBe("POST");
+    // Raw fetch site: it must carry its own deadline, no conditional-fetch cover.
+    expect(requestInit?.signal).toBeInstanceOf(AbortSignal);
     expect(String(requestInit?.body)).toContain("<wsse:Username>test-user</wsse:Username>");
     expect(String(requestInit?.body)).toContain(
       'PasswordText">test-password</wsse:Password>',
@@ -760,6 +762,8 @@ describe("ApiConnector", () => {
 
     const [, requestInit] = fetchMock.mock.calls[0] ?? [];
     expect(requestInit?.method).toBe("POST");
+    // Raw fetch site: it must carry its own deadline, no conditional-fetch cover.
+    expect(requestInit?.signal).toBeInstanceOf(AbortSignal);
     expect((requestInit?.headers as Record<string, string>).Authorization).toBe(
       "Bearer hunter-token",
     );

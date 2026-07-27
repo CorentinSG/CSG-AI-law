@@ -141,4 +141,35 @@ describe("evaluatePublicationEligibility", () => {
     expect(result.blockingReasons).toEqual([]);
     expect(result.recommendedAction).toContain("automatic publication");
   });
+
+  it("keeps an unverified catch-all source out of the automatic publication lane", () => {
+    const result = evaluatePublicationEligibility({
+      update: { ...baseUpdate, status: "needs_review" },
+      rawItem: baseRawItem,
+      source: {
+        ...baseSource,
+        config: { requiresReview: true, requiresReviewReason: "generated_catch_all_selector" },
+      },
+    });
+
+    expect(result.eligible).toBe(false);
+    expect(
+      result.blockingReasons.some((reason) => reason.includes("unverified catch-all")),
+    ).toBe(true);
+  });
+
+  it("still lets a reviewed catch-all item be published", () => {
+    const result = evaluatePublicationEligibility({
+      update: { ...baseUpdate, status: "approved" },
+      rawItem: baseRawItem,
+      source: {
+        ...baseSource,
+        config: { requiresReview: true, requiresReviewReason: "generated_catch_all_selector" },
+      },
+    });
+
+    expect(result.eligible).toBe(true);
+    expect(result.blockingReasons).toEqual([]);
+    expect(result.recommendedAction).not.toContain("automatic publication");
+  });
 });
