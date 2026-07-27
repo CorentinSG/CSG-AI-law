@@ -50,6 +50,14 @@ jobs:
             exit 1
           fi
 
+      - name: Generate a run-scoped admin auth secret
+        run: |
+          # env validation demands ADMIN_AUTH_SECRET for admin session signing.
+          # This job only drains the scan queue and never serves or validates an
+          # admin session, so it uses a throwaway per-run value rather than the
+          # production secret. Nothing here is stored or printed.
+          printf 'ADMIN_AUTH_SECRET=%s\n' "$(openssl rand -hex 32)" >> "$GITHUB_ENV"
+
       - name: Start local Scrapling worker
         run: |
           token="$(openssl rand -hex 32)"
