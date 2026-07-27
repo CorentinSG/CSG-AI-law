@@ -1,3 +1,5 @@
+import { z } from "zod";
+
 import type {
   AiRegulatoryUpdate,
   ExtractedCandidateItem,
@@ -20,24 +22,30 @@ export const citationQualityStatuses = [
 
 export type CitationQualityStatus = (typeof citationQualityStatuses)[number];
 
-export type SourceReferenceRole =
-  | "primary"
-  | "supporting"
-  | "discovery"
-  | "official_confirmation";
+export const sourceReferenceRoles = [
+  "primary",
+  "supporting",
+  "discovery",
+  "official_confirmation",
+] as const;
 
-export type SourceReferenceType =
-  | "official"
-  | "court"
-  | "regulator"
-  | "government"
-  | "parliament"
-  | "legislation"
-  | "policy"
-  | "standards_body"
-  | "discovery_source"
-  | "media_source"
-  | "tracker";
+export type SourceReferenceRole = (typeof sourceReferenceRoles)[number];
+
+export const sourceReferenceTypes = [
+  "official",
+  "court",
+  "regulator",
+  "government",
+  "parliament",
+  "legislation",
+  "policy",
+  "standards_body",
+  "discovery_source",
+  "media_source",
+  "tracker",
+] as const;
+
+export type SourceReferenceType = (typeof sourceReferenceTypes)[number];
 
 export interface SourcePinpoint {
   article?: string;
@@ -110,19 +118,67 @@ function sourceTypeFor(source: RegulationSource): SourceReferenceType {
   return "official";
 }
 
+// Read-time validation for the `sourceReferences` JSON column.
+//
+// These references come from a JSONB payload, so any field can be missing or
+// wrong-typed. Downstream consumers (assessCitationQuality) call string methods
+// on `verificationStatus`, `title` and `institution` and iterate `pinpoint`, so
+// an unvalidated partial row used to throw at read time.
+//
+// Defaults are deliberately conservative — a malformed field degrades to the
+// least-privileged value so a broken row can never be mistaken for a verified
+// official source:
+//   sourceRole          -> "discovery"
+//   sourceType          -> "discovery_source"  (never official-like)
+//   reliabilityLevel    -> "low"
+//   verificationStatus  -> "needs_official_source"
+//   pinpoint            -> {}  (no pinpoint detected)
+//   every nullable field -> null
+// Entries missing the identifying core (title / institution / url / sourceRole
+// as strings) are dropped, which is the pre-existing behaviour.
+const nullableStringField = z.string().nullable().catch(null);
+
+const sourcePinpointSchema = z
+  .looseObject({})
+  .transform((value) => value as SourcePinpoint)
+  .catch({} as SourcePinpoint);
+
+const sourceReferenceSchema = z.object({
+  sourceRole: z.string().pipe(z.enum(sourceReferenceRoles).catch("discovery")),
+  title: z.string(),
+  institution: z.string(),
+  url: z.string(),
+  canonicalUrl: nullableStringField,
+  sourceType: z.enum(sourceReferenceTypes).catch("discovery_source"),
+  authorityType: nullableStringField,
+  publicationDate: nullableStringField,
+  detectedAt: nullableStringField,
+  retrievedAt: nullableStringField,
+  lastVerifiedAt: nullableStringField,
+  jurisdiction: nullableStringField,
+  documentType: nullableStringField,
+  excerpt: nullableStringField,
+  pinpoint: sourcePinpointSchema,
+  reliabilityLevel: z.enum(["high", "medium", "low"]).catch("low"),
+  verificationStatus: z.string().catch("needs_official_source"),
+  archivedUrl: nullableStringField,
+  accessLimitations: nullableStringField,
+  notes: nullableStringField,
+});
+
 function parseSourceReferences(value: unknown): SourceReference[] {
   if (!Array.isArray(value)) return [];
 
-  return value.filter((entry): entry is SourceReference => {
-    if (!entry || typeof entry !== "object") return false;
-    const candidate = entry as Partial<SourceReference>;
-    return (
-      typeof candidate.title === "string" &&
-      typeof candidate.institution === "string" &&
-      typeof candidate.url === "string" &&
-      typeof candidate.sourceRole === "string"
-    );
-  });
+  const references: SourceReference[] = [];
+  for (const entry of value) {
+    if (!entry || typeof entry !== "object" || Array.isArray(entry)) continue;
+    const parsed = sourceReferenceSchema.safeParse(entry);
+    if (!parsed.success) continue;
+    // Unknown keys are preserved so a read/write round trip cannot silently
+    // drop data the schema does not know about; validated fields always win.
+    references.push({ ...(entry as Record<string, unknown>), ...parsed.data });
+  }
+  return references;
 }
 
 export function getSourceReferencesFromRawItem(
