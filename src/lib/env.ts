@@ -124,65 +124,78 @@ export interface AppEnv {
   SCRAPLING_WORKER_URL?: string;
 }
 
+// GitHub Actions substitutes an empty string for every `secrets.X` reference
+// that is not configured, so an unset optional connector secret arrives as ""
+// rather than absent. Zod `.optional()` tolerates absence, not emptiness, so
+// FIRECRAWL_API_KEY="" failed `.min(1)` and ALERT_WEBHOOK_URL="" failed `.url()`
+// and took the whole scan worker down. Treat blank as unset — that also lets the
+// `?? default` fallbacks below apply instead of propagating an empty string.
+function readRawEnv(): Record<string, string | undefined> {
+  return Object.fromEntries(
+    Object.entries(process.env).filter(([, value]) => value?.trim()),
+  );
+}
+
 function buildEnv(): AppEnv {
+  const rawEnv = readRawEnv();
   const parsed = rawEnvSchema.parse({
-    NODE_ENV: process.env.NODE_ENV,
-    VERCEL_ENV: process.env.VERCEL_ENV,
+    NODE_ENV: rawEnv.NODE_ENV,
+    VERCEL_ENV: rawEnv.VERCEL_ENV,
     NEXT_PUBLIC_SITE_URL:
-      process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000",
-    NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL,
-    NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
-    APP_DATA_MODE: process.env.APP_DATA_MODE,
+      rawEnv.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000",
+    NEXT_PUBLIC_SUPABASE_URL: rawEnv.NEXT_PUBLIC_SUPABASE_URL,
+    NEXT_PUBLIC_SUPABASE_ANON_KEY: rawEnv.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+    APP_DATA_MODE: rawEnv.APP_DATA_MODE,
     ALLOW_MEMORY_MODE_IN_PRODUCTION:
-      process.env.ALLOW_MEMORY_MODE_IN_PRODUCTION ?? "false",
-    OPENAI_API_KEY: process.env.OPENAI_API_KEY,
-    NEWSAPI_API_KEY: process.env.NEWSAPI_API_KEY,
-    JUDILIBRE_API_KEYID: process.env.JUDILIBRE_API_KEYID,
-    COURTLISTENER_API_KEY: process.env.COURTLISTENER_API_KEY,
-    COURTLISTENER_API_TOKEN: process.env.COURTLISTENER_API_TOKEN,
-    LEGAL_DATA_HUNTER_MCP_URL: process.env.LEGAL_DATA_HUNTER_MCP_URL,
-    LEGAL_DATA_HUNTER_API_KEY: process.env.LEGAL_DATA_HUNTER_API_KEY,
-    LEGAL_RESEARCH_MCP_URL: process.env.LEGAL_RESEARCH_MCP_URL,
-    EURLEX_USERNAME: process.env.EURLEX_USERNAME,
-    EURLEX_PASSWORD: process.env.EURLEX_PASSWORD,
-    EUR_LEX_USERNAME: process.env.EUR_LEX_USERNAME,
-    EUR_LEX_PASSWORD: process.env.EUR_LEX_PASSWORD,
-    LEGIFRANCE_PISTE_CLIENT_ID: process.env.LEGIFRANCE_PISTE_CLIENT_ID,
-    LEGIFRANCE_PISTE_CLIENT_SECRET: process.env.LEGIFRANCE_PISTE_CLIENT_SECRET,
-    OPENAI_MODEL: process.env.OPENAI_MODEL ?? "gpt-4.1-mini",
-    AI_PROCESSING_ENABLED: process.env.AI_PROCESSING_ENABLED ?? "false",
-    AI_ENABLE_PROCESSING: process.env.AI_ENABLE_PROCESSING,
-    AI_MONTHLY_BUDGET_USD: process.env.AI_MONTHLY_BUDGET_USD ?? "20",
+      rawEnv.ALLOW_MEMORY_MODE_IN_PRODUCTION ?? "false",
+    OPENAI_API_KEY: rawEnv.OPENAI_API_KEY,
+    NEWSAPI_API_KEY: rawEnv.NEWSAPI_API_KEY,
+    JUDILIBRE_API_KEYID: rawEnv.JUDILIBRE_API_KEYID,
+    COURTLISTENER_API_KEY: rawEnv.COURTLISTENER_API_KEY,
+    COURTLISTENER_API_TOKEN: rawEnv.COURTLISTENER_API_TOKEN,
+    LEGAL_DATA_HUNTER_MCP_URL: rawEnv.LEGAL_DATA_HUNTER_MCP_URL,
+    LEGAL_DATA_HUNTER_API_KEY: rawEnv.LEGAL_DATA_HUNTER_API_KEY,
+    LEGAL_RESEARCH_MCP_URL: rawEnv.LEGAL_RESEARCH_MCP_URL,
+    EURLEX_USERNAME: rawEnv.EURLEX_USERNAME,
+    EURLEX_PASSWORD: rawEnv.EURLEX_PASSWORD,
+    EUR_LEX_USERNAME: rawEnv.EUR_LEX_USERNAME,
+    EUR_LEX_PASSWORD: rawEnv.EUR_LEX_PASSWORD,
+    LEGIFRANCE_PISTE_CLIENT_ID: rawEnv.LEGIFRANCE_PISTE_CLIENT_ID,
+    LEGIFRANCE_PISTE_CLIENT_SECRET: rawEnv.LEGIFRANCE_PISTE_CLIENT_SECRET,
+    OPENAI_MODEL: rawEnv.OPENAI_MODEL ?? "gpt-4.1-mini",
+    AI_PROCESSING_ENABLED: rawEnv.AI_PROCESSING_ENABLED ?? "false",
+    AI_ENABLE_PROCESSING: rawEnv.AI_ENABLE_PROCESSING,
+    AI_MONTHLY_BUDGET_USD: rawEnv.AI_MONTHLY_BUDGET_USD ?? "20",
     AI_MAX_INPUT_TOKENS_PER_ITEM:
-      process.env.AI_MAX_INPUT_TOKENS_PER_ITEM ?? "12000",
-    AI_MAX_ITEMS_PER_SCAN: process.env.AI_MAX_ITEMS_PER_SCAN ?? "10",
-    AI_MODEL_RELEVANCE: process.env.AI_MODEL_RELEVANCE ?? "gpt-5.4-nano",
+      rawEnv.AI_MAX_INPUT_TOKENS_PER_ITEM ?? "12000",
+    AI_MAX_ITEMS_PER_SCAN: rawEnv.AI_MAX_ITEMS_PER_SCAN ?? "10",
+    AI_MODEL_RELEVANCE: rawEnv.AI_MODEL_RELEVANCE ?? "gpt-5.4-nano",
     AI_MODEL_CLASSIFICATION:
-      process.env.AI_MODEL_CLASSIFICATION ?? "gpt-5.4-nano",
-    AI_MODEL_SUMMARY: process.env.AI_MODEL_SUMMARY ?? "gpt-5.4-mini",
-    AI_MODEL_DEEP_ANALYSIS: process.env.AI_MODEL_DEEP_ANALYSIS ?? "gpt-5.4",
+      rawEnv.AI_MODEL_CLASSIFICATION ?? "gpt-5.4-nano",
+    AI_MODEL_SUMMARY: rawEnv.AI_MODEL_SUMMARY ?? "gpt-5.4-mini",
+    AI_MODEL_DEEP_ANALYSIS: rawEnv.AI_MODEL_DEEP_ANALYSIS ?? "gpt-5.4",
     AI_COST_GUARDRAILS_ENABLED:
-      process.env.AI_COST_GUARDRAILS_ENABLED ?? "true",
-    ADMIN_AUTH_SECRET: process.env.ADMIN_AUTH_SECRET,
-    ADMIN_USERNAME: process.env.ADMIN_USERNAME ?? "admin",
-    ADMIN_PASSWORD: process.env.ADMIN_PASSWORD ?? "change-me",
-    CRON_SECRET: process.env.CRON_SECRET,
-    ALERT_WEBHOOK_URL: process.env.ALERT_WEBHOOK_URL,
-    UPSTASH_REDIS_REST_URL: process.env.UPSTASH_REDIS_REST_URL,
-    UPSTASH_REDIS_REST_TOKEN: process.env.UPSTASH_REDIS_REST_TOKEN,
-    SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY,
-    DATABASE_URL: process.env.DATABASE_URL,
-    FIRECRAWL_API_KEY: process.env.FIRECRAWL_API_KEY,
-    INGESTION_SECRET: process.env.INGESTION_SECRET,
-    SCRAPING_USER_AGENT: process.env.SCRAPING_USER_AGENT,
-    SCRAPING_RATE_LIMIT_PER_DOMAIN: process.env.SCRAPING_RATE_LIMIT_PER_DOMAIN ?? "5",
-    SCRAPLING_WORKER_URL: process.env.SCRAPLING_WORKER_URL,
+      rawEnv.AI_COST_GUARDRAILS_ENABLED ?? "true",
+    ADMIN_AUTH_SECRET: rawEnv.ADMIN_AUTH_SECRET,
+    ADMIN_USERNAME: rawEnv.ADMIN_USERNAME ?? "admin",
+    ADMIN_PASSWORD: rawEnv.ADMIN_PASSWORD ?? "change-me",
+    CRON_SECRET: rawEnv.CRON_SECRET,
+    ALERT_WEBHOOK_URL: rawEnv.ALERT_WEBHOOK_URL,
+    UPSTASH_REDIS_REST_URL: rawEnv.UPSTASH_REDIS_REST_URL,
+    UPSTASH_REDIS_REST_TOKEN: rawEnv.UPSTASH_REDIS_REST_TOKEN,
+    SUPABASE_SERVICE_ROLE_KEY: rawEnv.SUPABASE_SERVICE_ROLE_KEY,
+    DATABASE_URL: rawEnv.DATABASE_URL,
+    FIRECRAWL_API_KEY: rawEnv.FIRECRAWL_API_KEY,
+    INGESTION_SECRET: rawEnv.INGESTION_SECRET,
+    SCRAPING_USER_AGENT: rawEnv.SCRAPING_USER_AGENT,
+    SCRAPING_RATE_LIMIT_PER_DOMAIN: rawEnv.SCRAPING_RATE_LIMIT_PER_DOMAIN ?? "5",
+    SCRAPLING_WORKER_URL: rawEnv.SCRAPLING_WORKER_URL,
   });
 
   const isProduction = parsed.NODE_ENV === "production";
   const isProductionDeployment =
     parsed.VERCEL_ENV === "production" ||
-    (isProduction && process.env.VERCEL_ENV === undefined);
+    (isProduction && rawEnv.VERCEL_ENV === undefined);
   const appDataMode = parsed.APP_DATA_MODE ?? (isProduction ? undefined : "memory");
 
   if (!appDataMode) {
