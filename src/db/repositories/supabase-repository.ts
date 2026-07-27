@@ -120,8 +120,8 @@ const IMPACT_REMEDIATION: Record<RepositoryFallbackImpact, string> = {
     "Results were served from in-memory or synthesised data and are incomplete. Apply the pending src/db/migrations/*.sql in Supabase.",
 };
 
-// One webhook alert per table+operation per process; the console.error below is
-// emitted on every occurrence so the failure is never silent in logs.
+// One webhook alert per table+operation+impact per process; the console.error
+// below is emitted on every occurrence so the failure is never silent in logs.
 const alertedFallbackKeys = new Set<string>();
 
 /**
