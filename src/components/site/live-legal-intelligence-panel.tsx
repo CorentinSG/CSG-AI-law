@@ -17,6 +17,7 @@ import {
 } from "@/content/ai-regulation/live-intelligence";
 import { formatDisplayDate, formatExactDateTime } from "@/lib/utils";
 import { DEFAULT_LOCALE, type Locale } from "@/lib/i18n/config";
+import { livePanelCopy, type LivePanelCopy } from "@/lib/i18n/live-panel-copy";
 import { localeHref } from "@/lib/i18n/href";
 
 // Left border accent by region for at-a-glance geographic identification
@@ -68,11 +69,14 @@ function getPhaseToneClass(phase: LegalStoryPhase): string {
   }
 }
 
-function getActivitySummary(activity: LiveSourceActivityItem[]) {
+function getActivitySummary(
+  activity: LiveSourceActivityItem[],
+  copy: LivePanelCopy["empty"],
+) {
   if (activity.length === 0) {
     return {
-      title: "No public signals yet",
-      body: "Monitoring continues in the background.",
+      title: copy.noSignalsTitle,
+      body: copy.noSignalsBody,
     };
   }
 
@@ -85,14 +89,14 @@ function getActivitySummary(activity: LiveSourceActivityItem[]) {
 
   if (blockedCount === activity.length) {
     return {
-      title: "Source access degraded",
-      body: "Tracked sources were blocked or inaccessible; nothing shown until verified.",
+      title: copy.degradedTitle,
+      body: copy.degradedBody,
     };
   }
 
   return {
-    title: "No newly visible developments",
-    body: "No new public legal signals ready to show right now.",
+    title: copy.noNewTitle,
+    body: copy.noNewBody,
   };
 }
 
@@ -107,7 +111,8 @@ export function LiveLegalIntelligencePanel({
   itemFreshnessById,
   lang = DEFAULT_LOCALE,
 }: LiveLegalIntelligencePanelProps) {
-  const emptyState = getActivitySummary(activity);
+  const copy = livePanelCopy[lang];
+  const emptyState = getActivitySummary(activity, copy.empty);
   const rows =
     stories && stories.length > 0
       ? stories.map((story) => ({
@@ -140,7 +145,7 @@ export function LiveLegalIntelligencePanel({
             <span className="relative inline-flex size-1.5 rounded-full bg-[color:var(--color-live,#10b981)]" />
           </span>
           <span className="font-mono text-[10px] uppercase tracking-[0.28em] text-white/60">
-            Live monitoring · {regionLabel}
+            {copy.liveMonitoring} · {regionLabel}
           </span>
           <span className="ml-auto font-mono text-[9px] uppercase tracking-[0.18em] text-white/40">
             {formatExactDateTime(lastCheckedAt)}
@@ -176,7 +181,7 @@ export function LiveLegalIntelligencePanel({
                   <>
                     <span aria-hidden className="text-white/25">·</span>
                     <span className="text-[color:var(--color-accent-strong,#c4882a)]">
-                      Corroboré · {corroboration.sourceCount} sources
+                      {copy.corroborated(corroboration.sourceCount)}
                     </span>
                   </>
                 ) : null}
@@ -198,7 +203,7 @@ export function LiveLegalIntelligencePanel({
                 <span aria-hidden className="text-white/25">·</span>
                 <span>{item.legalArea}</span>
                 <span aria-hidden className="text-white/25">·</span>
-                <span>Publié {formatDisplayDate(item.publicationDate)}</span>
+                <span>{copy.published(formatDisplayDate(item.publicationDate))}</span>
                 <span aria-hidden className="text-white/25">·</span>
                 <span>{item.sourceName}</span>
                 {item.officialSourceUrl ? (
@@ -210,13 +215,13 @@ export function LiveLegalIntelligencePanel({
                       rel="noreferrer"
                       className="text-[color:var(--color-accent-strong,#c4882a)] transition-colors hover:text-white/80"
                     >
-                      source officielle ↗
+                      {copy.officialSource}
                     </a>
                   </>
                 ) : (
                   <>
                     <span aria-hidden className="text-white/25">·</span>
-                    <span className="text-amber-300/80">vérification officielle en attente</span>
+                    <span className="text-amber-300/80">{copy.officialVerificationPending}</span>
                   </>
                 )}
                 {extraSources.map((member) => (
@@ -228,7 +233,7 @@ export function LiveLegalIntelligencePanel({
                       rel="noreferrer"
                       className="text-white/55 transition-colors hover:text-white/80"
                     >
-                      aussi via {member.sourceName} ↗
+                      {copy.alsoVia(member.sourceName)}
                     </a>
                   </span>
                 ))}
@@ -239,15 +244,14 @@ export function LiveLegalIntelligencePanel({
       ) : (
         <div className="border-y border-white/8 py-8">
           <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-white/45">
-            État public
+            {copy.publicStateLabel}
           </p>
           <p className="mt-2 font-display text-xl font-medium tracking-[-0.03em] text-white/90">
             {emptyState.title}
           </p>
           <p className="mt-2 max-w-2xl text-sm leading-7 text-white/60">{emptyState.body}</p>
           <p className="mt-3 max-w-2xl text-[13px] leading-6 text-white/45">
-            Seuls les développements sourcés et publiquement sûrs apparaissent ici — un
-            élément s&apos;affiche une fois source, date et vérification prêtes.
+            {copy.publicStateNote}
           </p>
         </div>
       )}

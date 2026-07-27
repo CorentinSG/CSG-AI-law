@@ -1,3 +1,15 @@
+/**
+ * Whether a mandate entry corresponds to a real, seeded, scanned source.
+ *
+ * Every entry below is currently `aspirational_not_wired`: the ids are
+ * declarative mandate names (`news-…`, `official-…`) and none of them exists in
+ * `regulation_sources` or in any country source registry (whose ids look like
+ * `src-cnil-ai`). The field is required so a mandate can never be read as real
+ * monitoring coverage; flip an entry to `seeded_and_scanned` only once its
+ * source is actually seeded and reached by a scan profile.
+ */
+export type MandateSourceProvisioning = "aspirational_not_wired" | "seeded_and_scanned";
+
 export interface AgentSourceMandate {
   legalNewsSources: ReadonlyArray<{
     id: string;
@@ -6,6 +18,7 @@ export interface AgentSourceMandate {
     scope: "pan_european_filtered_by_country" | "country_specific";
     use: "legal_news_monitoring";
     activationRule: "filter_by_country_and_ai_law_terms";
+    provisioning: MandateSourceProvisioning;
   }>;
   officialDatabaseSources: ReadonlyArray<{
     id: string;
@@ -19,6 +32,7 @@ export interface AgentSourceMandate {
     use: "legal_database_monitoring";
     coverage: ReadonlyArray<"hard_law" | "soft_law" | "case_law_and_decisions">;
     activationRule: "verify_official_endpoint_before_active_scan";
+    provisioning: MandateSourceProvisioning;
   }>;
 }
 
@@ -30,6 +44,7 @@ const sharedEuropeanLegalNewsSources = [
     scope: "pan_european_filtered_by_country",
     use: "legal_news_monitoring",
     activationRule: "filter_by_country_and_ai_law_terms",
+    provisioning: "aspirational_not_wired",
   },
   {
     id: "news-euractiv-tech-ai",
@@ -38,6 +53,7 @@ const sharedEuropeanLegalNewsSources = [
     scope: "pan_european_filtered_by_country",
     use: "legal_news_monitoring",
     activationRule: "filter_by_country_and_ai_law_terms",
+    provisioning: "aspirational_not_wired",
   },
   {
     id: "news-politico-tech-ai",
@@ -46,6 +62,7 @@ const sharedEuropeanLegalNewsSources = [
     scope: "pan_european_filtered_by_country",
     use: "legal_news_monitoring",
     activationRule: "filter_by_country_and_ai_law_terms",
+    provisioning: "aspirational_not_wired",
   },
   {
     id: "news-mlex-ai",
@@ -54,6 +71,7 @@ const sharedEuropeanLegalNewsSources = [
     scope: "pan_european_filtered_by_country",
     use: "legal_news_monitoring",
     activationRule: "filter_by_country_and_ai_law_terms",
+    provisioning: "aspirational_not_wired",
   },
 ] as const;
 
@@ -100,6 +118,7 @@ function buildCountrySpecificNewsSource(country: string) {
     scope: "country_specific" as const,
     use: "legal_news_monitoring" as const,
     activationRule: "filter_by_country_and_ai_law_terms" as const,
+    provisioning: "aspirational_not_wired" as const,
   };
 }
 
@@ -113,6 +132,7 @@ function buildOfficialDatabaseSources(country: string, authority: string) {
       use: "legal_database_monitoring",
       coverage: ["soft_law", "case_law_and_decisions"],
       activationRule: "verify_official_endpoint_before_active_scan",
+      provisioning: "aspirational_not_wired",
     },
     {
       id: `official-${slug}-journal-ai`,
@@ -121,6 +141,7 @@ function buildOfficialDatabaseSources(country: string, authority: string) {
       use: "legal_database_monitoring",
       coverage: ["hard_law"],
       activationRule: "verify_official_endpoint_before_active_scan",
+      provisioning: "aspirational_not_wired",
     },
     {
       id: `official-${slug}-parliament-ai`,
@@ -129,6 +150,7 @@ function buildOfficialDatabaseSources(country: string, authority: string) {
       use: "legal_database_monitoring",
       coverage: ["hard_law"],
       activationRule: "verify_official_endpoint_before_active_scan",
+      provisioning: "aspirational_not_wired",
     },
     {
       id: `official-${slug}-government-digital-ai`,
@@ -137,6 +159,7 @@ function buildOfficialDatabaseSources(country: string, authority: string) {
       use: "legal_database_monitoring",
       coverage: ["soft_law", "hard_law"],
       activationRule: "verify_official_endpoint_before_active_scan",
+      provisioning: "aspirational_not_wired",
     },
     {
       id: `official-${slug}-courts-ai`,
@@ -145,6 +168,7 @@ function buildOfficialDatabaseSources(country: string, authority: string) {
       use: "legal_database_monitoring",
       coverage: ["case_law_and_decisions"],
       activationRule: "verify_official_endpoint_before_active_scan",
+      provisioning: "aspirational_not_wired",
     },
   ] as const;
 }
