@@ -265,6 +265,75 @@ describe("buildSourceRuntimeHealthSummaries", () => {
   });
 });
 
+describe("buildSourceExecutionDecisions declared scanFrequency", () => {
+  // Sources covered by a country monitoring registry take that registry's
+  // recommendedCadence. Everything else falls back to the declared
+  // `scanFrequency` column, which must actually gate selection — a source
+  // declared `weekly` must not be re-scanned daily. `src-declared-cadence-ai`
+  // is deliberately absent from every registry so the fallback path is used.
+  const lastAttemptAt = "2026-06-10T10:00:00.000Z";
+  const lastAttemptMs = Date.parse(lastAttemptAt);
+  const hour = 60 * 60 * 1000;
+
+  function decideAt(scanFrequency: RegulationSource["scanFrequency"], now: Date) {
+    const sourceId = "src-declared-cadence-ai";
+    return buildSourceExecutionDecisions({
+      sources: [
+        makeSource({
+          id: sourceId,
+          name: "Declared cadence probe",
+          scanFrequency,
+          lastScannedAt: lastAttemptAt,
+          lastSuccessfulScanAt: lastAttemptAt,
+        }),
+      ],
+      sourceHealthChecks: [makeHealthCheck({ sourceId, checkedAt: lastAttemptAt })],
+      scanLogs: [makeScanLog({ sourceId, scanFinishedAt: lastAttemptAt })],
+      scanJobs: [makeScanJob({ sourceId, finishedAt: lastAttemptAt })],
+      ingestionLogs: [makeIngestionLog({ source_id: sourceId, finished_at: lastAttemptAt })],
+      now,
+    })[0];
+  }
+
+  const cases = [
+    { scanFrequency: "hourly", intervalHours: 1 },
+    { scanFrequency: "every_6_hours", intervalHours: 6 },
+    { scanFrequency: "daily", intervalHours: 24 },
+    { scanFrequency: "weekly", intervalHours: 168 },
+  ] as const;
+
+  for (const { scanFrequency, intervalHours } of cases) {
+    it(`holds a ${scanFrequency} source until its declared interval elapses`, () => {
+      const before = decideAt(
+        scanFrequency,
+        new Date(lastAttemptMs + (intervalHours - 0.5) * hour),
+      );
+      expect(before).toMatchObject({
+        shouldScan: false,
+        decision: "skip_until_due",
+        recommendedCadence: scanFrequency,
+      });
+
+      const after = decideAt(
+        scanFrequency,
+        new Date(lastAttemptMs + (intervalHours + 0.5) * hour),
+      );
+      expect(after).toMatchObject({ shouldScan: true, decision: "scan_now" });
+    });
+  }
+
+  it("does not rescan a weekly source on the daily boundary", () => {
+    const decision = decideAt("weekly", new Date(lastAttemptMs + 24 * hour));
+    expect(decision.shouldScan).toBe(false);
+    expect(decision.recommendedCadence).toBe("weekly");
+  });
+
+  it("lets an every_6_hours source run four times a day rather than once", () => {
+    const decision = decideAt("every_6_hours", new Date(lastAttemptMs + 7 * hour));
+    expect(decision.shouldScan).toBe(true);
+  });
+});
+
 describe("buildSourceExecutionDecisions", () => {
   it("skips a fresh source until its base cadence is due", () => {
     const decisions = buildSourceExecutionDecisions({
