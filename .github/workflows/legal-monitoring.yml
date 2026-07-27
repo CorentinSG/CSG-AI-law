@@ -21,7 +21,10 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          # Node 20 has no native WebSocket, which @supabase/supabase-js Realtime
+          # requires: the scan worker started, read its config, then aborted with
+          # "Node.js 20 detected without native WebSocket support".
+          node-version: 22
           cache: npm
 
       - run: npm ci
@@ -55,12 +58,15 @@ jobs:
           # env validation demands ADMIN_AUTH_SECRET for admin session signing.
           # This job only drains the scan queue and never serves or validates an
           # admin session, so it uses a throwaway per-run value rather than the
-          # production secret. Nothing here is stored or printed.
-          printf 'ADMIN_AUTH_SECRET=%s\n' "$(openssl rand -hex 32)" >> "$GITHUB_ENV"
+          # production secret. Nothing here is stored.
+          secret="$(openssl rand -hex 32)"
+          echo "::add-mask::$secret"
+          printf 'ADMIN_AUTH_SECRET=%s\n' "$secret" >> "$GITHUB_ENV"
 
       - name: Start local Scrapling worker
         run: |
           token="$(openssl rand -hex 32)"
+          echo "::add-mask::$token"
           printf 'SCRAPLING_WORKER_TOKEN=%s\n' "$token" >> "$GITHUB_ENV"
           SCRAPLING_WORKER_TOKEN="$token" \
             gunicorn --chdir scrapling_worker worker:app \
