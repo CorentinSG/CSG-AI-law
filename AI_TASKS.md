@@ -11,7 +11,7 @@ Each agent edits only its own rows. Status vocabulary: `CLAIMED` · `WIP` · `BL
 
 | Task ID | Owner | Status | Branch @ sha | Locked files | Graph anchor | Updated |
 |---|---|---|---|---|---|---|
-| T-GITHUB-MONITORING-RECOVERY | Claude Code | BLOCKED (operator action required — see 2026-07-26 log entry) | `claude/github-monitoring-recovery-lz4dos` | GitHub Actions repository secrets and monitoring validation | `.github/workflows/legal-monitoring.yml`, `buildHealthSnapshot()`, community "Source Runtime Health" | 2026-07-26 |
+| T-GITHUB-MONITORING-RECOVERY | Claude Code | REVIEW (green on branch; needs merge to `main`) | `claude/github-monitoring-recovery-lz4dos` @ `80f5903` | `.github/workflows/legal-monitoring.yml`, `src/lib/env.ts` | `buildHealthSnapshot()`, `readRawEnv()`, `writeScanWorkerStatus()`, community "Source Runtime Health" | 2026-07-27 |
 | T-MONITORING-CORRECTNESS (plan 2.3/2.4/2.8) | Claude Code | REVIEW | `claude/github-monitoring-recovery-lz4dos` | `src/agents/ai-regulation/euNewsSources.ts`, `connectors/conditional-fetch.ts`, `registry-seed-integrity.test.ts`, `sourceRuntimeHealth.test.ts` | `fetchTextWithConditionalCaching()`, `buildSourceExecutionDecisions()`, `getSourceDescriptor()`, community "Source Runtime Health" | 2026-07-27 |
 | T-TOTAL-PROJECT-OWNERSHIP | Claude Code | MERGED | `main` | entire repository | all Graphify communities; start with the total handoff document | 2026-07-25 |
 | TOOLING-GRAPH-PROTOCOL | Claude Code | REVIEW | `ops/t-ops9-ux` @ `30bc31c` | `AGENTS.md`, `AI_TASKS.md`, `.gitignore`, `.git/hooks/*` | n/a (tooling, no app code) | 2026-06-20 |
@@ -47,6 +47,21 @@ YYYY-MM-DD · <Agent> · <TASK-ID> · <STATUS>
 ```
 
 ## Current status
+
+2026-07-27 · Claude Code · T-GITHUB-MONITORING-RECOVERY · REVIEW
+- Intent:        Operator added the three Supabase repository secrets; drive the acceptance list to green. The secrets turned out to be correct on the first try — they had been masking three separate code defects that only surfaced once validation passed.
+- Files:         `.github/workflows/legal-monitoring.yml`, `src/lib/env.ts`, `src/lib/env.test.ts`, `AI_TASKS.md`.
+- Graph anchors: `readRawEnv()` (new), `buildEnv()`, `buildHealthSnapshot()`, `writeScanWorkerStatus()`, community "Source Runtime Health".
+- Defects found and fixed (each was invisible while secret validation failed first):
+  1. **Blank optional secrets.** GitHub Actions substitutes `""` for every unconfigured `secrets.X`, and the workflow forwards nine optional connector secrets. Zod `.optional()` tolerates absence, not emptiness, so `FIRECRAWL_API_KEY=""` failed `.min(1)` and `ALERT_WEBHOOK_URL=""` failed `.url()`, killing the worker before it drained anything. `readRawEnv()` now treats blank as unset, which also restores the `?? default` fallbacks. Two regression tests added. Run `30235496634`.
+  2. **`ADMIN_AUTH_SECRET` demanded of a queue worker.** Env validation requires the admin session signing key unconditionally, but this job never serves or validates an admin session. The workflow now mints a throwaway per-run value, the pattern already used for `SCRAPLING_WORKER_TOKEN`; no new repository secret, and the production admin guard is untouched. Run `30235692726`.
+  3. **Node 20 has no native WebSocket.** `@supabase/supabase-js` Realtime requires one, so the worker booted, printed its config, then aborted. Vercel production already runs Node 24.x, so the workflow's Node 20 pin was the outlier; moved to Node 22. Run `30235765127`.
+- Acceptance evidence (run `30235850441` on `claude/github-monitoring-recovery-lz4dos`, https://github.com/CorentinSG/CSG-AI-law/actions/runs/30235850441): secret validation `success`, Scrapling startup `success`, queue drain executing real scans. `/api/health?check=worker` returned **HTTP 200** at **2026-07-27T04:10:08.354Z** with `ok:true`, `worker.state:"active"`, `alive:true`, `heartbeatFresh:true`, `heartbeatAgeMs:926`, `heartbeatAt 2026-07-27 04:10:07.428+00`, `runningJobs:1`. Newest successful scan advanced from `2026-07-22T17:05:42.866Z` to **`2026-07-27T04:03:48.493Z`** (`eu_live_news_discovery_scan`; `international_live_news_scan` at 03:59:15).
+- Verification:  `npm test` PASS 743/743, `npm run lint` PASS, `npm run typecheck` PASS. Workflow YAML parsed and step order checked.
+- Also hardened: both run-scoped values (`ADMIN_AUTH_SECRET`, `SCRAPLING_WORKER_TOKEN`) were being echoed in the step env group, contradicting the documented claim that the token is never printed; both are now `::add-mask::`ed.
+- Remaining risk: **the fixes are not on `main`.** The 4×/hour schedule runs from `main`, which still carries all three defects, so scheduled runs keep failing until this branch merges. `ci.yml` also still pins Node 20 — it passes today, left deliberately untouched.
+- Branch/commit: `claude/github-monitoring-recovery-lz4dos` @ `80f5903`.
+- Next:          Merge to `main`, then re-dispatch from `main` and confirm one green scheduled cycle before declaring the Railway migration complete.
 
 2026-07-27 · Claude Code · T-MONITORING-CORRECTNESS · REVIEW
 - Intent:        Master-plan Wave 2 correctness lot (2.3 scanFrequency, 2.4 transient retry, 2.8 registry/seed id drift), picked up while T-GITHUB-MONITORING-RECOVERY waits on operator secrets. Goal: make the first green Actions run actually useful, not merely non-red.
