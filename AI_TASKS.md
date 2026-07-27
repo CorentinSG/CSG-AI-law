@@ -11,8 +11,8 @@ Each agent edits only its own rows. Status vocabulary: `CLAIMED` · `WIP` · `BL
 
 | Task ID | Owner | Status | Branch @ sha | Locked files | Graph anchor | Updated |
 |---|---|---|---|---|---|---|
-| T-GITHUB-MONITORING-RECOVERY | Claude Code | REVIEW (green on branch; needs merge to `main`) | `claude/github-monitoring-recovery-lz4dos` @ `80f5903` | `.github/workflows/legal-monitoring.yml`, `src/lib/env.ts` | `buildHealthSnapshot()`, `readRawEnv()`, `writeScanWorkerStatus()`, community "Source Runtime Health" | 2026-07-27 |
-| T-MONITORING-CORRECTNESS (plan 2.3/2.4/2.8) | Claude Code | REVIEW | `claude/github-monitoring-recovery-lz4dos` | `src/agents/ai-regulation/euNewsSources.ts`, `connectors/conditional-fetch.ts`, `registry-seed-integrity.test.ts`, `sourceRuntimeHealth.test.ts` | `fetchTextWithConditionalCaching()`, `buildSourceExecutionDecisions()`, `getSourceDescriptor()`, community "Source Runtime Health" | 2026-07-27 |
+| T-GITHUB-MONITORING-RECOVERY | Claude Code | MERGED | `main` @ `eac691b` | none (released) | `buildHealthSnapshot()`, `readRawEnv()`, `writeScanWorkerStatus()`, community "Source Runtime Health" | 2026-07-27 |
+| T-MONITORING-CORRECTNESS (plan 2.3/2.4/2.8) | Claude Code | MERGED | `main` @ `eac691b` | none (released) | `fetchTextWithConditionalCaching()`, `buildSourceExecutionDecisions()`, `getSourceDescriptor()`, community "Source Runtime Health" | 2026-07-27 |
 | T-TOTAL-PROJECT-OWNERSHIP | Claude Code | MERGED | `main` | entire repository | all Graphify communities; start with the total handoff document | 2026-07-25 |
 | TOOLING-GRAPH-PROTOCOL | Claude Code | REVIEW | `ops/t-ops9-ux` @ `30bc31c` | `AGENTS.md`, `AI_TASKS.md`, `.gitignore`, `.git/hooks/*` | n/a (tooling, no app code) | 2026-06-20 |
 | T-OPS9-UX | Claude Code | WIP | `ops/t-ops9-ux` @ `30bc31c` | `src/app/**`, shared UI components | community "UI Components and Utilities", "Intelligence Hub UI" | 2026-06-20 |
@@ -47,6 +47,18 @@ YYYY-MM-DD · <Agent> · <TASK-ID> · <STATUS>
 ```
 
 ## Current status
+
+2026-07-27 · Claude Code · T-GITHUB-MONITORING-RECOVERY · MERGED
+- Intent:        Close the Railway→GitHub Actions migration. PR #40 merged to `main` at the operator's explicit request; all nine acceptance steps now pass **from `main`**, which is the condition the 2026-07-26 handoff set before the migration could be called operational.
+- Files:         `AI_TASKS.md` (this record only). The code shipped in `eac691b`.
+- Graph anchors: `readRawEnv()`, `buildHealthSnapshot()`, `writeScanWorkerStatus()`, `fetchTextWithConditionalCaching()`, community "Source Runtime Health".
+- Green run:     https://github.com/CorentinSG/CSG-AI-law/actions/runs/30278378903 — dispatched from `main` @ `eac691b`. `Validate required Supabase secrets` success, `Start local Scrapling worker` success, queue drain executing real scans.
+- Healthcheck:   `/api/health?check=worker` → **HTTP 200 at 2026-07-27T15:14:35.786Z**. `ok:true`, `worker.state:"active"`, `alive:true`, `heartbeatFresh:true`, `heartbeatAgeMs:2170`, `heartbeatAt 2026-07-27 15:14:33.616+00`, `runningJobs:1`, `database.reachable:true`, production commit `eac691b`. Seventeen profiles carry fresh scans; newest `austria_official_legal_scan` at `2026-07-27T15:12:38.070Z`, well past the `2026-07-22T17:05:42.866Z` watermark.
+- Acceptance:    All seven checks from `docs/handoffs/2026-07-26-github-actions-monitoring-verification.md` pass. **The Railway migration is operational.**
+- Correction:    An earlier reading of this session claimed the worker's self-scheduler starved its own idle-exit condition. The run logs refute it — run `30273232615` enqueued 12 jobs and processed 20 with zero failures, so the drain outpaces the refill. The 40-minute cancellations were the 22-July backlog exceeding one run's window, not a design defect. No cadence change is needed; successive scheduled runs absorb the arrears.
+- Verification:  743 tests, lint, typecheck, build all passed pre-merge; CI `verify` green on the PR head.
+- Branch/commit: `main` @ `eac691b` (squash of `claude/github-monitoring-recovery-lz4dos`).
+- Next:          Nobody — this task is closed. Remaining monitoring work lives in plan item 2.6 (US lanes unseeded) and the missing per-request fetch timeout in `conditional-fetch.ts`, both recorded below and unowned.
 
 2026-07-27 · Claude Code · T-GITHUB-MONITORING-RECOVERY · REVIEW
 - Intent:        Operator added the three Supabase repository secrets; drive the acceptance list to green. The secrets turned out to be correct on the first try — they had been masking three separate code defects that only surfaced once validation passed.
