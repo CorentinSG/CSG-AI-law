@@ -43,6 +43,7 @@ export default async function EuAiActCalendarPage({
           ]}
         />
         <SectionHeading
+          as="h1"
           eyebrow={fr ? "Échéances officielles · UE" : "Official deadlines · EU"}
           title={fr ? "Calendrier d'application" : "Application calendar"}
           description={

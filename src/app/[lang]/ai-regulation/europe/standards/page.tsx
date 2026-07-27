@@ -76,6 +76,7 @@ export default async function EuropeStandardsPage({
           ]}
         />
         <SectionHeading
+          as="h1"
           eyebrow={fr ? "Droit souple · Standards · UE" : "Soft law · Standards · EU"}
           title="Standards & Soft law"
           description={

@@ -480,6 +480,73 @@ describe("MemoryAiRegulationRepository", () => {
     );
   });
 
+  it("serves the scan-job queue oldest-first regardless of insertion order", async () => {
+    // Deliberately enqueued newest-first: a worker that reads a recent-jobs
+    // window and filters in memory would never reach `job-old`.
+    const enqueue = async (createdAt: string, status: "queued" | "running") => {
+      const job = await repository.createScanJob({
+        sourceId: "src-federal-register-ai",
+        trigger: "scheduled",
+        requestedBy: "test-suite",
+        status,
+        startedAt: null,
+        finishedAt: null,
+        resultSummary: {},
+        errorMessage: null,
+      });
+      return repository.updateScanJob(job.id, { createdAt });
+    };
+
+    const newest = await enqueue("2026-07-27T11:00:00.000Z", "queued");
+    const running = await enqueue("2026-07-27T12:00:00.000Z", "running");
+    const oldest = await enqueue("2026-07-01T09:00:00.000Z", "queued");
+    const middle = await enqueue("2026-07-15T09:00:00.000Z", "queued");
+
+    const queued = await repository.listQueuedScanJobs();
+    const ids = queued.map((job) => job.id);
+
+    expect(ids.slice(0, 3)).toEqual([oldest.id, middle.id, newest.id]);
+    expect(ids).not.toContain(running.id);
+    expect(queued.every((job) => job.status === "queued")).toBe(true);
+
+    // The limit takes the head of the queue, not the tail.
+    expect((await repository.listQueuedScanJobs(1)).map((job) => job.id)).toEqual([
+      oldest.id,
+    ]);
+  });
+
+  it("reads scan jobs by creation time window rather than by row count", async () => {
+    const enqueue = async (createdAt: string) => {
+      const job = await repository.createScanJob({
+        sourceId: "src-federal-register-ai",
+        trigger: "scheduled",
+        requestedBy: "central-monitoring-scheduler",
+        status: "succeeded",
+        startedAt: null,
+        finishedAt: null,
+        resultSummary: {},
+        errorMessage: null,
+      });
+      return repository.updateScanJob(job.id, { createdAt });
+    };
+
+    const inWindowOld = await enqueue("2026-07-27T11:51:00.000Z");
+    const inWindowNew = await enqueue("2026-07-27T11:59:00.000Z");
+    const outOfWindow = await enqueue("2026-07-27T10:00:00.000Z");
+
+    const recent = await repository.listScanJobsCreatedSince("2026-07-27T11:50:00.000Z");
+    const ids = recent.map((job) => job.id);
+
+    expect(ids).toContain(inWindowOld.id);
+    expect(ids).toContain(inWindowNew.id);
+    expect(ids).not.toContain(outOfWindow.id);
+    // Newest first, so a capped read keeps the most recent duplicates.
+    expect(ids.indexOf(inWindowNew.id)).toBeLessThan(ids.indexOf(inWindowOld.id));
+    expect(await repository.listScanJobsCreatedSince("2026-07-27T11:50:00.000Z", 1)).toEqual([
+      inWindowNew,
+    ]);
+  });
+
   it("claims a queued scan job only once with lease metadata", async () => {
     const job = await repository.createScanJob({
       sourceId: "src-federal-register-ai",

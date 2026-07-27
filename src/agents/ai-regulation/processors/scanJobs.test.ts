@@ -8,6 +8,15 @@ const updateRepository = {
   getScanJobs: vi.fn(async (limit?: number) =>
     typeof limit === "number" ? jobs.slice(0, limit) : jobs.slice(),
   ),
+  // Queue selection asks the repository for queued jobs oldest-first rather
+  // than filtering a window of the newest jobs in memory, which starved the
+  // queue once it grew past that window.
+  getQueuedScanJobs: vi.fn(async (limit?: number) => {
+    const queued = jobs
+      .filter((job) => job.status === "queued")
+      .sort((a, b) => a.createdAt.localeCompare(b.createdAt));
+    return typeof limit === "number" ? queued.slice(0, limit) : queued;
+  }),
   getScanJob: vi.fn(async (jobId: string) => jobs.find((job) => job.id === jobId) ?? null),
   createScanJob: vi.fn(async (input) => {
     const timestamp = "2026-06-06T10:00:00.000Z";

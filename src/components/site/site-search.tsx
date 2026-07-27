@@ -6,6 +6,8 @@ import { ArrowRight, CornerDownLeft, Search, X } from "lucide-react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 
 import { buildSiteSearchIndex, type SearchEntry } from "@/content/site-search-index";
+import { type Locale } from "@/lib/i18n/config";
+import { localeHref } from "@/lib/i18n/href";
 import { cn } from "@/lib/utils";
 
 const ease: [number, number, number, number] = [0.16, 1, 0.3, 1];
@@ -36,7 +38,12 @@ const GROUP_ORDER: SearchEntry["group"][] = [
   "Note",
 ];
 
-export function SiteSearch() {
+export function SiteSearch({ lang }: {
+  /** Required: the index stores unprefixed paths, so pushing one verbatim sent
+   * the reader through `proxy.ts`, which re-negotiates the locale from
+   * Accept-Language and can land them in the other language. */
+  lang: Locale;
+}) {
   const router = useRouter();
   const reduce = useReducedMotion();
   const [open, setOpen] = useState(false);
@@ -93,7 +100,7 @@ export function SiteSearch() {
 
   const go = (entry: SearchEntry) => {
     setOpen(false);
-    router.push(entry.href);
+    router.push(localeHref(lang, entry.href));
   };
 
   const onKeyDown = (e: React.KeyboardEvent) => {

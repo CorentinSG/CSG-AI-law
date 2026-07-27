@@ -123,7 +123,7 @@ export function SiteHeader({
           : "border-b border-transparent bg-transparent backdrop-blur-0",
       )}
     >
-      <SiteSearch />
+      <SiteSearch lang={lang} />
       <div
         className={cn(
           "mx-auto flex max-w-7xl items-center justify-between gap-4 px-6 transition-[padding] duration-500",

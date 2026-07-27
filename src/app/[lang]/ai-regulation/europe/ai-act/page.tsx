@@ -115,6 +115,7 @@ export default async function EuAiActPage({
           ]}
         />
         <SectionHeading
+          as="h1"
           eyebrow={t.eyebrow}
           title={act.shortTitle}
           description={act.scope}

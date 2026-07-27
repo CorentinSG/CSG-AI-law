@@ -46,6 +46,7 @@ export default async function UsCaseLawPage({
           ]}
         />
         <SectionHeading
+          as="h1"
           eyebrow={fr ? "Décisions & enforcement · États-Unis" : "Decisions & enforcement · United States"}
           title={fr ? "Jurisprudence" : "Case law"}
           description={

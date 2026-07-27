@@ -15,6 +15,8 @@ const { queueScanJob } = vi.hoisted(() => ({
 
 const updateRepository = vi.hoisted(() => ({
   getScanJobs: vi.fn(async (): Promise<ScanJob[]> => []),
+  // The duplicate check reads the dedupe window by time, not by row count.
+  getScanJobsCreatedSince: vi.fn(async (): Promise<ScanJob[]> => []),
 }));
 
 vi.mock("@/agents/ai-regulation/processors/scanJobs", () => ({
@@ -28,7 +30,7 @@ vi.mock("@/agents/ai-regulation/processors/updateRepository", () => ({
 describe("central monitoring scheduler", () => {
   afterEach(() => {
     vi.clearAllMocks();
-    updateRepository.getScanJobs.mockResolvedValue([]);
+    updateRepository.getScanJobsCreatedSince.mockResolvedValue([]);
   });
 
   it("builds a central plan covering every EU, US, and International monitoring agent", () => {
@@ -173,11 +175,11 @@ describe("central monitoring scheduler", () => {
   it("reads the scan-job history once per invocation instead of once per plan item", async () => {
     await enqueueCentralMonitoringSchedule({});
 
-    expect(updateRepository.getScanJobs).toHaveBeenCalledTimes(1);
+    expect(updateRepository.getScanJobsCreatedSince).toHaveBeenCalledTimes(1);
   });
 
   it("skips recent duplicate sweeps to keep worker restarts and Vercel cron from piling up jobs", async () => {
-    updateRepository.getScanJobs.mockResolvedValueOnce([
+    updateRepository.getScanJobsCreatedSince.mockResolvedValueOnce([
       {
         id: "job-existing",
         sourceId: null,

@@ -43,6 +43,7 @@ export default async function UsGovernancePage({
           ]}
         />
         <SectionHeading
+          as="h1"
           eyebrow={fr ? "Acteurs & supervision · États-Unis" : "Actors & oversight · United States"}
           title={fr ? "Gouvernance" : "Governance"}
           description={

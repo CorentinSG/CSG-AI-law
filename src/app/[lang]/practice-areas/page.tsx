@@ -7,6 +7,7 @@ import { MotionStagger } from "@/components/site/motion-stagger";
 import { SectionHeading } from "@/components/site/section-heading";
 import { SiteShell } from "@/components/site/shell";
 import { Card, CardContent } from "@/components/ui/card";
+import { localeHref } from "@/lib/i18n/href";
 import {
   getLegalDomains,
   legalDomainSourcingPrinciple,
@@ -50,6 +51,7 @@ export default async function PracticeAreasPage({
     <SiteShell className="space-y-12 md:space-y-16">
       <section className="space-y-4">
         <SectionHeading
+          as="h1"
           eyebrow={fr ? "Intelligence juridique" : "Legal intelligence"}
           title={fr ? "Domaines de pratique" : "Practice areas"}
           description={
@@ -94,7 +96,11 @@ export default async function PracticeAreasPage({
           );
 
           return domain.hubHref ? (
-            <Link key={domain.slug} href={domain.hubHref} className="group block">
+            <Link
+              key={domain.slug}
+              href={localeHref(fr ? "fr" : "en", domain.hubHref)}
+              className="group block"
+            >
               {card}
             </Link>
           ) : (

@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 
+import { DEFAULT_LOCALE, isLocale } from "@/lib/i18n/config";
+import { localeHref } from "@/lib/i18n/href";
+
 export const metadata: Metadata = {
   title: "AI Law News",
   description:
@@ -8,10 +11,13 @@ export const metadata: Metadata = {
 };
 
 export default async function NewsPage({
+  params: routeParams,
   searchParams,
 }: {
+  params: Promise<{ lang: string }>;
   searchParams?: Promise<Record<string, string | string[] | undefined>>;
 }) {
+  const { lang } = await routeParams;
   const params = ((await searchParams) ?? {}) as Record<string, string>;
   const nextParams = new URLSearchParams();
 
@@ -23,5 +29,10 @@ export default async function NewsPage({
 
   nextParams.set("view", "news");
 
-  redirect(`/ai-regulation?${nextParams.toString()}`);
+  // Keep the locale segment: an unprefixed target goes through `proxy.ts`,
+  // which re-negotiates the locale from Accept-Language and can drop a French
+  // reader onto /en.
+  redirect(
+    `${localeHref(isLocale(lang) ? lang : DEFAULT_LOCALE, "/ai-regulation")}?${nextParams.toString()}`,
+  );
 }

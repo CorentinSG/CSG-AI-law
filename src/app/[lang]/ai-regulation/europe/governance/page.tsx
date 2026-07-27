@@ -56,6 +56,7 @@ export default async function EuropeGovernancePage({
           ]}
         />
         <SectionHeading
+          as="h1"
           eyebrow={fr ? "Acteurs institutionnels · UE" : "Institutional actors · EU"}
           title={fr ? "Gouvernance" : "Governance"}
           description={

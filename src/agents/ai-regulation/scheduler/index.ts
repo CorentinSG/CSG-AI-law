@@ -172,11 +172,6 @@ const DEFAULT_SCHEDULER_DEDUPE_WINDOW_MS = 10 * 60 * 1000;
 // 15-minute rotation each country's lanes run roughly every 2h15.
 const COUNTRY_STAGGER_WINDOW_MS = 15 * 60 * 1000;
 
-// Single `scan_jobs` read per scheduler invocation. This used to run once per
-// plan item; with the per-country lanes that would be 27 full reads per cycle,
-// which is the kind of load that already produced Cloudflare 522s on Supabase.
-const SCHEDULER_DUPLICATE_LOOKBACK_JOBS = 300;
-
 function activeCountryScanItemIds(now: number) {
   // The day offset keeps a once-a-day caller (the vercel.json central-scheduler
   // cron) from aliasing: 96 fifteen-minute windows per day is a multiple of 3,
@@ -288,9 +283,13 @@ export async function enqueueCentralMonitoringSchedule(options?: {
 
   const now = Date.now();
   const activeCountryItemIds = activeCountryScanItemIds(now);
+  // A row window could miss a duplicate created seconds ago once enqueue volume
+  // pushed it past the newest N rows. Ask for the dedupe window by time instead.
   const recentJobs =
     dedupeWindowMs > 0
-      ? await updateRepository.getScanJobs(SCHEDULER_DUPLICATE_LOOKBACK_JOBS)
+      ? await updateRepository.getScanJobsCreatedSince(
+          new Date(now - dedupeWindowMs).toISOString(),
+        )
       : [];
 
   const queuedJobs = [];

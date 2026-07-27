@@ -171,6 +171,101 @@ function reportRepositoryFallback(input: {
     });
 }
 
+// PostgREST caps every response at `db-max-rows` (1000 on Supabase) and still
+// answers 200 OK, so a truncated read is indistinguishable from a complete one.
+// Reads that must see every matching row page explicitly instead of issuing one
+// unbounded SELECT.
+export const BOUNDED_READ_PAGE_SIZE = 1000;
+
+// Absolute ceiling for a paged read. A read that needs more than this is not a
+// "list everything" read any more and belongs on a paginated API.
+export const BOUNDED_READ_MAX_ROWS = 10_000;
+
+type BoundedReadError = {
+  code?: string;
+  message?: string;
+  details?: string;
+  hint?: string;
+} | null;
+
+type BoundedReadResponse = { data: unknown[] | null; error: BoundedReadError };
+
+/**
+ * Make a bounded read that hit its ceiling loud.
+ *
+ * Unlike a legacy fallback this is not schema drift — the query worked, there is
+ * simply more data than the caller's contract can carry. It gets its own log
+ * prefix so the two are never confused in triage.
+ */
+function reportBoundedReadTruncation(input: {
+  table: string;
+  operation: string;
+  cap: number;
+}) {
+  console.error(
+    [
+      "[supabase-repository] bounded read truncated",
+      `table=${input.table}`,
+      `operation=${input.operation}`,
+      `cap=${input.cap}`,
+      "remediation=RESULTS ARE INCOMPLETE. More rows match than the bounded-read ceiling allows. Move this caller onto a paginated API (listRegulatoryUpdatesPage / listRegulatoryUpdatesCursorPage) or raise the ceiling deliberately.",
+    ].join(" | "),
+  );
+}
+
+/**
+ * Read every row a query matches by walking fixed-size windows.
+ *
+ * `buildPage` must apply `.range(from, to)` and is called once per window. The
+ * next window starts at the number of rows actually received, so a server-side
+ * `db-max-rows` smaller than {@link BOUNDED_READ_PAGE_SIZE} shortens the window
+ * instead of silently ending the walk.
+ *
+ * The loop deliberately runs one iteration past `maxRows`: that extra (usually
+ * empty) window distinguishes "the table holds exactly maxRows rows" from
+ * "there is more", so truncation is never reported on a false positive and no
+ * COUNT query is needed.
+ */
+export async function fetchAllRows(
+  buildPage: (from: number, to: number) => PromiseLike<BoundedReadResponse>,
+  context: {
+    table: string;
+    operation: string;
+    pageSize?: number;
+    maxRows?: number;
+  },
+): Promise<{ rows: Row[]; error: BoundedReadError; truncated: boolean }> {
+  const pageSize = Math.max(1, context.pageSize ?? BOUNDED_READ_PAGE_SIZE);
+  const maxRows = Math.max(1, context.maxRows ?? BOUNDED_READ_MAX_ROWS);
+  const rows: Row[] = [];
+
+  while (rows.length <= maxRows) {
+    const { data, error } = await buildPage(rows.length, rows.length + pageSize - 1);
+    if (error) {
+      return { rows, error, truncated: false };
+    }
+    const page = (data ?? []) as Row[];
+    if (page.length === 0) {
+      return { rows, error: null, truncated: false };
+    }
+    rows.push(...page);
+  }
+
+  reportBoundedReadTruncation({
+    table: context.table,
+    operation: context.operation,
+    cap: maxRows,
+  });
+  return { rows: rows.slice(0, maxRows), error: null, truncated: true };
+}
+
+/**
+ * Offset paging over a table that is being written to can return the same row in
+ * two adjacent windows; ids keep the assembled set unique.
+ */
+function dedupeRowsById(rows: Row[]) {
+  return [...new Map(rows.map((row) => [row.id, row])).values()];
+}
 
 function requireAdminClient(): SupabaseClient {
   const client = getSupabaseAdminClient();
@@ -937,18 +1032,28 @@ export class SupabaseAiRegulationRepository implements AiRegulationRepository {
     scope: VisibilityScope = "admin",
   ) {
     const client = scope === "public" ? requirePublicReadClient() : requireAdminClient();
-    let query = client
-      .from("ai_regulatory_updates")
-      .select(UPDATE_LIST_COLUMNS)
-      .order("publication_date", { ascending: false, nullsFirst: false })
-      .order("created_at", { ascending: false });
+    const buildPage =
+      (columns: string, includeAuthorityType: boolean) => (from: number, to: number) => {
+        let query = client
+          .from("ai_regulatory_updates")
+          .select(columns)
+          .order("publication_date", { ascending: false, nullsFirst: false })
+          .order("created_at", { ascending: false })
+          // Unique tiebreaker: without one, rows sharing a publication_date and
+          // created_at can swap between windows and be read twice or skipped.
+          .order("id", { ascending: false })
+          .range(from, to);
+        if (scope === "public") {
+          query = query.eq("status", "published");
+        }
+        applyUpdateFilters(query, filters, { includeAuthorityType });
+        return query as unknown as PromiseLike<BoundedReadResponse>;
+      };
 
-    if (scope === "public") {
-      query = query.eq("status", "published");
-    }
-
-    applyUpdateFilters(query, filters);
-    const { data, error } = await query;
+    const { rows, error } = await fetchAllRows(buildPage(UPDATE_LIST_COLUMNS, true), {
+      table: "ai_regulatory_updates",
+      operation: "listRegulatoryUpdates",
+    });
     if (isMissingAuthorityTypeColumnError(error)) {
       reportRepositoryFallback({
         table: "ai_regulatory_updates",
@@ -956,24 +1061,21 @@ export class SupabaseAiRegulationRepository implements AiRegulationRepository {
         impact: "read_degraded",
         error,
       });
-      let legacyQuery = client
-        .from("ai_regulatory_updates")
-        .select(LEGACY_UPDATE_LIST_COLUMNS)
-        .order("publication_date", { ascending: false, nullsFirst: false })
-        .order("created_at", { ascending: false });
-      if (scope === "public") {
-        legacyQuery = legacyQuery.eq("status", "published");
-      }
-      applyUpdateFilters(legacyQuery, filters, { includeAuthorityType: false });
-      const legacyResult = await legacyQuery;
+      const legacyResult = await fetchAllRows(
+        buildPage(LEGACY_UPDATE_LIST_COLUMNS, false),
+        {
+          table: "ai_regulatory_updates",
+          operation: "listRegulatoryUpdates(legacy)",
+        },
+      );
       handleError("Failed to list regulatory updates", legacyResult.error);
       return applyLegacyAuthorityTypeFilter(
-        ((legacyResult.data ?? []) as unknown as Row[]).map(mapUpdateRow),
+        dedupeRowsById(legacyResult.rows).map(mapUpdateRow),
         filters,
       );
     }
     handleError("Failed to list regulatory updates", error);
-    return ((data ?? []) as unknown as Row[]).map(mapUpdateRow);
+    return dedupeRowsById(rows).map(mapUpdateRow);
   }
 
   async listRegulatoryUpdatesPage(
@@ -1118,15 +1220,26 @@ export class SupabaseAiRegulationRepository implements AiRegulationRepository {
     // large raw_metadata JSONB blobs for every row. This is a significant
     // payload reduction vs the previous collectOptions() full-table load.
     const client = scope === "public" ? requirePublicReadClient() : requireAdminClient();
-    let query = client
-      .from("ai_regulatory_updates")
-      .select(
-        "status,jurisdiction,region,development_type,legal_area,authority_type,publication_date,importance_level,source_name,tags",
-      );
-    if (scope === "public") {
-      query = query.eq("status", "published");
-    }
-    const { data, error } = await query;
+    const buildPage = (columns: string) => (from: number, to: number) => {
+      let query = client
+        .from("ai_regulatory_updates")
+        .select(columns)
+        // Order is irrelevant to a distinct-values aggregation but mandatory for
+        // stable offset paging; the primary key is unique and already indexed.
+        .order("id", { ascending: true })
+        .range(from, to);
+      if (scope === "public") {
+        query = query.eq("status", "published");
+      }
+      return query as unknown as PromiseLike<BoundedReadResponse>;
+    };
+
+    const { rows: allRows, error } = await fetchAllRows(
+      buildPage(
+        "id,status,jurisdiction,region,development_type,legal_area,authority_type,publication_date,importance_level,source_name,tags",
+      ),
+      { table: "ai_regulatory_updates", operation: "listDistinctFilterValues" },
+    );
     if (isMissingAuthorityTypeColumnError(error)) {
       reportRepositoryFallback({
         table: "ai_regulatory_updates",
@@ -1134,17 +1247,17 @@ export class SupabaseAiRegulationRepository implements AiRegulationRepository {
         impact: "read_degraded",
         error,
       });
-      let legacyQuery = client
-        .from("ai_regulatory_updates")
-        .select(
-          "status,jurisdiction,region,development_type,legal_area,publication_date,importance_level,source_name,tags",
-        );
-      if (scope === "public") {
-        legacyQuery = legacyQuery.eq("status", "published");
-      }
-      const legacyResult = await legacyQuery;
+      const legacyResult = await fetchAllRows(
+        buildPage(
+          "id,status,jurisdiction,region,development_type,legal_area,publication_date,importance_level,source_name,tags",
+        ),
+        {
+          table: "ai_regulatory_updates",
+          operation: "listDistinctFilterValues(legacy)",
+        },
+      );
       handleError("Failed to load filter values", legacyResult.error);
-      const legacyRows = ((legacyResult.data ?? []) as unknown as Row[]).map(mapUpdateRow);
+      const legacyRows = dedupeRowsById(legacyResult.rows).map(mapUpdateRow);
       const distinct = (arr: (string | null | undefined)[]) =>
         [...new Set(arr.filter((v): v is string => typeof v === "string" && v.length > 0))].sort();
       return {
@@ -1163,7 +1276,7 @@ export class SupabaseAiRegulationRepository implements AiRegulationRepository {
       };
     }
     handleError("Failed to load filter values", error);
-    const rows = data ?? [];
+    const rows = dedupeRowsById(allRows);
 
     const distinct = (arr: (string | null | undefined)[]) =>
       [...new Set(arr.filter((v): v is string => typeof v === "string" && v.length > 0))].sort();
@@ -1179,7 +1292,9 @@ export class SupabaseAiRegulationRepository implements AiRegulationRepository {
       developmentType: distinct(rows.map((r) => r.development_type as string)),
       importanceLevel: distinct(rows.map((r) => r.importance_level as string)),
       publicationDate: distinct(rows.map((r) => r.publication_date as string)),
-      tag: distinct((rows as Array<{ tags: string[] }>).flatMap((r) => r.tags ?? [])),
+      tag: distinct(
+        (rows as unknown as Array<{ tags: string[] }>).flatMap((r) => r.tags ?? []),
+      ),
       sourceName: distinct(rows.map((r) => r.source_name as string)),
     };
   }
@@ -1947,6 +2062,65 @@ export class SupabaseAiRegulationRepository implements AiRegulationRepository {
     }
     handleError("Failed to list scan jobs", error);
     return (data ?? []).map(mapScanJobRow);
+  }
+
+  async listQueuedScanJobs(limit = 50) {
+    const client = requireAdminClient();
+    const { data, error } = await client
+      .from("scan_jobs")
+      .select("*")
+      .eq("status", "queued")
+      .order("created_at", { ascending: true })
+      .limit(limit);
+    if (isMissingRelationError(error)) {
+      reportRepositoryFallback({
+        table: "scan_jobs",
+        operation: "listQueuedScanJobs",
+        impact: "read_degraded",
+        error,
+      });
+      return [...this.legacyScanJobs.values()]
+        .filter((job) => job.status === "queued")
+        .sort((a, b) => a.createdAt.localeCompare(b.createdAt))
+        .slice(0, limit);
+    }
+    handleError("Failed to list queued scan jobs", error);
+    return (data ?? []).map(mapScanJobRow);
+  }
+
+  async listScanJobsCreatedSince(since: string, limit = 500) {
+    const client = requireAdminClient();
+    // One row past the ceiling: enough to tell "the window holds exactly `limit`
+    // jobs" from "the window is wider than the caller can see".
+    const { data, error } = await client
+      .from("scan_jobs")
+      .select("*")
+      .gte("created_at", since)
+      .order("created_at", { ascending: false })
+      .limit(limit + 1);
+    if (isMissingRelationError(error)) {
+      reportRepositoryFallback({
+        table: "scan_jobs",
+        operation: "listScanJobsCreatedSince",
+        impact: "read_degraded",
+        error,
+      });
+      return [...this.legacyScanJobs.values()]
+        .filter((job) => job.createdAt >= since)
+        .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
+        .slice(0, limit);
+    }
+    handleError("Failed to list scan jobs by creation time", error);
+    const rows = (data ?? []).map(mapScanJobRow);
+    if (rows.length > limit) {
+      reportBoundedReadTruncation({
+        table: "scan_jobs",
+        operation: "listScanJobsCreatedSince",
+        cap: limit,
+      });
+      return rows.slice(0, limit);
+    }
+    return rows;
   }
 
   async listScanJobsPage(page?: ListPageParams) {

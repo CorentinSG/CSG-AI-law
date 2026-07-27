@@ -454,6 +454,7 @@ export default async function EuropeCountryPage({
       <section id="overview" className="scroll-mt-28 space-y-5">
         <MotionReveal>
         <BreadcrumbNav
+          lang={fr ? "fr" : "en"}
           items={[
             { label: "AI Law Hub", href: "/ai-regulation" },
             { label: "Europe", href: "/ai-regulation/europe" },

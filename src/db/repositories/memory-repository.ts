@@ -672,6 +672,20 @@ export class MemoryAiRegulationRepository implements AiRegulationRepository {
     return typeof limit === "number" ? jobs.slice(0, limit) : jobs;
   }
 
+  async listQueuedScanJobs(limit = 50) {
+    return getMockStore()
+      .scanJobs.filter((job) => job.status === "queued")
+      .sort((a, b) => a.createdAt.localeCompare(b.createdAt))
+      .slice(0, limit);
+  }
+
+  async listScanJobsCreatedSince(since: string, limit = 500) {
+    return getMockStore()
+      .scanJobs.filter((job) => job.createdAt >= since)
+      .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
+      .slice(0, limit);
+  }
+
   async listScanJobsPage(page?: ListPageParams) {
     return toPagedResult(getMockStore().scanJobs, page);
   }

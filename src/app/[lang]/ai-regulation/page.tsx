@@ -31,6 +31,8 @@ import {
 import { getPriorityEuropeCountryProfiles } from "@/content/ai-regulation/europe-country-profiles";
 import { internationalAiStandardsBaseline } from "@/content/ai-regulation/international-ai-standards";
 import { getPriorityUsStateProfiles } from "@/content/ai-regulation/us-state-ai-law-baseline";
+import { type Locale } from "@/lib/i18n/config";
+import { localeHref } from "@/lib/i18n/href";
 import { encodeCursor, parseCursorParam } from "@/lib/pagination";
 import type { RegulatoryUpdateFilters } from "@/db/repository-types";
 
@@ -152,6 +154,11 @@ export default async function AiRegulationPage({
 }) {
   const { lang } = await routeParams;
   const fr = lang === "fr";
+  const locale: Locale = fr ? "fr" : "en";
+  // Every internal link on this page must carry the locale segment. An
+  // unprefixed path falls through to `proxy.ts`, which re-negotiates the
+  // locale from Accept-Language and can strand a French reader on /en.
+  const href = (path: string) => localeHref(locale, path);
   const params = ((await searchParams) ?? {}) as Record<string, string>;
   const activeView = parseView(params.view);
   const afterCursor = parseCursorParam(params.after);
@@ -207,7 +214,7 @@ export default async function AiRegulationPage({
     const authorityType = deriveUpdateAuthorityType(update);
     return {
       id: update.id,
-      href: `/ai-regulation/${update.id}`,
+      href: href(`/ai-regulation/${update.id}`),
       title: update.title,
       summary: update.oneSentenceSummary,
       region: update.region,
@@ -224,13 +231,13 @@ export default async function AiRegulationPage({
   });
 
   const regionHubs = [
-    { label: "Europe", kicker: fr ? "Cadre UE · États membres" : "EU framework · member states", href: "/ai-regulation/europe" },
-    { label: fr ? "États-Unis" : "United States", kicker: fr ? "Fédéral · niveaux étatiques" : "Federal · state layers", href: "/ai-regulation/united-states" },
-    { label: "International", kicker: fr ? "Standards · gouvernance mondiale" : "Standards · global governance", href: "/ai-regulation/international" },
+    { label: "Europe", kicker: fr ? "Cadre UE · États membres" : "EU framework · member states", href: href("/ai-regulation/europe") },
+    { label: fr ? "États-Unis" : "United States", kicker: fr ? "Fédéral · niveaux étatiques" : "Federal · state layers", href: href("/ai-regulation/united-states") },
+    { label: "International", kicker: fr ? "Standards · gouvernance mondiale" : "Standards · global governance", href: href("/ai-regulation/international") },
   ];
 
   const dbLoadMoreHref = updatesPage.nextCursor
-    ? `/ai-regulation?view=database&dbafter=${encodeURIComponent(encodeCursor(updatesPage.nextCursor))}`
+    ? href(`/ai-regulation?view=database&dbafter=${encodeURIComponent(encodeCursor(updatesPage.nextCursor))}`)
     : null;
   const todayIso = new Date().toISOString().slice(0, 10);
 
@@ -238,11 +245,12 @@ export default async function AiRegulationPage({
     <SiteShell className="space-y-10">
       <section className="space-y-6">
         <SectionHeading
+          as="h1"
           eyebrow={fr ? "Hub Droit de l'IA" : "AI law hub"}
           title={fr ? "Intelligence juridique IA" : "AI legal intelligence"}
           actions={
             <Link
-              href={activeView === "news" ? "/ai-regulation?view=database" : "/ai-regulation?view=news"}
+              href={href(activeView === "news" ? "/ai-regulation?view=database" : "/ai-regulation?view=news")}
               className="text-sm uppercase tracking-[0.16em] text-zinc-800 underline decoration-black/15 underline-offset-4"
             >
               {activeView === "news"
@@ -256,7 +264,7 @@ export default async function AiRegulationPage({
           }
         />
 
-        <IntelligenceHubTabs tabs={[...hubTabs]} activeValue={activeView} />
+        <IntelligenceHubTabs tabs={[...hubTabs]} activeValue={activeView} lang={fr ? "fr" : "en"} />
       </section>
 
       {activeView === "overview" ? (
@@ -269,7 +277,7 @@ export default async function AiRegulationPage({
                 title={fr ? "Développements juridiques récents" : "Recent legal developments"}
               />
               <Link
-                href="/ai-regulation?view=news"
+                href={href("/ai-regulation?view=news")}
                 className="shrink-0 text-sm uppercase tracking-[0.16em] text-zinc-600 underline decoration-black/15 underline-offset-4"
               >
                 {fr ? "Toutes les actualités →" : "All news →"}
@@ -313,7 +321,7 @@ export default async function AiRegulationPage({
                   title="Europe"
                   lang={fr ? "fr" : "en"}
                   description="EU AI Act and Member State implementation."
-                  href="/ai-regulation/europe"
+                  href={href("/ai-regulation/europe")}
                   liveLabel="Europe news"
                   liveCount={europeNewsCount}
                   dbCount={updatesPage.items.length}
@@ -327,7 +335,7 @@ export default async function AiRegulationPage({
                   title={fr ? "États-Unis" : "United States"}
                   lang={fr ? "fr" : "en"}
                   description="Federal and 50-state AI law coverage."
-                  href="/ai-regulation/united-states"
+                  href={href("/ai-regulation/united-states")}
                   liveLabel="U.S. news"
                   liveCount={usNewsCount}
                   dbCount={updatesPage.items.length}
@@ -342,7 +350,7 @@ export default async function AiRegulationPage({
                   lang={fr ? "fr" : "en"}
                   kickerLabel={fr ? "Couche transnationale" : "Transnational layer"}
                   description="ISO/IEC, OECD, UNESCO, IEEE, and cross-border AI governance instruments."
-                  href="/ai-regulation/international"
+                  href={href("/ai-regulation/international")}
                   liveLabel="International news"
                   liveCount={internationalNewsCount}
                   dbCount={internationalDatabaseCount}
@@ -363,7 +371,7 @@ export default async function AiRegulationPage({
                 title={fr ? "Dernières entrées publiées" : "Latest published monitor entries"}
               />
               <Link
-                href="/ai-regulation?view=database"
+                href={href("/ai-regulation?view=database")}
                 className="shrink-0 text-sm uppercase tracking-[0.16em] text-zinc-600 underline decoration-black/15 underline-offset-4"
               >
                 {fr ? "Base complète →" : "Full database →"}
@@ -375,6 +383,7 @@ export default async function AiRegulationPage({
                   <UpdateCard
                     key={update.id}
                     update={update}
+                    lang={locale}
                     href={`/ai-regulation/${update.id}`}
                   />
                 ))
@@ -414,7 +423,7 @@ export default async function AiRegulationPage({
               </CardContent>
             </Card>
             <Link
-              href="/ai-regulation/methodology"
+              href={href("/ai-regulation/methodology")}
               className="group flex flex-col justify-between gap-6 rounded-[2rem] border border-white/10 bg-white/[0.03] p-6 transition-colors hover:bg-white/[0.05]"
             >
               <div className="space-y-2">
@@ -477,7 +486,7 @@ export default async function AiRegulationPage({
           <FilterBar
             searchParams={params}
             options={newsOptions}
-            basePath="/ai-regulation"
+            basePath={href("/ai-regulation")}
             filters={buildNewsFilters(fr)}
             lang={fr ? "fr" : "en"}
             persistentParams={{ view: "news" }}
@@ -498,7 +507,7 @@ export default async function AiRegulationPage({
           )}
 
           <CursorPaginationControls
-            basePath="/ai-regulation"
+            basePath={href("/ai-regulation")}
             searchParams={params}
             nextCursorEncoded={newsPage.nextCursor ? encodeCursor(newsPage.nextCursor) : null}
             cursorParamKey="after"

@@ -141,7 +141,7 @@ export default async function MethodologyPage({
             { label: t.breadcrumbMethodology, href: "/ai-regulation/methodology" },
           ]}
         />
-        <SectionHeading eyebrow={t.eyebrow} title={t.title} description={t.description} />
+        <SectionHeading as="h1" eyebrow={t.eyebrow} title={t.title} description={t.description} />
       </MotionReveal>
 
       <section className="space-y-4">

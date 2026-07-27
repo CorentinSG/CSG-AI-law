@@ -249,6 +249,23 @@ export interface AiRegulationRepository {
     input: DataQualityFindingInput,
   ): Promise<DataQualityFinding>;
   listScanJobs(limit?: number): Promise<ScanJob[]>;
+  /**
+   * Oldest-first queue head: `status = 'queued'` ordered by `created_at ASC`.
+   *
+   * Workers must select from this rather than filtering a recent-jobs window —
+   * `listScanJobs()` orders newest-first, so once the queue is longer than the
+   * window the oldest queued jobs are never reached (queue starvation).
+   */
+  listQueuedScanJobs(limit?: number): Promise<ScanJob[]>;
+  /**
+   * Scan jobs with `created_at >= since`, newest first, capped at `limit`.
+   *
+   * A time window, not a row window: use it for duplicate/recency checks so the
+   * lookback is the interval the caller actually means, independent of enqueue
+   * volume. If more jobs than `limit` fall inside the window the read is capped
+   * and the truncation is reported.
+   */
+  listScanJobsCreatedSince(since: string, limit?: number): Promise<ScanJob[]>;
   listScanJobsPage(page?: ListPageParams): Promise<PagedResult<ScanJob>>;
   listScanJobsCursorPage(page?: ListCursorParams): Promise<CursorPagedResult<ScanJob>>;
   getScanJobById(id: string): Promise<ScanJob | null>;

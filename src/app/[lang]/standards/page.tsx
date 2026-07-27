@@ -108,6 +108,7 @@ export default async function StandardsPage({
       {/* Hero */}
       <MotionReveal>
         <SectionHeading
+          as="h1"
           eyebrow={fr ? "Droit souple · Standards" : "Soft law · Standards"}
           title={fr ? "Standards & soft law" : "Standards & soft law"}
           description={

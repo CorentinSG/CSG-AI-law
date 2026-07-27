@@ -80,7 +80,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { path: "", lastModified: now, changeFrequency: "weekly", priority: 1 },
     { path: "/research", lastModified: now, changeFrequency: "weekly", priority: 0.9 },
     { path: "/ai-regulation", lastModified: now, changeFrequency: "daily", priority: 0.9 },
-    { path: "/news", lastModified: now, changeFrequency: "daily", priority: 0.85 },
+    // `/news` is deliberately absent: the route is a pure `redirect()` to
+    // `/ai-regulation?view=news`. Listing a redirect makes every crawl of it a
+    // wasted fetch and a "Page with redirect" coverage warning. The redirect
+    // target is already listed above; `/news/[slug]` articles are real pages
+    // and are still emitted from `getDatabaseRoutes()`.
     { path: "/ai-regulation/europe", lastModified: now, changeFrequency: "daily", priority: 0.85 },
     { path: "/ai-regulation/united-states", lastModified: now, changeFrequency: "daily", priority: 0.85 },
     { path: "/ai-regulation/international", lastModified: now, changeFrequency: "weekly", priority: 0.8 },

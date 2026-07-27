@@ -40,6 +40,7 @@ export default async function UsTimelinePage({
           ]}
         />
         <SectionHeading
+          as="h1"
           eyebrow={fr ? "Chronologie officielle · États-Unis" : "Official timeline · United States"}
           title="Timeline US"
           description={
