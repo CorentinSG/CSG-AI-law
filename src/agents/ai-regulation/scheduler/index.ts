@@ -6,7 +6,7 @@ import type { ScanProfileId } from "@/agents/ai-regulation/scanProfiles";
 import { internationalMonitoringSourceRegistry } from "@/agents/ai-regulation/internationalNewsSources";
 import { listUsMonitoringAgents } from "@/agents/ai-regulation/usMonitoringSupervisorAgent";
 
-export type CentralSchedulerRegion = "eu" | "us" | "international";
+export type CentralSchedulerRegion = "eu" | "us" | "international" | "country";
 
 export interface CentralSchedulerPlanItem {
   id: string;
@@ -28,12 +28,18 @@ export interface CentralSchedulerPlan {
   items: CentralSchedulerPlanItem[];
 }
 
-export interface CentralSchedulerSkippedJob {
-  itemId: string;
-  scanProfile: ScanProfileId;
-  existingJobId: string;
-  reason: "recent_duplicate";
-}
+export type CentralSchedulerSkippedJob =
+  | {
+      itemId: string;
+      scanProfile: ScanProfileId;
+      existingJobId: string;
+      reason: "recent_duplicate";
+    }
+  | {
+      itemId: string;
+      scanProfile: ScanProfileId;
+      reason: "staggered_country_wave";
+    };
 
 const EU_SCAN_ITEMS = [
   {
@@ -98,16 +104,89 @@ const INTERNATIONAL_SCAN_ITEMS = [
   },
 ] as const;
 
+// Countries that own a dedicated source registry, monitoring agent, and scan
+// profiles. Their `<country>_official_legal_scan` lane already runs daily from
+// the per-country cron entries in `vercel.json`, so only the two lanes nothing
+// else executes are scheduled here.
+const COUNTRY_SCAN_SLUGS = [
+  "austria",
+  "belgium",
+  "france",
+  "germany",
+  "ireland",
+  "italy",
+  "netherlands",
+  "spain",
+  "sweden",
+] as const;
+
+type CountryScanSlug = (typeof COUNTRY_SCAN_SLUGS)[number];
+
+const COUNTRY_SCAN_TIERS = [
+  {
+    key: "live-news",
+    profileSuffix: "live_news_scan",
+    label: "live legal-news sweep",
+    cadence: "live",
+  },
+  {
+    key: "verification",
+    profileSuffix: "verification_scan",
+    label: "recurring verification sweep",
+    cadence: "hourly",
+  },
+] as const;
+
+// Compile-time proof that every generated id is a declared scan profile:
+// this alias must stay assignable to `ScanProfileId`.
+type CountryScanProfileId =
+  `${CountryScanSlug}_${(typeof COUNTRY_SCAN_TIERS)[number]["profileSuffix"]}`;
+
+const COUNTRY_SCAN_ITEMS: CentralSchedulerPlanItem[] = COUNTRY_SCAN_SLUGS.flatMap((slug) =>
+  COUNTRY_SCAN_TIERS.map((tier) => {
+    const scanProfile: CountryScanProfileId = `${slug}_${tier.profileSuffix}`;
+    return {
+      id: `${slug}-${tier.key}`,
+      region: "country" as const,
+      label: `${slug.charAt(0).toUpperCase()}${slug.slice(1)} ${tier.label}`,
+      scanProfile,
+      cadence: tier.cadence,
+      agentIds: [slug],
+      agentCount: 1,
+    };
+  }),
+);
+
 export const scheduler = {
   recommendedCron: "*/15 * * * *",
   description:
-    "Central scheduler for the AI Regulation Monitor. It queues regional profile sweeps covering all EU and US monitoring agents; a permanent worker should drain the queue.",
+    "Central scheduler for the AI Regulation Monitor. It queues regional profile sweeps covering all EU and US monitoring agents, plus staggered per-country live-news and verification lanes; a permanent worker should drain the queue.",
 };
 
 const DEFAULT_SCHEDULER_DEDUPE_WINDOW_MS = 10 * 60 * 1000;
 
+// Per-country lanes are staggered instead of fanned out: one cycle activates
+// exactly one country, rotating deterministically off the wall clock so that a
+// fresh process (GitHub Actions spawns one per run) picks the same country as
+// any other scheduler invocation in the same window. With nine countries on a
+// 15-minute rotation each country's lanes run roughly every 2h15.
+const COUNTRY_STAGGER_WINDOW_MS = 15 * 60 * 1000;
+
+function activeCountryScanItemIds(now: number) {
+  // The day offset keeps a once-a-day caller (the vercel.json central-scheduler
+  // cron) from aliasing: 96 fifteen-minute windows per day is a multiple of 3,
+  // so without it a daily cron would only ever reach three of the nine
+  // countries. 96 + 1 is coprime with 9, and inside a day the offset is
+  // constant, so the 15-minute rotation stays exactly one country per cycle.
+  const index =
+    (Math.floor(now / COUNTRY_STAGGER_WINDOW_MS) + Math.floor(now / 86_400_000)) %
+    COUNTRY_SCAN_SLUGS.length;
+  const slug = COUNTRY_SCAN_SLUGS[index];
+  return new Set(COUNTRY_SCAN_TIERS.map((tier) => `${slug}-${tier.key}`));
+}
+
 function planItemsForRegion(
-  region: CentralSchedulerRegion,
+  region: Exclude<CentralSchedulerRegion, "country">,
   agentIds: string[],
 ): CentralSchedulerPlanItem[] {
   const definitions =
@@ -130,16 +209,16 @@ function timestamp(value: string | null | undefined) {
   return Number.isNaN(parsed) ? null : parsed;
 }
 
-async function findRecentDuplicateSchedulerJob(
+function findRecentDuplicateSchedulerJob(
+  jobs: Awaited<ReturnType<typeof updateRepository.getScanJobs>>,
   item: CentralSchedulerPlanItem,
   dedupeWindowMs: number,
-  now = Date.now(),
+  now: number,
 ) {
   if (dedupeWindowMs <= 0) {
     return null;
   }
 
-  const jobs = await updateRepository.getScanJobs(100);
   return (
     jobs.find((job) => {
       if (job.status === "failed") {
@@ -175,6 +254,7 @@ export function buildCentralMonitoringSchedule(): CentralSchedulerPlan {
       ...planItemsForRegion("eu", euAgentIds),
       ...planItemsForRegion("us", usAgentIds),
       ...planItemsForRegion("international", internationalAgentIds),
+      ...COUNTRY_SCAN_ITEMS,
     ],
   };
 }
@@ -186,7 +266,9 @@ export async function enqueueCentralMonitoringSchedule(options?: {
   cadences?: Array<CentralSchedulerPlanItem["cadence"]>;
   dedupeWindowMs?: number;
 }) {
-  const selectedRegions = new Set(options?.regions ?? ["eu", "us", "international"]);
+  const selectedRegions = new Set(
+    options?.regions ?? ["eu", "us", "international", "country"],
+  );
   const selectedCadences = options?.cadences ? new Set(options.cadences) : null;
   const trigger = options?.trigger ?? "scheduled";
   const requestedBy = options?.requestedBy ?? "central-monitoring-scheduler";
@@ -199,10 +281,35 @@ export async function enqueueCentralMonitoringSchedule(options?: {
       (!selectedCadences || selectedCadences.has(item.cadence)),
   );
 
+  const now = Date.now();
+  const activeCountryItemIds = activeCountryScanItemIds(now);
+  // A row window could miss a duplicate created seconds ago once enqueue volume
+  // pushed it past the newest N rows. Ask for the dedupe window by time instead.
+  const recentJobs =
+    dedupeWindowMs > 0
+      ? await updateRepository.getScanJobsCreatedSince(
+          new Date(now - dedupeWindowMs).toISOString(),
+        )
+      : [];
+
   const queuedJobs = [];
   const skippedJobs: CentralSchedulerSkippedJob[] = [];
   for (const item of selectedItems) {
-    const duplicate = await findRecentDuplicateSchedulerJob(item, dedupeWindowMs);
+    if (item.region === "country" && !activeCountryItemIds.has(item.id)) {
+      skippedJobs.push({
+        itemId: item.id,
+        scanProfile: item.scanProfile,
+        reason: "staggered_country_wave",
+      });
+      continue;
+    }
+
+    const duplicate = findRecentDuplicateSchedulerJob(
+      recentJobs,
+      item,
+      dedupeWindowMs,
+      now,
+    );
     if (duplicate) {
       skippedJobs.push({
         itemId: item.id,

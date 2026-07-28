@@ -1,3 +1,5 @@
+import { z } from "zod";
+
 import type { RawRegulatoryItem, RegulationSource } from "@/agents/ai-regulation/types";
 import {
   extractDiscoveryLeadMetadata,
@@ -153,13 +155,49 @@ export function buildInitialVerificationMetadata(input: {
   };
 }
 
+// Read-time validation for the `rawMetadata.verification` JSON blob.
+//
+// Defaults are conservative: an unreadable field degrades to "unknown /
+// unverified" rather than throwing downstream (callers call `.replaceAll()` on
+// `verificationStatus` and spread `corroboratingSourceUrls`). A malformed blob
+// can therefore never claim official-source confirmation or public visibility.
+const verificationMetadataSchema = z.object({
+  initialDetectionSource: z.string().catch(""),
+  initialSourceOfficial: z.boolean().catch(false),
+  initialSourceType: z.string().catch(""),
+  sourceUrl: z.string().catch(""),
+  detectedAt: z.string().catch(""),
+  lastVerifiedAt: z.string().nullable().catch(null),
+  verificationStatus: z.enum(verificationStatuses).catch("needs_official_source"),
+  officialSourceFound: z.boolean().catch(false),
+  officialSourceUrl: z.string().nullable().catch(null),
+  corroboratingSourcesCount: z.number().catch(0),
+  corroboratingSourceUrls: z
+    .array(z.unknown())
+    .catch([])
+    .transform((entries) =>
+      entries.filter((entry): entry is string => typeof entry === "string"),
+    ),
+  confidenceLevel: z.enum(["high", "medium", "low"]).catch("low"),
+  reviewerNotes: z.string().catch(""),
+  publicVisibilityAllowed: z.boolean().catch(false),
+  nextSuggestedVerificationSource: z.string().catch(""),
+  notPublishableReason: z.string().nullable().catch(null),
+  stale: z.boolean().catch(false),
+});
+
 export function extractVerificationMetadata(
   rawItem: Pick<RawRegulatoryItem, "rawMetadata">,
 ): VerificationMetadata | null {
   const value = rawItem.rawMetadata.verification;
-  if (!value || typeof value !== "object") return null;
+  if (!value || typeof value !== "object" || Array.isArray(value)) return null;
 
-  return value as VerificationMetadata;
+  const parsed = verificationMetadataSchema.safeParse(value);
+  if (!parsed.success) return null;
+
+  // Unknown keys are preserved so a read/merge/write round trip cannot silently
+  // drop data the schema does not know about; validated fields always win.
+  return { ...(value as Record<string, unknown>), ...parsed.data };
 }
 
 export function isVerificationStatus(input: string): input is VerificationStatus {

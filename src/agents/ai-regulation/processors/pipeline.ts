@@ -25,6 +25,7 @@ import {
   isEligibleCorroboratingSource,
   type CorroborationMatch,
 } from "@/agents/ai-regulation/processors/crossSourceCorroboration";
+import { requiresSourceReview } from "@/agents/ai-regulation/publicationEligibility";
 import { getScanProfile } from "@/agents/ai-regulation/scanProfiles";
 import type { ScanProfileId } from "@/agents/ai-regulation/scanProfiles";
 import { isDiscoveryOnlySource } from "@/agents/ai-regulation/utils/discovery";
@@ -192,8 +193,9 @@ function buildDiscoveryLeadCopy(input: {
 
 function shouldAutoPublishLegalDatabaseItem(input: {
   discoveryOnlySource: boolean;
+  sourceReviewRequired: boolean;
 }) {
-  return !input.discoveryOnlySource;
+  return !input.discoveryOnlySource && !input.sourceReviewRequired;
 }
 
 // --- Types shared across pipeline stages ---
@@ -620,6 +622,7 @@ async function processAllCandidates(
       const discoveryOnlySource = isDiscoveryOnlySource(entry.source);
       const autoPublishLegalDatabaseItem = shouldAutoPublishLegalDatabaseItem({
         discoveryOnlySource,
+        sourceReviewRequired: requiresSourceReview(entry.source),
       });
       const autoPublicationTimestamp = autoPublishLegalDatabaseItem
         ? new Date().toISOString()

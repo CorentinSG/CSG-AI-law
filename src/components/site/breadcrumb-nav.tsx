@@ -1,24 +1,29 @@
 import Link from "next/link";
 import { cn } from "@/lib/utils";
-import { DEFAULT_LOCALE, type Locale } from "@/lib/i18n/config";
+import { type Locale } from "@/lib/i18n/config";
 import { localeHref } from "@/lib/i18n/href";
 
 interface BreadcrumbItem {
   label: string;
+  /** Unprefixed app path, e.g. `/ai-regulation`. The locale segment is added
+   * here — never pre-prefix it at the call site or it double-prefixes. */
   href: string;
 }
 
 interface BreadcrumbNavProps {
   items: BreadcrumbItem[];
   className?: string;
-  lang?: Locale;
+  /** Required on purpose. This used to default to `en`, so any call site that
+   * forgot it silently rendered every crumb as `/en/…` and bounced French
+   * readers back to English. A required prop makes that a build error. */
+  lang: Locale;
 }
 
 /**
  * Hierarchical breadcrumb navigation.
  * All items except the last are rendered as links; the last is the current page.
  */
-export function BreadcrumbNav({ items, className, lang = DEFAULT_LOCALE }: BreadcrumbNavProps) {
+export function BreadcrumbNav({ items, className, lang }: BreadcrumbNavProps) {
   if (items.length === 0) return null;
 
   return (

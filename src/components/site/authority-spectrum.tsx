@@ -162,7 +162,10 @@ export function AuthoritySpectrum({
                   transition={{ duration: 0.4, delay: reduce ? 0 : 1.1 }}
                   className={[
                     "relative mb-1 font-mono text-[10px] tabular-nums transition-colors duration-300",
-                    isActive ? "text-accent-strong" : "text-zinc-500 group-hover:text-zinc-200",
+                    // The dark ramp inverts Tailwind's zinc scale, so hovering
+                    // to zinc-200 dimmed this label (0.58 → 0.30) instead of
+                    // brightening it. zinc-800 is the intended emphasis.
+                    isActive ? "text-accent-strong" : "text-zinc-500 group-hover:text-zinc-800",
                   ].join(" ")}
                 >
                   {cluster.count}

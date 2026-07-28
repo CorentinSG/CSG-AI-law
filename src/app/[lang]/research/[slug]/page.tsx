@@ -72,14 +72,15 @@ export default async function ResearchArticlePage({
     <SiteShell className="space-y-14 md:space-y-20">
       <MotionReveal className="space-y-6">
         <BreadcrumbNav
+          lang={lang}
           items={[
-            { label: t.home, href: `/${lang}` },
-            { label: t.notesCommentary, href: `/${lang}/research` },
+            { label: t.home, href: "/" },
+            { label: t.notesCommentary, href: "/research" },
             {
               label:
                 entry.title.slice(0, 30) +
                 (entry.title.length > 30 ? "…" : ""),
-              href: `/${lang}/research/${entry.slug}`,
+              href: `/research/${entry.slug}`,
             },
           ]}
         />
@@ -269,7 +270,8 @@ export default async function ResearchArticlePage({
             {relatedEntries.map((related) => (
               <ResearchCard
                 key={related.slug}
-                href={`/${lang}/research/${related.slug}`}
+                lang={lang}
+                href={`/research/${related.slug}`}
                 category={related.category}
                 title={related.title}
                 description={related.summary}

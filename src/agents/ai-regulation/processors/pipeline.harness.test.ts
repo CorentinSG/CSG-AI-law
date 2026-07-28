@@ -364,6 +364,43 @@ describe("runAiRegulationScan harness wiring", () => {
     expect(results.flat().map((result) => result.newItemsDetected).sort()).toEqual([0, 1]);
   });
 
+  it.each([
+    ["auto-publishes a verified official source", {}, "published"],
+    [
+      "routes an unverified catch-all source to review",
+      { requiresReview: true, requiresReviewReason: "generated_catch_all_selector" },
+      "needs_review",
+    ],
+  ] as const)("%s", async (_label, config, expectedStatus) => {
+    mocks.sourceManager.getActiveSourcesForProfile.mockResolvedValue([
+      { ...source, config },
+    ]);
+    mocks.sourceScanner.scanSource.mockResolvedValue({
+      items: [{ id: "item-1" }],
+      itemsFetched: 1,
+      warnings: [],
+      errors: [],
+      responseStatus: 200,
+      zeroResultsReason: null,
+    });
+    mocks.itemExtractor.extract.mockReturnValue([{
+      title: "AI courts rule",
+      url: "https://example.eu/item-1",
+      text: "AI rule text",
+      metadata: {},
+      publicationDate: "2026-06-11",
+    }]);
+
+    const { runAiRegulationScan } = await import(
+      "@/agents/ai-regulation/processors/pipeline"
+    );
+    await runAiRegulationScan(source.id);
+
+    expect(mocks.updateRepository.createUpdate).toHaveBeenCalledWith(
+      expect.objectContaining({ status: expectedStatus }),
+    );
+  });
+
   it("stores a structured failure report in scan logs when source retrieval fails", async () => {
     mocks.sourceScanner.scanSource.mockRejectedValue(new Error("403 Forbidden"));
     const { runAiRegulationScan } = await import(

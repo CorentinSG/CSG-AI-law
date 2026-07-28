@@ -1,6 +1,9 @@
 import type { ConnectorScanResult, SourceConnector } from "@/agents/ai-regulation/connectors/types";
 import type { ConditionalFetchNotModifiedResult, ConditionalJsonFetchResult } from "@/agents/ai-regulation/connectors/conditional-fetch";
-import { fetchJsonWithConditionalCaching } from "@/agents/ai-regulation/connectors/conditional-fetch";
+import {
+  CONNECTOR_REQUEST_TIMEOUT_MS,
+  fetchJsonWithConditionalCaching,
+} from "@/agents/ai-regulation/connectors/conditional-fetch";
 import {
   buildExcerpt,
   buildStableCandidateId,
@@ -812,6 +815,7 @@ async function scanEurLex(source: RegulationSource): Promise<ConnectorScanResult
         searchLanguage,
       }),
       next: { revalidate: 0 },
+      signal: AbortSignal.timeout(CONNECTOR_REQUEST_TIMEOUT_MS),
     });
     xml = await response.text();
     const fault = extractEurLexFault(xml);
@@ -1013,6 +1017,7 @@ async function requestPisteAccessToken(
     },
     body,
     next: { revalidate: 0 },
+    signal: AbortSignal.timeout(CONNECTOR_REQUEST_TIMEOUT_MS),
   });
 
   if (!response.ok) {
@@ -1139,6 +1144,7 @@ async function scanLegifrance(source: RegulationSource): Promise<ConnectorScanRe
         },
       }),
       next: { revalidate: 0 },
+      signal: AbortSignal.timeout(CONNECTOR_REQUEST_TIMEOUT_MS),
     });
 
     if (!response.ok) {
@@ -1337,6 +1343,7 @@ async function scanLegalDataHunter(source: RegulationSource): Promise<ConnectorS
         sourceId: source.id,
       }),
       next: { revalidate: 0 },
+      signal: AbortSignal.timeout(CONNECTOR_REQUEST_TIMEOUT_MS),
     });
 
     if (!response.ok) {

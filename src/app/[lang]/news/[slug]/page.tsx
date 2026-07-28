@@ -14,6 +14,7 @@ import {
   normalizeNewsItemRecord,
 } from "@/content/ai-regulation/news";
 import { env } from "@/lib/env";
+import { DEFAULT_LOCALE, isLocale, type Locale } from "@/lib/i18n/config";
 import { formatDisplayDate } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
@@ -52,9 +53,10 @@ export async function generateMetadata({
 export default async function NewsDetailPage({
   params,
 }: {
-  params: Promise<{ slug: string }>;
+  params: Promise<{ lang: string; slug: string }>;
 }) {
-  const { slug } = await params;
+  const { lang, slug } = await params;
+  const locale: Locale = isLocale(lang) ? lang : DEFAULT_LOCALE;
   const item = await getPublicNewsItem(slug);
   if (!item) notFound();
   const sourceReferences = await updateRepository.getSourceReferencesForRawItem(
@@ -82,6 +84,7 @@ export default async function NewsDetailPage({
       {/* Breadcrumb */}
       <MotionReveal>
       <BreadcrumbNav
+        lang={locale}
         items={[
           { label: "AI Law Hub", href: "/ai-regulation" },
           { label: "AI Law News", href: "/ai-regulation?view=news" },

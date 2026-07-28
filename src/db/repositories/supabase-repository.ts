@@ -94,6 +94,178 @@ import { getSupabaseAdminClient, getSupabaseServerReadClient } from "@/lib/supab
 
 type Row = Record<string, unknown>;
 
+/**
+ * How much damage a legacy compatibility fallback does when it engages.
+ *
+ * - `write_not_persisted`: the write never reached Postgres. It lives only in
+ *   this process's in-memory map and disappears on restart. Operators believe
+ *   the row (often an audit record) was saved; it was not.
+ * - `write_degraded`: the write reached Postgres but lost something —
+ *   columns were stripped, values were downgraded, or the atomic RPC was
+ *   replaced by a non-transactional multi-statement path.
+ * - `read_degraded`: the read was served from in-memory state or synthesised
+ *   from other tables instead of the real relation, so results are incomplete.
+ */
+type RepositoryFallbackImpact =
+  | "write_not_persisted"
+  | "write_degraded"
+  | "read_degraded";
+
+const IMPACT_REMEDIATION: Record<RepositoryFallbackImpact, string> = {
+  write_not_persisted:
+    "DATA WAS NOT PERSISTED. It exists only in this process's memory and is lost on restart. Apply the pending src/db/migrations/*.sql in Supabase and re-run the operation.",
+  write_degraded:
+    "The write reached Postgres but lost fields or transactional guarantees. Apply the pending src/db/migrations/*.sql in Supabase and re-check the affected row.",
+  read_degraded:
+    "Results were served from in-memory or synthesised data and are incomplete. Apply the pending src/db/migrations/*.sql in Supabase.",
+};
+
+// One webhook alert per table+operation+impact per process; the console.error
+// below is emitted on every occurrence so the failure is never silent in logs.
+const alertedFallbackKeys = new Set<string>();
+
+/**
+ * Make a legacy compatibility fallback loud.
+ *
+ * The fallbacks themselves are intentionally preserved — turning a schema drift
+ * into a production crash would be worse than degrading. What must never happen
+ * again is a fallback engaging silently.
+ */
+function reportRepositoryFallback(input: {
+  table: string;
+  operation: string;
+  impact: RepositoryFallbackImpact;
+  error: { code?: string; message?: string } | null;
+}) {
+  const message = [
+    "[supabase-repository] legacy fallback engaged",
+    `table=${input.table}`,
+    `operation=${input.operation}`,
+    `impact=${input.impact}`,
+    `code=${input.error?.code ?? "none"}`,
+    `message=${input.error?.message ?? "none"}`,
+    `remediation=${IMPACT_REMEDIATION[input.impact]}`,
+  ].join(" | ");
+
+  console.error(message);
+
+  const key = `${input.table}:${input.operation}:${input.impact}`;
+  if (alertedFallbackKeys.has(key)) return;
+  alertedFallbackKeys.add(key);
+
+  // Imported lazily: @/lib/alerting reaches back into the repository layer, so a
+  // static import here would create an evaluation cycle with @/db/repository.
+  void import("@/lib/alerting")
+    .then(({ postAlertPayload }) =>
+      postAlertPayload({
+        kind: "repository_legacy_fallback",
+        emittedAt: new Date().toISOString(),
+        table: input.table,
+        operation: input.operation,
+        impact: input.impact,
+        text: message,
+      }),
+    )
+    .catch(() => {
+      // Alert delivery is best-effort and must never fail a repository operation.
+    });
+}
+
+// PostgREST caps every response at `db-max-rows` (1000 on Supabase) and still
+// answers 200 OK, so a truncated read is indistinguishable from a complete one.
+// Reads that must see every matching row page explicitly instead of issuing one
+// unbounded SELECT.
+export const BOUNDED_READ_PAGE_SIZE = 1000;
+
+// Absolute ceiling for a paged read. A read that needs more than this is not a
+// "list everything" read any more and belongs on a paginated API.
+export const BOUNDED_READ_MAX_ROWS = 10_000;
+
+type BoundedReadError = {
+  code?: string;
+  message?: string;
+  details?: string;
+  hint?: string;
+} | null;
+
+type BoundedReadResponse = { data: unknown[] | null; error: BoundedReadError };
+
+/**
+ * Make a bounded read that hit its ceiling loud.
+ *
+ * Unlike a legacy fallback this is not schema drift — the query worked, there is
+ * simply more data than the caller's contract can carry. It gets its own log
+ * prefix so the two are never confused in triage.
+ */
+function reportBoundedReadTruncation(input: {
+  table: string;
+  operation: string;
+  cap: number;
+}) {
+  console.error(
+    [
+      "[supabase-repository] bounded read truncated",
+      `table=${input.table}`,
+      `operation=${input.operation}`,
+      `cap=${input.cap}`,
+      "remediation=RESULTS ARE INCOMPLETE. More rows match than the bounded-read ceiling allows. Move this caller onto a paginated API (listRegulatoryUpdatesPage / listRegulatoryUpdatesCursorPage) or raise the ceiling deliberately.",
+    ].join(" | "),
+  );
+}
+
+/**
+ * Read every row a query matches by walking fixed-size windows.
+ *
+ * `buildPage` must apply `.range(from, to)` and is called once per window. The
+ * next window starts at the number of rows actually received, so a server-side
+ * `db-max-rows` smaller than {@link BOUNDED_READ_PAGE_SIZE} shortens the window
+ * instead of silently ending the walk.
+ *
+ * The loop deliberately runs one iteration past `maxRows`: that extra (usually
+ * empty) window distinguishes "the table holds exactly maxRows rows" from
+ * "there is more", so truncation is never reported on a false positive and no
+ * COUNT query is needed.
+ */
+export async function fetchAllRows(
+  buildPage: (from: number, to: number) => PromiseLike<BoundedReadResponse>,
+  context: {
+    table: string;
+    operation: string;
+    pageSize?: number;
+    maxRows?: number;
+  },
+): Promise<{ rows: Row[]; error: BoundedReadError; truncated: boolean }> {
+  const pageSize = Math.max(1, context.pageSize ?? BOUNDED_READ_PAGE_SIZE);
+  const maxRows = Math.max(1, context.maxRows ?? BOUNDED_READ_MAX_ROWS);
+  const rows: Row[] = [];
+
+  while (rows.length <= maxRows) {
+    const { data, error } = await buildPage(rows.length, rows.length + pageSize - 1);
+    if (error) {
+      return { rows, error, truncated: false };
+    }
+    const page = (data ?? []) as Row[];
+    if (page.length === 0) {
+      return { rows, error: null, truncated: false };
+    }
+    rows.push(...page);
+  }
+
+  reportBoundedReadTruncation({
+    table: context.table,
+    operation: context.operation,
+    cap: maxRows,
+  });
+  return { rows: rows.slice(0, maxRows), error: null, truncated: true };
+}
+
+/**
+ * Offset paging over a table that is being written to can return the same row in
+ * two adjacent windows; ids keep the assembled set unique.
+ */
+function dedupeRowsById(rows: Row[]) {
+  return [...new Map(rows.map((row) => [row.id, row])).values()];
+}
 
 function requireAdminClient(): SupabaseClient {
   const client = getSupabaseAdminClient();
@@ -408,6 +580,12 @@ export async function upsertRawItemWithClient(
     p_source_references: sourceReferences,
   });
   if (isMissingRpcError(error)) {
+    reportRepositoryFallback({
+      table: "raw_regulatory_items",
+      operation: "upsertRawItemWithClient",
+      impact: "write_degraded",
+      error,
+    });
     const { data: existing, error: lookupError } = await client
       .from("raw_regulatory_items")
       .select("*")
@@ -572,9 +750,21 @@ export async function completeScanJobWithClient(
     p_error_message: patch.errorMessage,
   });
   if (isMissingRpcError(error)) {
+    reportRepositoryFallback({
+      table: "scan_jobs",
+      operation: "completeScanJobWithClient",
+      impact: "write_degraded",
+      error,
+    });
     return completeScanJobWithoutRpc(client, id, leaseToken, patch);
   }
   if (isMissingRelationError(error)) {
+    reportRepositoryFallback({
+      table: "scan_jobs",
+      operation: "completeScanJobWithClient",
+      impact: "write_not_persisted",
+      error,
+    });
     const existing = legacyScanJobs.get(id);
     if (
       !existing ||
@@ -842,37 +1032,50 @@ export class SupabaseAiRegulationRepository implements AiRegulationRepository {
     scope: VisibilityScope = "admin",
   ) {
     const client = scope === "public" ? requirePublicReadClient() : requireAdminClient();
-    let query = client
-      .from("ai_regulatory_updates")
-      .select(UPDATE_LIST_COLUMNS)
-      .order("publication_date", { ascending: false, nullsFirst: false })
-      .order("created_at", { ascending: false });
+    const buildPage =
+      (columns: string, includeAuthorityType: boolean) => (from: number, to: number) => {
+        let query = client
+          .from("ai_regulatory_updates")
+          .select(columns)
+          .order("publication_date", { ascending: false, nullsFirst: false })
+          .order("created_at", { ascending: false })
+          // Unique tiebreaker: without one, rows sharing a publication_date and
+          // created_at can swap between windows and be read twice or skipped.
+          .order("id", { ascending: false })
+          .range(from, to);
+        if (scope === "public") {
+          query = query.eq("status", "published");
+        }
+        applyUpdateFilters(query, filters, { includeAuthorityType });
+        return query as unknown as PromiseLike<BoundedReadResponse>;
+      };
 
-    if (scope === "public") {
-      query = query.eq("status", "published");
-    }
-
-    applyUpdateFilters(query, filters);
-    const { data, error } = await query;
+    const { rows, error } = await fetchAllRows(buildPage(UPDATE_LIST_COLUMNS, true), {
+      table: "ai_regulatory_updates",
+      operation: "listRegulatoryUpdates",
+    });
     if (isMissingAuthorityTypeColumnError(error)) {
-      let legacyQuery = client
-        .from("ai_regulatory_updates")
-        .select(LEGACY_UPDATE_LIST_COLUMNS)
-        .order("publication_date", { ascending: false, nullsFirst: false })
-        .order("created_at", { ascending: false });
-      if (scope === "public") {
-        legacyQuery = legacyQuery.eq("status", "published");
-      }
-      applyUpdateFilters(legacyQuery, filters, { includeAuthorityType: false });
-      const legacyResult = await legacyQuery;
+      reportRepositoryFallback({
+        table: "ai_regulatory_updates",
+        operation: "listRegulatoryUpdates",
+        impact: "read_degraded",
+        error,
+      });
+      const legacyResult = await fetchAllRows(
+        buildPage(LEGACY_UPDATE_LIST_COLUMNS, false),
+        {
+          table: "ai_regulatory_updates",
+          operation: "listRegulatoryUpdates(legacy)",
+        },
+      );
       handleError("Failed to list regulatory updates", legacyResult.error);
       return applyLegacyAuthorityTypeFilter(
-        ((legacyResult.data ?? []) as unknown as Row[]).map(mapUpdateRow),
+        dedupeRowsById(legacyResult.rows).map(mapUpdateRow),
         filters,
       );
     }
     handleError("Failed to list regulatory updates", error);
-    return ((data ?? []) as unknown as Row[]).map(mapUpdateRow);
+    return dedupeRowsById(rows).map(mapUpdateRow);
   }
 
   async listRegulatoryUpdatesPage(
@@ -896,6 +1099,12 @@ export class SupabaseAiRegulationRepository implements AiRegulationRepository {
     applyUpdateFilters(query, filters);
     const { data, error, count } = await query;
     if (isMissingAuthorityTypeColumnError(error)) {
+      reportRepositoryFallback({
+        table: "ai_regulatory_updates",
+        operation: "listRegulatoryUpdatesPage",
+        impact: "read_degraded",
+        error,
+      });
       let legacyQuery = client
         .from("ai_regulatory_updates")
         .select(LEGACY_UPDATE_LIST_COLUMNS)
@@ -964,6 +1173,12 @@ export class SupabaseAiRegulationRepository implements AiRegulationRepository {
     applyUpdateFilters(query, filters);
     const { data, error } = await query;
     if (isMissingAuthorityTypeColumnError(error)) {
+      reportRepositoryFallback({
+        table: "ai_regulatory_updates",
+        operation: "listRegulatoryUpdatesCursorPage",
+        impact: "read_degraded",
+        error,
+      });
       const all = await this.listRegulatoryUpdates(filters, scope);
       const sorted = [...all].sort((a, b) =>
         compareForCursorSort(
@@ -1005,27 +1220,44 @@ export class SupabaseAiRegulationRepository implements AiRegulationRepository {
     // large raw_metadata JSONB blobs for every row. This is a significant
     // payload reduction vs the previous collectOptions() full-table load.
     const client = scope === "public" ? requirePublicReadClient() : requireAdminClient();
-    let query = client
-      .from("ai_regulatory_updates")
-      .select(
-        "status,jurisdiction,region,development_type,legal_area,authority_type,publication_date,importance_level,source_name,tags",
-      );
-    if (scope === "public") {
-      query = query.eq("status", "published");
-    }
-    const { data, error } = await query;
-    if (isMissingAuthorityTypeColumnError(error)) {
-      let legacyQuery = client
+    const buildPage = (columns: string) => (from: number, to: number) => {
+      let query = client
         .from("ai_regulatory_updates")
-        .select(
-          "status,jurisdiction,region,development_type,legal_area,publication_date,importance_level,source_name,tags",
-        );
+        .select(columns)
+        // Order is irrelevant to a distinct-values aggregation but mandatory for
+        // stable offset paging; the primary key is unique and already indexed.
+        .order("id", { ascending: true })
+        .range(from, to);
       if (scope === "public") {
-        legacyQuery = legacyQuery.eq("status", "published");
+        query = query.eq("status", "published");
       }
-      const legacyResult = await legacyQuery;
+      return query as unknown as PromiseLike<BoundedReadResponse>;
+    };
+
+    const { rows: allRows, error } = await fetchAllRows(
+      buildPage(
+        "id,status,jurisdiction,region,development_type,legal_area,authority_type,publication_date,importance_level,source_name,tags",
+      ),
+      { table: "ai_regulatory_updates", operation: "listDistinctFilterValues" },
+    );
+    if (isMissingAuthorityTypeColumnError(error)) {
+      reportRepositoryFallback({
+        table: "ai_regulatory_updates",
+        operation: "listDistinctFilterValues",
+        impact: "read_degraded",
+        error,
+      });
+      const legacyResult = await fetchAllRows(
+        buildPage(
+          "id,status,jurisdiction,region,development_type,legal_area,publication_date,importance_level,source_name,tags",
+        ),
+        {
+          table: "ai_regulatory_updates",
+          operation: "listDistinctFilterValues(legacy)",
+        },
+      );
       handleError("Failed to load filter values", legacyResult.error);
-      const legacyRows = ((legacyResult.data ?? []) as unknown as Row[]).map(mapUpdateRow);
+      const legacyRows = dedupeRowsById(legacyResult.rows).map(mapUpdateRow);
       const distinct = (arr: (string | null | undefined)[]) =>
         [...new Set(arr.filter((v): v is string => typeof v === "string" && v.length > 0))].sort();
       return {
@@ -1044,7 +1276,7 @@ export class SupabaseAiRegulationRepository implements AiRegulationRepository {
       };
     }
     handleError("Failed to load filter values", error);
-    const rows = data ?? [];
+    const rows = dedupeRowsById(allRows);
 
     const distinct = (arr: (string | null | undefined)[]) =>
       [...new Set(arr.filter((v): v is string => typeof v === "string" && v.length > 0))].sort();
@@ -1060,7 +1292,9 @@ export class SupabaseAiRegulationRepository implements AiRegulationRepository {
       developmentType: distinct(rows.map((r) => r.development_type as string)),
       importanceLevel: distinct(rows.map((r) => r.importance_level as string)),
       publicationDate: distinct(rows.map((r) => r.publication_date as string)),
-      tag: distinct((rows as Array<{ tags: string[] }>).flatMap((r) => r.tags ?? [])),
+      tag: distinct(
+        (rows as unknown as Array<{ tags: string[] }>).flatMap((r) => r.tags ?? []),
+      ),
       sourceName: distinct(rows.map((r) => r.source_name as string)),
     };
   }
@@ -1173,6 +1407,12 @@ export class SupabaseAiRegulationRepository implements AiRegulationRepository {
       .select("*")
       .single();
     if (isMissingAuthorityTypeColumnError(error)) {
+      reportRepositoryFallback({
+        table: "ai_regulatory_updates",
+        operation: "createAiRegulatoryUpdate",
+        impact: "write_degraded",
+        error,
+      });
       const legacyResult = await client
         .from("ai_regulatory_updates")
         .insert(omitAuthorityTypeColumn(row))
@@ -1223,6 +1463,12 @@ export class SupabaseAiRegulationRepository implements AiRegulationRepository {
       .select("*")
       .single();
     if (isMissingAuthorityTypeColumnError(error)) {
+      reportRepositoryFallback({
+        table: "ai_regulatory_updates",
+        operation: "updateAiRegulatoryUpdate",
+        impact: "write_degraded",
+        error,
+      });
       const legacyResult = await client
         .from("ai_regulatory_updates")
         .update({ ...omitAuthorityTypeColumn(row), updated_at: new Date().toISOString() })
@@ -1283,6 +1529,12 @@ export class SupabaseAiRegulationRepository implements AiRegulationRepository {
     if (rpcError || !rpcData || (Array.isArray(rpcData) && rpcData.length === 0)) {
       // RPC not available (schema ahead of remote deployment) — fall back to
       // the two-step path and preserve audit trail best-effort.
+      reportRepositoryFallback({
+        table: "ai_regulatory_updates",
+        operation: "transitionReviewStatus",
+        impact: "write_degraded",
+        error: rpcError,
+      });
       const patch: Record<string, unknown> = {
         status,
         reviewed_by: reviewer,
@@ -1359,6 +1611,12 @@ export class SupabaseAiRegulationRepository implements AiRegulationRepository {
       .select("*")
       .single();
     if (isSchemaCacheMismatchError(error)) {
+      reportRepositoryFallback({
+        table: "regulation_sources",
+        operation: "createSource",
+        impact: "write_degraded",
+        error,
+      });
       const { data: legacyData, error: legacyError } = await client
         .from("regulation_sources")
         .insert(adaptSourceRowForLegacySchema(row))
@@ -1384,6 +1642,12 @@ export class SupabaseAiRegulationRepository implements AiRegulationRepository {
       .select("*")
       .single();
     if (isSchemaCacheMismatchError(error)) {
+      reportRepositoryFallback({
+        table: "regulation_sources",
+        operation: "updateSource",
+        impact: "write_degraded",
+        error,
+      });
       const { data: legacyData, error: legacyError } = await client
         .from("regulation_sources")
         .update(adaptSourceRowForLegacySchema(row))
@@ -1493,6 +1757,12 @@ export class SupabaseAiRegulationRepository implements AiRegulationRepository {
     }
     const { data, error } = await query;
     if (isMissingRelationError(error)) {
+      reportRepositoryFallback({
+        table: "source_references",
+        operation: "listSourceReferences",
+        impact: "read_degraded",
+        error,
+      });
       const references = Array.from(this.legacySourceReferences.values())
         .flat()
         .filter((reference) => {
@@ -1521,6 +1791,12 @@ export class SupabaseAiRegulationRepository implements AiRegulationRepository {
       .delete()
       .eq("raw_item_id", rawItemId);
     if (isMissingRelationError(deleteError)) {
+      reportRepositoryFallback({
+        table: "source_references",
+        operation: "replaceSourceReferencesForRawItem",
+        impact: "write_not_persisted",
+        error: deleteError,
+      });
       const inserted = references.map((reference) =>
         sourceReferenceInputToRecord(reference),
       );
@@ -1541,6 +1817,12 @@ export class SupabaseAiRegulationRepository implements AiRegulationRepository {
       .insert(rows)
       .select("*");
     if (isMissingRelationError(error)) {
+      reportRepositoryFallback({
+        table: "source_references",
+        operation: "replaceSourceReferencesForRawItem",
+        impact: "write_not_persisted",
+        error,
+      });
       const inserted = references.map((reference) =>
         sourceReferenceInputToRecord(reference),
       );
@@ -1563,6 +1845,12 @@ export class SupabaseAiRegulationRepository implements AiRegulationRepository {
     }
     const { data, error } = await query;
     if (isMissingRelationError(error)) {
+      reportRepositoryFallback({
+        table: "verification_attempts",
+        operation: "listVerificationAttempts",
+        impact: "read_degraded",
+        error,
+      });
       const attempts = Array.from(this.legacyVerificationAttempts.values()).filter((attempt) =>
         rawItemId ? attempt.rawItemId === rawItemId : true,
       );
@@ -1586,6 +1874,12 @@ export class SupabaseAiRegulationRepository implements AiRegulationRepository {
       .select("*")
       .single();
     if (isMissingRelationError(error)) {
+      reportRepositoryFallback({
+        table: "verification_attempts",
+        operation: "createVerificationAttempt",
+        impact: "write_not_persisted",
+        error,
+      });
       const record = this.createLegacyVerificationAttemptRecord(input);
       this.legacyVerificationAttempts.set(record.id, record);
       return record;
@@ -1606,6 +1900,12 @@ export class SupabaseAiRegulationRepository implements AiRegulationRepository {
     }
     const { data, error } = await query;
     if (isMissingRelationError(error)) {
+      reportRepositoryFallback({
+        table: "review_events",
+        operation: "listReviewEvents",
+        impact: "read_degraded",
+        error,
+      });
       const events = Array.from(this.legacyReviewEvents.values()).filter((event) =>
         regulatoryUpdateId ? event.regulatoryUpdateId === regulatoryUpdateId : true,
       );
@@ -1629,6 +1929,12 @@ export class SupabaseAiRegulationRepository implements AiRegulationRepository {
       .select("*")
       .single();
     if (isMissingRelationError(error)) {
+      reportRepositoryFallback({
+        table: "review_events",
+        operation: "createReviewEvent",
+        impact: "write_not_persisted",
+        error,
+      });
       const record = this.createLegacyReviewEventRecord(input);
       this.legacyReviewEvents.set(record.id, record);
       return record;
@@ -1649,6 +1955,12 @@ export class SupabaseAiRegulationRepository implements AiRegulationRepository {
     }
     const { data, error } = await query;
     if (isMissingRelationError(error)) {
+      reportRepositoryFallback({
+        table: "data_quality_findings",
+        operation: "listDataQualityFindings",
+        impact: "read_degraded",
+        error,
+      });
       const findings = Array.from(this.legacyDataQualityFindings.values()).filter((finding) =>
         entityType ? finding.entityType === entityType : true,
       );
@@ -1671,6 +1983,12 @@ export class SupabaseAiRegulationRepository implements AiRegulationRepository {
     }
     const { data, error, count } = await query;
     if (isMissingRelationError(error)) {
+      reportRepositoryFallback({
+        table: "data_quality_findings",
+        operation: "listDataQualityFindingsPage",
+        impact: "read_degraded",
+        error,
+      });
       const findings = Array.from(this.legacyDataQualityFindings.values()).filter((finding) =>
         entityType ? finding.entityType === entityType : true,
       );
@@ -1712,6 +2030,12 @@ export class SupabaseAiRegulationRepository implements AiRegulationRepository {
       .select("*")
       .single();
     if (isMissingRelationError(error)) {
+      reportRepositoryFallback({
+        table: "data_quality_findings",
+        operation: "upsertDataQualityFinding",
+        impact: "write_not_persisted",
+        error,
+      });
       const record = this.createLegacyDataQualityFindingRecord(input);
       this.legacyDataQualityFindings.set(record.id, record);
       return record;
@@ -1728,10 +2052,75 @@ export class SupabaseAiRegulationRepository implements AiRegulationRepository {
       .order("created_at", { ascending: false })
       .limit(limit);
     if (isMissingRelationError(error)) {
+      reportRepositoryFallback({
+        table: "scan_jobs",
+        operation: "listScanJobs",
+        impact: "read_degraded",
+        error,
+      });
       return Array.from(this.legacyScanJobs.values()).slice(0, limit);
     }
     handleError("Failed to list scan jobs", error);
     return (data ?? []).map(mapScanJobRow);
+  }
+
+  async listQueuedScanJobs(limit = 50) {
+    const client = requireAdminClient();
+    const { data, error } = await client
+      .from("scan_jobs")
+      .select("*")
+      .eq("status", "queued")
+      .order("created_at", { ascending: true })
+      .limit(limit);
+    if (isMissingRelationError(error)) {
+      reportRepositoryFallback({
+        table: "scan_jobs",
+        operation: "listQueuedScanJobs",
+        impact: "read_degraded",
+        error,
+      });
+      return [...this.legacyScanJobs.values()]
+        .filter((job) => job.status === "queued")
+        .sort((a, b) => a.createdAt.localeCompare(b.createdAt))
+        .slice(0, limit);
+    }
+    handleError("Failed to list queued scan jobs", error);
+    return (data ?? []).map(mapScanJobRow);
+  }
+
+  async listScanJobsCreatedSince(since: string, limit = 500) {
+    const client = requireAdminClient();
+    // One row past the ceiling: enough to tell "the window holds exactly `limit`
+    // jobs" from "the window is wider than the caller can see".
+    const { data, error } = await client
+      .from("scan_jobs")
+      .select("*")
+      .gte("created_at", since)
+      .order("created_at", { ascending: false })
+      .limit(limit + 1);
+    if (isMissingRelationError(error)) {
+      reportRepositoryFallback({
+        table: "scan_jobs",
+        operation: "listScanJobsCreatedSince",
+        impact: "read_degraded",
+        error,
+      });
+      return [...this.legacyScanJobs.values()]
+        .filter((job) => job.createdAt >= since)
+        .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
+        .slice(0, limit);
+    }
+    handleError("Failed to list scan jobs by creation time", error);
+    const rows = (data ?? []).map(mapScanJobRow);
+    if (rows.length > limit) {
+      reportBoundedReadTruncation({
+        table: "scan_jobs",
+        operation: "listScanJobsCreatedSince",
+        cap: limit,
+      });
+      return rows.slice(0, limit);
+    }
+    return rows;
   }
 
   async listScanJobsPage(page?: ListPageParams) {
@@ -1743,6 +2132,12 @@ export class SupabaseAiRegulationRepository implements AiRegulationRepository {
       .order("created_at", { ascending: false })
       .range(offset, offset + limit - 1);
     if (isMissingRelationError(error)) {
+      reportRepositoryFallback({
+        table: "scan_jobs",
+        operation: "listScanJobsPage",
+        impact: "read_degraded",
+        error,
+      });
       const jobs = Array.from(this.legacyScanJobs.values());
       const items = jobs.slice(offset, offset + limit);
       return {
@@ -1784,6 +2179,12 @@ export class SupabaseAiRegulationRepository implements AiRegulationRepository {
 
     const { data, error } = await query;
     if (isMissingRelationError(error)) {
+      reportRepositoryFallback({
+        table: "scan_jobs",
+        operation: "listScanJobsCursorPage",
+        impact: "read_degraded",
+        error,
+      });
       const jobs = [...this.legacyScanJobs.values()].sort((a, b) =>
         compareForCursorSort(a.createdAt, a.id, b.createdAt, b.id),
       );
@@ -1819,6 +2220,12 @@ export class SupabaseAiRegulationRepository implements AiRegulationRepository {
       .limit(1)
       .maybeSingle();
     if (isMissingRelationError(error)) {
+      reportRepositoryFallback({
+        table: "scan_jobs",
+        operation: "getScanJobById",
+        impact: "read_degraded",
+        error,
+      });
       return this.legacyScanJobs.get(id) ?? null;
     }
     handleError("Failed to load scan job", error);
@@ -1841,6 +2248,12 @@ export class SupabaseAiRegulationRepository implements AiRegulationRepository {
       .select("*")
       .single();
     if (isMissingRelationError(error)) {
+      reportRepositoryFallback({
+        table: "scan_jobs",
+        operation: "createScanJob",
+        impact: "write_not_persisted",
+        error,
+      });
       const record = this.createLegacyScanJobRecord(input);
       this.legacyScanJobs.set(record.id, record);
       return record;
@@ -1887,6 +2300,12 @@ export class SupabaseAiRegulationRepository implements AiRegulationRepository {
       .select("*")
       .maybeSingle();
     if (isMissingRelationError(error)) {
+      reportRepositoryFallback({
+        table: "scan_jobs",
+        operation: "tryStartScanJob",
+        impact: "write_not_persisted",
+        error,
+      });
       const legacyExisting = this.legacyScanJobs.get(id);
       if (!legacyExisting) {
         throw new RepositoryOperationError(`Scan job ${id} not found.`);
@@ -1926,6 +2345,12 @@ export class SupabaseAiRegulationRepository implements AiRegulationRepository {
       .select("*")
       .single();
     if (isMissingRelationError(error)) {
+      reportRepositoryFallback({
+        table: "scan_jobs",
+        operation: "updateScanJob",
+        impact: "write_not_persisted",
+        error,
+      });
       const existing = this.legacyScanJobs.get(id);
       if (!existing) {
         throw new RepositoryOperationError(`Scan job ${id} not found.`);
@@ -1988,6 +2413,12 @@ export class SupabaseAiRegulationRepository implements AiRegulationRepository {
     }
     const { data, error } = await query;
     if (isMissingRelationError(error)) {
+      reportRepositoryFallback({
+        table: "discovery_leads",
+        operation: "listDiscoveryLeads",
+        impact: "read_degraded",
+        error,
+      });
       const leads = Array.from(this.legacyDiscoveryLeads.values()).filter((lead) =>
         status ? lead.status === status : true,
       );
@@ -2010,6 +2441,12 @@ export class SupabaseAiRegulationRepository implements AiRegulationRepository {
     }
     const { data, error, count } = await query;
     if (isMissingRelationError(error)) {
+      reportRepositoryFallback({
+        table: "discovery_leads",
+        operation: "listDiscoveryLeadsPage",
+        impact: "read_degraded",
+        error,
+      });
       const leads = Array.from(this.legacyDiscoveryLeads.values()).filter((lead) =>
         status ? lead.status === status : true,
       );
@@ -2056,6 +2493,12 @@ export class SupabaseAiRegulationRepository implements AiRegulationRepository {
 
     const { data, error } = await query;
     if (isMissingRelationError(error)) {
+      reportRepositoryFallback({
+        table: "discovery_leads",
+        operation: "listDiscoveryLeadsCursorPage",
+        impact: "read_degraded",
+        error,
+      });
       const leads = [...this.legacyDiscoveryLeads.values()]
         .filter((lead) => (status ? lead.status === status : true))
         .sort((a, b) => compareForCursorSort(a.createdAt, a.id, b.createdAt, b.id));
@@ -2091,6 +2534,12 @@ export class SupabaseAiRegulationRepository implements AiRegulationRepository {
       .limit(1)
       .maybeSingle();
     if (isMissingRelationError(error)) {
+      reportRepositoryFallback({
+        table: "discovery_leads",
+        operation: "getDiscoveryLeadById",
+        impact: "read_degraded",
+        error,
+      });
       return this.legacyDiscoveryLeads.get(id) ?? null;
     }
     handleError("Failed to load discovery lead", error);
@@ -2107,6 +2556,12 @@ export class SupabaseAiRegulationRepository implements AiRegulationRepository {
       .limit(1)
       .maybeSingle();
     if (isMissingRelationError(error)) {
+      reportRepositoryFallback({
+        table: "discovery_leads",
+        operation: "getDiscoveryLeadByRawItemId",
+        impact: "read_degraded",
+        error,
+      });
       return (
         Array.from(this.legacyDiscoveryLeads.values()).find(
           (lead) => lead.rawItemId === rawItemId,
@@ -2133,6 +2588,12 @@ export class SupabaseAiRegulationRepository implements AiRegulationRepository {
       .select("*")
       .single();
     if (isMissingRelationError(error)) {
+      reportRepositoryFallback({
+        table: "discovery_leads",
+        operation: "createDiscoveryLead",
+        impact: "write_not_persisted",
+        error,
+      });
       const record = this.createLegacyDiscoveryLeadRecord(input);
       this.legacyDiscoveryLeads.set(record.id, record);
       return record;
@@ -2153,6 +2614,12 @@ export class SupabaseAiRegulationRepository implements AiRegulationRepository {
       .select("*")
       .single();
     if (isMissingRelationError(error)) {
+      reportRepositoryFallback({
+        table: "discovery_leads",
+        operation: "updateDiscoveryLead",
+        impact: "write_not_persisted",
+        error,
+      });
       const existing = this.legacyDiscoveryLeads.get(id);
       if (!existing) {
         throw new RepositoryOperationError(`Discovery lead ${id} not found.`);
@@ -2182,6 +2649,12 @@ export class SupabaseAiRegulationRepository implements AiRegulationRepository {
     }
     const { data, error } = await query;
     if (isMissingRelationError(error)) {
+      reportRepositoryFallback({
+        table: "news_items",
+        operation: "listNewsItems",
+        impact: "read_degraded",
+        error,
+      });
       const fallback = await this.buildFallbackNewsItems(scope);
       return fallback.slice(0, limit);
     }
@@ -2203,6 +2676,12 @@ export class SupabaseAiRegulationRepository implements AiRegulationRepository {
     }
     const { data, error, count } = await query;
     if (isMissingRelationError(error)) {
+      reportRepositoryFallback({
+        table: "news_items",
+        operation: "listNewsItemsPage",
+        impact: "read_degraded",
+        error,
+      });
       const fallback = await this.buildFallbackNewsItems(scope);
       const items = fallback.slice(offset, offset + limit);
       return {
@@ -2255,6 +2734,12 @@ export class SupabaseAiRegulationRepository implements AiRegulationRepository {
 
     const { data, error } = await query;
     if (isMissingRelationError(error)) {
+      reportRepositoryFallback({
+        table: "news_items",
+        operation: "listNewsItemsCursorPage",
+        impact: "read_degraded",
+        error,
+      });
       // Fallback: sort/filter in memory from regulatory updates
       const fallback = await this.buildFallbackNewsItems(scope);
       const afterCursor = cursor
@@ -2302,6 +2787,12 @@ export class SupabaseAiRegulationRepository implements AiRegulationRepository {
     }
     const { data, error } = await query.maybeSingle();
     if (isMissingRelationError(error)) {
+      reportRepositoryFallback({
+        table: "news_items",
+        operation: "getNewsItemBySlug",
+        impact: "read_degraded",
+        error,
+      });
       const fallback = await this.buildFallbackNewsItems(scope);
       return fallback.find((item) => item.slug === slug) ?? null;
     }
@@ -2326,6 +2817,12 @@ export class SupabaseAiRegulationRepository implements AiRegulationRepository {
       .select("*")
       .single();
     if (isMissingRelationError(error)) {
+      reportRepositoryFallback({
+        table: "news_items",
+        operation: "upsertNewsItem",
+        impact: "write_not_persisted",
+        error,
+      });
       const record = this.createLegacyNewsItemRecord(input);
       this.legacyNewsItems.set(record.id, record);
       return record;
@@ -2346,6 +2843,12 @@ export class SupabaseAiRegulationRepository implements AiRegulationRepository {
     }
     const { data, error } = await query;
     if (isMissingRelationError(error)) {
+      reportRepositoryFallback({
+        table: "source_health_checks",
+        operation: "listSourceHealthChecks",
+        impact: "read_degraded",
+        error,
+      });
       const checks = Array.from(this.legacySourceHealthChecks.values()).filter((check) =>
         sourceId ? check.sourceId === sourceId : true,
       );
@@ -2369,6 +2872,12 @@ export class SupabaseAiRegulationRepository implements AiRegulationRepository {
       .select("*")
       .single();
     if (isMissingRelationError(error)) {
+      reportRepositoryFallback({
+        table: "source_health_checks",
+        operation: "createSourceHealthCheck",
+        impact: "write_not_persisted",
+        error,
+      });
       const record = this.createLegacySourceHealthCheckRecord(input);
       this.legacySourceHealthChecks.set(record.id, record);
       return record;
@@ -2388,6 +2897,12 @@ export class SupabaseAiRegulationRepository implements AiRegulationRepository {
     }
     const { data, error } = await query;
     if (isMissingRelationError(error)) {
+      reportRepositoryFallback({
+        table: "country_intelligence",
+        operation: "listCountryIntelligence",
+        impact: "read_degraded",
+        error,
+      });
       const countries = Array.from(this.legacyCountryIntelligence.values());
       return region ? countries.filter((country) => country.region === region) : countries;
     }
@@ -2403,6 +2918,12 @@ export class SupabaseAiRegulationRepository implements AiRegulationRepository {
       .eq("slug", slug)
       .maybeSingle();
     if (isMissingRelationError(error)) {
+      reportRepositoryFallback({
+        table: "country_intelligence",
+        operation: "getCountryIntelligenceBySlug",
+        impact: "read_degraded",
+        error,
+      });
       return (
         Array.from(this.legacyCountryIntelligence.values()).find(
           (country) => country.slug === slug,
@@ -2430,6 +2951,12 @@ export class SupabaseAiRegulationRepository implements AiRegulationRepository {
       .select("*")
       .single();
     if (isMissingRelationError(error)) {
+      reportRepositoryFallback({
+        table: "country_intelligence",
+        operation: "upsertCountryIntelligence",
+        impact: "write_not_persisted",
+        error,
+      });
       const existing = this.legacyCountryIntelligence.get(input.id);
       const record = existing
         ? mapCountryIntelligenceRow(
@@ -2461,6 +2988,12 @@ export class SupabaseAiRegulationRepository implements AiRegulationRepository {
     }
     const { data, error } = await query;
     if (isMissingRelationError(error)) {
+      reportRepositoryFallback({
+        table: "country_profile_review_events",
+        operation: "listCountryProfileReviewEvents",
+        impact: "read_degraded",
+        error,
+      });
       const events = Array.from(this.legacyCountryProfileReviewEvents.values()).filter(
         (event) => (countryId ? event.countryId === countryId : true),
       );
@@ -2484,6 +3017,12 @@ export class SupabaseAiRegulationRepository implements AiRegulationRepository {
       .select("*")
       .single();
     if (isMissingRelationError(error)) {
+      reportRepositoryFallback({
+        table: "country_profile_review_events",
+        operation: "createCountryProfileReviewEvent",
+        impact: "write_not_persisted",
+        error,
+      });
       const record = this.createLegacyCountryProfileReviewEventRecord(input);
       this.legacyCountryProfileReviewEvents.set(record.id, record);
       return record;
@@ -2500,6 +3039,12 @@ export class SupabaseAiRegulationRepository implements AiRegulationRepository {
       .eq("country_id", countryId)
       .order("created_at", { ascending: true });
     if (isMissingRelationError(error)) {
+      reportRepositoryFallback({
+        table: "country_intelligence_sources",
+        operation: "listCountryIntelligenceSources",
+        impact: "read_degraded",
+        error,
+      });
       return this.getLegacyCountryIntelligenceSources(countryId);
     }
     handleError("Failed to list country intelligence sources", error);
@@ -2516,6 +3061,12 @@ export class SupabaseAiRegulationRepository implements AiRegulationRepository {
       .delete()
       .eq("country_id", countryId);
     if (isMissingRelationError(deleteResult.error)) {
+      reportRepositoryFallback({
+        table: "country_intelligence_sources",
+        operation: "replaceCountryIntelligenceSources",
+        impact: "write_not_persisted",
+        error: deleteResult.error,
+      });
       const records = sources.map((source) =>
         this.createLegacyCountryIntelligenceSourceRecord(source),
       );
@@ -2555,7 +3106,15 @@ export class SupabaseAiRegulationRepository implements AiRegulationRepository {
       .order("created_at", { ascending: false })
       .limit(1)
       .maybeSingle();
-    if (error) return null;
+    if (error) {
+      reportRepositoryFallback({
+        table: "raw_regulatory_items",
+        operation: "findRawRegulatoryItemByUrl",
+        impact: "read_degraded",
+        error,
+      });
+      return null;
+    }
     if (!data) return null;
     return mapRawItemRow(data);
   }
@@ -2582,6 +3141,12 @@ export class SupabaseAiRegulationRepository implements AiRegulationRepository {
       .single();
     if (error || !data) {
       // Non-fatal: return a local copy if Supabase insert fails
+      reportRepositoryFallback({
+        table: "ingestion_logs",
+        operation: "createIngestionLog",
+        impact: "write_not_persisted",
+        error,
+      });
       return {
         ...input,
         urls_discovered: input.urls_discovered ?? 0,
@@ -2605,7 +3170,15 @@ export class SupabaseAiRegulationRepository implements AiRegulationRepository {
       .limit(limit);
     if (sourceId) query = query.eq("source_id", sourceId);
     const { data, error } = await query;
-    if (error) return [];
+    if (error) {
+      reportRepositoryFallback({
+        table: "ingestion_logs",
+        operation: "listIngestionLogs",
+        impact: "read_degraded",
+        error,
+      });
+      return [];
+    }
     return (data ?? []).map(mapIngestionLogRow);
   }
 }

@@ -585,6 +585,8 @@ describe("StaticPageConnector", () => {
     expect(result.items.length).toBeGreaterThanOrEqual(2);
     expect(result.items[0]?.publicationDate).toBe("2025-09-01");
     expect(fetchMock).toHaveBeenCalledTimes(2);
+    // The redirect follow is a raw fetch and must carry its own deadline too.
+    expect(fetchMock.mock.calls[1]?.[1]?.signal).toBeInstanceOf(AbortSignal);
     expect(
       result.items.some((item) => item.url.endsWith(".pdf") || item.url.includes("lia-dans-la-justice")),
     ).toBe(true);

@@ -14,7 +14,8 @@ const DIGEST_SOURCE_ID = "ops-alerting";
 type AlertKind =
   | "source_runtime_state"
   | "source_consecutive_failures"
-  | "review_backlog_digest";
+  | "review_backlog_digest"
+  | "repository_legacy_fallback";
 type AlertScanTrigger = "manual" | "scheduled" | "scheduled_local_test";
 
 export interface AlertPayload {
@@ -33,6 +34,10 @@ export interface AlertPayload {
   checkedAt?: string;
   needsReviewBacklogSize?: number;
   failureReasons?: string[];
+  // repository_legacy_fallback only
+  table?: string;
+  operation?: string;
+  impact?: string;
   text?: string;
 }
 

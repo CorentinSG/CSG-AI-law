@@ -5,6 +5,7 @@ import { PageTransition } from "@/components/site/page-transition";
 import { SiteFooter } from "@/components/site/site-footer";
 import { SiteHeader } from "@/components/site/site-header";
 import { SiteNotice } from "@/components/site/site-notice";
+import { SkipToContent } from "@/components/site/skip-to-content";
 import { cn } from "@/lib/utils";
 
 export function SiteShell({
@@ -29,11 +30,14 @@ export function SiteShell({
           : "dark-site bg-[radial-gradient(circle_at_top,_rgba(154,107,31,0.06),_transparent_22%),linear-gradient(180deg,_#080808_0%,_#0a0a0a_100%)] text-zinc-100",
       )}
     >
+      <SkipToContent targetId="main-content" />
       {!isAdmin ? <CursorBot /> : null}
       {!isAdmin ? <SiteNotice /> : null}
       <SiteHeader variant={variant} />
       <PageTransition>
         <main
+          id="main-content"
+          tabIndex={-1}
           className={cn(
             "mx-auto w-full max-w-7xl px-6 py-10 md:py-16",
             className,

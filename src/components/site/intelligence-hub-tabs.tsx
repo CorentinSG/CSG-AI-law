@@ -3,16 +3,24 @@
 import Link from "next/link";
 import { motion } from "framer-motion";
 
+import { type Locale } from "@/lib/i18n/config";
+import { localeHref } from "@/lib/i18n/href";
 import { cn } from "@/lib/utils";
 
 export function IntelligenceHubTabs({
   tabs,
   activeValue,
   className,
+  lang,
 }: {
+  /** `href` is an unprefixed app path — the locale segment is added here. */
   tabs: Array<{ label: string; value: string; href: string; note?: string }>;
   activeValue: string;
   className?: string;
+  /** Required: without it every tab linked to the unprefixed path, and
+   * `proxy.ts` re-negotiated the locale from Accept-Language — so a French
+   * reader with an English browser was thrown to /en on every tab click. */
+  lang: Locale;
 }) {
   const activeNote = tabs.find((tab) => tab.value === activeValue)?.note;
 
@@ -25,7 +33,7 @@ export function IntelligenceHubTabs({
           return (
             <Link
               key={tab.value}
-              href={tab.href}
+              href={localeHref(lang, tab.href)}
               scroll={false}
               aria-current={active ? "page" : undefined}
               className={cn(

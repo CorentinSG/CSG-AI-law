@@ -84,6 +84,7 @@ export default async function UsStatesIndexPage({
           ]}
         />
         <SectionHeading
+          as="h1"
           eyebrow={fr ? "Couverture par état · États-Unis" : "Coverage by state · United States"}
           title={fr ? "Les 50 états + DC" : "All 50 states + DC"}
           description={

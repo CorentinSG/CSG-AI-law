@@ -114,6 +114,7 @@ export default async function UsFederalPage({
           ]}
         />
         <SectionHeading
+          as="h1"
           eyebrow={fr ? "Droit fédéral · États-Unis" : "Federal law · United States"}
           title="Federal"
           description={

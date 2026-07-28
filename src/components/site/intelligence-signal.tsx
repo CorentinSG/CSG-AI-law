@@ -8,7 +8,9 @@ const toneClasses = {
     warning: "border-amber-200 bg-amber-50 text-amber-900",
   },
   dark: {
-    neutral: "border-white/10 bg-white/5 text-zinc-200",
+    // zinc-200 is the decorative floor of the dark ramp (2.57:1) — badge copy
+    // is read, so it uses the lowest step that clears WCAG AA.
+    neutral: "border-white/10 bg-white/5 text-zinc-400",
     positive: "border-emerald-400/25 bg-emerald-500/10 text-emerald-100",
     informative: "border-sky-400/25 bg-sky-500/10 text-sky-100",
     warning: "border-amber-400/25 bg-amber-500/10 text-amber-100",

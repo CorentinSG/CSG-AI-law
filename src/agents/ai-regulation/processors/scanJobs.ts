@@ -503,12 +503,12 @@ export async function processNextQueuedScanJob(options?: {
   heartbeatIntervalMs?: number;
   heartbeatTimeoutMs?: number;
 }) {
-  const jobs = await updateRepository.getScanJobs(
+  // Selecting from the newest N jobs and filtering in memory starved the queue:
+  // once more than N jobs existed, the oldest queued work was unreachable and
+  // never ran. Ask the repository for queued jobs oldest-first instead.
+  const queuedJobs = await updateRepository.getQueuedScanJobs(
     options?.limit ?? DEFAULT_SCAN_JOB_FETCH_LIMIT,
   );
-  const queuedJobs = jobs
-    .filter((job) => job.status === "queued")
-    .sort(sortJobsByCreatedAtAscending);
 
   if (queuedJobs.length === 0) {
     return null;

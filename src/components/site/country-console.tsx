@@ -347,7 +347,7 @@ export function CountryLegalDatabase({
                   <span aria-hidden className="absolute inset-0 rounded-full border border-white/8" />
                 )}
                 <span className="relative">
-                  {pill.label} <span className="text-white/40">{pill.count}</span>
+                  {pill.label} <span className="text-white/70">{pill.count}</span>
                 </span>
               </button>
             );

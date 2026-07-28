@@ -7,7 +7,10 @@ import {
   parseVisibleDate,
   resolveAbsoluteUrl,
 } from "@/agents/ai-regulation/connectors/connector-utils";
-import { fetchTextWithConditionalCaching } from "@/agents/ai-regulation/connectors/conditional-fetch";
+import {
+  CONNECTOR_REQUEST_TIMEOUT_MS,
+  fetchTextWithConditionalCaching,
+} from "@/agents/ai-regulation/connectors/conditional-fetch";
 import {
   isConseilEtatSourceUrl,
   isCourCassationSourceUrl,
@@ -1411,6 +1414,7 @@ export class StaticPageConnector implements SourceConnector {
               "C-Saint-Girons-AI-Regulation-Monitor/0.1 (official-source-monitoring)",
           },
           next: { revalidate: 0 },
+          signal: AbortSignal.timeout(CONNECTOR_REQUEST_TIMEOUT_MS),
         });
 
         if (redirectedResponse.ok) {

@@ -40,6 +40,7 @@ export default async function EuropeTimelinePage({
           ]}
         />
         <SectionHeading
+          as="h1"
           eyebrow={fr ? "Chronologie officielle · UE" : "Official timeline · EU"}
           title="Timeline EU"
           description={

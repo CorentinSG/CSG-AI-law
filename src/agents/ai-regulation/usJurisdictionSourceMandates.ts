@@ -1,3 +1,15 @@
+// Same provisioning vocabulary as the EU member-state mandates; imported rather
+// than duplicated so the two mandate files cannot drift.
+import type { MandateSourceProvisioning } from "@/agents/ai-regulation/euMemberStateSourceMandates";
+
+/**
+ * Every entry below is currently `aspirational_not_wired`: the ids are
+ * declarative mandate names (`news-…`, `official-…`) and none of them exists in
+ * `regulation_sources` or in any seeded source registry (whose ids look like
+ * `src-ny-courts-ai`). The field is required so a mandate can never be read as
+ * real monitoring coverage; flip an entry to `seeded_and_scanned` only once its
+ * source is actually seeded and reached by a scan profile.
+ */
 export interface UsAgentSourceMandate {
   legalNewsSources: ReadonlyArray<{
     id: string;
@@ -11,6 +23,7 @@ export interface UsAgentSourceMandate {
     scope: "national_filtered_by_jurisdiction" | "jurisdiction_specific";
     use: "legal_news_monitoring";
     activationRule: "filter_by_jurisdiction_and_ai_law_terms";
+    provisioning: MandateSourceProvisioning;
   }>;
   officialDatabaseSources: ReadonlyArray<{
     id: string;
@@ -25,6 +38,7 @@ export interface UsAgentSourceMandate {
     use: "legal_database_monitoring";
     coverage: ReadonlyArray<"hard_law" | "soft_law" | "case_law_and_decisions">;
     activationRule: "verify_official_endpoint_before_active_scan";
+    provisioning: MandateSourceProvisioning;
   }>;
 }
 
@@ -36,6 +50,7 @@ const sharedUsLegalNewsSources = [
     scope: "national_filtered_by_jurisdiction",
     use: "legal_news_monitoring",
     activationRule: "filter_by_jurisdiction_and_ai_law_terms",
+    provisioning: "aspirational_not_wired",
   },
   {
     id: "news-law360-ai",
@@ -44,6 +59,7 @@ const sharedUsLegalNewsSources = [
     scope: "national_filtered_by_jurisdiction",
     use: "legal_news_monitoring",
     activationRule: "filter_by_jurisdiction_and_ai_law_terms",
+    provisioning: "aspirational_not_wired",
   },
   {
     id: "news-bloomberg-law-ai",
@@ -52,6 +68,7 @@ const sharedUsLegalNewsSources = [
     scope: "national_filtered_by_jurisdiction",
     use: "legal_news_monitoring",
     activationRule: "filter_by_jurisdiction_and_ai_law_terms",
+    provisioning: "aspirational_not_wired",
   },
   {
     id: "news-mllex-us-ai",
@@ -60,6 +77,7 @@ const sharedUsLegalNewsSources = [
     scope: "national_filtered_by_jurisdiction",
     use: "legal_news_monitoring",
     activationRule: "filter_by_jurisdiction_and_ai_law_terms",
+    provisioning: "aspirational_not_wired",
   },
   {
     id: "news-cyberscoop-ai",
@@ -68,6 +86,7 @@ const sharedUsLegalNewsSources = [
     scope: "national_filtered_by_jurisdiction",
     use: "legal_news_monitoring",
     activationRule: "filter_by_jurisdiction_and_ai_law_terms",
+    provisioning: "aspirational_not_wired",
   },
 ] as const;
 
@@ -80,6 +99,7 @@ const federalNewsSources = [
     scope: "jurisdiction_specific",
     use: "legal_news_monitoring",
     activationRule: "filter_by_jurisdiction_and_ai_law_terms",
+    provisioning: "aspirational_not_wired",
   },
 ] as const;
 
@@ -91,6 +111,7 @@ const federalOfficialSources = [
     use: "legal_database_monitoring",
     coverage: ["hard_law", "soft_law"],
     activationRule: "verify_official_endpoint_before_active_scan",
+    provisioning: "aspirational_not_wired",
   },
   {
     id: "official-us-congress-ai",
@@ -99,6 +120,7 @@ const federalOfficialSources = [
     use: "legal_database_monitoring",
     coverage: ["hard_law"],
     activationRule: "verify_official_endpoint_before_active_scan",
+    provisioning: "aspirational_not_wired",
   },
   {
     id: "official-us-ftc-ai",
@@ -107,6 +129,7 @@ const federalOfficialSources = [
     use: "legal_database_monitoring",
     coverage: ["soft_law", "case_law_and_decisions"],
     activationRule: "verify_official_endpoint_before_active_scan",
+    provisioning: "aspirational_not_wired",
   },
   {
     id: "official-us-nist-ai",
@@ -115,6 +138,7 @@ const federalOfficialSources = [
     use: "legal_database_monitoring",
     coverage: ["soft_law"],
     activationRule: "verify_official_endpoint_before_active_scan",
+    provisioning: "aspirational_not_wired",
   },
   {
     id: "official-us-federal-courts-ai",
@@ -123,6 +147,7 @@ const federalOfficialSources = [
     use: "legal_database_monitoring",
     coverage: ["case_law_and_decisions"],
     activationRule: "verify_official_endpoint_before_active_scan",
+    provisioning: "aspirational_not_wired",
   },
 ] as const;
 
@@ -188,6 +213,7 @@ function buildJurisdictionSpecificNewsSource(jurisdiction: string, postalCode: s
     scope: "jurisdiction_specific" as const,
     use: "legal_news_monitoring" as const,
     activationRule: "filter_by_jurisdiction_and_ai_law_terms" as const,
+    provisioning: "aspirational_not_wired" as const,
   };
 }
 
@@ -201,6 +227,7 @@ function buildStateOfficialSources(jurisdiction: string, postalCode: string) {
       use: "legal_database_monitoring",
       coverage: ["hard_law"],
       activationRule: "verify_official_endpoint_before_active_scan",
+      provisioning: "aspirational_not_wired",
     },
     {
       id: `official-us-${code}-code-register-ai`,
@@ -209,6 +236,7 @@ function buildStateOfficialSources(jurisdiction: string, postalCode: string) {
       use: "legal_database_monitoring",
       coverage: ["hard_law", "soft_law"],
       activationRule: "verify_official_endpoint_before_active_scan",
+      provisioning: "aspirational_not_wired",
     },
     {
       id: `official-us-${code}-ag-ai`,
@@ -217,6 +245,7 @@ function buildStateOfficialSources(jurisdiction: string, postalCode: string) {
       use: "legal_database_monitoring",
       coverage: ["soft_law", "case_law_and_decisions"],
       activationRule: "verify_official_endpoint_before_active_scan",
+      provisioning: "aspirational_not_wired",
     },
     {
       id: `official-us-${code}-digital-ai`,
@@ -225,6 +254,7 @@ function buildStateOfficialSources(jurisdiction: string, postalCode: string) {
       use: "legal_database_monitoring",
       coverage: ["soft_law", "hard_law"],
       activationRule: "verify_official_endpoint_before_active_scan",
+      provisioning: "aspirational_not_wired",
     },
     {
       id: `official-us-${code}-courts-ai`,
@@ -233,6 +263,7 @@ function buildStateOfficialSources(jurisdiction: string, postalCode: string) {
       use: "legal_database_monitoring",
       coverage: ["case_law_and_decisions"],
       activationRule: "verify_official_endpoint_before_active_scan",
+      provisioning: "aspirational_not_wired",
     },
   ] as const;
 }

@@ -150,6 +150,12 @@ export const updateRepository = {
   async getScanJobs(limit?: number) {
     return getAiRegulationRepository().listScanJobs(limit);
   },
+  async getQueuedScanJobs(limit?: number) {
+    return getAiRegulationRepository().listQueuedScanJobs(limit);
+  },
+  async getScanJobsCreatedSince(since: string, limit?: number) {
+    return getAiRegulationRepository().listScanJobsCreatedSince(since, limit);
+  },
   async getScanJobsPage(page?: ListPageParams) {
     return getAiRegulationRepository().listScanJobsPage(page);
   },

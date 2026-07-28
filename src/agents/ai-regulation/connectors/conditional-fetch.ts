@@ -26,6 +26,25 @@ const MAX_FETCH_ATTEMPTS = 3;
 const RETRY_BASE_DELAY_MS = 500;
 const RETRY_MAX_DELAY_MS = 4000;
 
+// A source that accepts the connection and then stalls is invisible to the
+// retry policy above: undici only gives up after its multi-minute default, and
+// never at all if the server trickles just enough bytes to keep the socket
+// alive. Because the pipeline scans sources sequentially, one such source can
+// consume the whole GitHub Actions run. 20s is generous for the HTML/RSS/JSON
+// documents these connectors poll — including the slower official search
+// endpoints — while staying two orders of magnitude below the run budget.
+// AbortSignal.timeout also covers the response body stream, so a trickled body
+// aborts too (mirrors src/agents/ingestion/scraplingClient.ts).
+export const CONNECTOR_REQUEST_TIMEOUT_MS = 20_000;
+
+// A timeout is retried like any other transient failure, but three full
+// deadlines would cost over a minute per source — worse than the hang it
+// guards against. One logical fetch therefore shares a single budget: every
+// attempt gets whichever is smaller, the per-request deadline or the budget
+// left, so the attempt chain can never exceed this figure of request time
+// however the failures are mixed.
+const CONNECTOR_FETCH_BUDGET_MS = 45_000;
+
 export function isTransientFetchStatus(status: number) {
   return TRANSIENT_STATUS_CODES.has(status);
 }
@@ -36,6 +55,11 @@ export function isTransientFetchError(error: unknown): boolean {
   if (typeof code === "string" && TRANSIENT_ERROR_CODES.has(code)) {
     return true;
   }
+  // Our own deadline firing is the same class of blip as a socket timeout, so
+  // it is retried within the shared budget. Only "TimeoutError" qualifies:
+  // a plain "AbortError" would be a caller cancelling on purpose, and
+  // retrying that would defeat the cancellation.
+  if ((error as { name?: unknown }).name === "TimeoutError") return true;
   const cause = (error as { cause?: unknown }).cause;
   return cause ? isTransientFetchError(cause) : false;
 }
@@ -53,12 +77,20 @@ function sleep(ms: number) {
 
 async function fetchWithTransientRetry(url: string, init: RequestInit) {
   let lastError: unknown = null;
+  const budgetExpiresAt = Date.now() + CONNECTOR_FETCH_BUDGET_MS;
 
   for (let attempt = 0; attempt < MAX_FETCH_ATTEMPTS; attempt += 1) {
     const isLastAttempt = attempt === MAX_FETCH_ATTEMPTS - 1;
+    const timeoutMs = Math.max(
+      0,
+      Math.min(CONNECTOR_REQUEST_TIMEOUT_MS, budgetExpiresAt - Date.now()),
+    );
 
     try {
-      const response = await fetch(url, init);
+      const response = await fetch(url, {
+        ...init,
+        signal: AbortSignal.timeout(timeoutMs),
+      });
       if (!isTransientFetchStatus(response.status) || isLastAttempt) {
         return response;
       }
