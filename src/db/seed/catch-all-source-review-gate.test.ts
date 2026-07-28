@@ -11,8 +11,8 @@ import { regulationSourcesSeed } from "@/db/seed/ai-regulation-seed";
 // replaces the selector.
 const GENERATED_CATCH_ALL_SELECTOR = "main a[href], article a[href], a[href]";
 
-// Nine hand-authored DPA/ministry sources use a bare anchor selector too,
-// only scoped to <main> — the same failure mode one notch narrower.
+// Hand-authored DPA/ministry sources that use a bare anchor selector too, only
+// scoped to <main> — the same failure mode one notch narrower.
 const MAIN_SCOPED_ANCHOR_SELECTOR = "main a[href]";
 
 // Verified official lanes that must keep auto-publishing.
@@ -30,10 +30,11 @@ describe("generated catch-all source review gate", () => {
     (source) => source.config?.itemSelector === GENERATED_CATCH_ALL_SELECTOR,
   );
 
-  // 62, not the original 66: Croatia, Malta and Monaco (DPA lanes) and Greece
-  // (government lane) moved to verified RSS feeds and left the gate.
-  it("covers the generated shells that still have no verified feed", () => {
-    expect(catchAllSources.length).toBe(62);
+  // 58, down from the original 66: four lanes moved to verified RSS feeds
+  // (Croatia, Malta, Monaco DPAs and the Greek government) and four to verified
+  // selectors (Greece, Luxembourg and Portugal DPAs, the Slovenian government).
+  it("covers the generated shells with neither a feed nor a verified selector", () => {
+    expect(catchAllSources.length).toBe(58);
     expect(
       catchAllSources.every(
         (source) => source.id.endsWith("-dpa-ai") || source.id.endsWith("-government-ai"),
@@ -51,7 +52,7 @@ describe("generated catch-all source review gate", () => {
   });
 
   // The flag must never spread beyond sources that genuinely extract with a bare
-  // anchor selector: the 62 remaining generated shells plus the 8 hand-authored
+  // anchor selector: the 58 remaining generated shells plus the 7 hand-authored
   // main-scoped ones. Anything else appearing here means a verified official
   // lane was pulled out of the automatic publication path by mistake.
   it("keeps the flag confined to sources with a bare anchor selector", () => {
@@ -63,7 +64,7 @@ describe("generated catch-all source review gate", () => {
       );
     });
 
-    expect(flagged.length).toBe(70);
+    expect(flagged.length).toBe(65);
     expect(flagged.map((source) => source.id).sort()).toEqual(
       anchorCatchAll.map((source) => source.id).sort(),
     );
@@ -93,7 +94,8 @@ describe("main-scoped anchor catch-all review gate", () => {
   );
 
   it("covers every hand-authored source using a bare main-scoped anchor selector", () => {
-    // src-nl-ap-ai left this set: its verified RSS feed replaced the selector.
+    // src-nl-ap-ai left via a verified feed, src-se-regeringen-ai via a
+    // verified selector.
     expect(mainScopedSources.map((source) => source.id).sort()).toEqual([
       "src-at-dsb-ai",
       "src-be-apd-ai",
@@ -102,7 +104,6 @@ describe("main-scoped anchor catch-all review gate", () => {
       "src-nl-rdi-ai",
       "src-nl-rijksoverheid-ai",
       "src-se-digg-ai",
-      "src-se-regeringen-ai",
     ]);
   });
 
@@ -119,7 +120,7 @@ describe("main-scoped anchor catch-all review gate", () => {
   });
 });
 
-// Feeds verified end to end by scripts/discover-source-feeds.ts on GitHub
+// Feeds verified end to end by scripts/discover-source-extraction.ts on GitHub
 // Actions (run 30373800651, 2026-07-28): each parses and carries dated items.
 // Only 12 of the 75 probed sources had one, and only these five were judged
 // usable — the rest were stale, carried filename or case-number titles, or were
@@ -147,6 +148,37 @@ describe("sources promoted to a verified feed", () => {
       // These feeds are broader than AI, so deterministic filtering must remain.
       expect(Array.isArray(source?.config?.includeAnyTerms), id).toBe(true);
       expect((source?.config?.includeAnyTerms as unknown[]).length, id).toBeGreaterThan(0);
+    });
+  }
+});
+
+// Selectors verified against the live pages by the extended probe (run
+// 30387343579, 2026-07-28). Each yielded several distinct same-host links with
+// headline-length titles and 100% date coverage — the bar a navigation menu
+// cannot clear, which is the reason these lanes may leave the gate. Only 5 of
+// the 70 probed sources produced one; a selector must never be added by guess.
+const VERIFIED_SELECTORS: Record<string, string> = {
+  "src-gr-dpa-ai": ".views-row",
+  "src-lu-dpa-ai": "article",
+  "src-pt-dpa-ai": ".card, .c-card",
+  "src-si-government-ai": ".list-item, .listitem, .result-item",
+  "src-se-regeringen-ai": "main ul li:has(a[href]):has(time)",
+};
+
+describe("sources promoted to a verified selector", () => {
+  for (const [id, selector] of Object.entries(VERIFIED_SELECTORS)) {
+    it(`${id} uses its verified selector and has left the review gate`, () => {
+      const source = regulationSourcesSeed.find((entry) => entry.id === id);
+
+      expect(source, id).toBeDefined();
+      expect(source?.config?.itemSelector, id).toBe(selector);
+      expect(requiresSourceReview(source), id).toBe(false);
+      // These selectors match containers, so the link must come from the
+      // connector's default descendant `a` — a leftover `linkSelector: "self"`
+      // would take the container itself and break extraction.
+      expect(source?.config?.linkSelector, id).toBeUndefined();
+      expect(isDiscoveryOnlySource(source), id).toBe(false);
+      expect(Array.isArray(source?.config?.includeAnyTerms), id).toBe(true);
     });
   }
 });
