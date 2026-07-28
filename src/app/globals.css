@@ -78,7 +78,12 @@ a:hover {
 /* Added to SiteShell public variant so all pages inherit dark theme
    without touching each page individually. Higher specificity wins. */
 /* Muted text ramp — every step that carries real words clears WCAG AA (≥4.5:1
-   on the near-black body). Steps 300/200 are decorative-only (dividers, dots). */
+   on the #080808 body). The 4.5:1 threshold sits at white/0.4512, so 300 was
+   raised from 0.42 (4.03:1, failing) to 0.47 (4.80:1): it is used ~31 times for
+   real copy, including legal timeline text, so the old "decorative-only" claim
+   was not true of it. 200 stays deliberately dim at 2.57:1 because its only
+   remaining uses are aria-hidden decoration (a breadcrumb slash and the 404
+   numeral) — do not put readable text on it. */
 .dark-site .text-zinc-950 { color: rgba(255, 255, 255, 0.95); }
 .dark-site .text-zinc-900 { color: rgba(255, 255, 255, 0.90); }
 .dark-site .text-zinc-800 { color: rgba(255, 255, 255, 0.80); }
@@ -86,7 +91,7 @@ a:hover {
 .dark-site .text-zinc-600 { color: rgba(255, 255, 255, 0.66); }
 .dark-site .text-zinc-500 { color: rgba(255, 255, 255, 0.58); }
 .dark-site .text-zinc-400 { color: rgba(255, 255, 255, 0.52); }
-.dark-site .text-zinc-300 { color: rgba(255, 255, 255, 0.42); }
+.dark-site .text-zinc-300 { color: rgba(255, 255, 255, 0.47); }
 .dark-site .text-zinc-200 { color: rgba(255, 255, 255, 0.30); }
 
 .dark-site .bg-white { background-color: rgba(255, 255, 255, 0.05); }

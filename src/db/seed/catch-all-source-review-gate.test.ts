@@ -11,6 +11,10 @@ import { regulationSourcesSeed } from "@/db/seed/ai-regulation-seed";
 // replaces the selector.
 const GENERATED_CATCH_ALL_SELECTOR = "main a[href], article a[href], a[href]";
 
+// Nine hand-authored DPA/ministry sources use a bare anchor selector too,
+// only scoped to <main> — the same failure mode one notch narrower.
+const MAIN_SCOPED_ANCHOR_SELECTOR = "main a[href]";
+
 // Verified official lanes that must keep auto-publishing.
 const AUTO_ELIGIBLE_OFFICIAL_SOURCE_IDS = [
   "src-federal-register-ai",
@@ -44,11 +48,22 @@ describe("generated catch-all source review gate", () => {
     }
   });
 
-  it("keeps the flag confined to the generated catch-all shells", () => {
+  // The flag must never spread beyond sources that genuinely extract with a bare
+  // anchor selector: the 66 generated shells plus the 9 hand-authored
+  // main-scoped ones. Anything else appearing here means a verified official
+  // lane was pulled out of the automatic publication path by mistake.
+  it("keeps the flag confined to sources with a bare anchor selector", () => {
     const flagged = regulationSourcesSeed.filter((source) => requiresSourceReview(source));
+    const anchorCatchAll = regulationSourcesSeed.filter((source) => {
+      const selector = source.config?.itemSelector;
+      return (
+        selector === GENERATED_CATCH_ALL_SELECTOR || selector === MAIN_SCOPED_ANCHOR_SELECTOR
+      );
+    });
 
+    expect(flagged.length).toBe(75);
     expect(flagged.map((source) => source.id).sort()).toEqual(
-      catchAllSources.map((source) => source.id).sort(),
+      anchorCatchAll.map((source) => source.id).sort(),
     );
   });
 
@@ -66,6 +81,38 @@ describe("generated catch-all source review gate", () => {
       expect(source, id).toBeDefined();
       expect(requiresSourceReview(source), id).toBe(false);
       expect(isDiscoveryOnlySource(source), id).toBe(false);
+    }
+  });
+});
+
+describe("main-scoped anchor catch-all review gate", () => {
+  const mainScopedSources = regulationSourcesSeed.filter(
+    (source) => source.config?.itemSelector === MAIN_SCOPED_ANCHOR_SELECTOR,
+  );
+
+  it("covers every hand-authored source using a bare main-scoped anchor selector", () => {
+    expect(mainScopedSources.map((source) => source.id).sort()).toEqual([
+      "src-at-dsb-ai",
+      "src-be-apd-ai",
+      "src-ie-dete-ai",
+      "src-ie-dpc-ai",
+      "src-nl-ap-ai",
+      "src-nl-rdi-ai",
+      "src-nl-rijksoverheid-ai",
+      "src-se-digg-ai",
+      "src-se-regeringen-ai",
+    ]);
+  });
+
+  it("flags them for review without downgrading them to discovery leads", () => {
+    for (const source of mainScopedSources) {
+      expect(requiresSourceReview(source), source.id).toBe(true);
+      expect(source.config?.requiresReviewReason, source.id).toBe(
+        "main_scoped_anchor_catch_all",
+      );
+      // They remain official: a reviewer can still publish them.
+      expect(isDiscoveryOnlySource(source), source.id).toBe(false);
+      expect(["official", "regulator"], source.id).toContain(source.sourceCategory);
     }
   });
 });
