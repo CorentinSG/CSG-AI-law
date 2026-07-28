@@ -133,7 +133,11 @@ const remainingEuMemberStateSourceInputs = [
     dpaName: "Finnish Office of the Data Protection Ombudsman",
     dpaUrl: "https://tietosuoja.fi/en/ai-systems-and-data-protection",
     governmentName: "Traficom EU Artificial Intelligence Act materials",
-    governmentUrl: "https://traficom.fi/en/ai-regulation/about-eu-artificial-intelligence-act",
+    // The seeded AI-Act explainer is a static page that publishes nothing. The
+    // root is Traficom's newsroom. URL only — its listing is general transport
+    // news (run 30397833023 sampled jet-ski safety and hand-luggage advice), so
+    // this lane stays gated and leans on `includeAnyTerms` to filter.
+    governmentUrl: "https://traficom.fi",
     newsQuery:
       '(("artificial intelligence" OR "AI Act" OR tekoäly) AND Finland AND (law OR regulation OR legal OR Traficom))',
     gdeltQuery:
@@ -316,7 +320,11 @@ const nonEuEuropeSourceInputs = [
     code: "no",
     country: "Norway",
     dpaName: "Norwegian Data Protection Authority",
-    dpaUrl: "https://www.datatilsynet.no/en/regulations-and-tools/artificial-intelligence/",
+    // The old /en/regulations-and-tools/artificial-intelligence/ page 404s. The
+    // authority's own root carries its guidance listing (run 30397833023:
+    // blockchain and anonymisation guidelines, information-sharing cooperation).
+    dpaUrl: "https://www.datatilsynet.no",
+    dpaSelector: "main ul li:has(a[href]):has(time)",
     governmentName: "Lovdata official legal information",
     governmentUrl: "https://lovdata.no/",
     newsQuery:
@@ -342,7 +350,12 @@ const nonEuEuropeSourceInputs = [
     code: "ch",
     country: "Switzerland",
     dpaName: "Federal Data Protection and Information Commissioner",
-    dpaUrl: "https://www.edoeb.admin.ch/edoeb/en/home/datenschutz/technologien/ki.html",
+    // The old deep link 404s; /de/mitteilungen is the FDPIC's actual
+    // announcements page. URL only — the probe's selector there returned 126
+    // items at 77% dated with "Mehr über …" wrapper links (run 30397833023), so
+    // it stays on the catch-all and inside the review gate until a narrower
+    // selector is verified.
+    dpaUrl: "https://www.edoeb.admin.ch/de/mitteilungen",
     governmentName: "Fedlex official publication platform",
     governmentUrl: "https://www.fedlex.admin.ch/",
     newsQuery:
@@ -1219,8 +1232,9 @@ export const regulationSourcesSeed: RegulationSource[] = [
     jurisdiction: "Austria",
     region: "Europe",
     country: "Austria",
-    sourceUrl:
-      "https://dsb.gv.at/kuenstlichebrintelligenz/kuenstliche-intelligenz-datenschutz",
+    // The seeded deep link (note the typo it was seeded with) publishes nothing.
+    // The DSB's own root carries its listing.
+    sourceUrl: "https://dsb.gv.at",
     sourceType: "regulator_page",
     ingestionMethod: "existing",
     sourceCategory: "regulator",
@@ -1234,10 +1248,11 @@ export const regulationSourcesSeed: RegulationSource[] = [
     config: {
       maxItems: 30,
       authorityTypeHint: "Agency guidance",
-      itemSelector: "main a[href]",
-      requiresReview: true,
-      requiresReviewReason: "main_scoped_anchor_catch_all",
-      linkSelector: "self",
+      // Verified against the live root by run 30397833023: 3 items, 100% dated —
+      // the EDPB Dublin high-level meeting, the VwGH ruling on unlawful
+      // processing of party affinities, the 2026 focus-audit update. No
+      // linkSelector, so the connector's default descendant `a` applies.
+      itemSelector: "main li:has(a[href])",
       includeAnyTerms: [
         "künstliche intelligenz",
         "ki-verordnung",
@@ -3657,7 +3672,11 @@ export const regulationSourcesSeed: RegulationSource[] = [
     jurisdiction: "Sweden",
     region: "Europe",
     country: "Sweden",
-    sourceUrl: "https://www.digg.se/kunskap-och-stod/eu-rattsakter/ai-forordningen",
+    // The seeded AI-Act guidance page is static and publishes nothing; DIGG's
+    // root is its newsroom. URL only — run 30397833023 found the listing there
+    // but sampled general digital-government news, so this lane stays gated and
+    // leans on `includeAnyTerms` to filter.
+    sourceUrl: "https://www.digg.se",
     sourceType: "regulator_page",
     ingestionMethod: "existing",
     sourceCategory: "official",

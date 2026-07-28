@@ -20,7 +20,10 @@ permissions:
 jobs:
   discover:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    # The recovery phase adds up to 9 requests per source that yields nothing at
+    # its seeded URL, on top of the feed sweep. A manual probe is allowed to be
+    # slow; being cut off mid-sweep loses the whole report.
+    timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
 

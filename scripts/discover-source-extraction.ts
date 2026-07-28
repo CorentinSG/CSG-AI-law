@@ -115,6 +115,13 @@ type Finding = {
   sampleTitles: string[];
   selectorCandidate: SelectorEvidence | null;
   note: string;
+  /** Set when a listing was found somewhere other than the seeded URL. */
+  recoveredUrl?: string;
+  /** Set only when the seeded page did not yield HTML — the fix-or-drop evidence. */
+  pageStatus?: number | null;
+  pageFinalUrl?: string | null;
+  rootStatus?: number | null;
+  verdict?: string;
 };
 
 const parser = new Parser({
@@ -122,14 +129,105 @@ const parser = new Parser({
   headers: { "User-Agent": USER_AGENT },
 });
 
-async function fetchText(url: string) {
-  const response = await fetch(url, {
-    headers: { "User-Agent": USER_AGENT },
-    signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
-    redirect: "follow",
-  });
-  if (!response.ok) return null;
-  return response.text();
+type PageFetch = {
+  html: string | null;
+  status: number | null;
+  finalUrl: string | null;
+  errorName: string | null;
+  /** undici's underlying cause — `ENOTFOUND`, `ECONNRESET`, `CERT_HAS_EXPIRED`… */
+  errorCode: string | null;
+};
+
+// Node reports every fetch failure as a bare `TypeError`; the discriminating
+// detail is on `cause.code`. Only a DNS failure says the host is actually gone —
+// a reset, a refusal or a TLS rejection means the name still resolves and
+// something is deliberately turning this client away.
+const DNS_FAILURE_CODES = new Set(["ENOTFOUND", "EAI_AGAIN"]);
+
+async function fetchPage(url: string): Promise<PageFetch> {
+  try {
+    const response = await fetch(url, {
+      headers: { "User-Agent": USER_AGENT },
+      signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
+      redirect: "follow",
+    });
+    return {
+      html: response.ok ? await response.text() : null,
+      status: response.status,
+      finalUrl: response.url || url,
+      errorName: null,
+      errorCode: null,
+    };
+  } catch (error) {
+    const cause = (error as { cause?: { code?: string } }).cause;
+    return {
+      html: null,
+      status: null,
+      finalUrl: null,
+      errorName: (error as Error).name,
+      errorCode: cause?.code ?? null,
+    };
+  }
+}
+
+/**
+ * Turn a failed page fetch into a verdict a human can act on. The distinction
+ * that matters is fixable versus dead, and the first probe run could not draw
+ * it: every failure was reported as "unreachable" or "non-OK status", which put
+ * a live regulator refusing datacenter traffic in the same bucket as a URL that
+ * no longer exists. Deactivating a source on that evidence would drop a working
+ * lane, so the verdict is deliberately conservative — only `dead_path` and
+ * `dead_host` license removing anything, and both require the site to have said
+ * so explicitly.
+ *
+ * `rootStatus` is the status of the source's own origin, fetched only after the
+ * seeded URL failed: a live root behind a dead path means the authority moved
+ * its newsroom, which is a URL fix rather than a deactivation.
+ */
+export function diagnosePageFailure(page: PageFetch, rootStatus: number | null) {
+  if (page.errorName === "TimeoutError") {
+    return { verdict: "timeout" as const, note: "timed out — slow host, not proof of a dead source" };
+  }
+  if (page.status === null) {
+    // No HTTP response at all, so there is no evidence about the *path* — the
+    // root shares this hostname, so a root that answers proves DNS works and the
+    // failure was transient. Only a DNS failure with a dead root says the source
+    // is gone. Ireland's DPC failed a previous run here with a connection reset:
+    // a live regulator whose WAF refuses datacenter clients, which must never
+    // read as death.
+    if (rootStatus !== null && rootStatus < 500) {
+      return {
+        verdict: "unreachable" as const,
+        note: `${page.errorCode ?? page.errorName ?? "no response"}, but the site root answers ${rootStatus} — transient`,
+      };
+    }
+    if (page.errorCode && !DNS_FAILURE_CODES.has(page.errorCode)) {
+      return {
+        verdict: "unreachable" as const,
+        note: `${page.errorCode} — the connection was refused, not proof of a dead source`,
+      };
+    }
+    return {
+      verdict: "dead_host" as const,
+      note: `${page.errorCode ?? page.errorName ?? "unknown error"} — the hostname does not resolve`,
+    };
+  }
+  if (page.status === 403 || page.status === 401 || page.status === 429) {
+    return {
+      verdict: "blocked" as const,
+      note: `${page.status} — the site is up and refusing this client, not a dead source`,
+    };
+  }
+  if (page.status === 404 || page.status === 410) {
+    const alive = rootStatus !== null && rootStatus < 400;
+    return alive
+      ? { verdict: "dead_path" as const, note: `${page.status}, but the site root answers ${rootStatus}` }
+      : { verdict: "dead_host" as const, note: `${page.status} and the site root answers ${rootStatus ?? "nothing"}` };
+  }
+  if (page.status >= 500) {
+    return { verdict: "server_error" as const, note: `${page.status} — server-side, retry before judging` };
+  }
+  return { verdict: "other" as const, note: `unexpected status ${page.status}` };
 }
 
 /**
@@ -248,6 +346,53 @@ export function bestSelector(html: string, baseUrl: string): SelectorEvidence | 
   return null;
 }
 
+/**
+ * Words that name a publication listing across the languages these authorities
+ * publish in. Matched against both the href and the link text, so a Slovenian
+ * site linking "Novice" and an Icelandic one linking "Fréttir" both surface.
+ * Deliberately broad: a wrong candidate costs one request and is then rejected
+ * by the same evidence bar as everything else, while a missing language costs a
+ * whole lane.
+ */
+const LISTING_LINK_HINTS =
+  /news|nyhet|nyhed|nyheter|aktuel|aktualit|actualit|aktualn|aktuality|presse|press|media|medij|frett|fr[ée]ttir|uutis|nieuws|notic|vijesti|novosti|novice|h[ií]rek|naujien|jaunumi|uudised|stiri|obvestila|communiqu|publicat|publikac|mitteilung|meldung|pressemitteilung|announcement|blog/i;
+
+/**
+ * A seeded URL that yields nothing is not the end of the story: these lanes were
+ * seeded with topic and landing pages, and the authority's actual listing is
+ * usually one link away from its own root. Collecting those links is discovery,
+ * not guessing — every candidate still has to clear the same evidence bar.
+ */
+export function listingCandidates(html: string, baseUrl: string): string[] {
+  const $ = cheerio.load(html);
+  let origin: string;
+  try {
+    origin = new URL(baseUrl).origin;
+  } catch {
+    return [];
+  }
+
+  const candidates: string[] = [];
+  $("a[href]").each((_, element) => {
+    const href = $(element).attr("href") ?? "";
+    const text = $(element).text().trim();
+    try {
+      const resolved = new URL(href, baseUrl);
+      if (resolved.origin !== origin) return;
+      // The root itself is already probed by the caller, and a fragment or a
+      // query-only link is the same page again.
+      resolved.hash = "";
+      if (resolved.pathname === "/" || resolved.pathname === "") return;
+      if (!LISTING_LINK_HINTS.test(resolved.pathname) && !LISTING_LINK_HINTS.test(text)) return;
+      candidates.push(resolved.toString());
+    } catch {
+      // Ignore an unparseable href rather than failing the whole probe.
+    }
+  });
+
+  return [...new Set(candidates)];
+}
+
 function declaredFeedUrls(html: string, baseUrl: string) {
   const $ = cheerio.load(html);
   const urls: string[] = [];
@@ -281,20 +426,35 @@ async function probe(source: RegulationSource): Promise<Finding> {
     note: "",
   };
 
-  let html: string | null = null;
-  try {
-    html = await fetchText(source.sourceUrl);
-  } catch (error) {
-    base.note = `page unreachable: ${(error as Error).message}`;
-  }
+  const page = await fetchPage(source.sourceUrl);
+  const html = page.html;
 
   const candidates: Array<{ url: string; via: Finding["discoveredVia"] }> = [];
-  if (html) {
+  // `!== null`, not truthiness: a 200 with an empty body is a page that loaded
+  // and yielded nothing, not a load failure. Treating "" as failure reported
+  // src-ie-dete-ai as "unexpected status 200".
+  if (html !== null) {
     for (const url of declaredFeedUrls(html, source.sourceUrl)) {
       candidates.push({ url, via: "link-rel" });
     }
-  } else if (!base.note) {
-    base.note = "page returned a non-OK status";
+  } else {
+    // Only now is the extra request justified: the root tells fix-the-URL apart
+    // from the source being gone.
+    let rootStatus: number | null = null;
+    try {
+      const origin = new URL(source.sourceUrl).origin;
+      if (origin !== source.sourceUrl.replace(/\/$/, "")) {
+        rootStatus = (await fetchPage(origin)).status;
+      }
+    } catch {
+      // Unparseable source URL — handled below.
+    }
+    const diagnosis = diagnosePageFailure(page, rootStatus);
+    base.pageStatus = page.status;
+    base.pageFinalUrl = page.finalUrl;
+    base.rootStatus = rootStatus;
+    base.verdict = diagnosis.verdict;
+    base.note = diagnosis.note;
   }
 
   try {
@@ -327,13 +487,65 @@ async function probe(source: RegulationSource): Promise<Finding> {
   // the page we already fetched — no extra request, and a far better answer
   // than the bare `a[href]` these sources use today.
   const selectorCandidate = html ? bestSelector(html, source.sourceUrl) : null;
+  if (selectorCandidate) {
+    return {
+      ...base,
+      selectorCandidate,
+      note: "no feed, but a candidate selector yields dated publications",
+    };
+  }
+
+  // Last resort: the seeded URL gave nothing, but these lanes were seeded with
+  // topic and landing pages, so the authority's real listing is usually one link
+  // from its own root. Search there before concluding the source is unusable.
+  const recovered = await recoverFromRoot(source.sourceUrl);
+  if (recovered) {
+    return {
+      ...base,
+      selectorCandidate: recovered.evidence,
+      recoveredUrl: recovered.url,
+      note: `the seeded URL yields nothing, but ${recovered.url} does — the source URL should move there`,
+    };
+  }
+
   return {
     ...base,
-    selectorCandidate,
-    note: selectorCandidate
-      ? "no feed, but a candidate selector yields dated publications"
-      : base.note || "no feed and no selector produced dated publications",
+    selectorCandidate: null,
+    note:
+      base.note ||
+      (html !== null && html.trim().length === 0
+        ? "page returned 200 with an empty body — client-side rendered, needs a browser renderer not a selector"
+        : "no feed and no selector produced dated publications"),
   };
+}
+
+/** Candidate listing pages tried per source. Bounds the request budget. */
+const MAX_RECOVERY_CANDIDATES = 8;
+
+async function recoverFromRoot(sourceUrl: string) {
+  let origin: string;
+  try {
+    origin = new URL(sourceUrl).origin;
+  } catch {
+    return null;
+  }
+
+  const root = await fetchPage(origin);
+  if (!root.html) return null;
+
+  // The root may itself be the listing.
+  const rootEvidence = bestSelector(root.html, origin);
+  if (rootEvidence) return { url: origin, evidence: rootEvidence };
+
+  for (const candidate of listingCandidates(root.html, origin).slice(0, MAX_RECOVERY_CANDIDATES)) {
+    if (candidate === sourceUrl) continue;
+    const page = await fetchPage(candidate);
+    if (!page.html) continue;
+    const evidence = bestSelector(page.html, candidate);
+    if (evidence) return { url: candidate, evidence };
+  }
+
+  return null;
 }
 
 async function main() {
@@ -360,11 +572,15 @@ async function main() {
   }
 
   const found = findings.filter((finding) => finding.feedUrl);
-  const withSelector = findings.filter((finding) => !finding.feedUrl && finding.selectorCandidate);
+  const recovered = findings.filter((finding) => !finding.feedUrl && finding.recoveredUrl);
+  const withSelector = findings.filter(
+    (finding) => !finding.feedUrl && !finding.recoveredUrl && finding.selectorCandidate,
+  );
   const stuck = findings.filter((finding) => !finding.feedUrl && !finding.selectorCandidate);
 
   console.log(`\n${found.length}/${findings.length} sources have a verified feed.`);
   console.log(`${withSelector.length}/${findings.length} have no feed but a candidate selector.`);
+  console.log(`${recovered.length}/${findings.length} yield nothing at the seeded URL but do elsewhere on the site.`);
   console.log(`${stuck.length}/${findings.length} have neither and must stay gated.\n`);
   console.log("Nothing here is a decision. Judge each candidate before wiring it.\n");
 
@@ -390,12 +606,49 @@ async function main() {
     }
   }
 
-  if (stuck.length > 0) {
-    console.log("--- neither feed nor selector ---");
-    for (const finding of stuck) {
-      console.log(`  ${finding.sourceId.padEnd(28)} ${finding.note}`);
+  if (recovered.length > 0) {
+    // These need a source URL change as well as a selector, so they are reported
+    // apart from the plain selector candidates — wiring only the selector would
+    // point it at a page that still yields nothing.
+    console.log("--- listing found elsewhere on the site (seeded URL is wrong) ---\n");
+    for (const finding of recovered) {
+      const candidate = finding.selectorCandidate!;
+      console.log(`${finding.sourceId}  (${finding.country})`);
+      console.log(`  seeded   : ${finding.sourceUrl}`);
+      console.log(`  found at : ${finding.recoveredUrl}`);
+      console.log(`  selector : ${candidate.selector}`);
+      console.log(`  items    : ${candidate.itemCount}, ${Math.round(candidate.datedRatio * 100)}% dated`);
+      for (const row of candidate.sampleRows) console.log(`  sample   : ${row}`);
+      console.log("");
     }
-    console.log("");
+  }
+
+  if (stuck.length > 0) {
+    // Sources whose page never loaded are a different problem from sources whose
+    // page loaded but yielded nothing: the first is a broken URL or a blocked
+    // client, the second is genuinely hard extraction. Reporting them together
+    // is what made the last run's "19 dead sources" unactionable.
+    const unloadable = stuck.filter((finding) => finding.verdict);
+    const extractionless = stuck.filter((finding) => !finding.verdict);
+
+    if (unloadable.length > 0) {
+      console.log(`--- page never loaded (${unloadable.length}) ---`);
+      for (const finding of [...unloadable].sort((a, b) =>
+        (a.verdict ?? "").localeCompare(b.verdict ?? ""),
+      )) {
+        console.log(`  ${finding.sourceId.padEnd(28)} ${(finding.verdict ?? "").padEnd(13)} ${finding.note}`);
+        console.log(`  ${" ".repeat(28)} ${finding.sourceUrl}`);
+      }
+      console.log("");
+    }
+
+    if (extractionless.length > 0) {
+      console.log(`--- page loaded, no feed and no selector (${extractionless.length}) ---`);
+      for (const finding of extractionless) {
+        console.log(`  ${finding.sourceId.padEnd(28)} ${finding.note}`);
+      }
+      console.log("");
+    }
   }
 
   if (jsonArg >= 0) {

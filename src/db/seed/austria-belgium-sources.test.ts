@@ -51,14 +51,24 @@ describe("Austria and Belgium production source seed", () => {
     }
   });
 
-  it.each(["src-at-dsb-ai", "src-be-apd-ai"])(
-    "configures the official AI hub %s with real listing selectors",
-    (sourceId) => {
-      const source = regulationSourcesSeed.find((entry) => entry.id === sourceId);
-      const config = source?.config ?? {};
+  it("still scrapes src-be-apd-ai with the main-scoped anchor catch-all", () => {
+    const source = regulationSourcesSeed.find((entry) => entry.id === "src-be-apd-ai");
+    const config = source?.config ?? {};
 
-      expect(config.itemSelector).toBe("main a[href]");
-      expect(config.linkSelector).toBe("self");
-    },
-  );
+    expect(config.itemSelector).toBe("main a[href]");
+    expect(config.linkSelector).toBe("self");
+  });
+
+  // src-at-dsb-ai left the catch-all: its seeded deep link 404'd and the probe
+  // verified a listing on the authority's root instead (run 30397833023).
+  // linkSelector must stay absent — this selector matches containers, so the
+  // connector's default descendant `a` is what finds the link.
+  it("scrapes src-at-dsb-ai with the selector verified against its root", () => {
+    const source = regulationSourcesSeed.find((entry) => entry.id === "src-at-dsb-ai");
+    const config = source?.config ?? {};
+
+    expect(source?.sourceUrl).toBe("https://dsb.gv.at");
+    expect(config.itemSelector).toBe("main li:has(a[href])");
+    expect(config.linkSelector).toBeUndefined();
+  });
 });

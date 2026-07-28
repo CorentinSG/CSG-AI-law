@@ -30,11 +30,12 @@ describe("generated catch-all source review gate", () => {
     (source) => source.config?.itemSelector === GENERATED_CATCH_ALL_SELECTOR,
   );
 
-  // 58, down from the original 66: four lanes moved to verified RSS feeds
-  // (Croatia, Malta, Monaco DPAs and the Greek government) and four to verified
-  // selectors (Greece, Luxembourg and Portugal DPAs, the Slovenian government).
+  // 57, down from the original 66: four lanes moved to verified RSS feeds
+  // (Croatia, Malta, Monaco DPAs and the Greek government) and five to verified
+  // selectors (Greece, Luxembourg, Portugal and Norway DPAs, the Slovenian
+  // government).
   it("covers the generated shells with neither a feed nor a verified selector", () => {
-    expect(catchAllSources.length).toBe(58);
+    expect(catchAllSources.length).toBe(57);
     expect(
       catchAllSources.every(
         (source) => source.id.endsWith("-dpa-ai") || source.id.endsWith("-government-ai"),
@@ -52,7 +53,7 @@ describe("generated catch-all source review gate", () => {
   });
 
   // The flag must never spread beyond sources that genuinely extract with a bare
-  // anchor selector: the 58 remaining generated shells plus the 7 hand-authored
+  // anchor selector: the 57 remaining generated shells plus the 6 hand-authored
   // main-scoped ones. Anything else appearing here means a verified official
   // lane was pulled out of the automatic publication path by mistake.
   it("keeps the flag confined to sources with a bare anchor selector", () => {
@@ -64,7 +65,7 @@ describe("generated catch-all source review gate", () => {
       );
     });
 
-    expect(flagged.length).toBe(65);
+    expect(flagged.length).toBe(63);
     expect(flagged.map((source) => source.id).sort()).toEqual(
       anchorCatchAll.map((source) => source.id).sort(),
     );
@@ -94,10 +95,9 @@ describe("main-scoped anchor catch-all review gate", () => {
   );
 
   it("covers every hand-authored source using a bare main-scoped anchor selector", () => {
-    // src-nl-ap-ai left via a verified feed, src-se-regeringen-ai via a
-    // verified selector.
+    // src-nl-ap-ai left via a verified feed; src-se-regeringen-ai and
+    // src-at-dsb-ai via verified selectors.
     expect(mainScopedSources.map((source) => source.id).sort()).toEqual([
-      "src-at-dsb-ai",
       "src-be-apd-ai",
       "src-ie-dete-ai",
       "src-ie-dpc-ai",
@@ -163,6 +163,10 @@ const VERIFIED_SELECTORS: Record<string, string> = {
   "src-pt-dpa-ai": ".card, .c-card",
   "src-si-government-ai": ".list-item, .listitem, .result-item",
   "src-se-regeringen-ai": "main ul li:has(a[href]):has(time)",
+  // Recovered from the authority's own root after the seeded deep link 404'd
+  // (run 30397833023).
+  "src-no-dpa-ai": "main ul li:has(a[href]):has(time)",
+  "src-at-dsb-ai": "main li:has(a[href])",
 };
 
 describe("sources promoted to a verified selector", () => {
@@ -179,6 +183,29 @@ describe("sources promoted to a verified selector", () => {
       expect(source?.config?.linkSelector, id).toBeUndefined();
       expect(isDiscoveryOnlySource(source), id).toBe(false);
       expect(Array.isArray(source?.config?.includeAnyTerms), id).toBe(true);
+    });
+  }
+});
+
+// Lanes whose seeded URL returned 404 or published nothing, repointed at a page
+// the probe verified is live. These stay inside the review gate: the page is now
+// right, but the evidence did not show it yields *legal* developments — Traficom
+// and DIGG list general agency news, and the FDPIC selector matched 126 items at
+// 77% dated. Fixing reachability is not the same as proving precision.
+const REPOINTED_BUT_STILL_GATED: Record<string, string> = {
+  "src-ch-dpa-ai": "https://www.edoeb.admin.ch/de/mitteilungen",
+  "src-fi-government-ai": "https://traficom.fi",
+  "src-se-digg-ai": "https://www.digg.se",
+};
+
+describe("lanes repointed at a live page but still gated", () => {
+  for (const [id, url] of Object.entries(REPOINTED_BUT_STILL_GATED)) {
+    it(`${id} points at the verified live page and stays under review`, () => {
+      const source = regulationSourcesSeed.find((entry) => entry.id === id);
+
+      expect(source, id).toBeDefined();
+      expect(source?.sourceUrl, id).toBe(url);
+      expect(requiresSourceReview(source), id).toBe(true);
     });
   }
 });
