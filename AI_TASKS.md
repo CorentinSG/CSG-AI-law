@@ -11,9 +11,8 @@ Each agent edits only its own rows. Status vocabulary: `CLAIMED` · `WIP` · `BL
 
 | Task ID | Owner | Status | Branch @ sha | Locked files | Graph anchor | Updated |
 |---|---|---|---|---|---|---|
-| T-SITE-BACKLOG-WAVE (plan 1.7/1.14, 2.2/2.11, 4.3/4.4/4.6/4.8/4.9) | Claude Code | REVIEW | `claude/github-monitoring-recovery-lz4dos` @ `d5e569e` | `src/app/[lang]/{legal-notice,privacy,about}`, `scheduler/index.ts`, `supabase-repository.ts`, `citations.ts`, `verification.ts`, `sitemap.ts`, `section-heading.tsx` | `reportRepositoryFallback()`, `parseSourceReferences()`, `extractVerificationMetadata()`, `buildCentralMonitoringSchedule()`, `livePanelCopy`, community "Source Runtime Health", "DB Repository Layer", "UI Components and Utilities" | 2026-07-27 |
-| T-GITHUB-MONITORING-RECOVERY | Claude Code | MERGED | `main` @ `eac691b` | none (released) | `buildHealthSnapshot()`, `readRawEnv()`, `writeScanWorkerStatus()`, community "Source Runtime Health" | 2026-07-27 |
-| T-MONITORING-CORRECTNESS (plan 2.3/2.4/2.8) | Claude Code | MERGED | `main` @ `eac691b` | none (released) | `fetchTextWithConditionalCaching()`, `buildSourceExecutionDecisions()`, `getSourceDescriptor()`, community "Source Runtime Health" | 2026-07-27 |
+| T-SITE-BACKLOG-WAVE (plan 1.7/1.14, 2.2/2.11, 4.3/4.4/4.6/4.8/4.9) | Claude Code | MERGED | `main` @ `9514b3d` (#41) | none (released) | `reportRepositoryFallback()`, `parseSourceReferences()`, `extractVerificationMetadata()`, `buildCentralMonitoringSchedule()`, `livePanelCopy`, community "Source Runtime Health", "DB Repository Layer", "UI Components and Utilities" | 2026-07-28 |
+| T-SOURCE-EXTRACTION-VERIFICATION | Claude Code | MERGED | `main` @ `28df5d1` (#42→#44) | none (released) | `bestSelector()`, `buildCountryMonitoringSources()`, `requiresSourceReview()`, `getQueuedScanJobs()`, community "Data Ingestion Pipeline" | 2026-07-28 |
 | T-TOTAL-PROJECT-OWNERSHIP | Claude Code | MERGED | `main` | entire repository | all Graphify communities; start with the total handoff document | 2026-07-25 |
 | TOOLING-GRAPH-PROTOCOL | Claude Code | REVIEW | `ops/t-ops9-ux` @ `30bc31c` | `AGENTS.md`, `AI_TASKS.md`, `.gitignore`, `.git/hooks/*` | n/a (tooling, no app code) | 2026-06-20 |
 | T-OPS9-UX | Claude Code | WIP | `ops/t-ops9-ux` @ `30bc31c` | `src/app/**`, shared UI components | community "UI Components and Utilities", "Intelligence Hub UI" | 2026-06-20 |
@@ -48,6 +47,16 @@ YYYY-MM-DD · <Agent> · <TASK-ID> · <STATUS>
 ```
 
 ## Current status
+
+2026-07-28 · Claude Code · T-SOURCE-EXTRACTION-VERIFICATION · MERGED
+- Intent:        Stop guessing extraction paths for the 66 generated country DPA/government shells. Probe every one on GitHub Actions against the live page, and wire only what the evidence supports.
+- Files:         `scripts/discover-source-extraction.ts` + `.test.ts` (new), `.github/workflows/discover-source-extraction.yml` (new), `src/db/seed/ai-regulation-seed.ts`, `src/db/seed/catch-all-source-review-gate.test.ts`, `src/agents/ai-regulation/processors/scanJobs.ts`, `src/agents/ai-regulation/euNewsSources.ts`; deleted `scripts/discover-source-feeds.ts` + its workflow.
+- Graph anchors: `bestSelector()` (new), `buildCountryMonitoringSources()`, `requiresSourceReview()`, `getQueuedScanJobs()`, community "Data Ingestion Pipeline". Graph not rebuilt — `graphify` is absent from this clone, so no graph query informed this work; `bestSelector()` will not exist as a node until it is.
+- Result:        Of 70 probed sources, **5 had a usable feed and 5 a usable selector; 58 have neither and stay gated.** Gated totals 70 → 65. Ten of seventy is modest, but nothing was wired from a guess: the bar is several distinct same-host links, headline-length titles and ≥50% date coverage, which a navigation menu cannot clear. Two probe defects were caught by its own tests before the live run — cheerio's `.text()` glues a date to the preceding word so no word boundary exists to match on, and the script held sockets open so the first run was killed at 30 min despite a complete report.
+- Also:          `getQueuedScanJobs()` replaces a read-100-newest-then-filter-in-memory path that starved the queue under load. `src-council-of-europe-ai` → `src-council-europe-ai` (id collision). `scripts/discover-source-feeds.ts` and its workflow were orphaned on `main` by the squash of #43 — that diff was computed against a merge base predating #42, so only the "add" half of the rename landed; removed here.
+- Verification:  `npm test` **829/829 across 138 files**, `npm run lint` clean, `npm run typecheck` clean, `npm run build` PASS (re-run in full after rebasing onto `ebac1f6`; the build needs CI's placeholder env or it fails the `APP_DATA_MODE` guard).
+- Branch/commit: `main` @ `28df5d1` (PRs #42, #43, #44)
+- Next:          Claude Code. **19 of the 58 still-gated sources returned no usable page** (5 unreachable, 14 non-OK) — those seeded URLs are probably dead, which is claimed coverage that does not exist. Verify and fix or deactivate them. Owner-blocked and unchanged: 43 `{{OWNER: …}}` legal placeholders, a read-only session-pooler `DATABASE_URL` for production forensics, `NEWSAPI_API_KEY` (media radar is a silent no-op across all 45 jurisdictions), and a decision on the health freshness window — GitHub cron delivers ~1 run/1–3.5 h against a declared 4/h, so `/api/health?check=worker` reads 503 most of the time and the dead-man switch is becoming noise.
 
 2026-07-27 · Claude Code · T-SITE-BACKLOG-WAVE · REVIEW
 - Intent:        Four master-plan workstreams run in parallel by managed subagents on disjoint file scopes, then reviewed, corrected and committed here. Covers everything in the backlog that needs no production database access.
