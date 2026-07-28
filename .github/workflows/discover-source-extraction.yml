@@ -1,0 +1,55 @@
+name: Discover source extraction
+
+# Manual only. Probes the seeded sources that still extract with a bare anchor
+# selector: first for a real RSS/Atom feed, then — for those without one — for a
+# candidate CSS selector that yields dated publications rather than navigation.
+# It reads nothing from Supabase and writes nothing anywhere; the output is a
+# report uploaded as an artifact, so neither a feed URL nor a selector is ever
+# guessed before a human judges the evidence.
+on:
+  workflow_dispatch:
+    inputs:
+      limit:
+        description: "Maximum number of sources to probe (blank = all)"
+        required: false
+        default: ""
+
+permissions:
+  contents: read
+
+jobs:
+  discover:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: Probe sources for a trustworthy extraction path
+        env:
+          # The script only reads the TS seed, but env validation runs on import.
+          APP_DATA_MODE: memory
+          ALLOW_MEMORY_MODE_IN_PRODUCTION: "true"
+          LIMIT: ${{ inputs.limit }}
+        run: |
+          secret="$(openssl rand -hex 32)"
+          echo "::add-mask::$secret"
+          export ADMIN_AUTH_SECRET="$secret"
+          if [ -n "$LIMIT" ]; then
+            npx tsx scripts/discover-source-extraction.ts --limit "$LIMIT" --json feed-discovery.json
+          else
+            npx tsx scripts/discover-source-extraction.ts --json feed-discovery.json
+          fi
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: extraction-discovery
+          path: feed-discovery.json
+          if-no-files-found: warn
