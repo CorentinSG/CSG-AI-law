@@ -18,6 +18,19 @@ type CountryMonitoringSourceInput = {
   newsQuery: string;
   gdeltQuery: string;
   domains: readonly string[];
+  /**
+   * A feed URL here replaces the generated `a[href]` catch-all for that lane:
+   * the source becomes an RSS scan and leaves the review gate, because the feed
+   * yields published items rather than whatever anchors happen to be on an
+   * index page.
+   *
+   * Only set one that has been verified end to end — it must parse and carry
+   * dated items. `scripts/discover-source-feeds.ts` does that verification on
+   * GitHub Actions; never fill these in from a guess or a search result.
+   * Keyword filtering still applies, since these feeds are broader than AI.
+   */
+  dpaFeedUrl?: string;
+  governmentFeedUrl?: string;
 };
 
 const remainingEuMemberStateSourceInputs = [
@@ -36,6 +49,8 @@ const remainingEuMemberStateSourceInputs = [
   },
   {
     code: "hr",
+    // verified 2026-07-28 (run 30373800651): declared by the page, 10 dated items, latest 2026-07-20, incl. EDPB anonymisation and web-scraping guidelines
+    dpaFeedUrl: "https://azop.hr/feed/",
     country: "Croatia",
     dpaName: "Croatian Personal Data Protection Agency",
     dpaUrl: "https://azop.hr/",
@@ -117,6 +132,8 @@ const remainingEuMemberStateSourceInputs = [
   },
   {
     code: "gr",
+    // verified 2026-07-28 (run 30373800651): conventional path, 10 dated items, latest 2026-03-24; legislative drafting committees, so keyword filtering matters
+    governmentFeedUrl: "https://gslegal.gov.gr/rss",
     country: "Greece",
     dpaName: "Hellenic Data Protection Authority",
     dpaUrl: "https://www.dpa.gr/en",
@@ -182,6 +199,8 @@ const remainingEuMemberStateSourceInputs = [
   },
   {
     code: "mt",
+    // verified 2026-07-28 (run 30373800651): declared by the page, 10 dated items, latest 2026-07-27, incl. revised EU AI Act timelines
+    dpaFeedUrl: "https://idpc.org.mt/feed/",
     country: "Malta",
     dpaName: "Malta Information and Data Protection Commissioner",
     dpaUrl: "https://idpc.org.mt/",
@@ -329,6 +348,8 @@ const nonEuEuropeSourceInputs = [
   },
   {
     code: "mc",
+    // verified 2026-07-28 (run 30373800651): conventional path, 10 dated items, latest 2026-07-16, incl. breach-notification duties and adequacy decisions
+    dpaFeedUrl: "https://www.ccin.mc/rss",
     country: "Monaco",
     dpaName: "Commission de Controle des Informations Nominatives",
     dpaUrl: "https://www.ccin.mc/",
@@ -473,21 +494,27 @@ function buildCountryMonitoringSources(inputs: readonly CountryMonitoringSourceI
         jurisdiction: input.country,
         region: "Europe",
         country: input.country,
-        sourceUrl: input.dpaUrl,
-        sourceType: "regulator_page",
+        sourceUrl: input.dpaFeedUrl ?? input.dpaUrl,
+        sourceType: input.dpaFeedUrl ? "RSS" : "regulator_page",
         scanFrequency: "daily",
         active: true,
         lastScannedAt: null,
-        notes: `Official ${input.country} data-protection authority source for AI, automated-decision, biometric, and data-protection enforcement monitoring.`,
+        notes: input.dpaFeedUrl
+          ? `Official ${input.country} data-protection authority RSS feed, verified to parse and carry dated items. Keyword filtering remains essential because the feed is broader than AI alone.`
+          : `Official ${input.country} data-protection authority source for AI, automated-decision, biometric, and data-protection enforcement monitoring.`,
         reliabilityLevel: "high",
-        preferredExtractionMethod: "html_static",
+        preferredExtractionMethod: input.dpaFeedUrl ? "rss" : "html_static",
         config: {
           maxItems: 15,
           authorityTypeHint: "Agency guidance",
-          itemSelector: "main a[href], article a[href], a[href]",
-          linkSelector: "self",
-          requiresReview: true,
-          requiresReviewReason: "generated_catch_all_selector",
+          ...(input.dpaFeedUrl
+            ? {}
+            : {
+                itemSelector: "main a[href], article a[href], a[href]",
+                linkSelector: "self",
+                requiresReview: true,
+                requiresReviewReason: "generated_catch_all_selector",
+              }),
           includeAnyTerms: [
             "artificial intelligence",
             "AI Act",
@@ -513,21 +540,27 @@ function buildCountryMonitoringSources(inputs: readonly CountryMonitoringSourceI
         jurisdiction: input.country,
         region: "Europe",
         country: input.country,
-        sourceUrl: input.governmentUrl,
-        sourceType: "static_page",
+        sourceUrl: input.governmentFeedUrl ?? input.governmentUrl,
+        sourceType: input.governmentFeedUrl ? "RSS" : "static_page",
         scanFrequency: "daily",
         active: true,
         lastScannedAt: null,
-        notes: `Official ${input.country} government or legal-database anchor for AI Act implementation, legislation, soft-law, and public-sector AI materials.`,
+        notes: input.governmentFeedUrl
+          ? `Official ${input.country} government RSS feed, verified to parse and carry dated items. Keyword filtering remains essential because the feed covers government business far beyond AI.`
+          : `Official ${input.country} government or legal-database anchor for AI Act implementation, legislation, soft-law, and public-sector AI materials.`,
         reliabilityLevel: "high",
-        preferredExtractionMethod: "html_static",
+        preferredExtractionMethod: input.governmentFeedUrl ? "rss" : "html_static",
         config: {
           maxItems: 15,
           authorityTypeHint: "Government policy",
-          itemSelector: "main a[href], article a[href], a[href]",
-          linkSelector: "self",
-          requiresReview: true,
-          requiresReviewReason: "generated_catch_all_selector",
+          ...(input.governmentFeedUrl
+            ? {}
+            : {
+                itemSelector: "main a[href], article a[href], a[href]",
+                linkSelector: "self",
+                requiresReview: true,
+                requiresReviewReason: "generated_catch_all_selector",
+              }),
           includeAnyTerms: [
             "artificial intelligence",
             "AI Act",
@@ -1688,24 +1721,24 @@ export const regulationSourcesSeed: RegulationSource[] = [
     jurisdiction: "Netherlands",
     region: "Europe",
     country: "Netherlands",
-    sourceUrl: "https://www.autoriteitpersoonsgegevens.nl/themas/algoritmes-ai",
-    sourceType: "regulator_page",
+    // Feed verified 2026-07-28 (run 30373800651): conventional path, 10 dated
+    // items, latest 2026-07-28, incl. AVG guidelines for generative AI and EDPB
+    // guidance on scraping and anonymisation. Replaces the `main a[href]`
+    // catch-all, so this lane leaves the review gate.
+    sourceUrl: "https://www.autoriteitpersoonsgegevens.nl/rss",
+    sourceType: "RSS",
     ingestionMethod: "existing",
     sourceCategory: "regulator",
     scanFrequency: "daily",
     active: true,
     lastScannedAt: null,
     notes:
-      "Official Dutch Autoriteit Persoonsgegevens algorithms and AI topic hub for supervisory guidance and AI-risk materials.",
+      "Official Dutch Autoriteit Persoonsgegevens RSS feed, verified to parse and carry dated items. Keyword filtering remains essential because the feed is broader than AI alone.",
     reliabilityLevel: "high",
-    preferredExtractionMethod: "html_static",
+    preferredExtractionMethod: "rss",
     config: {
       maxItems: 20,
       authorityTypeHint: "Agency guidance",
-      itemSelector: "main a[href]",
-      requiresReview: true,
-      requiresReviewReason: "main_scoped_anchor_catch_all",
-      linkSelector: "self",
       includeAnyTerms: ["algoritmes", "kunstmatige intelligentie", "ai-verordening", "ai act", "toezicht"],
       editorialNotes: ["Official AP source.", "Supervisory guidance must remain distinct from binding legislation."],
     },

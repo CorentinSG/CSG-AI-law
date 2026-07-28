@@ -224,7 +224,16 @@ async function main() {
   }
 }
 
-main().catch((error) => {
-  console.error(error);
-  process.exit(1);
-});
+main()
+  .then(() => {
+    // Probing 75 hosts leaves undici sockets and rss-parser handles open, which
+    // keeps the event loop alive long after the report is written. The first run
+    // finished its work in 15 minutes and was then killed by the 30-minute job
+    // timeout, so the run read as `cancelled` despite having completed and
+    // uploaded a full report. Exit explicitly rather than wait them out.
+    process.exit(0);
+  })
+  .catch((error) => {
+    console.error(error);
+    process.exit(1);
+  });
