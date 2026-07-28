@@ -14,7 +14,7 @@ import {
   normalizeNewsItemRecord,
 } from "@/content/ai-regulation/news";
 import { env } from "@/lib/env";
-import { DEFAULT_LOCALE, isLocale, type Locale } from "@/lib/i18n/config";
+import { isLocale, type Locale } from "@/lib/i18n/config";
 import { formatDisplayDate } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
@@ -56,7 +56,8 @@ export default async function NewsDetailPage({
   params: Promise<{ lang: string; slug: string }>;
 }) {
   const { lang, slug } = await params;
-  const locale: Locale = isLocale(lang) ? lang : DEFAULT_LOCALE;
+  if (!isLocale(lang)) notFound();
+  const locale: Locale = lang;
   const item = await getPublicNewsItem(slug);
   if (!item) notFound();
   const sourceReferences = await updateRepository.getSourceReferencesForRawItem(

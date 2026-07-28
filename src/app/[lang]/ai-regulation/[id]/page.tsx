@@ -13,7 +13,7 @@ import { IntelligenceSignal } from "@/components/site/intelligence-signal";
 import { SiteShell } from "@/components/site/shell";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { env } from "@/lib/env";
-import { DEFAULT_LOCALE, isLocale, type Locale } from "@/lib/i18n/config";
+import { isLocale, type Locale } from "@/lib/i18n/config";
 import { formatDisplayDate } from "@/lib/utils";
 
 // Stays dynamic (not ISR like the other public /ai-regulation pages, T-RT0C):
@@ -57,7 +57,8 @@ export default async function LegalUpdateDetailPage({
   params: Promise<{ lang: string; id: string }>;
 }) {
   const { lang, id } = await params;
-  const locale: Locale = isLocale(lang) ? lang : DEFAULT_LOCALE;
+  if (!isLocale(lang)) notFound();
+  const locale: Locale = lang;
   const update = await updateRepository.getPublicUpdate(id);
   if (!update) {
     notFound();

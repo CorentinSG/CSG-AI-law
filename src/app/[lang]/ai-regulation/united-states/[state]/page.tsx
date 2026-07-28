@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
+import { isLocale } from "@/lib/i18n/config";
+
 import { updateRepository } from "@/agents/ai-regulation/processors/updateRepository";
 import { buildLiveStoryFeed } from "@/agents/ai-regulation/storyClustering";
 import { BreadcrumbNav } from "@/components/site/breadcrumb-nav";
@@ -83,6 +85,7 @@ export default async function UsStatePage({
   params: Promise<{ state: string; lang: string }>;
 }) {
   const { state, lang } = await params;
+  if (!isLocale(lang)) notFound();
   const fr = lang === "fr";
   const profile = getUsStateAiLawProfileBySlug(state);
   if (!profile) notFound();

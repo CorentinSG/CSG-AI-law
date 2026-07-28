@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
+import { notFound } from "next/navigation";
 
 import { ContactExperience } from "@/components/site/contact-experience";
 import { SiteShell } from "@/components/site/shell";
+import { isLocale } from "@/lib/i18n/config";
 
 export async function generateMetadata({
   params,
@@ -27,6 +29,7 @@ export default async function ContactPage({
   params: Promise<{ lang: string }>;
 }) {
   const { lang } = await params;
+  if (!isLocale(lang)) notFound();
   return (
     <SiteShell>
       <ContactExperience email={CONTACT_EMAIL} lang={lang === "fr" ? "fr" : "en"} />

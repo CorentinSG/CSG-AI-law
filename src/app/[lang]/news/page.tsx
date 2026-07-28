@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { redirect } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 
 import { DEFAULT_LOCALE, isLocale } from "@/lib/i18n/config";
 import { localeHref } from "@/lib/i18n/href";
@@ -18,6 +18,7 @@ export default async function NewsPage({
   searchParams?: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const { lang } = await routeParams;
+  if (!isLocale(lang)) notFound();
   const params = ((await searchParams) ?? {}) as Record<string, string>;
   const nextParams = new URLSearchParams();
 

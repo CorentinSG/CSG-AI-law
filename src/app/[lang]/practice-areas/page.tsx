@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { notFound } from "next/navigation";
 import { ArrowUpRight } from "lucide-react";
 
 import { MotionReveal } from "@/components/site/motion-reveal";
@@ -7,6 +8,7 @@ import { MotionStagger } from "@/components/site/motion-stagger";
 import { SectionHeading } from "@/components/site/section-heading";
 import { SiteShell } from "@/components/site/shell";
 import { Card, CardContent } from "@/components/ui/card";
+import { isLocale } from "@/lib/i18n/config";
 import { localeHref } from "@/lib/i18n/href";
 import {
   getLegalDomains,
@@ -44,6 +46,7 @@ export default async function PracticeAreasPage({
   params: Promise<{ lang: string }>;
 }) {
   const { lang } = await params;
+  if (!isLocale(lang)) notFound();
   const fr = lang === "fr";
   const domains = getLegalDomains();
 

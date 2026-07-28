@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { notFound } from "next/navigation";
 
 import { updateRepository } from "@/agents/ai-regulation/processors/updateRepository";
 import {
@@ -31,7 +32,7 @@ import {
 import { getPriorityEuropeCountryProfiles } from "@/content/ai-regulation/europe-country-profiles";
 import { internationalAiStandardsBaseline } from "@/content/ai-regulation/international-ai-standards";
 import { getPriorityUsStateProfiles } from "@/content/ai-regulation/us-state-ai-law-baseline";
-import { type Locale } from "@/lib/i18n/config";
+import { isLocale, type Locale } from "@/lib/i18n/config";
 import { localeHref } from "@/lib/i18n/href";
 import { encodeCursor, parseCursorParam } from "@/lib/pagination";
 import type { RegulatoryUpdateFilters } from "@/db/repository-types";
@@ -153,6 +154,7 @@ export default async function AiRegulationPage({
   searchParams?: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const { lang } = await routeParams;
+  if (!isLocale(lang)) notFound();
   const fr = lang === "fr";
   const locale: Locale = fr ? "fr" : "en";
   // Every internal link on this page must carry the locale segment. An

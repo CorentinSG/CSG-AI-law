@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
+import { isLocale } from "@/lib/i18n/config";
+
 import { getFranceLiveLegalIntelligenceData } from "@/agents/ai-regulation/franceLegalNewsAgent";
 import { getCountryLiveIntelligenceLoader } from "@/agents/ai-regulation/countryLiveDataRegistry";
 import { getStoryPhaseDisplay } from "@/agents/ai-regulation/storyClustering";
@@ -145,6 +147,7 @@ export default async function EuropeCountryPage({
   params: Promise<{ country: string; lang: string }>;
 }) {
   const { country, lang } = await params;
+  if (!isLocale(lang)) notFound();
   const fr = lang === "fr";
   const profile = getEuropeCountryProfileBySlug(country);
   if (!profile) notFound();
