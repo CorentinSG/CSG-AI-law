@@ -132,7 +132,15 @@ type PageFetch = {
   status: number | null;
   finalUrl: string | null;
   errorName: string | null;
+  /** undici's underlying cause — `ENOTFOUND`, `ECONNRESET`, `CERT_HAS_EXPIRED`… */
+  errorCode: string | null;
 };
+
+// Node reports every fetch failure as a bare `TypeError`; the discriminating
+// detail is on `cause.code`. Only a DNS failure says the host is actually gone —
+// a reset, a refusal or a TLS rejection means the name still resolves and
+// something is deliberately turning this client away.
+const DNS_FAILURE_CODES = new Set(["ENOTFOUND", "EAI_AGAIN"]);
 
 async function fetchPage(url: string): Promise<PageFetch> {
   try {
@@ -146,9 +154,17 @@ async function fetchPage(url: string): Promise<PageFetch> {
       status: response.status,
       finalUrl: response.url || url,
       errorName: null,
+      errorCode: null,
     };
   } catch (error) {
-    return { html: null, status: null, finalUrl: null, errorName: (error as Error).name };
+    const cause = (error as { cause?: { code?: string } }).cause;
+    return {
+      html: null,
+      status: null,
+      finalUrl: null,
+      errorName: (error as Error).name,
+      errorCode: cause?.code ?? null,
+    };
   }
 }
 
@@ -171,12 +187,28 @@ export function diagnosePageFailure(page: PageFetch, rootStatus: number | null) 
     return { verdict: "timeout" as const, note: "timed out — slow host, not proof of a dead source" };
   }
   if (page.status === null) {
-    // DNS failure, connection refused, TLS rejection. If the origin answers, the
-    // host is alive and only this path is broken.
-    const alive = rootStatus !== null && rootStatus < 500;
-    return alive
-      ? { verdict: "dead_path" as const, note: `did not resolve, but the site root answers ${rootStatus}` }
-      : { verdict: "dead_host" as const, note: `host did not respond (${page.errorName ?? "unknown error"})` };
+    // No HTTP response at all, so there is no evidence about the *path* — the
+    // root shares this hostname, so a root that answers proves DNS works and the
+    // failure was transient. Only a DNS failure with a dead root says the source
+    // is gone. Ireland's DPC failed a previous run here with a connection reset:
+    // a live regulator whose WAF refuses datacenter clients, which must never
+    // read as death.
+    if (rootStatus !== null && rootStatus < 500) {
+      return {
+        verdict: "unreachable" as const,
+        note: `${page.errorCode ?? page.errorName ?? "no response"}, but the site root answers ${rootStatus} — transient`,
+      };
+    }
+    if (page.errorCode && !DNS_FAILURE_CODES.has(page.errorCode)) {
+      return {
+        verdict: "unreachable" as const,
+        note: `${page.errorCode} — the connection was refused, not proof of a dead source`,
+      };
+    }
+    return {
+      verdict: "dead_host" as const,
+      note: `${page.errorCode ?? page.errorName ?? "unknown error"} — the hostname does not resolve`,
+    };
   }
   if (page.status === 403 || page.status === 401 || page.status === 429) {
     return {
@@ -349,7 +381,10 @@ async function probe(source: RegulationSource): Promise<Finding> {
   const html = page.html;
 
   const candidates: Array<{ url: string; via: Finding["discoveredVia"] }> = [];
-  if (html) {
+  // `!== null`, not truthiness: a 200 with an empty body is a page that loaded
+  // and yielded nothing, not a load failure. Treating "" as failure reported
+  // src-ie-dete-ai as "unexpected status 200".
+  if (html !== null) {
     for (const url of declaredFeedUrls(html, source.sourceUrl)) {
       candidates.push({ url, via: "link-rel" });
     }
@@ -408,7 +443,10 @@ async function probe(source: RegulationSource): Promise<Finding> {
     selectorCandidate,
     note: selectorCandidate
       ? "no feed, but a candidate selector yields dated publications"
-      : base.note || "no feed and no selector produced dated publications",
+      : base.note ||
+        (html !== null && html.trim().length === 0
+          ? "page returned 200 with an empty body — client-side rendered, needs a browser renderer not a selector"
+          : "no feed and no selector produced dated publications"),
   };
 }
 

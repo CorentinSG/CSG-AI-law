@@ -96,8 +96,14 @@ describe("candidate selector discovery", () => {
   });
 });
 
-function failed(status: number | null, errorName: string | null = null) {
-  return { html: null, status, finalUrl: null, errorName };
+function failed(status: number | null, errorCode: string | null = null) {
+  return {
+    html: null,
+    status,
+    finalUrl: null,
+    errorName: status === null ? "TypeError" : null,
+    errorCode,
+  };
 }
 
 // This verdict decides whether a declared official source gets deactivated, so
@@ -118,15 +124,56 @@ describe("page failure diagnosis", () => {
     expect(diagnosePageFailure(failed(410), 200).verdict).toBe("dead_path");
   });
 
-  it("treats a DNS or TLS failure as a dead host only if the root is dead too", () => {
-    expect(diagnosePageFailure(failed(null, "TypeError"), null).verdict).toBe("dead_host");
-    expect(diagnosePageFailure(failed(null, "TypeError"), 200).verdict).toBe("dead_path");
+  it("calls a host dead only when DNS itself fails", () => {
+    expect(diagnosePageFailure(failed(null, "ENOTFOUND"), null).verdict).toBe("dead_host");
+    expect(diagnosePageFailure(failed(null, "EAI_AGAIN"), null).verdict).toBe("dead_host");
+  });
+
+  // Node surfaces every fetch failure as a bare TypeError, so an earlier version
+  // of this classifier read a WAF resetting the connection as a dead host — and
+  // would have had Ireland's DPC deactivated. `cause.code` is the discriminator.
+  it("does not call a live host dead when the connection is merely refused", () => {
+    for (const code of ["ECONNRESET", "ECONNREFUSED", "EPROTO", "CERT_HAS_EXPIRED", "UND_ERR_CONNECT_TIMEOUT"]) {
+      expect(diagnosePageFailure(failed(null, code), null).verdict, code).toBe("unreachable");
+    }
+  });
+
+  // The root shares the failing path's hostname, so a root that answers proves
+  // DNS works and the failure was transient — never that the path is wrong.
+  // Only a real 404/410 is evidence about a path.
+  it("treats any transport failure with a live root as transient, not a dead path", () => {
+    expect(diagnosePageFailure(failed(null, "ENOTFOUND"), 200).verdict).toBe("unreachable");
+    expect(diagnosePageFailure(failed(null, "ECONNRESET"), 200).verdict).toBe("unreachable");
+  });
+
+  it("reaches dead_path only from an HTTP status that names the path as gone", () => {
+    const transport = ["ENOTFOUND", "EAI_AGAIN", "ECONNRESET", "ECONNREFUSED", "EPROTO"];
+    for (const code of transport) {
+      for (const root of [200, 301, 404, null]) {
+        expect(diagnosePageFailure(failed(null, code), root).verdict, `${code}/${root}`).not.toBe("dead_path");
+      }
+    }
   });
 
   it("never condemns a source on a timeout or a server error", () => {
-    expect(diagnosePageFailure(failed(null, "TimeoutError"), null).verdict).toBe("timeout");
+    const timedOut = { html: null, status: null, finalUrl: null, errorName: "TimeoutError", errorCode: null };
+    expect(diagnosePageFailure(timedOut, null).verdict).toBe("timeout");
     for (const status of [500, 502, 503, 504]) {
       expect(diagnosePageFailure(failed(status), 200).verdict, String(status)).toBe("server_error");
+    }
+  });
+
+  // Only these two license removing a declared official source. If a future
+  // change lets another verdict through, that is a coverage regression waiting
+  // to happen, so the set is pinned rather than described.
+  it("keeps the removable set to exactly dead_path and dead_host", () => {
+    const removable = new Set(["dead_path", "dead_host"]);
+    const cases = [
+      failed(403), failed(401), failed(429), failed(500), failed(503),
+      failed(null, "ECONNRESET"), failed(null, "CERT_HAS_EXPIRED"),
+    ];
+    for (const page of cases) {
+      expect(removable.has(diagnosePageFailure(page, 200).verdict), JSON.stringify(page)).toBe(false);
     }
   });
 
