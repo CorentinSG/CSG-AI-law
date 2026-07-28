@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { bestSelector, diagnosePageFailure } from "./discover-source-extraction";
+import { bestSelector, diagnosePageFailure, listingCandidates } from "./discover-source-extraction";
 
 const BASE = "https://dpa.example.gov/news";
 
@@ -93,6 +93,47 @@ describe("candidate selector discovery", () => {
       <article class="post"><a href="/c">Contact</a><time datetime="2026-07-03">3 July</time></article>`);
 
     expect(bestSelector(shortLabels, BASE)).toBeNull();
+  });
+});
+
+describe("listing candidates from a site root", () => {
+  const ROOT = "https://dpa.example.gov";
+
+  // These authorities publish in their own languages; an English-only hint list
+  // would silently skip most of Europe.
+  it("finds the listing link in the site's own language", () => {
+    const html = `<a href="/nyheter">Nyheter</a>
+      <a href="/frettir">Fréttir</a>
+      <a href="/novice">Novice</a>
+      <a href="/aktualnosci">Aktualności</a>
+      <a href="/communiques">Communiqués de presse</a>`;
+
+    expect(listingCandidates(html, ROOT)).toHaveLength(5);
+  });
+
+  it("matches on the link text when the href gives nothing away", () => {
+    const html = `<a href="/s/12345">Nieuws</a>`;
+    expect(listingCandidates(html, ROOT)).toEqual(["https://dpa.example.gov/s/12345"]);
+  });
+
+  it("stays on the source's own host", () => {
+    const html = `<a href="https://twitter.com/dpa">News</a><a href="/news">News</a>`;
+    expect(listingCandidates(html, ROOT)).toEqual(["https://dpa.example.gov/news"]);
+  });
+
+  it("skips the root and bare fragments, which are the same page again", () => {
+    const html = `<a href="/">News</a><a href="#news">News</a><a href="/news">News</a>`;
+    expect(listingCandidates(html, ROOT)).toEqual(["https://dpa.example.gov/news"]);
+  });
+
+  it("does not repeat a link that appears in both nav and footer", () => {
+    const html = `<a href="/news">News</a><a href="/news">News</a>`;
+    expect(listingCandidates(html, ROOT)).toHaveLength(1);
+  });
+
+  it("ignores links that name nothing like a publication listing", () => {
+    const html = `<a href="/contact">Contact</a><a href="/about">About us</a><a href="/jobs">Vacancies</a>`;
+    expect(listingCandidates(html, ROOT)).toEqual([]);
   });
 });
 

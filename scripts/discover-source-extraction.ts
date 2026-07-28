@@ -115,6 +115,8 @@ type Finding = {
   sampleTitles: string[];
   selectorCandidate: SelectorEvidence | null;
   note: string;
+  /** Set when a listing was found somewhere other than the seeded URL. */
+  recoveredUrl?: string;
   /** Set only when the seeded page did not yield HTML — the fix-or-drop evidence. */
   pageStatus?: number | null;
   pageFinalUrl?: string | null;
@@ -344,6 +346,53 @@ export function bestSelector(html: string, baseUrl: string): SelectorEvidence | 
   return null;
 }
 
+/**
+ * Words that name a publication listing across the languages these authorities
+ * publish in. Matched against both the href and the link text, so a Slovenian
+ * site linking "Novice" and an Icelandic one linking "Fréttir" both surface.
+ * Deliberately broad: a wrong candidate costs one request and is then rejected
+ * by the same evidence bar as everything else, while a missing language costs a
+ * whole lane.
+ */
+const LISTING_LINK_HINTS =
+  /news|nyhet|nyhed|nyheter|aktuel|aktualit|actualit|aktualn|aktuality|presse|press|media|medij|frett|fr[ée]ttir|uutis|nieuws|notic|vijesti|novosti|novice|h[ií]rek|naujien|jaunumi|uudised|stiri|obvestila|communiqu|publicat|publikac|mitteilung|meldung|pressemitteilung|announcement|blog/i;
+
+/**
+ * A seeded URL that yields nothing is not the end of the story: these lanes were
+ * seeded with topic and landing pages, and the authority's actual listing is
+ * usually one link away from its own root. Collecting those links is discovery,
+ * not guessing — every candidate still has to clear the same evidence bar.
+ */
+export function listingCandidates(html: string, baseUrl: string): string[] {
+  const $ = cheerio.load(html);
+  let origin: string;
+  try {
+    origin = new URL(baseUrl).origin;
+  } catch {
+    return [];
+  }
+
+  const candidates: string[] = [];
+  $("a[href]").each((_, element) => {
+    const href = $(element).attr("href") ?? "";
+    const text = $(element).text().trim();
+    try {
+      const resolved = new URL(href, baseUrl);
+      if (resolved.origin !== origin) return;
+      // The root itself is already probed by the caller, and a fragment or a
+      // query-only link is the same page again.
+      resolved.hash = "";
+      if (resolved.pathname === "/" || resolved.pathname === "") return;
+      if (!LISTING_LINK_HINTS.test(resolved.pathname) && !LISTING_LINK_HINTS.test(text)) return;
+      candidates.push(resolved.toString());
+    } catch {
+      // Ignore an unparseable href rather than failing the whole probe.
+    }
+  });
+
+  return [...new Set(candidates)];
+}
+
 function declaredFeedUrls(html: string, baseUrl: string) {
   const $ = cheerio.load(html);
   const urls: string[] = [];
@@ -438,16 +487,65 @@ async function probe(source: RegulationSource): Promise<Finding> {
   // the page we already fetched — no extra request, and a far better answer
   // than the bare `a[href]` these sources use today.
   const selectorCandidate = html ? bestSelector(html, source.sourceUrl) : null;
+  if (selectorCandidate) {
+    return {
+      ...base,
+      selectorCandidate,
+      note: "no feed, but a candidate selector yields dated publications",
+    };
+  }
+
+  // Last resort: the seeded URL gave nothing, but these lanes were seeded with
+  // topic and landing pages, so the authority's real listing is usually one link
+  // from its own root. Search there before concluding the source is unusable.
+  const recovered = await recoverFromRoot(source.sourceUrl);
+  if (recovered) {
+    return {
+      ...base,
+      selectorCandidate: recovered.evidence,
+      recoveredUrl: recovered.url,
+      note: `the seeded URL yields nothing, but ${recovered.url} does — the source URL should move there`,
+    };
+  }
+
   return {
     ...base,
-    selectorCandidate,
-    note: selectorCandidate
-      ? "no feed, but a candidate selector yields dated publications"
-      : base.note ||
-        (html !== null && html.trim().length === 0
-          ? "page returned 200 with an empty body — client-side rendered, needs a browser renderer not a selector"
-          : "no feed and no selector produced dated publications"),
+    selectorCandidate: null,
+    note:
+      base.note ||
+      (html !== null && html.trim().length === 0
+        ? "page returned 200 with an empty body — client-side rendered, needs a browser renderer not a selector"
+        : "no feed and no selector produced dated publications"),
   };
+}
+
+/** Candidate listing pages tried per source. Bounds the request budget. */
+const MAX_RECOVERY_CANDIDATES = 8;
+
+async function recoverFromRoot(sourceUrl: string) {
+  let origin: string;
+  try {
+    origin = new URL(sourceUrl).origin;
+  } catch {
+    return null;
+  }
+
+  const root = await fetchPage(origin);
+  if (!root.html) return null;
+
+  // The root may itself be the listing.
+  const rootEvidence = bestSelector(root.html, origin);
+  if (rootEvidence) return { url: origin, evidence: rootEvidence };
+
+  for (const candidate of listingCandidates(root.html, origin).slice(0, MAX_RECOVERY_CANDIDATES)) {
+    if (candidate === sourceUrl) continue;
+    const page = await fetchPage(candidate);
+    if (!page.html) continue;
+    const evidence = bestSelector(page.html, candidate);
+    if (evidence) return { url: candidate, evidence };
+  }
+
+  return null;
 }
 
 async function main() {
@@ -474,11 +572,15 @@ async function main() {
   }
 
   const found = findings.filter((finding) => finding.feedUrl);
-  const withSelector = findings.filter((finding) => !finding.feedUrl && finding.selectorCandidate);
+  const recovered = findings.filter((finding) => !finding.feedUrl && finding.recoveredUrl);
+  const withSelector = findings.filter(
+    (finding) => !finding.feedUrl && !finding.recoveredUrl && finding.selectorCandidate,
+  );
   const stuck = findings.filter((finding) => !finding.feedUrl && !finding.selectorCandidate);
 
   console.log(`\n${found.length}/${findings.length} sources have a verified feed.`);
   console.log(`${withSelector.length}/${findings.length} have no feed but a candidate selector.`);
+  console.log(`${recovered.length}/${findings.length} yield nothing at the seeded URL but do elsewhere on the site.`);
   console.log(`${stuck.length}/${findings.length} have neither and must stay gated.\n`);
   console.log("Nothing here is a decision. Judge each candidate before wiring it.\n");
 
@@ -497,6 +599,23 @@ async function main() {
       const candidate = finding.selectorCandidate!;
       console.log(`${finding.sourceId}  (${finding.country})`);
       console.log(`  page     : ${finding.sourceUrl}`);
+      console.log(`  selector : ${candidate.selector}`);
+      console.log(`  items    : ${candidate.itemCount}, ${Math.round(candidate.datedRatio * 100)}% dated`);
+      for (const row of candidate.sampleRows) console.log(`  sample   : ${row}`);
+      console.log("");
+    }
+  }
+
+  if (recovered.length > 0) {
+    // These need a source URL change as well as a selector, so they are reported
+    // apart from the plain selector candidates — wiring only the selector would
+    // point it at a page that still yields nothing.
+    console.log("--- listing found elsewhere on the site (seeded URL is wrong) ---\n");
+    for (const finding of recovered) {
+      const candidate = finding.selectorCandidate!;
+      console.log(`${finding.sourceId}  (${finding.country})`);
+      console.log(`  seeded   : ${finding.sourceUrl}`);
+      console.log(`  found at : ${finding.recoveredUrl}`);
       console.log(`  selector : ${candidate.selector}`);
       console.log(`  items    : ${candidate.itemCount}, ${Math.round(candidate.datedRatio * 100)}% dated`);
       for (const row of candidate.sampleRows) console.log(`  sample   : ${row}`);
