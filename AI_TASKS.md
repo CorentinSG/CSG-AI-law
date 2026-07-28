@@ -13,6 +13,7 @@ Each agent edits only its own rows. Status vocabulary: `CLAIMED` · `WIP` · `BL
 |---|---|---|---|---|---|---|
 | T-SITE-BACKLOG-WAVE (plan 1.7/1.14, 2.2/2.11, 4.3/4.4/4.6/4.8/4.9) | Claude Code | MERGED | `main` @ `9514b3d` (#41) | none (released) | `reportRepositoryFallback()`, `parseSourceReferences()`, `extractVerificationMetadata()`, `buildCentralMonitoringSchedule()`, `livePanelCopy`, community "Source Runtime Health", "DB Repository Layer", "UI Components and Utilities" | 2026-07-28 |
 | T-SOURCE-EXTRACTION-VERIFICATION | Claude Code | MERGED | `main` @ `28df5d1` (#42→#44) | none (released) | `bestSelector()`, `buildCountryMonitoringSources()`, `requiresSourceReview()`, `getQueuedScanJobs()`, community "Data Ingestion Pipeline" | 2026-07-28 |
+| T-DEAD-SOURCE-TRIAGE | Claude Code | DONE-LOCAL | `claude/github-monitoring-recovery-lz4dos` @ `0bb1f59` | `scripts/discover-source-extraction.ts` + `.test.ts` | `diagnosePageFailure()`, `fetchPage()`, community "Data Ingestion Pipeline" | 2026-07-28 |
 | T-TOTAL-PROJECT-OWNERSHIP | Claude Code | MERGED | `main` | entire repository | all Graphify communities; start with the total handoff document | 2026-07-25 |
 | TOOLING-GRAPH-PROTOCOL | Claude Code | REVIEW | `ops/t-ops9-ux` @ `30bc31c` | `AGENTS.md`, `AI_TASKS.md`, `.gitignore`, `.git/hooks/*` | n/a (tooling, no app code) | 2026-06-20 |
 | T-OPS9-UX | Claude Code | WIP | `ops/t-ops9-ux` @ `30bc31c` | `src/app/**`, shared UI components | community "UI Components and Utilities", "Intelligence Hub UI" | 2026-06-20 |
@@ -47,6 +48,17 @@ YYYY-MM-DD · <Agent> · <TASK-ID> · <STATUS>
 ```
 
 ## Current status
+
+2026-07-28 · Claude Code · T-DEAD-SOURCE-TRIAGE · DONE-LOCAL
+- Intent:        Establish what is actually wrong with the sources whose page never loads, before fixing or deactivating any of them.
+- Files:         `scripts/discover-source-extraction.ts`, `scripts/discover-source-extraction.test.ts`
+- Graph anchors: `diagnosePageFailure()` (new), `fetchPage()` (new, replaces `fetchText`), community "Data Ingestion Pipeline"
+- Finding:       **None of them is a dead source.** Run 30396337775 over all 66 gated lanes: 18 pages never loaded — 8 `blocked` (403, live sites refusing a datacenter client), 5 `dead_path` (404 with a live root — the only genuine URL fixes), 5 `unreachable` (4× `UNABLE_TO_VERIFY_LEAF_SIGNATURE`, 1× `UND_ERR_CONNECT_TIMEOUT`), **0 `dead_host`**. The earlier "19 probably-dead seeded URLs" was an artefact of the probe reporting only "unreachable"/"non-OK"; it is withdrawn. Roughly 14 of the 18 need a browser-based client (Scrapling/Firecrawl), not a better URL or selector — including `src-ie-dete-ai`, which returns 200 with an empty body.
+- URL fixes due: `src-sk-dpa-ai`, `src-no-dpa-ai`, `src-is-dpa-ai`, `src-ch-dpa-ai`, `src-nl-rijksoverheid-ai`.
+- Defects fixed: the classifier read `error.name` (always `TypeError`) instead of `cause.code`, so a WAF reset was indistinguishable from a DNS failure — Ireland's DPC came back `dead_host`, one step from deactivation. `if (html)` read a 200 with an empty body as a load failure. Tightening both surfaced a third: `dead_path` was reachable from a transport error, though the root shares the failing path's hostname and so can only ever prove the failure was transient.
+- Verification:  `npm test` **838/838 across 138 files**, `npm run lint` clean, `npm run typecheck` clean. Build not re-run — no app code changed, the diff is a standalone script plus its test.
+- Branch/commit: `claude/github-monitoring-recovery-lz4dos` @ `0bb1f59` (unmerged, no PR opened)
+- Next:          Claude Code. Two separable jobs: (a) recover the 5 `dead_path` URLs — must run on Actions, this container's egress policy 403s every one of these hosts, so neither `curl` nor WebFetch can discover them here; (b) route the ~14 blocked/TLS/JS-rendered lanes through the browser extractor instead of `fetch`, which is a connector change, not a seed change.
 
 2026-07-28 · Claude Code · T-SOURCE-EXTRACTION-VERIFICATION · MERGED
 - Intent:        Stop guessing extraction paths for the 66 generated country DPA/government shells. Probe every one on GitHub Actions against the live page, and wire only what the evidence supports.
