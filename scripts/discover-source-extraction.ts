@@ -115,6 +115,11 @@ type Finding = {
   sampleTitles: string[];
   selectorCandidate: SelectorEvidence | null;
   note: string;
+  /** Set only when the seeded page did not yield HTML — the fix-or-drop evidence. */
+  pageStatus?: number | null;
+  pageFinalUrl?: string | null;
+  rootStatus?: number | null;
+  verdict?: string;
 };
 
 const parser = new Parser({
@@ -122,14 +127,73 @@ const parser = new Parser({
   headers: { "User-Agent": USER_AGENT },
 });
 
-async function fetchText(url: string) {
-  const response = await fetch(url, {
-    headers: { "User-Agent": USER_AGENT },
-    signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
-    redirect: "follow",
-  });
-  if (!response.ok) return null;
-  return response.text();
+type PageFetch = {
+  html: string | null;
+  status: number | null;
+  finalUrl: string | null;
+  errorName: string | null;
+};
+
+async function fetchPage(url: string): Promise<PageFetch> {
+  try {
+    const response = await fetch(url, {
+      headers: { "User-Agent": USER_AGENT },
+      signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
+      redirect: "follow",
+    });
+    return {
+      html: response.ok ? await response.text() : null,
+      status: response.status,
+      finalUrl: response.url || url,
+      errorName: null,
+    };
+  } catch (error) {
+    return { html: null, status: null, finalUrl: null, errorName: (error as Error).name };
+  }
+}
+
+/**
+ * Turn a failed page fetch into a verdict a human can act on. The distinction
+ * that matters is fixable versus dead, and the first probe run could not draw
+ * it: every failure was reported as "unreachable" or "non-OK status", which put
+ * a live regulator refusing datacenter traffic in the same bucket as a URL that
+ * no longer exists. Deactivating a source on that evidence would drop a working
+ * lane, so the verdict is deliberately conservative — only `dead_path` and
+ * `dead_host` license removing anything, and both require the site to have said
+ * so explicitly.
+ *
+ * `rootStatus` is the status of the source's own origin, fetched only after the
+ * seeded URL failed: a live root behind a dead path means the authority moved
+ * its newsroom, which is a URL fix rather than a deactivation.
+ */
+export function diagnosePageFailure(page: PageFetch, rootStatus: number | null) {
+  if (page.errorName === "TimeoutError") {
+    return { verdict: "timeout" as const, note: "timed out — slow host, not proof of a dead source" };
+  }
+  if (page.status === null) {
+    // DNS failure, connection refused, TLS rejection. If the origin answers, the
+    // host is alive and only this path is broken.
+    const alive = rootStatus !== null && rootStatus < 500;
+    return alive
+      ? { verdict: "dead_path" as const, note: `did not resolve, but the site root answers ${rootStatus}` }
+      : { verdict: "dead_host" as const, note: `host did not respond (${page.errorName ?? "unknown error"})` };
+  }
+  if (page.status === 403 || page.status === 401 || page.status === 429) {
+    return {
+      verdict: "blocked" as const,
+      note: `${page.status} — the site is up and refusing this client, not a dead source`,
+    };
+  }
+  if (page.status === 404 || page.status === 410) {
+    const alive = rootStatus !== null && rootStatus < 400;
+    return alive
+      ? { verdict: "dead_path" as const, note: `${page.status}, but the site root answers ${rootStatus}` }
+      : { verdict: "dead_host" as const, note: `${page.status} and the site root answers ${rootStatus ?? "nothing"}` };
+  }
+  if (page.status >= 500) {
+    return { verdict: "server_error" as const, note: `${page.status} — server-side, retry before judging` };
+  }
+  return { verdict: "other" as const, note: `unexpected status ${page.status}` };
 }
 
 /**
@@ -281,20 +345,32 @@ async function probe(source: RegulationSource): Promise<Finding> {
     note: "",
   };
 
-  let html: string | null = null;
-  try {
-    html = await fetchText(source.sourceUrl);
-  } catch (error) {
-    base.note = `page unreachable: ${(error as Error).message}`;
-  }
+  const page = await fetchPage(source.sourceUrl);
+  const html = page.html;
 
   const candidates: Array<{ url: string; via: Finding["discoveredVia"] }> = [];
   if (html) {
     for (const url of declaredFeedUrls(html, source.sourceUrl)) {
       candidates.push({ url, via: "link-rel" });
     }
-  } else if (!base.note) {
-    base.note = "page returned a non-OK status";
+  } else {
+    // Only now is the extra request justified: the root tells fix-the-URL apart
+    // from the source being gone.
+    let rootStatus: number | null = null;
+    try {
+      const origin = new URL(source.sourceUrl).origin;
+      if (origin !== source.sourceUrl.replace(/\/$/, "")) {
+        rootStatus = (await fetchPage(origin)).status;
+      }
+    } catch {
+      // Unparseable source URL — handled below.
+    }
+    const diagnosis = diagnosePageFailure(page, rootStatus);
+    base.pageStatus = page.status;
+    base.pageFinalUrl = page.finalUrl;
+    base.rootStatus = rootStatus;
+    base.verdict = diagnosis.verdict;
+    base.note = diagnosis.note;
   }
 
   try {
@@ -391,11 +467,31 @@ async function main() {
   }
 
   if (stuck.length > 0) {
-    console.log("--- neither feed nor selector ---");
-    for (const finding of stuck) {
-      console.log(`  ${finding.sourceId.padEnd(28)} ${finding.note}`);
+    // Sources whose page never loaded are a different problem from sources whose
+    // page loaded but yielded nothing: the first is a broken URL or a blocked
+    // client, the second is genuinely hard extraction. Reporting them together
+    // is what made the last run's "19 dead sources" unactionable.
+    const unloadable = stuck.filter((finding) => finding.verdict);
+    const extractionless = stuck.filter((finding) => !finding.verdict);
+
+    if (unloadable.length > 0) {
+      console.log(`--- page never loaded (${unloadable.length}) ---`);
+      for (const finding of [...unloadable].sort((a, b) =>
+        (a.verdict ?? "").localeCompare(b.verdict ?? ""),
+      )) {
+        console.log(`  ${finding.sourceId.padEnd(28)} ${(finding.verdict ?? "").padEnd(13)} ${finding.note}`);
+        console.log(`  ${" ".repeat(28)} ${finding.sourceUrl}`);
+      }
+      console.log("");
     }
-    console.log("");
+
+    if (extractionless.length > 0) {
+      console.log(`--- page loaded, no feed and no selector (${extractionless.length}) ---`);
+      for (const finding of extractionless) {
+        console.log(`  ${finding.sourceId.padEnd(28)} ${finding.note}`);
+      }
+      console.log("");
+    }
   }
 
   if (jsonArg >= 0) {

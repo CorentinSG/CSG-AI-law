@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { bestSelector } from "./discover-source-extraction";
+import { bestSelector, diagnosePageFailure } from "./discover-source-extraction";
 
 const BASE = "https://dpa.example.gov/news";
 
@@ -93,5 +93,45 @@ describe("candidate selector discovery", () => {
       <article class="post"><a href="/c">Contact</a><time datetime="2026-07-03">3 July</time></article>`);
 
     expect(bestSelector(shortLabels, BASE)).toBeNull();
+  });
+});
+
+function failed(status: number | null, errorName: string | null = null) {
+  return { html: null, status, finalUrl: null, errorName };
+}
+
+// This verdict decides whether a declared official source gets deactivated, so
+// the asymmetry is deliberate: only `dead_path` and `dead_host` license removing
+// anything, and a live root always downgrades `dead_host` to `dead_path`.
+describe("page failure diagnosis", () => {
+  it("does not call a live site blocking a datacenter client dead", () => {
+    // The Irish DPC and the Dutch Rijksoverheid failed the first probe run this
+    // way. Both are live; deactivating them would have dropped working lanes.
+    for (const status of [401, 403, 429]) {
+      expect(diagnosePageFailure(failed(status), 200).verdict, String(status)).toBe("blocked");
+    }
+  });
+
+  it("separates a moved newsroom from a site that is gone", () => {
+    expect(diagnosePageFailure(failed(404), 200).verdict).toBe("dead_path");
+    expect(diagnosePageFailure(failed(404), null).verdict).toBe("dead_host");
+    expect(diagnosePageFailure(failed(410), 200).verdict).toBe("dead_path");
+  });
+
+  it("treats a DNS or TLS failure as a dead host only if the root is dead too", () => {
+    expect(diagnosePageFailure(failed(null, "TypeError"), null).verdict).toBe("dead_host");
+    expect(diagnosePageFailure(failed(null, "TypeError"), 200).verdict).toBe("dead_path");
+  });
+
+  it("never condemns a source on a timeout or a server error", () => {
+    expect(diagnosePageFailure(failed(null, "TimeoutError"), null).verdict).toBe("timeout");
+    for (const status of [500, 502, 503, 504]) {
+      expect(diagnosePageFailure(failed(status), 200).verdict, String(status)).toBe("server_error");
+    }
+  });
+
+  it("carries the evidence into the note so a reader need not rerun the probe", () => {
+    expect(diagnosePageFailure(failed(403), 200).note).toContain("403");
+    expect(diagnosePageFailure(failed(404), 200).note).toContain("root answers 200");
   });
 });
