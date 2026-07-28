@@ -31,6 +31,16 @@ type CountryMonitoringSourceInput = {
    */
   dpaFeedUrl?: string;
   governmentFeedUrl?: string;
+  /**
+   * A CSS selector here replaces the generated `a[href]` catch-all for a lane
+   * that publishes no feed. Same rule as the feed fields: only a selector
+   * verified against the live page may go here — it must yield several distinct
+   * same-host links with headline-length titles and dates on the items. The
+   * connector's defaults then take over (`linkSelector: "a"`,
+   * `dateSelector: "time, .date"`), which is what the probe itself assumes.
+   */
+  dpaSelector?: string;
+  governmentSelector?: string;
 };
 
 const remainingEuMemberStateSourceInputs = [
@@ -132,6 +142,8 @@ const remainingEuMemberStateSourceInputs = [
   },
   {
     code: "gr",
+    // selector verified 2026-07-28 (run 30387343579): 4 items, 100% dated, incl. the EDPB 2026 Coordinated Enforcement Action on transparency
+    dpaSelector: ".views-row",
     // verified 2026-07-28 (run 30373800651): conventional path, 10 dated items, latest 2026-03-24; legislative drafting committees, so keyword filtering matters
     governmentFeedUrl: "https://gslegal.gov.gr/rss",
     country: "Greece",
@@ -186,6 +198,8 @@ const remainingEuMemberStateSourceInputs = [
   },
   {
     code: "lu",
+    // selector verified 2026-07-28 (run 30387343579): 6 items, 100% dated, incl. "Data Protection Basics: Artificial Intelligence"
+    dpaSelector: "article",
     country: "Luxembourg",
     dpaName: "Luxembourg National Commission for Data Protection",
     dpaUrl: "https://cnpd.public.lu/en.html",
@@ -227,6 +241,8 @@ const remainingEuMemberStateSourceInputs = [
   },
   {
     code: "pt",
+    // selector verified 2026-07-28 (run 30387343579): 4 items, 100% dated, incl. the CNPD 2027-2029 strategic plan
+    dpaSelector: ".card, .c-card",
     country: "Portugal",
     dpaName: "Portuguese National Data Protection Commission",
     dpaUrl: "https://www.cnpd.pt/",
@@ -267,6 +283,8 @@ const remainingEuMemberStateSourceInputs = [
   },
   {
     code: "si",
+    // selector verified 2026-07-28 (run 30387343579): 12 items, 100% dated, incl. the national AI strategy to 2030 and ministry AI/data guidelines
+    governmentSelector: ".list-item, .listitem, .result-item",
     country: "Slovenia",
     dpaName: "Slovenian Information Commissioner",
     dpaUrl: "https://www.ip-rs.si/en",
@@ -509,12 +527,14 @@ function buildCountryMonitoringSources(inputs: readonly CountryMonitoringSourceI
           authorityTypeHint: "Agency guidance",
           ...(input.dpaFeedUrl
             ? {}
-            : {
-                itemSelector: "main a[href], article a[href], a[href]",
-                linkSelector: "self",
-                requiresReview: true,
-                requiresReviewReason: "generated_catch_all_selector",
-              }),
+            : input.dpaSelector
+              ? { itemSelector: input.dpaSelector }
+              : {
+                  itemSelector: "main a[href], article a[href], a[href]",
+                  linkSelector: "self",
+                  requiresReview: true,
+                  requiresReviewReason: "generated_catch_all_selector",
+                }),
           includeAnyTerms: [
             "artificial intelligence",
             "AI Act",
@@ -555,12 +575,14 @@ function buildCountryMonitoringSources(inputs: readonly CountryMonitoringSourceI
           authorityTypeHint: "Government policy",
           ...(input.governmentFeedUrl
             ? {}
-            : {
-                itemSelector: "main a[href], article a[href], a[href]",
-                linkSelector: "self",
-                requiresReview: true,
-                requiresReviewReason: "generated_catch_all_selector",
-              }),
+            : input.governmentSelector
+              ? { itemSelector: input.governmentSelector }
+              : {
+                  itemSelector: "main a[href], article a[href], a[href]",
+                  linkSelector: "self",
+                  requiresReview: true,
+                  requiresReviewReason: "generated_catch_all_selector",
+                }),
           includeAnyTerms: [
             "artificial intelligence",
             "AI Act",
@@ -3679,10 +3701,12 @@ export const regulationSourcesSeed: RegulationSource[] = [
     config: {
       maxItems: 15,
       authorityTypeHint: "Proposed law",
-      itemSelector: "main a[href]",
-      requiresReview: true,
-      requiresReviewReason: "main_scoped_anchor_catch_all",
-      linkSelector: "self",
+      // Selector verified 2026-07-28 (run 30387343579): 5 items, 100% dated,
+      // returning SOU inquiry reports (digital tools in company law, access to
+      // data, cyber-resilience). Replaces the `main a[href]` catch-all, so this
+      // lane leaves the review gate. The connector's linkSelector/dateSelector
+      // defaults apply, which is what the probe assumed when it verified this.
+      itemSelector: "main ul li:has(a[href]):has(time)",
       includeAnyTerms: ["ai-förordningen", "artificiell intelligens", "marknadskontroll", "sanktioner"],
       editorialNotes: ["Official Swedish Government source.", "Inquiry reports and press releases must remain distinct from enacted law."],
     },
