@@ -546,3 +546,35 @@ describe("buildHealthSnapshot", () => {
     });
   });
 });
+
+describe("isMonitoringStale", () => {
+  const HOUR = 60 * 60 * 1000;
+  const scans = (newestSuccessfulScanAgeMs: number | null) => ({
+    scans: { newestSuccessfulScanAgeMs, newestSuccessfulScanAt: null, byProfile: {} },
+  });
+
+  it("tolerates the real gap between cron runs", async () => {
+    const { isMonitoringStale } = await import("@/lib/health");
+    // Observed delivery is one run every 1-3.5 hours against a declared 15
+    // minutes, so anything inside that band must stay green.
+    for (const hours of [0, 1, 2, 3.5, 5.9]) {
+      expect(isMonitoringStale(scans(hours * HOUR)), `${hours}h`).toBe(false);
+    }
+  });
+
+  it("fires once monitoring has genuinely stalled", async () => {
+    const { isMonitoringStale, MONITORING_STALE_AFTER_MS } = await import("@/lib/health");
+    expect(isMonitoringStale(scans(MONITORING_STALE_AFTER_MS + 1))).toBe(true);
+    expect(isMonitoringStale(scans(5 * 24 * HOUR))).toBe(true);
+  });
+
+  it("treats a monitor that has never scanned as stale, not unknown", async () => {
+    const { isMonitoringStale } = await import("@/lib/health");
+    expect(isMonitoringStale(scans(null))).toBe(true);
+  });
+
+  it("keeps a window wider than the worst observed gap between runs", async () => {
+    const { MONITORING_STALE_AFTER_MS } = await import("@/lib/health");
+    expect(MONITORING_STALE_AFTER_MS).toBeGreaterThan(3.5 * HOUR);
+  });
+});
