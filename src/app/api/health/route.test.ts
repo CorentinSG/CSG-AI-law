@@ -2,7 +2,10 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 
 const buildHealthSnapshot = vi.fn();
 
-vi.mock("@/lib/health", () => ({
+// Only the snapshot is faked. `isMonitoringStale` stays real so these tests
+// exercise the actual staleness rule through the route rather than a stub of it.
+vi.mock("@/lib/health", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@/lib/health")>()),
   buildHealthSnapshot,
 }));
 
@@ -82,34 +85,58 @@ describe("health route", () => {
     expect(buildHealthSnapshot).toHaveBeenCalledWith({ access: "public" });
   });
 
-  it("returns 503 for an authenticated worker check when its heartbeat is stale", async () => {
+  async function workerCheck(snapshot: Record<string, unknown>) {
     process.env.CRON_SECRET = "1234567890abcdef";
     process.env.ADMIN_AUTH_SECRET = "123456789012345678901234";
     const { resetEnvForTests } = await import("@/lib/env");
     resetEnvForTests();
 
-    buildHealthSnapshot.mockResolvedValueOnce({
-      ok: true,
-      worker: {
-        alive: true,
-        heartbeatFresh: false,
-      },
-    });
+    buildHealthSnapshot.mockResolvedValueOnce(snapshot);
 
     const { GET } = await import("@/app/api/health/route");
-    const response = await GET(
+    return GET(
       new Request("http://localhost/api/health?check=worker", {
-        headers: {
-          authorization: "Bearer 1234567890abcdef",
-        },
+        headers: { authorization: "Bearer 1234567890abcdef" },
       }),
     );
+  }
+
+  const HOUR = 60 * 60 * 1000;
+
+  // The case that motivated the change: between two cron runs there is no live
+  // worker, which is normal operation. Alerting on it meant a 503 almost
+  // continuously, and an always-red alert is one nobody reads.
+  it("stays 200 between runs when a scan succeeded recently", async () => {
+    const response = await workerCheck({
+      ok: true,
+      worker: { alive: false, heartbeatFresh: false },
+      scans: { newestSuccessfulScanAgeMs: 2 * HOUR, newestSuccessfulScanAt: "2026-07-28T20:00:00Z" },
+    });
+
+    expect(response.status).toBe(200);
+    expect(buildHealthSnapshot).toHaveBeenCalledWith({ access: "authenticated" });
+  });
+
+  it("returns 503 once no scan has succeeded for longer than the window", async () => {
+    const response = await workerCheck({
+      ok: true,
+      worker: { alive: true, heartbeatFresh: true },
+      scans: { newestSuccessfulScanAgeMs: 7 * HOUR, newestSuccessfulScanAt: "2026-07-28T14:00:00Z" },
+    });
 
     expect(response.status).toBe(503);
-    expect(buildHealthSnapshot).toHaveBeenCalledWith({ access: "authenticated" });
-    await expect(response.json()).resolves.toMatchObject({
-      ok: false,
-      worker: { alive: true, heartbeatFresh: false },
+    await expect(response.json()).resolves.toMatchObject({ ok: false });
+  });
+
+  // "Never scanned" on a monitor that has run for months is a fault, not an
+  // unknown, so it must not be treated as healthy.
+  it("returns 503 when no scan has ever succeeded", async () => {
+    const response = await workerCheck({
+      ok: true,
+      worker: { alive: true, heartbeatFresh: true },
+      scans: { newestSuccessfulScanAgeMs: null, newestSuccessfulScanAt: null },
     });
+
+    expect(response.status).toBe(503);
   });
 });

@@ -53,6 +53,38 @@ export interface HealthSnapshot {
   };
 }
 
+/**
+ * How long the monitor may go without a successful scan before the dead-man
+ * switch fires.
+ *
+ * The monitor is a batch job, not a daemon. GitHub cron declares every 15
+ * minutes but delivers roughly one run every 1–3.5 hours, and each run lasts
+ * 11–22 minutes. `worker.heartbeatFresh` asks whether a worker is alive *this
+ * second* (45s), so between runs it is false — which is normal operation, not a
+ * fault. Wiring an alert to it meant a 503 almost all the time, and an alert
+ * that is always red is one nobody reads.
+ *
+ * So the switch watches the thing that actually matters: how long since a scan
+ * last succeeded. Six hours is roughly 1.7x the widest gap observed between real
+ * runs, so ordinary cron jitter stays green while a genuine stall goes red — the
+ * 22 July outage sat at five days.
+ */
+export const MONITORING_STALE_AFTER_MS = 6 * 60 * 60 * 1000;
+
+/**
+ * True when no scan has succeeded recently enough. A snapshot with no successful
+ * scan at all counts as stale: on a monitor that has been running for months,
+ * "never" is a fault, not an unknown.
+ */
+export function isMonitoringStale(
+  snapshot: Pick<HealthSnapshot, "scans">,
+  staleAfterMs: number = MONITORING_STALE_AFTER_MS,
+): boolean {
+  const ageMs = snapshot.scans?.newestSuccessfulScanAgeMs ?? null;
+  if (ageMs === null) return true;
+  return ageMs > staleAfterMs;
+}
+
 const MAX_RECENT_SOURCES = 500;
 const MAX_RECENT_JOBS = 100;
 const MAX_REVIEW_ITEMS = 500;
