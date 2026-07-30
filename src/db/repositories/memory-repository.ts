@@ -531,6 +531,21 @@ export class MemoryAiRegulationRepository implements AiRegulationRepository {
     return typeof limit === "number" ? logs.slice(0, limit) : logs;
   }
 
+  async purgeScanLogsBefore(cutoffIso: string, batchSize = 500) {
+    const store = getMockStore();
+    // Oldest first, so repeated calls drain the backlog in the same order the
+    // Supabase implementation does.
+    const doomed = store.scanLogs
+      .filter((log) => log.scanStartedAt < cutoffIso)
+      .sort((a, b) => a.scanStartedAt.localeCompare(b.scanStartedAt))
+      .slice(0, batchSize);
+    if (doomed.length === 0) return 0;
+
+    const doomedIds = new Set(doomed.map((log) => log.id));
+    store.scanLogs = store.scanLogs.filter((log) => !doomedIds.has(log.id));
+    return doomed.length;
+  }
+
   async createScanLog(input: ScanLogInput) {
     const record: RegulationScanLog = {
       ...input,
