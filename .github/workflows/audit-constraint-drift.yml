@@ -1,0 +1,57 @@
+name: Audit constraint drift
+
+# Manual only. Answers whether migration 031 is already applied in production,
+# by reading the observable traces its two CHECK repairs would leave. Read-only:
+# it writes nothing and changes no row. The existing audit-database-schema.ts
+# cannot be used here because it needs a direct Postgres connection through
+# DATABASE_URL, which is not among this repository's secrets.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: Require the Supabase secrets
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: |
+          missing=()
+          for name in NEXT_PUBLIC_SUPABASE_URL SUPABASE_SERVICE_ROLE_KEY; do
+            if [ -z "${!name}" ]; then
+              missing+=("$name")
+            fi
+          done
+          if [ "${#missing[@]}" -gt 0 ]; then
+            printf 'Missing required GitHub secrets: %s\n' "${missing[*]}" >&2
+            exit 1
+          fi
+
+      - name: Read the traces the two CHECK repairs would leave
+        env:
+          APP_DATA_MODE: supabase
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: |
+          # Env validation demands ADMIN_AUTH_SECRET on import. This job never
+          # serves or validates an admin session, so a throwaway per-run value is
+          # used rather than the production secret. Nothing here is stored.
+          secret="$(openssl rand -hex 32)"
+          echo "::add-mask::$secret"
+          export ADMIN_AUTH_SECRET="$secret"
+          npx tsx scripts/audit-constraint-drift.ts
