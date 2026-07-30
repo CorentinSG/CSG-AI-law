@@ -82,8 +82,19 @@ async function main() {
     console.log("   009 CHECK forbids, so 028 cannot have applied. 031 repairs this.");
   } else {
     const row = srcRows![0] as { source_category: string; active: boolean };
-    console.log(`   APPLIED — ${MIGRATION_028_SOURCE_ID} exists`);
-    console.log(`   (source_category='${row.source_category}', active=${row.active}).`);
+    // Presence alone proves nothing: the application seed creates this source
+    // with a category the drifted CHECK permits. Only the category 028 writes
+    // shows 028 actually ran, so that is what decides the verdict.
+    if (row.source_category === MIGRATION_028_CATEGORY) {
+      console.log(`   APPLIED — ${MIGRATION_028_SOURCE_ID} carries source_category`);
+      console.log(`   '${MIGRATION_028_CATEGORY}', which the drifted CHECK would reject.`);
+    } else {
+      console.log(`   DRIFTED — ${MIGRATION_028_SOURCE_ID} exists, but with`);
+      console.log(`   source_category='${row.source_category}', not '${MIGRATION_028_CATEGORY}'.`);
+      console.log("   The row was created by something the CHECK permits (the application");
+      console.log("   seed), not by 028 — so 028 still has not applied. 031 repairs this.");
+    }
+    console.log(`   (active=${row.active})`);
   }
 
   // ── Which categories does production actually hold? ──────────────────────
@@ -100,6 +111,11 @@ async function main() {
     console.log(
       `\n   '${MIGRATION_028_CATEGORY}' present anywhere in regulation_sources: ${present ? "yes" : "no"}`,
     );
+    // This is the decisive signal, independent of what happened to the 028 row:
+    // if no row anywhere carries the value, the CHECK still forbids it.
+    if (!present) {
+      console.log("   No row anywhere carries it, so the CHECK still forbids the value.");
+    }
   }
 
   console.log("\nNothing was changed. Applying 031 remains a separate, explicit decision.");
