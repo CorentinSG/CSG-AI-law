@@ -214,6 +214,13 @@ export interface AiRegulationRepository {
   disableSource(id: string): Promise<RegulationSource>;
   listScanLogs(limit?: number, sourceId?: string): Promise<RegulationScanLog[]>;
   createScanLog(input: ScanLogInput): Promise<RegulationScanLog>;
+  /**
+   * Deletes scan logs started before `cutoffIso`, at most `batchSize` rows per
+   * call. Returns how many were deleted, so a caller can stop once a pass comes
+   * back short. Bounded on purpose: an unbounded delete over a table that had
+   * grown enough to blow the statement timeout would simply re-create it.
+   */
+  purgeScanLogsBefore(cutoffIso: string, batchSize?: number): Promise<number>;
   listRawRegulatoryItems(limit?: number, sourceId?: string): Promise<RawRegulatoryItem[]>;
   listProcessingLogs(limit?: number): Promise<AiProcessingLog[]>;
   createAiProcessingLog(input: AiProcessingLogInput): Promise<AiProcessingLog>;

@@ -105,6 +105,9 @@ export const updateRepository = {
   async getScanLogsBySource(sourceId: string, limit?: number) {
     return getAiRegulationRepository().listScanLogs(limit, sourceId);
   },
+  async purgeScanLogsBefore(cutoffIso: string, batchSize?: number) {
+    return getAiRegulationRepository().purgeScanLogsBefore(cutoffIso, batchSize);
+  },
   async getProcessingLogs(limit?: number) {
     return getAiRegulationRepository().listProcessingLogs(limit);
   },

@@ -1696,6 +1696,34 @@ export class SupabaseAiRegulationRepository implements AiRegulationRepository {
     return mapScanLogRow(data);
   }
 
+  async purgeScanLogsBefore(cutoffIso: string, batchSize = 500) {
+    const client = requireAdminClient();
+    // Select the ids first, then delete by id. PostgREST cannot limit a delete,
+    // and an unfiltered `delete().lt(...)` over a table large enough to have
+    // caused the statement timeouts this purge exists to prevent would just
+    // re-create them. Selecting ids uses the scan_started_at index added in
+    // migration 032, so each pass is cheap and its cost does not grow with the
+    // size of the backlog.
+    const { data, error } = await client
+      .from("regulation_scan_logs")
+      .select("id")
+      .lt("scan_started_at", cutoffIso)
+      .order("scan_started_at", { ascending: true })
+      .limit(batchSize);
+    handleError("Failed to list scan logs for purge", error);
+
+    const ids = (data ?? []).map((row) => (row as { id: string }).id);
+    if (ids.length === 0) return 0;
+
+    const { error: deleteError } = await client
+      .from("regulation_scan_logs")
+      .delete()
+      .in("id", ids);
+    handleError("Failed to purge scan logs", deleteError);
+
+    return ids.length;
+  }
+
   async listRawRegulatoryItems(limit = 20, sourceId?: string) {
     const client = requireAdminClient();
     let query = client

@@ -8,6 +8,10 @@ import { enqueueCentralMonitoringSchedule } from "@/agents/ai-regulation/schedul
 import { drainQueuedScanJobs } from "@/agents/ai-regulation/processors/scanJobs";
 import { updateRepository } from "@/agents/ai-regulation/processors/updateRepository";
 import {
+  purgeExpiredScanLogs,
+  SCAN_LOG_RETENTION_DAYS,
+} from "@/agents/ai-regulation/processors/scanLogRetention";
+import {
   acquireScanWorkerLease,
   clearScanWorkerStopRequest,
   createScanWorkerConfig,
@@ -133,6 +137,20 @@ async function main() {
 
   await writeStatus("starting");
   await writePersistentHeartbeat("starting");
+
+  // Once per run, before any scanning. `regulation_scan_logs` had no retention
+  // and grew until sorting it exceeded the statement timeout, which exhausted
+  // the pool and took the database down. Migration 032 made the read cheap; this
+  // stops the table growing back into the same wall. Bounded per run, and it
+  // never throws — housekeeping must not cost a scan run.
+  const purge = await purgeExpiredScanLogs();
+  if (purge.error) {
+    console.warn(`[scan-worker] scan-log purge failed: ${purge.error}`);
+  } else if (purge.deleted > 0) {
+    console.log(
+      `[scan-worker] purged ${purge.deleted} scan log(s) older than ${SCAN_LOG_RETENTION_DAYS}d in ${purge.batches} batch(es)${purge.drained ? "" : " (backlog remains, continues next run)"}`,
+    );
+  }
 
   try {
     while (true) {
