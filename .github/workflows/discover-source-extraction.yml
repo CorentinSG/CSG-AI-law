@@ -13,6 +13,11 @@ on:
         description: "Maximum number of sources to probe (blank = all)"
         required: false
         default: ""
+      browser:
+        description: "Also retry the sources that never loaded through a real browser"
+        required: false
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -49,6 +54,18 @@ jobs:
           else
             npx tsx scripts/discover-source-extraction.ts --json feed-discovery.json
           fi
+
+      # Opt-in, because installing Chromium and driving it costs several minutes
+      # on top of the sweep. It answers one question: of the sources a plain
+      # fetch cannot load, how many would a real browser reach? The production
+      # fallback calls Scrapling's plain `Fetcher`, so today the answer is
+      # assumed rather than measured.
+      - name: Retry the unloadable sources through a real browser
+        if: ${{ inputs.browser }}
+        run: |
+          python -m pip install --quiet 'scrapling[fetchers]'
+          python -m playwright install --with-deps chromium
+          python scripts/browser-fetch-probe.py feed-discovery.json
 
       - uses: actions/upload-artifact@v4
         if: always()

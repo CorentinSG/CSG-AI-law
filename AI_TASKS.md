@@ -49,6 +49,18 @@ YYYY-MM-DD · <Agent> · <TASK-ID> · <STATUS>
 
 ## Current status
 
+2026-07-30 · Claude Code · T-BROWSER-FETCH-MEASUREMENT · REVIEW
+- Intent:        Before switching the Scrapling worker to a real browser, measure whether a browser actually reaches the lanes a plain fetch cannot.
+- Files:         `scripts/browser-fetch-probe.py` (new), `.github/workflows/discover-source-extraction.yml` (opt-in `browser` input)
+- Graph anchors: `scanStaticSourceWithBrowserFallback()`, `shouldUseStaticBrowserFallback()`, community "Data Ingestion Pipeline". Not a graph node — standalone script.
+- Finding:       **A browser recovers 5 of 22 (23%), not the wholesale fix assumed.** Run 30562315311: recovered `src-bg-dpa-ai`, `src-hu-dpa-ai`, `src-ro-government-ai`, `src-sm-dpa-ai`, `src-mk-government-ai`. 17 still fail — many with `Page.goto: Timeout 30000ms` from the Actions runner (Ireland DPC, Belgium APD, Liechtenstein, Bosnia), some with a genuine 403 even to Chromium (Vatican 347B, Bosnia parliament 3923B), and `src-nl-rijksoverheid-ai` returns a real 404 page (173KB).
+- Recommendation: **Do not add Chromium to the monitoring workflow.** 4 of the 5 recovered lanes failed on `UNABLE_TO_VERIFY_LEAF_SIGNATURE`, and the Scrapling worker already retries those with `verify=False` behind `ALLOW_INSECURE_SSL_FALLBACK` — no browser needed, at a stated security cost. So a browser buys roughly one lane (Hungary's DPA, a hard 403) that nothing else reaches, against a Chromium install on every run. The widespread 30s timeouts also suggest the runner's egress is itself part of the problem, which a browser does not fix.
+- Correction:    An earlier entry framed these as "~14 lanes needing the browser extractor", implying a browser would recover them. Measurement says otherwise. Withdrawn.
+- Note:          22 unloadable this run vs 16 two runs earlier — these sites flake, so any single run understates or overstates. Treat counts as approximate.
+- Verification:  `npm test` 887/887 across 139 files, `npm run lint` clean, `npm run typecheck` clean. Target-selection filter and empty-report path unit-checked before the live run; `Selector.html_content` confirmed to round-trip raw HTML.
+- Branch/commit: `claude/github-monitoring-recovery-lz4dos` @ `1443fc0`
+- Next:          Claude Code. The remaining lanes are not a fetch-strategy problem, so stop treating them as one. Better targets: the unapplied migration 031 and the unknown production migration history; per-source purge/retention for `regulation_scan_logs`, whose growth caused the timeouts fixed in #48.
+
 2026-07-28 · Claude Code · T-DEAD-SOURCE-TRIAGE · DONE-LOCAL
 - Intent:        Establish what is actually wrong with the sources whose page never loads, before fixing or deactivating any of them.
 - Files:         `scripts/discover-source-extraction.ts`, `scripts/discover-source-extraction.test.ts`
