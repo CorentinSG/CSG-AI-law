@@ -1,0 +1,62 @@
+name: Audit content funnel
+
+# Manual only. Measures how much of what the monitor collects actually reaches
+# the public site: raw items → DB entries / news → published → visible, over
+# 7 days, 30 days, and all time. Read-only — counts only, changes nothing.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: Require the Supabase secrets
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: |
+          missing=()
+          for name in NEXT_PUBLIC_SUPABASE_URL SUPABASE_SERVICE_ROLE_KEY; do
+            if [ -z "${!name}" ]; then
+              missing+=("$name")
+            fi
+          done
+          if [ "${#missing[@]}" -gt 0 ]; then
+            printf 'Missing required GitHub secrets: %s\n' "${missing[*]}" >&2
+            exit 1
+          fi
+
+      - name: Count every funnel stage
+        env:
+          APP_DATA_MODE: supabase
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: |
+          # Env validation demands ADMIN_AUTH_SECRET on import. This job never
+          # serves or validates an admin session, so a throwaway per-run value
+          # is used rather than the production secret. Nothing here is stored.
+          secret="$(openssl rand -hex 32)"
+          echo "::add-mask::$secret"
+          export ADMIN_AUTH_SECRET="$secret"
+          npx tsx scripts/audit-content-funnel.ts --json content-funnel.json
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: content-funnel
+          path: content-funnel.json
+          if-no-files-found: warn
