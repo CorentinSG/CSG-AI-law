@@ -30,12 +30,12 @@ describe("generated catch-all source review gate", () => {
     (source) => source.config?.itemSelector === GENERATED_CATCH_ALL_SELECTOR,
   );
 
-  // 57, down from the original 66: four lanes moved to verified RSS feeds
-  // (Croatia, Malta, Monaco DPAs and the Greek government) and five to verified
-  // selectors (Greece, Luxembourg, Portugal and Norway DPAs, the Slovenian
-  // government).
+  // 54, down from the original 66: four lanes moved to verified RSS feeds
+  // (Croatia, Malta, Monaco DPAs and the Greek government) and eight to verified
+  // selectors (Greece, Luxembourg, Portugal, Norway, Finland and Slovakia DPAs,
+  // the Slovenian and Latvian governments).
   it("covers the generated shells with neither a feed nor a verified selector", () => {
-    expect(catchAllSources.length).toBe(57);
+    expect(catchAllSources.length).toBe(54);
     expect(
       catchAllSources.every(
         (source) => source.id.endsWith("-dpa-ai") || source.id.endsWith("-government-ai"),
@@ -53,7 +53,7 @@ describe("generated catch-all source review gate", () => {
   });
 
   // The flag must never spread beyond sources that genuinely extract with a bare
-  // anchor selector: the 57 remaining generated shells plus the 6 hand-authored
+  // anchor selector: the 54 remaining generated shells plus the 6 hand-authored
   // main-scoped ones. Anything else appearing here means a verified official
   // lane was pulled out of the automatic publication path by mistake.
   it("keeps the flag confined to sources with a bare anchor selector", () => {
@@ -65,7 +65,7 @@ describe("generated catch-all source review gate", () => {
       );
     });
 
-    expect(flagged.length).toBe(63);
+    expect(flagged.length).toBe(60);
     expect(flagged.map((source) => source.id).sort()).toEqual(
       anchorCatchAll.map((source) => source.id).sort(),
     );
@@ -167,6 +167,11 @@ const VERIFIED_SELECTORS: Record<string, string> = {
   // (run 30397833023).
   "src-no-dpa-ai": "main ul li:has(a[href]):has(time)",
   "src-at-dsb-ai": "main li:has(a[href])",
+  // Found by deriving candidates from the page rather than matching a curated
+  // pattern (run 30600418373) — no hand-written list would contain these names.
+  "src-fi-dpa-ai": "div.feed-item.simple",
+  "src-sk-dpa-ai": "div.portfolio-item",
+  "src-lv-government-ai": "div.text-container",
 };
 
 describe("sources promoted to a verified selector", () => {
@@ -196,6 +201,10 @@ const REPOINTED_BUT_STILL_GATED: Record<string, string> = {
   "src-ch-dpa-ai": "https://www.edoeb.admin.ch/de/mitteilungen",
   "src-fi-government-ai": "https://traficom.fi",
   "src-se-digg-ai": "https://www.digg.se",
+  // The seeded link was a single 2024 press release, which publishes nothing
+  // further. The root is the ministry's newsroom, but run 30600418373 sampled
+  // energy and defence releases there rather than AI law.
+  "src-cz-government-ai": "https://mpo.gov.cz",
 };
 
 describe("lanes repointed at a live page but still gated", () => {

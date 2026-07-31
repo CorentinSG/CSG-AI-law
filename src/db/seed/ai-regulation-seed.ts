@@ -92,8 +92,12 @@ const remainingEuMemberStateSourceInputs = [
     dpaName: "Czech Office for Personal Data Protection",
     dpaUrl: "https://uoou.gov.cz/en",
     governmentName: "Czech Ministry of Industry and Trade AI Act implementation",
-    governmentUrl:
-      "https://mpo.gov.cz/en/guidepost/for-the-media/press-releases/the-ministry-of-industry-and-trade-has-prepared-a-draft-law-on-artificial-intelligence----289865/",
+    // The seeded link is a single 2024 press release — one article, which
+    // publishes nothing further. The ministry's root is its newsroom. URL only:
+    // run 30600418373 found a listing there but sampled energy and defence
+    // releases, not AI law, so this lane stays gated and leans on
+    // `includeAnyTerms` to filter.
+    governmentUrl: "https://mpo.gov.cz",
     newsQuery:
       '(("artificial intelligence" OR "AI Act" OR "umělá inteligence") AND (Czechia OR Czech Republic OR ÚOOÚ) AND (law OR regulation OR legal))',
     gdeltQuery:
@@ -131,7 +135,12 @@ const remainingEuMemberStateSourceInputs = [
     code: "fi",
     country: "Finland",
     dpaName: "Finnish Office of the Data Protection Ombudsman",
-    dpaUrl: "https://tietosuoja.fi/en/ai-systems-and-data-protection",
+    // The seeded AI explainer is a static page that publishes nothing. The
+    // authority's root carries its newsroom, verified by run 30600418373:
+    // 3 items, 100% dated — EDPB inter-authority data sharing, the 2025 annual
+    // report, EDPB anonymisation and scraping guidance.
+    dpaUrl: "https://tietosuoja.fi",
+    dpaSelector: "div.feed-item.simple",
     governmentName: "Traficom EU Artificial Intelligence Act materials",
     // The seeded AI-Act explainer is a static page that publishes nothing. The
     // root is Traficom's newsroom. URL only — its listing is general transport
@@ -180,7 +189,10 @@ const remainingEuMemberStateSourceInputs = [
     dpaName: "Latvian Data State Inspectorate",
     dpaUrl: "https://www.dvi.gov.lv/en",
     governmentName: "Likumi.lv official legislation database",
+    // The seeded URL was already right; only the selector was missing. Verified
+    // by run 30600418373: 5 items, 100% dated — Cabinet regulation amendments.
     governmentUrl: "https://likumi.lv/",
+    governmentSelector: "div.text-container",
     newsQuery:
       '(("artificial intelligence" OR "AI Act" OR "mākslīgais intelekts") AND Latvia AND (law OR regulation OR legal OR DVI))',
     gdeltQuery:
@@ -276,7 +288,12 @@ const remainingEuMemberStateSourceInputs = [
     code: "sk",
     country: "Slovakia",
     dpaName: "Slovak Office for Personal Data Protection",
-    dpaUrl: "https://dataprotection.gov.sk/uoou/en",
+    // /uoou/en 404s. The authority's root carries its listing, verified by run
+    // 30600418373: 5 items, 100% dated — EDPB on a legal basis for
+    // inter-regulatory exchange, EDPB anonymisation and web scraping for
+    // generative AI.
+    dpaUrl: "https://dataprotection.gov.sk",
+    dpaSelector: "div.portfolio-item",
     governmentName: "Slov-lex official legislation portal",
     governmentUrl: "https://www.slov-lex.sk/",
     newsQuery:
