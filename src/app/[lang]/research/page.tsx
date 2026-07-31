@@ -11,6 +11,7 @@ import {
 } from "@/components/site/research-explorer";
 import { SiteShell } from "@/components/site/shell";
 import { isLocale } from "@/lib/i18n/config";
+import { localeAlternates } from "@/lib/seo";
 import { getDictionary } from "../dictionaries";
 
 export async function generateMetadata({
@@ -19,7 +20,11 @@ export async function generateMetadata({
   const { lang } = await params;
   if (!isLocale(lang)) return {};
   const t = (await getDictionary(lang)).research;
-  return { title: t.metaTitle, description: t.metaDescription };
+  return {
+    title: t.metaTitle,
+    description: t.metaDescription,
+    alternates: localeAlternates(lang, "/research"),
+  };
 }
 
 export default async function ResearchPage({

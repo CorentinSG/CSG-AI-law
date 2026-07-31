@@ -16,13 +16,22 @@ import { SiteShell } from "@/components/site/shell";
 import { StandardsExplorer, type StandardsInstrument } from "@/components/site/standards-explorer";
 import { isLocale } from "@/lib/i18n/config";
 import { localeHref } from "@/lib/i18n/href";
+import { localeAlternates } from "@/lib/seo";
 import { formatDisplayDate } from "@/lib/utils";
 
-export const metadata: Metadata = {
-  title: "Standards & Soft Law",
-  description:
-    "Every technical standard, governance framework, and soft-law instrument tracked for AI compliance — searchable, filterable, and clearly distinguished from binding law.",
-};
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ lang: string }>;
+}): Promise<Metadata> {
+  const { lang } = await params;
+  return {
+    alternates: isLocale(lang) ? localeAlternates(lang, "/standards") : undefined,
+    title: "Standards & Soft Law",
+    description:
+      "Every technical standard, governance framework, and soft-law instrument tracked for AI compliance — searchable, filterable, and clearly distinguished from binding law.",
+  };
+}
 
 // ISR (T-RT0C): serve from cache, revalidate every 5 min.
 export const revalidate = 300;

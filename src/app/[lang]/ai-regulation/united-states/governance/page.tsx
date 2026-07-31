@@ -13,12 +13,21 @@ import { usAiSoftLawBaseline } from "@/content/ai-regulation/us-ai-soft-law";
 import { formatDisplayDate } from "@/lib/utils";
 import { isLocale } from "@/lib/i18n/config";
 import { localeHref } from "@/lib/i18n/href";
+import { localeAlternates } from "@/lib/seo";
 
-export const metadata: Metadata = {
-  title: "US Governance | United States Hub",
-  description:
-    "Institutional AI governance actors in the United States — FTC, EEOC, CFPB, case law, and federal soft law.",
-};
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ lang: string }>;
+}): Promise<Metadata> {
+  const { lang } = await params;
+  return {
+    alternates: isLocale(lang) ? localeAlternates(lang, "/ai-regulation/united-states/governance") : undefined,
+    title: "US Governance | United States Hub",
+    description:
+      "Institutional AI governance actors in the United States — FTC, EEOC, CFPB, case law, and federal soft law.",
+  };
+}
 
 export const revalidate = 3600;
 

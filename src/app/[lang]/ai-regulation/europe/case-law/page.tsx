@@ -15,12 +15,21 @@ import {
 import { formatDisplayDate } from "@/lib/utils";
 import { isLocale } from "@/lib/i18n/config";
 import { localeHref } from "@/lib/i18n/href";
+import { localeAlternates } from "@/lib/seo";
 
-export const metadata: Metadata = {
-  title: "Case Law | Europe Hub",
-  description:
-    "AI-related case law and enforcement decisions in Europe — court and authority decisions, plus the monitored case-law sources behind them.",
-};
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ lang: string }>;
+}): Promise<Metadata> {
+  const { lang } = await params;
+  return {
+    alternates: isLocale(lang) ? localeAlternates(lang, "/ai-regulation/europe/case-law") : undefined,
+    title: "Case Law | Europe Hub",
+    description:
+      "AI-related case law and enforcement decisions in Europe — court and authority decisions, plus the monitored case-law sources behind them.",
+  };
+}
 
 export const revalidate = 3600;
 

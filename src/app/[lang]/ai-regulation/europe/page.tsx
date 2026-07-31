@@ -16,12 +16,21 @@ import { getEuropeGeoPaths } from "@/lib/geo-paths";
 import { formatDisplayDate } from "@/lib/utils";
 import { isLocale } from "@/lib/i18n/config";
 import { localeHref } from "@/lib/i18n/href";
+import { localeAlternates } from "@/lib/seo";
 
-export const metadata: Metadata = {
-  title: "Europe Hub",
-  description:
-    "European Union AI regulation monitoring — AI Act milestones, governance actors, member state profiles, and live legal intelligence.",
-};
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ lang: string }>;
+}): Promise<Metadata> {
+  const { lang } = await params;
+  return {
+    alternates: isLocale(lang) ? localeAlternates(lang, "/ai-regulation/europe") : undefined,
+    title: "Europe Hub",
+    description:
+      "European Union AI regulation monitoring — AI Act milestones, governance actors, member state profiles, and live legal intelligence.",
+  };
+}
 
 export const revalidate = 300;
 

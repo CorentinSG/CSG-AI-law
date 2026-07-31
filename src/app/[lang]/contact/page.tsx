@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { ContactExperience } from "@/components/site/contact-experience";
 import { SiteShell } from "@/components/site/shell";
 import { isLocale } from "@/lib/i18n/config";
+import { localeAlternates } from "@/lib/seo";
 
 export async function generateMetadata({
   params,
@@ -13,6 +14,7 @@ export async function generateMetadata({
   const { lang } = await params;
   const fr = lang === "fr";
   return {
+    alternates: isLocale(lang) ? localeAlternates(lang, "/contact") : undefined,
     title: "Contact",
     description: fr
       ? "Contact professionnel pour collaborations de recherche, écriture, interventions et demandes liées au droit de l'IA et à l'intelligence juridique."

@@ -10,12 +10,21 @@ import { SiteShell } from "@/components/site/shell";
 import { euAiTimelineEntries } from "@/content/ai-regulation/eu-timeline";
 import { isLocale } from "@/lib/i18n/config";
 import { localeHref } from "@/lib/i18n/href";
+import { localeAlternates } from "@/lib/seo";
 
-export const metadata: Metadata = {
-  title: "EU Timeline | Europe Hub",
-  description:
-    "Official timeline of AI regulation in Europe — from the AI Act proposal through the first application deadlines.",
-};
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ lang: string }>;
+}): Promise<Metadata> {
+  const { lang } = await params;
+  return {
+    alternates: isLocale(lang) ? localeAlternates(lang, "/ai-regulation/europe/timeline") : undefined,
+    title: "EU Timeline | Europe Hub",
+    description:
+      "Official timeline of AI regulation in Europe — from the AI Act proposal through the first application deadlines.",
+  };
+}
 
 export const revalidate = 3600;
 

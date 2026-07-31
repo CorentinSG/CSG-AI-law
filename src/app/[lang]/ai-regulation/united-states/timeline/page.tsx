@@ -10,12 +10,21 @@ import { SiteShell } from "@/components/site/shell";
 import { usFederalTimelineEntries } from "@/content/ai-regulation/us-ai-legal-baseline";
 import { isLocale } from "@/lib/i18n/config";
 import { localeHref } from "@/lib/i18n/href";
+import { localeAlternates } from "@/lib/seo";
 
-export const metadata: Metadata = {
-  title: "US Timeline | United States Hub",
-  description:
-    "Official timeline of U.S. AI regulation — federal milestones and state actions, verified and classified.",
-};
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ lang: string }>;
+}): Promise<Metadata> {
+  const { lang } = await params;
+  return {
+    alternates: isLocale(lang) ? localeAlternates(lang, "/ai-regulation/united-states/timeline") : undefined,
+    title: "US Timeline | United States Hub",
+    description:
+      "Official timeline of U.S. AI regulation — federal milestones and state actions, verified and classified.",
+  };
+}
 
 export const revalidate = 3600;
 

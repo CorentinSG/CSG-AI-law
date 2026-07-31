@@ -11,12 +11,21 @@ import { europeAiActBaseline } from "@/content/ai-regulation/europe-ai-legal-bas
 import { formatDisplayDate } from "@/lib/utils";
 import { isLocale } from "@/lib/i18n/config";
 import { localeHref } from "@/lib/i18n/href";
+import { localeAlternates } from "@/lib/seo";
 
-export const metadata: Metadata = {
-  title: "Application Calendar | EU AI Act",
-  description:
-    "Phased application calendar of the EU AI Act — every official deadline with its legal effect, plus key articles and annexes.",
-};
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ lang: string }>;
+}): Promise<Metadata> {
+  const { lang } = await params;
+  return {
+    alternates: isLocale(lang) ? localeAlternates(lang, "/ai-regulation/europe/ai-act/calendar") : undefined,
+    title: "Application Calendar | EU AI Act",
+    description:
+      "Phased application calendar of the EU AI Act — every official deadline with its legal effect, plus key articles and annexes.",
+  };
+}
 
 export const revalidate = 3600;
 
