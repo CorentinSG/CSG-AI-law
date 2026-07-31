@@ -1,0 +1,52 @@
+name: SerpAPI discovery probe
+
+# Weekly site:-restricted Google queries against official domains the scan
+# runtime cannot fetch directly (HTTP 403 holds) and micro-state legal portals
+# with no scannable source. Hits become admin-only discovery leads with status
+# "unresolved" — nothing is published by this workflow.
+#
+# Query volume is hard-capped in the script (QUERY_BUDGET_PER_RUN); weekly
+# cadence keeps the SerpAPI free tier (100 searches/month) comfortable.
+# Without SERPAPI_API_KEY the run logs a loud skip and exits green; the admin
+# capability panel shows the missing key.
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "30 6 * * 2"
+
+concurrency:
+  group: serp-discovery-probe
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: Run the probe
+        env:
+          APP_DATA_MODE: supabase
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          SERPAPI_API_KEY: ${{ secrets.SERPAPI_API_KEY }}
+        run: |
+          # Env validation demands ADMIN_AUTH_SECRET on import. This job never
+          # serves or validates an admin session, so a throwaway per-run value
+          # is used rather than the production secret. Nothing here is stored.
+          secret="$(openssl rand -hex 32)"
+          echo "::add-mask::$secret"
+          export ADMIN_AUTH_SECRET="$secret"
+          npx tsx scripts/serp-discovery-probe.ts
