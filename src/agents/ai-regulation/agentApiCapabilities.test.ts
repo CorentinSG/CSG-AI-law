@@ -186,3 +186,34 @@ describe("agent API capabilities", () => {
     );
   });
 });
+
+describe("OpenAI processing capability", () => {
+  const find = (env: Record<string, string | undefined>) =>
+    listAgentApiCapabilities(env).find((capability) => capability.id === "openai-processing");
+
+  it("reports missing credentials when no key is set", () => {
+    const capability = find({});
+    expect(capability?.status).toBe("missing_credentials");
+    expect(capability?.userAction).toContain("OPENAI_API_KEY");
+  });
+
+  // The NewsAPI key sat unset for weeks with nothing surfacing it. The
+  // half-configured state — key present, flag off — is the one most likely to
+  // linger silently, so it must render as actionable, not as available.
+  it("reports needs_user_setup when the key exists but processing is disabled", () => {
+    const capability = find({ OPENAI_API_KEY: "sk-test", AI_ENABLE_PROCESSING: "false" });
+    expect(capability?.status).toBe("needs_user_setup");
+    expect(capability?.userAction).toContain("AI_ENABLE_PROCESSING");
+  });
+
+  it("reports available when the key exists and processing is enabled", () => {
+    const capability = find({ OPENAI_API_KEY: "sk-test", AI_ENABLE_PROCESSING: "true" });
+    expect(capability?.status).toBe("available");
+    expect(capability?.userAction).toBeUndefined();
+  });
+
+  it("honours the legacy AI_PROCESSING_ENABLED alias", () => {
+    const capability = find({ OPENAI_API_KEY: "sk-test", AI_PROCESSING_ENABLED: "true" });
+    expect(capability?.status).toBe("available");
+  });
+});

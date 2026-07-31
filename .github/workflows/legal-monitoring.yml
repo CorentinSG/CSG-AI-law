@@ -92,7 +92,15 @@ jobs:
           SCAN_JOB_WORKER_POLL_MS: "1000"
           SCAN_JOB_WORKER_MAX_JOBS_PER_CYCLE: "5"
           SCAN_JOB_WORKER_IDLE_EXIT_AFTER: "1"
-          AI_ENABLE_PROCESSING: "false"
+          # AI enrichment is off until the owner turns it on — no code change
+          # needed at enable time: set the repository *variable*
+          # AI_ENABLE_PROCESSING to "true" (Settings → Secrets and variables →
+          # Actions → Variables) and add the OPENAI_API_KEY secret. Cost stays
+          # inside the existing guardrails (AI_MONTHLY_BUDGET_USD default $20,
+          # 10 items/scan, 12k input tokens/item); without the key, items are
+          # cleanly marked skipped_due_to_missing_api_key rather than erroring.
+          AI_ENABLE_PROCESSING: ${{ vars.AI_ENABLE_PROCESSING || 'false' }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           SCRAPLING_WORKER_URL: http://127.0.0.1:8765
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
           NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}

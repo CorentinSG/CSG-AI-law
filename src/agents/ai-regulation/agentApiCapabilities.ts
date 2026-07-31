@@ -13,7 +13,8 @@ export type AgentApiCapabilityUse =
   | "official_legal_database"
   | "legal_news_discovery"
   | "case_law_discovery"
-  | "source_health";
+  | "source_health"
+  | "ai_processing";
 
 export interface AgentApiCapability {
   id: string;
@@ -67,6 +68,11 @@ export function listAgentApiCapabilities(
   rawEnv: AgentApiCapabilityEnv = process.env,
 ): AgentApiCapability[] {
   const newsApiReady = hasEnv("NEWSAPI_API_KEY", rawEnv);
+  const openAiKeyReady = hasEnv("OPENAI_API_KEY", rawEnv);
+  // The flag is read as a raw string on purpose: this module reports what the
+  // runtime environment literally says, the same way the workflow passes it.
+  const aiProcessingEnabled =
+    rawEnv.AI_ENABLE_PROCESSING === "true" || rawEnv.AI_PROCESSING_ENABLED === "true";
   const judilibreReady =
     hasEnv("JUDILIBRE_API_KEYID", rawEnv) ||
     hasAllEnv(
@@ -182,6 +188,29 @@ export function listAgentApiCapabilities(
         : "Set EURLEX_USERNAME and EURLEX_PASSWORD in Vercel/Railway so EU official legal database searches can use the native EUR-Lex SOAP webservice.",
       notes:
         "Official EU legal-database search channel. Use for discovery of EU instruments and lawmaking materials; binding status, instrument form, and pinpoint citations still require normal legal-database checks.",
+    }),
+    enrich({
+      id: "openai-processing",
+      label: "OpenAI AI processing",
+      // Three honest states: no key at all, key present but the flag off, or
+      // both in place. NEWSAPI_API_KEY sat unset for weeks with nothing
+      // surfacing it — this entry exists so the AI lane cannot repeat that.
+      status: !openAiKeyReady
+        ? "missing_credentials"
+        : aiProcessingEnabled
+          ? "available"
+          : "needs_user_setup",
+      uses: ["ai_processing"],
+      regions: ["Global"],
+      envVars: ["OPENAI_API_KEY", "AI_ENABLE_PROCESSING"],
+      implementedProvider: "openai",
+      userAction: !openAiKeyReady
+        ? "Add the OPENAI_API_KEY secret (GitHub Actions and/or Vercel). Without it, AI enrichment is a per-item no-op marked skipped_due_to_missing_api_key."
+        : aiProcessingEnabled
+          ? undefined
+          : "Key present but processing disabled. Set the AI_ENABLE_PROCESSING repository variable to \"true\" to enable enrichment within the existing guardrails (AI_MONTHLY_BUDGET_USD, AI_MAX_ITEMS_PER_SCAN, AI_MAX_INPUT_TOKENS_PER_ITEM).",
+      notes:
+        "Enrichment only — relevance, classification, summaries. Collection and deterministic auto-publication run without it, so enabling this raises content quality, not content existence. Spend is capped by the cost guardrails; never disable them to make it run more.",
     }),
     enrich({
       id: "newsapi",
