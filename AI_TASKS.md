@@ -11,6 +11,8 @@ Each agent edits only its own rows. Status vocabulary: `CLAIMED` · `WIP` · `BL
 
 | Task ID | Owner | Status | Branch @ sha | Locked files | Graph anchor | Updated |
 |---|---|---|---|---|---|---|
+| T-EFFICIENCY-PLAN (P0→P2) | Claude Code | MERGED | `main` @ `897d2b5` (#56–#61) | none (released) | `buildWeeklyDigestMarkdown()`, `deriveProvisioning()`, `purgeExpiredOperationalRecords()`, `localeAlternates()`, community "Scan Job Management", "DB Repository Layer" | 2026-07-31 |
+| T-SERP-PROBE | Claude Code | REVIEW | `claude/github-monitoring-recovery-lz4dos` @ `b02c076` (PR #62) | `scripts/serp-discovery-probe.ts`, `.github/workflows/serp-discovery.yml`, `agentApiCapabilities.ts` | `createDiscoveryLead()`, `listAgentApiCapabilities()`, community "DB Repository Layer" | 2026-07-31 |
 | T-DB-RESILIENCE | Claude Code | MERGED | `main` @ `a276f67` (#48→#50) | none (released) | `purgeExpiredScanLogs()`, `isMonitoringStale()`, community "DB Repository Layer", "Source Runtime Health" | 2026-07-31 |
 | T-MIGRATION-031 | Claude Code | MERGED | `main` @ `921af26` (#51→#52) | none (released) | `audit-constraint-drift.ts`, community "DB Repository Layer" | 2026-07-31 |
 | T-BROWSER-FETCH-MEASUREMENT | Claude Code | MERGED | `main` @ `3829f85` (#49) | none (released) | `scanStaticSourceWithBrowserFallback()`, community "Data Ingestion Pipeline" | 2026-07-31 |
@@ -48,6 +50,23 @@ YYYY-MM-DD · <Agent> · <TASK-ID> · <STATUS>
 ```
 
 ## Current status
+
+2026-07-31 · Claude Code · T-SERP-PROBE · REVIEW
+- Intent:        Weekly capped SerpAPI site:-probe for official domains the runtime cannot fetch (FTC/SEC/CoE/AP-NL 403 holds) and micro-state legal portals; hits become admin-only unresolved discovery leads. First caller of `createDiscoveryLead()`.
+- Files:         `scripts/serp-discovery-probe.ts` + `.test.ts` (new), `.github/workflows/serp-discovery.yml` (new), `src/agents/ai-regulation/agentApiCapabilities.ts` (serpapi entry)
+- Graph anchors: `createDiscoveryLead()`, `listAgentApiCapabilities()`, community "DB Repository Layer"
+- Verification:  test 948/948, lint/typecheck/build clean; write path round-tripped in memory mode through `loadDiscoveryLeadRecordsPage()`; keyless skip path exits 0 before env validation.
+- Branch/commit: `claude/github-monitoring-recovery-lz4dos` @ `b02c076` (PR #62)
+- Next:          Owner sets the `SERPAPI_API_KEY` secret to activate; until then the weekly workflow is a loud green no-op. Watch: first dedicated lead switches the admin discovery view off the legacy raw-item derivation (pre-existing switch).
+
+2026-07-31 · Claude Code · T-EFFICIENCY-PLAN · MERGED
+- Intent:        Execute the reviewed P0→P2 efficiency plan: measure the content funnel before touching it, then AI-enablement prep, weekly editorial digest, mandate honesty, generalized retention, structural SEO.
+- Files:         PRs #56 (funnel audit script+workflow), #57 (AI enablement env plumbing + openai-processing capability), #58 (weekly digest generator+workflow), #59 (mandate provisioning derived from seed), #60 (retention for health checks + resolved findings), #61 (hreflang alternates on all indexable pages + Article JSON-LD on research).
+- Graph anchors: `buildWeeklyDigestMarkdown()`, `deriveProvisioning()`, `summariseAgentProvisioning()`, `purgeExpiredOperationalRecords()`, `localeAlternates()`, `researchArticleJsonLd()`
+- Key findings:  funnel healthy (52–64% raw→entry, 99–100% entry→published; news visibility gate is policy-by-design); discovery-leads lane was dead code (0 rows ever); mandate provisioning 0/79→28/79 with both drift directions failing tests.
+- Verification:  each PR green on `verify` before squash-merge; suite grew 887→948 tests across the sequence.
+- Branch/commit: `main` @ `897d2b5`
+- Next:          Owner-side to unlock more: `OPENAI_API_KEY`+`AI_ENABLE_PROCESSING` (AI lane), `SERPAPI_API_KEY` (probe), NewsAPI ToS decision.
 
 2026-07-30 · Claude Code · T-BROWSER-FETCH-MEASUREMENT · REVIEW
 - Intent:        Before switching the Scrapling worker to a real browser, measure whether a browser actually reaches the lanes a plain fetch cannot.
