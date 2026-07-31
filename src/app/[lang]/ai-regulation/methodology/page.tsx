@@ -9,12 +9,21 @@ import { SectionHeading } from "@/components/site/section-heading";
 import { SiteShell } from "@/components/site/shell";
 import { isLocale } from "@/lib/i18n/config";
 import { localeHref } from "@/lib/i18n/href";
+import { localeAlternates } from "@/lib/seo";
 
-export const metadata: Metadata = {
-  title: "Methodology | AI Law Hub",
-  description:
-    "How the AI-law monitor works: verification levels, authority classification, source provenance, and the source-verification posture behind every published item.",
-};
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ lang: string }>;
+}): Promise<Metadata> {
+  const { lang } = await params;
+  return {
+    alternates: isLocale(lang) ? localeAlternates(lang, "/ai-regulation/methodology") : undefined,
+    title: "Methodology | AI Law Hub",
+    description:
+      "How the AI-law monitor works: verification levels, authority classification, source provenance, and the source-verification posture behind every published item.",
+  };
+}
 
 export const revalidate = 3600;
 

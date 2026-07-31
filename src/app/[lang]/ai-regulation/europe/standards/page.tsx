@@ -12,12 +12,21 @@ import { europeAiSoftLawBaseline } from "@/content/ai-regulation/europe-ai-soft-
 import { formatDisplayDate } from "@/lib/utils";
 import { isLocale } from "@/lib/i18n/config";
 import { localeHref } from "@/lib/i18n/href";
+import { localeAlternates } from "@/lib/seo";
 
-export const metadata: Metadata = {
-  title: "Standards & Soft Law EU | Europe Hub",
-  description:
-    "Technical standards, governance frameworks, and non-binding instruments applicable to AI in Europe — CENELEC, ISO/IEC, EDPB guidance.",
-};
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ lang: string }>;
+}): Promise<Metadata> {
+  const { lang } = await params;
+  return {
+    alternates: isLocale(lang) ? localeAlternates(lang, "/ai-regulation/europe/standards") : undefined,
+    title: "Standards & Soft Law EU | Europe Hub",
+    description:
+      "Technical standards, governance frameworks, and non-binding instruments applicable to AI in Europe — CENELEC, ISO/IEC, EDPB guidance.",
+  };
+}
 
 export const revalidate = 3600;
 

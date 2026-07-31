@@ -15,12 +15,21 @@ import {
 import { formatDisplayDate } from "@/lib/utils";
 import { isLocale, type Locale } from "@/lib/i18n/config";
 import { localeHref } from "@/lib/i18n/href";
+import { localeAlternates } from "@/lib/seo";
 
-export const metadata: Metadata = {
-  title: "EU AI Act | Europe Hub",
-  description:
-    "EU AI Act — Regulation (EU) 2024/1689. Risk classification, prohibited practices, GPAI provisions, and phased application calendar.",
-};
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ lang: string }>;
+}): Promise<Metadata> {
+  const { lang } = await params;
+  return {
+    alternates: isLocale(lang) ? localeAlternates(lang, "/ai-regulation/europe/ai-act") : undefined,
+    title: "EU AI Act | Europe Hub",
+    description:
+      "EU AI Act — Regulation (EU) 2024/1689. Risk classification, prohibited practices, GPAI provisions, and phased application calendar.",
+  };
+}
 
 export const revalidate = 3600;
 

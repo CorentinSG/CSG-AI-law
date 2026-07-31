@@ -13,12 +13,21 @@ import {
 } from "@/content/ai-regulation/europe-ai-legal-baseline";
 import { isLocale } from "@/lib/i18n/config";
 import { localeHref } from "@/lib/i18n/href";
+import { localeAlternates } from "@/lib/seo";
 
-export const metadata: Metadata = {
-  title: "EU Governance | Europe Hub",
-  description:
-    "Institutional AI governance actors in Europe — AI Office, EDPB, national authorities. Case law and enforcement decisions.",
-};
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ lang: string }>;
+}): Promise<Metadata> {
+  const { lang } = await params;
+  return {
+    alternates: isLocale(lang) ? localeAlternates(lang, "/ai-regulation/europe/governance") : undefined,
+    title: "EU Governance | Europe Hub",
+    description:
+      "Institutional AI governance actors in Europe — AI Office, EDPB, national authorities. Case law and enforcement decisions.",
+  };
+}
 
 export const revalidate = 3600;
 

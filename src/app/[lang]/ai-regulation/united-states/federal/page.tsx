@@ -14,12 +14,21 @@ import {
 import { formatDisplayDate } from "@/lib/utils";
 import { isLocale } from "@/lib/i18n/config";
 import { localeHref } from "@/lib/i18n/href";
+import { localeAlternates } from "@/lib/seo";
 
-export const metadata: Metadata = {
-  title: "Federal | United States Hub",
-  description:
-    "U.S. federal AI law — EO 14110, OMB Policy, NIST AI RMF, agency actions, and pending Congressional legislation.",
-};
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ lang: string }>;
+}): Promise<Metadata> {
+  const { lang } = await params;
+  return {
+    alternates: isLocale(lang) ? localeAlternates(lang, "/ai-regulation/united-states/federal") : undefined,
+    title: "Federal | United States Hub",
+    description:
+      "U.S. federal AI law — EO 14110, OMB Policy, NIST AI RMF, agency actions, and pending Congressional legislation.",
+  };
+}
 
 export const revalidate = 3600;
 

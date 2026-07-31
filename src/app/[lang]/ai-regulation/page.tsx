@@ -33,6 +33,7 @@ import { getPriorityEuropeCountryProfiles } from "@/content/ai-regulation/europe
 import { internationalAiStandardsBaseline } from "@/content/ai-regulation/international-ai-standards";
 import { getPriorityUsStateProfiles } from "@/content/ai-regulation/us-state-ai-law-baseline";
 import { isLocale, type Locale } from "@/lib/i18n/config";
+import { localeAlternates } from "@/lib/seo";
 import { localeHref } from "@/lib/i18n/href";
 import { encodeCursor, parseCursorParam } from "@/lib/pagination";
 import type { RegulatoryUpdateFilters } from "@/db/repository-types";
@@ -45,6 +46,7 @@ export async function generateMetadata({
   const { lang } = await params;
   const fr = lang === "fr";
   return {
+    alternates: isLocale(lang) ? localeAlternates(lang, "/ai-regulation") : undefined,
     title: fr ? "Hub d'intelligence juridique IA" : "AI Legal Intelligence Hub",
     description: fr
       ? "Un hub unifié d'intelligence juridique sur l'IA combinant développements légaux, veille sourcée et couverture de base de données structurée par région."

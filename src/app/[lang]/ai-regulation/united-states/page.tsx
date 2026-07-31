@@ -21,12 +21,21 @@ import { getUsGeoPaths } from "@/lib/geo-paths";
 import { formatDisplayDate } from "@/lib/utils";
 import { isLocale } from "@/lib/i18n/config";
 import { localeHref } from "@/lib/i18n/href";
+import { localeAlternates } from "@/lib/seo";
 
-export const metadata: Metadata = {
-  title: "United States Hub",
-  description:
-    "United States AI regulation monitoring — federal legislation, state-level activity, agency guidance, and source-verified legal intelligence.",
-};
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ lang: string }>;
+}): Promise<Metadata> {
+  const { lang } = await params;
+  return {
+    alternates: isLocale(lang) ? localeAlternates(lang, "/ai-regulation/united-states") : undefined,
+    title: "United States Hub",
+    description:
+      "United States AI regulation monitoring — federal legislation, state-level activity, agency guidance, and source-verified legal intelligence.",
+  };
+}
 
 export const revalidate = 300;
 

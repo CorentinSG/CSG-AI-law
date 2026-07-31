@@ -16,6 +16,7 @@ import { ResearchStatusBadge } from "@/components/site/research-status-badge";
 import { SiteShell } from "@/components/site/shell";
 import { Card, CardContent } from "@/components/ui/card";
 import { LOCALES, isLocale } from "@/lib/i18n/config";
+import { jsonLdString, localeAlternates, researchArticleJsonLd } from "@/lib/seo";
 import { getDictionary } from "../../dictionaries";
 
 type ResearchArticlePageProps = {
@@ -44,6 +45,7 @@ export async function generateMetadata({
   return {
     title: entry.title,
     description: entry.summary,
+    alternates: isLocale(lang) ? localeAlternates(lang, `/research/${entry.slug}`) : undefined,
     openGraph: {
       title: `${entry.title} | C. Saint-Girons, Esq — AI Law & Legal Intelligence`,
       description: entry.summary,
@@ -70,6 +72,10 @@ export default async function ResearchArticlePage({
 
   return (
     <SiteShell className="space-y-14 md:space-y-20">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: jsonLdString(researchArticleJsonLd(entry, lang)) }}
+      />
       <MotionReveal className="space-y-6">
         <BreadcrumbNav
           lang={lang}

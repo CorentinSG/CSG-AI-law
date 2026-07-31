@@ -9,6 +9,7 @@ import { SectionHeading } from "@/components/site/section-heading";
 import { SiteShell } from "@/components/site/shell";
 import { Card, CardContent } from "@/components/ui/card";
 import { isLocale } from "@/lib/i18n/config";
+import { localeAlternates } from "@/lib/seo";
 import { localeHref } from "@/lib/i18n/href";
 import {
   getLegalDomains,
@@ -24,6 +25,7 @@ export async function generateMetadata({
   const { lang } = await params;
   const fr = lang === "fr";
   return {
+    alternates: isLocale(lang) ? localeAlternates(lang, "/practice-areas") : undefined,
     title: fr ? "Domaines de pratique" : "Practice Areas",
     description: fr
       ? "Domaines de pratique en intelligence juridique : droit et gouvernance de l'IA, vie privée et protection des données, et droit du cloud — surveillés et vérifiés à partir de sources officielles."

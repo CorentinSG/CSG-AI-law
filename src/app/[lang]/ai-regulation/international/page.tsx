@@ -16,13 +16,22 @@ import { internationalAiStandardsBaseline } from "@/content/ai-regulation/intern
 import { normalizeNewsItemRecord } from "@/content/ai-regulation/news";
 import { isLocale } from "@/lib/i18n/config";
 import { localeHref } from "@/lib/i18n/href";
+import { localeAlternates } from "@/lib/seo";
 import { formatDisplayDate } from "@/lib/utils";
 
-export const metadata: Metadata = {
-  title: "International AI Law Hub",
-  description:
-    "International AI law and governance monitoring: ISO/IEC standards, OECD, UNESCO, IEEE, and cross-border AI governance instruments.",
-};
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ lang: string }>;
+}): Promise<Metadata> {
+  const { lang } = await params;
+  return {
+    alternates: isLocale(lang) ? localeAlternates(lang, "/ai-regulation/international") : undefined,
+    title: "International AI Law Hub",
+    description:
+      "International AI law and governance monitoring: ISO/IEC standards, OECD, UNESCO, IEEE, and cross-border AI governance instruments.",
+  };
+}
 
 export const revalidate = 300;
 
