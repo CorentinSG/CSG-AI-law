@@ -68,6 +68,7 @@ export function listAgentApiCapabilities(
   rawEnv: AgentApiCapabilityEnv = process.env,
 ): AgentApiCapability[] {
   const newsApiReady = hasEnv("NEWSAPI_API_KEY", rawEnv);
+  const serpApiReady = hasEnv("SERPAPI_API_KEY", rawEnv);
   const openAiKeyReady = hasEnv("OPENAI_API_KEY", rawEnv);
   // The flag is read as a raw string on purpose: this module reports what the
   // runtime environment literally says, the same way the workflow passes it.
@@ -225,6 +226,20 @@ export function listAgentApiCapabilities(
         : "Create a NewsAPI key and set NEWSAPI_API_KEY in Vercel/local env if you want faster multi-source legal-news discovery.",
       notes:
         "Discovery-only provider. Items can publish as legal news only when the domain is serious/reputable or corroborated; it must not be treated as an official legal database source.",
+    }),
+    enrich({
+      id: "serpapi",
+      label: "SerpAPI Google-index probe",
+      status: serpApiReady ? "available" : "missing_credentials",
+      uses: ["legal_news_discovery"],
+      regions: ["Europe", "United States", "Global"],
+      envVars: ["SERPAPI_API_KEY"],
+      implementedProvider: "serpapi",
+      userAction: serpApiReady
+        ? undefined
+        : "Create a SerpAPI key (free tier: 100 searches/month) and set the SERPAPI_API_KEY GitHub Actions secret. Without it the weekly serp-discovery workflow skips and blocked official domains stay unreachable.",
+      notes:
+        "Weekly capped site:-queries against official domains the runtime cannot fetch (FTC, SEC, Council of Europe, AP/NL) and micro-state legal portals. Results become admin-only discovery leads; a search hit is never treated as verification.",
     }),
     enrich({
       id: "legifrance-piste",
