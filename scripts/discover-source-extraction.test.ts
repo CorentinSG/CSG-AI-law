@@ -1,6 +1,11 @@
 import { describe, expect, it } from "vitest";
 
-import { bestSelector, diagnosePageFailure, listingCandidates } from "./discover-source-extraction";
+import {
+  bestSelector,
+  derivedSelectors,
+  diagnosePageFailure,
+  listingCandidates,
+} from "./discover-source-extraction";
 
 const BASE = "https://dpa.example.gov/news";
 
@@ -93,6 +98,81 @@ describe("candidate selector discovery", () => {
       <article class="post"><a href="/c">Contact</a><time datetime="2026-07-03">3 July</time></article>`);
 
     expect(bestSelector(shortLabels, BASE)).toBeNull();
+  });
+});
+
+describe("selectors derived from the page", () => {
+  it("finds a repeated listing signature the curated list does not name", () => {
+    const html = page(`
+      <div class="oversigt-element"><a href="/a">Guidance on automated decision making</a><time datetime="2026-07-01">1 July</time></div>
+      <div class="oversigt-element"><a href="/b">Opinion on biometric identification</a><time datetime="2026-07-02">2 July</time></div>
+      <div class="oversigt-element"><a href="/c">Report on algorithmic transparency</a><time datetime="2026-07-03">3 July</time></div>`);
+
+    expect(derivedSelectors(html)).toContain("div.oversigt-element");
+  });
+
+  it("ignores containers holding no link", () => {
+    const html = page(`
+      <div class="chrome">no link here</div>
+      <div class="chrome">nor here</div>
+      <div class="chrome">nor here either</div>`);
+
+    expect(derivedSelectors(html)).not.toContain("div.chrome");
+  });
+
+  it("skips signatures that repeat like page chrome rather than a listing", () => {
+    const rows = Array.from(
+      { length: 250 },
+      (_, i) => `<div class="everywhere"><a href="/x${i}">link</a></div>`,
+    ).join("");
+
+    expect(derivedSelectors(page(rows))).not.toContain("div.everywhere");
+  });
+
+  it("drops per-row state and hash classes that would fragment the signature", () => {
+    const html = page(`
+      <li class="row is-active"><a href="/a">Guidance on automated decisions</a></li>
+      <li class="row is-active"><a href="/b">Opinion on biometric systems</a></li>
+      <li class="row is-active"><a href="/c">Report on transparency duties</a></li>`);
+
+    // The full signature keeps only the stable class, so both granularities agree.
+    expect(derivedSelectors(html)).toContain("li.row");
+    expect(derivedSelectors(html).some((s) => s.includes("is-active"))).toBe(false);
+  });
+
+  it("prefers a specific signature over a broad one", () => {
+    const html = page(`
+      <div class="wrap news-row"><a href="/a">Guidance on automated decisions</a></div>
+      <div class="wrap news-row"><a href="/b">Opinion on biometric systems</a></div>
+      <div class="wrap news-row"><a href="/c">Report on transparency duties</a></div>`);
+
+    const derived = derivedSelectors(html);
+    expect(derived.indexOf("div.wrap.news-row")).toBeLessThan(derived.indexOf("div.wrap"));
+  });
+
+  // The whole point of deriving candidates is to offer more to the evidence bar,
+  // never to lower it. A navigation menu must still be rejected even though its
+  // markup repeats perfectly.
+  it("still rejects a navigation menu, which repeats just as regularly", () => {
+    const nav = page(`
+      <div class="menu-entry"><a href="/home">Home</a></div>
+      <div class="menu-entry"><a href="/about">About us</a></div>
+      <div class="menu-entry"><a href="/contact">Contact</a></div>
+      <div class="menu-entry"><a href="/legal">Legal notice</a></div>`);
+
+    expect(derivedSelectors(nav)).toContain("div.menu-entry");
+    expect(bestSelector(nav, BASE)).toBeNull();
+  });
+
+  it("lets a real listing through a derived selector end to end", () => {
+    const listing = page(`
+      <div class="oversigt-element"><a href="/a">Guidance on automated decision making</a><time datetime="2026-07-01">1 July</time></div>
+      <div class="oversigt-element"><a href="/b">Opinion on biometric identification systems</a><time datetime="2026-07-02">2 July</time></div>
+      <div class="oversigt-element"><a href="/c">Report on algorithmic transparency duties</a><time datetime="2026-07-03">3 July</time></div>`);
+
+    const evidence = bestSelector(listing, BASE);
+    expect(evidence?.selector).toBe("div.oversigt-element");
+    expect(evidence?.datedRatio).toBe(1);
   });
 });
 
