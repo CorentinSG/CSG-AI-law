@@ -1724,6 +1724,56 @@ export class SupabaseAiRegulationRepository implements AiRegulationRepository {
     return ids.length;
   }
 
+  async purgeSourceHealthChecksBefore(cutoffIso: string, batchSize = 500) {
+    const client = requireAdminClient();
+    // Same select-ids-then-delete shape as the scan-log purge, riding the
+    // checked_at index added in migration 032.
+    const { data, error } = await client
+      .from("source_health_checks")
+      .select("id")
+      .lt("checked_at", cutoffIso)
+      .order("checked_at", { ascending: true })
+      .limit(batchSize);
+    handleError("Failed to list source health checks for purge", error);
+
+    const ids = (data ?? []).map((row) => (row as { id: string }).id);
+    if (ids.length === 0) return 0;
+
+    const { error: deleteError } = await client
+      .from("source_health_checks")
+      .delete()
+      .in("id", ids);
+    handleError("Failed to purge source health checks", deleteError);
+
+    return ids.length;
+  }
+
+  async purgeResolvedDataQualityFindingsBefore(cutoffIso: string, batchSize = 500) {
+    const client = requireAdminClient();
+    // resolved_at carries no index, so this select is a filtered scan — fine at
+    // this table's size (one upserted row per unique finding, not one per scan).
+    // If it ever grows into timeout territory, index resolved_at first.
+    const { data, error } = await client
+      .from("data_quality_findings")
+      .select("id")
+      .not("resolved_at", "is", null)
+      .lt("resolved_at", cutoffIso)
+      .order("resolved_at", { ascending: true })
+      .limit(batchSize);
+    handleError("Failed to list resolved findings for purge", error);
+
+    const ids = (data ?? []).map((row) => (row as { id: string }).id);
+    if (ids.length === 0) return 0;
+
+    const { error: deleteError } = await client
+      .from("data_quality_findings")
+      .delete()
+      .in("id", ids);
+    handleError("Failed to purge resolved findings", deleteError);
+
+    return ids.length;
+  }
+
   async listRawRegulatoryItems(limit = 20, sourceId?: string) {
     const client = requireAdminClient();
     let query = client

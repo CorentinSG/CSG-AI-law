@@ -39,31 +39,24 @@ export type ScanLogPurgeResult = {
 };
 
 /**
- * Deletes scan logs older than the retention window, bounded per run.
- *
- * Never throws: retention is housekeeping, and failing it must not take down a
- * scan run. A failure is reported to the caller to log, not raised.
+ * Runs one bounded purge loop. Never throws: retention is housekeeping, and
+ * failing it must not take down a scan run — a failure is reported to the
+ * caller to log, with whatever was already deleted still counted.
  */
-export async function purgeExpiredScanLogs(options?: {
-  now?: Date;
-  retentionDays?: number;
-  batchSize?: number;
-  maxBatches?: number;
-}): Promise<ScanLogPurgeResult & { error?: string }> {
-  const cutoff = retentionCutoff(options?.now ?? new Date(), options?.retentionDays);
-  const batchSize = options?.batchSize ?? BATCH_SIZE;
-  const maxBatches = options?.maxBatches ?? MAX_BATCHES_PER_RUN;
-
+async function runBoundedPurge(
+  purgeBatch: (cutoffIso: string, batchSize: number) => Promise<number>,
+  options: { cutoffIso: string; batchSize: number; maxBatches: number },
+): Promise<ScanLogPurgeResult & { error?: string }> {
   let deleted = 0;
   let batches = 0;
 
   try {
-    while (batches < maxBatches) {
-      const removed = await updateRepository.purgeScanLogsBefore(cutoff, batchSize);
+    while (batches < options.maxBatches) {
+      const removed = await purgeBatch(options.cutoffIso, options.batchSize);
       batches += 1;
       deleted += removed;
       // A short pass means the backlog is gone; a full one means there is more.
-      if (removed < batchSize) return { deleted, batches, drained: true };
+      if (removed < options.batchSize) return { deleted, batches, drained: true };
     }
     return { deleted, batches, drained: false };
   } catch (error) {
@@ -74,4 +67,76 @@ export async function purgeExpiredScanLogs(options?: {
       error: error instanceof Error ? error.message : String(error),
     };
   }
+}
+
+/** Deletes scan logs older than the retention window, bounded per run. */
+export async function purgeExpiredScanLogs(options?: {
+  now?: Date;
+  retentionDays?: number;
+  batchSize?: number;
+  maxBatches?: number;
+}): Promise<ScanLogPurgeResult & { error?: string }> {
+  return runBoundedPurge((cutoff, batch) => updateRepository.purgeScanLogsBefore(cutoff, batch), {
+    cutoffIso: retentionCutoff(options?.now ?? new Date(), options?.retentionDays),
+    batchSize: options?.batchSize ?? BATCH_SIZE,
+    maxBatches: options?.maxBatches ?? MAX_BATCHES_PER_RUN,
+  });
+}
+
+/**
+ * Health checks share the scan logs' growth profile — one row per source per
+ * scan, nothing read past the newest 500 (`sourceRuntimeHealth`) — so they
+ * share the 30-day window.
+ */
+export const SOURCE_HEALTH_CHECK_RETENTION_DAYS = SCAN_LOG_RETENTION_DAYS;
+
+/**
+ * Findings are a quality paper trail, not scan noise, so only *resolved*
+ * findings are ever purged, and after a longer window. An unresolved finding is
+ * kept indefinitely: deleting an open problem is how it gets forgotten. If the
+ * same defect recurs after its resolved record is purged, the detector will
+ * simply file it again.
+ */
+export const RESOLVED_FINDING_RETENTION_DAYS = 90;
+
+export type OperationalRetentionReport = {
+  scanLogs: ScanLogPurgeResult & { error?: string };
+  sourceHealthChecks: ScanLogPurgeResult & { error?: string };
+  resolvedFindings: ScanLogPurgeResult & { error?: string };
+};
+
+/**
+ * The worker's once-per-run housekeeping: every operational table that grows
+ * per-scan gets the same bounded treatment that stopped `regulation_scan_logs`
+ * taking the database down. Sequential on purpose — three concurrent delete
+ * loops would compete for the same pool the scan needs next.
+ */
+export async function purgeExpiredOperationalRecords(options?: {
+  now?: Date;
+  batchSize?: number;
+  maxBatches?: number;
+}): Promise<OperationalRetentionReport> {
+  const now = options?.now ?? new Date();
+  const batchSize = options?.batchSize ?? BATCH_SIZE;
+  const maxBatches = options?.maxBatches ?? MAX_BATCHES_PER_RUN;
+
+  const scanLogs = await purgeExpiredScanLogs({ now, batchSize, maxBatches });
+  const sourceHealthChecks = await runBoundedPurge(
+    (cutoff, batch) => updateRepository.purgeSourceHealthChecksBefore(cutoff, batch),
+    {
+      cutoffIso: retentionCutoff(now, SOURCE_HEALTH_CHECK_RETENTION_DAYS),
+      batchSize,
+      maxBatches,
+    },
+  );
+  const resolvedFindings = await runBoundedPurge(
+    (cutoff, batch) => updateRepository.purgeResolvedDataQualityFindingsBefore(cutoff, batch),
+    {
+      cutoffIso: retentionCutoff(now, RESOLVED_FINDING_RETENTION_DAYS),
+      batchSize,
+      maxBatches,
+    },
+  );
+
+  return { scanLogs, sourceHealthChecks, resolvedFindings };
 }
