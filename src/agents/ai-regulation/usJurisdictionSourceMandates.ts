@@ -1,6 +1,9 @@
 // Same provisioning vocabulary as the EU member-state mandates; imported rather
 // than duplicated so the two mandate files cannot drift.
-import type { MandateSourceProvisioning } from "@/agents/ai-regulation/euMemberStateSourceMandates";
+import {
+  deriveProvisioning,
+  type MandateSourceProvisioning,
+} from "@/agents/ai-regulation/euMemberStateSourceMandates";
 
 /**
  * Every entry below is currently `aspirational_not_wired`: the ids are
@@ -39,6 +42,8 @@ export interface UsAgentSourceMandate {
     coverage: ReadonlyArray<"hard_law" | "soft_law" | "case_law_and_decisions">;
     activationRule: "verify_official_endpoint_before_active_scan";
     provisioning: MandateSourceProvisioning;
+    /** The seeded source ids this mandate line is fulfilled by, when wired. */
+    seedSourceIds?: readonly string[];
   }>;
 }
 
@@ -111,7 +116,8 @@ const federalOfficialSources = [
     use: "legal_database_monitoring",
     coverage: ["hard_law", "soft_law"],
     activationRule: "verify_official_endpoint_before_active_scan",
-    provisioning: "aspirational_not_wired",
+    provisioning: deriveProvisioning(["src-federal-register-ai"]),
+    seedSourceIds: ["src-federal-register-ai"],
   },
   {
     id: "official-us-congress-ai",
@@ -120,7 +126,8 @@ const federalOfficialSources = [
     use: "legal_database_monitoring",
     coverage: ["hard_law"],
     activationRule: "verify_official_endpoint_before_active_scan",
-    provisioning: "aspirational_not_wired",
+    provisioning: deriveProvisioning([]),
+    seedSourceIds: [],
   },
   {
     id: "official-us-ftc-ai",
@@ -129,7 +136,8 @@ const federalOfficialSources = [
     use: "legal_database_monitoring",
     coverage: ["soft_law", "case_law_and_decisions"],
     activationRule: "verify_official_endpoint_before_active_scan",
-    provisioning: "aspirational_not_wired",
+    provisioning: deriveProvisioning(["src-ftc-ai-press"]),
+    seedSourceIds: ["src-ftc-ai-press"],
   },
   {
     id: "official-us-nist-ai",
@@ -138,7 +146,8 @@ const federalOfficialSources = [
     use: "legal_database_monitoring",
     coverage: ["soft_law"],
     activationRule: "verify_official_endpoint_before_active_scan",
-    provisioning: "aspirational_not_wired",
+    provisioning: deriveProvisioning(["src-nist-ai-rmf"]),
+    seedSourceIds: ["src-nist-ai-rmf"],
   },
   {
     id: "official-us-federal-courts-ai",
@@ -147,7 +156,8 @@ const federalOfficialSources = [
     use: "legal_database_monitoring",
     coverage: ["case_law_and_decisions"],
     activationRule: "verify_official_endpoint_before_active_scan",
-    provisioning: "aspirational_not_wired",
+    provisioning: deriveProvisioning(["src-us-courtlistener-ai"]),
+    seedSourceIds: ["src-us-courtlistener-ai"],
   },
 ] as const;
 

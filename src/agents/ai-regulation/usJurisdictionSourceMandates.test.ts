@@ -16,16 +16,30 @@ describe("US jurisdiction source mandates", () => {
     ...mandate.officialDatabaseSources.map((source) => source.id),
   ]);
 
-  it("marks every declared mandate entry as aspirational rather than real coverage", () => {
-    // 50 states + District of Columbia + the federal lane.
-    expect(mandates.length).toBe(52);
+  // Provisioning is derived from the seed. The five federal official lines name
+  // their seeds explicitly; four exist (Federal Register, FTC, NIST,
+  // CourtListener) and Congress has no seeded counterpart, so it must stay
+  // aspirational. State-level officials have no seeds at all.
+  it("derives federal provisioning from real seeds and keeps states aspirational", () => {
+    const federal = usJurisdictionSourceMandates["us-federal"];
+    const byId = new Map(federal.officialDatabaseSources.map((source) => [source.id, source]));
 
-    for (const mandate of mandates) {
-      for (const source of [
-        ...mandate.legalNewsSources,
-        ...mandate.officialDatabaseSources,
-      ]) {
-        expect(source.provisioning, source.id).toBe("aspirational_not_wired");
+    expect(byId.get("official-us-federal-register-ai")?.provisioning).toBe("seeded_and_scanned");
+    // The FTC line names src-ftc-ai-press, but that seed is deliberately
+    // inactive (the official feed 403s from the scan runtime), and the
+    // derivation refuses to count an inactive seed — which is the mechanism
+    // working. If the source is reactivated, this flips on its own and this
+    // assertion gets updated deliberately.
+    expect(byId.get("official-us-ftc-ai")?.provisioning).toBe("aspirational_not_wired");
+    expect(byId.get("official-us-ftc-ai")?.seedSourceIds).toContain("src-ftc-ai-press");
+    expect(byId.get("official-us-nist-ai")?.provisioning).toBe("seeded_and_scanned");
+    expect(byId.get("official-us-federal-courts-ai")?.provisioning).toBe("seeded_and_scanned");
+    expect(byId.get("official-us-congress-ai")?.provisioning).toBe("aspirational_not_wired");
+
+    for (const [key, mandate] of Object.entries(usJurisdictionSourceMandates)) {
+      if (key === "us-federal") continue;
+      for (const source of [...mandate.legalNewsSources, ...mandate.officialDatabaseSources]) {
+        expect(source.provisioning, `${key}/${source.id}`).toBe("aspirational_not_wired");
       }
     }
   });
