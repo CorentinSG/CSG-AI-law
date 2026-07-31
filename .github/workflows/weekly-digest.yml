@@ -1,0 +1,68 @@
+name: Weekly editorial digest
+
+# Assembles — never writes — a reviewable editorial draft from the last week of
+# *published* monitor output, grouped by jurisdiction with real titles, sources
+# and dates. The draft is uploaded as an artifact for the owner to edit; nothing
+# is published, posted, or committed by this workflow.
+#
+# Scheduled for Monday morning so a fresh draft is waiting at the start of the
+# week; the manual trigger covers any other moment.
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 6 * * 1"
+
+permissions:
+  contents: read
+
+jobs:
+  digest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: Require the Supabase secrets
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: |
+          missing=()
+          for name in NEXT_PUBLIC_SUPABASE_URL SUPABASE_SERVICE_ROLE_KEY; do
+            if [ -z "${!name}" ]; then
+              missing+=("$name")
+            fi
+          done
+          if [ "${#missing[@]}" -gt 0 ]; then
+            printf 'Missing required GitHub secrets: %s\n' "${missing[*]}" >&2
+            exit 1
+          fi
+
+      - name: Assemble the draft from published output
+        env:
+          APP_DATA_MODE: supabase
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: |
+          # Env validation demands ADMIN_AUTH_SECRET on import. This job never
+          # serves or validates an admin session, so a throwaway per-run value
+          # is used rather than the production secret. Nothing here is stored.
+          secret="$(openssl rand -hex 32)"
+          echo "::add-mask::$secret"
+          export ADMIN_AUTH_SECRET="$secret"
+          npx tsx scripts/generate-weekly-digest.ts --days 7 --out weekly-digest.md
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: weekly-digest
+          path: weekly-digest.md
+          if-no-files-found: warn
