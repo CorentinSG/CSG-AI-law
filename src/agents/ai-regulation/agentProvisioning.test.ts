@@ -56,18 +56,20 @@ describe("summariseAgentProvisioning", () => {
   });
 });
 
-// The dashboard's headline count used to be every managed agent, which reported
-// coverage the monitor does not have. This pins the real state so that number
-// cannot quietly reinflate: if a mandate is genuinely wired later, this test
-// fails and is updated deliberately.
+// Pins the live registry's provisioning split so it can only change through a
+// deliberate edit. History of this pin: the dashboard once counted all 90
+// agents as coverage; the first honest measurement was 0 provisioned; deriving
+// provisioning from the seed (EU DPA/journal/government lines, US federal
+// officials) brought it to 28. Both directions of drift are failures — a seed
+// removal should demote silently into this test, and a new claim must name a
+// real seed to move the number.
 describe("the live agent registry", () => {
-  it("still declares every jurisdiction mandate as unwired", () => {
+  it("derives 28 provisioned agents from the seed, 51 honestly aspirational", () => {
     const summary = summariseAgentProvisioning(listGlobalMonitoringAgents().regionalSupervisors);
 
-    expect(summary.declaring).toBeGreaterThan(20);
-    expect(summary.provisioned).toBe(0);
-    expect(summary.aspirational).toBe(summary.declaring);
-    // And the honest figure is well below the raw agent count the tile showed.
-    expect(summary.total).toBeGreaterThan(summary.declaring);
+    expect(summary.total).toBe(90);
+    expect(summary.declaring).toBe(79);
+    expect(summary.provisioned).toBe(28);
+    expect(summary.aspirational).toBe(51);
   });
 });
