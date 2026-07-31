@@ -108,6 +108,15 @@ export const updateRepository = {
   async purgeScanLogsBefore(cutoffIso: string, batchSize?: number) {
     return getAiRegulationRepository().purgeScanLogsBefore(cutoffIso, batchSize);
   },
+  async purgeSourceHealthChecksBefore(cutoffIso: string, batchSize?: number) {
+    return getAiRegulationRepository().purgeSourceHealthChecksBefore(cutoffIso, batchSize);
+  },
+  async purgeResolvedDataQualityFindingsBefore(cutoffIso: string, batchSize?: number) {
+    return getAiRegulationRepository().purgeResolvedDataQualityFindingsBefore(
+      cutoffIso,
+      batchSize,
+    );
+  },
   async getProcessingLogs(limit?: number) {
     return getAiRegulationRepository().listProcessingLogs(limit);
   },

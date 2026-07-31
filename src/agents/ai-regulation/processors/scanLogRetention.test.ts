@@ -1,14 +1,23 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const purgeScanLogsBefore = vi.fn();
+const purgeSourceHealthChecksBefore = vi.fn();
+const purgeResolvedDataQualityFindingsBefore = vi.fn();
 
 vi.mock("./updateRepository", () => ({
-  updateRepository: { purgeScanLogsBefore },
+  updateRepository: {
+    purgeScanLogsBefore,
+    purgeSourceHealthChecksBefore,
+    purgeResolvedDataQualityFindingsBefore,
+  },
 }));
 
-const { purgeExpiredScanLogs, retentionCutoff, SCAN_LOG_RETENTION_DAYS } = await import(
-  "./scanLogRetention"
-);
+const {
+  purgeExpiredScanLogs,
+  purgeExpiredOperationalRecords,
+  retentionCutoff,
+  SCAN_LOG_RETENTION_DAYS,
+} = await import("./scanLogRetention");
 
 const NOW = new Date("2026-07-30T12:00:00.000Z");
 
@@ -85,5 +94,55 @@ describe("purgeExpiredScanLogs", () => {
 
     expect(result.deleted).toBe(500);
     expect(result.error).toContain("boom");
+  });
+});
+
+describe("purgeExpiredOperationalRecords", () => {
+  beforeEach(() => {
+    purgeScanLogsBefore.mockReset();
+    purgeSourceHealthChecksBefore.mockReset();
+    purgeResolvedDataQualityFindingsBefore.mockReset();
+  });
+
+  it("runs all three purges and reports each separately", async () => {
+    purgeScanLogsBefore.mockResolvedValue(3);
+    purgeSourceHealthChecksBefore.mockResolvedValue(2);
+    purgeResolvedDataQualityFindingsBefore.mockResolvedValue(0);
+
+    const report = await purgeExpiredOperationalRecords({ now: NOW, batchSize: 500 });
+
+    expect(report.scanLogs).toMatchObject({ deleted: 3, drained: true });
+    expect(report.sourceHealthChecks).toMatchObject({ deleted: 2, drained: true });
+    expect(report.resolvedFindings).toMatchObject({ deleted: 0, drained: true });
+  });
+
+  // Findings keep a longer paper trail than scan noise: 90 days, and the cutoff
+  // must reach the repository method, since it is the only thing distinguishing
+  // "resolved long ago" from "resolved yesterday".
+  it("purges resolved findings on the 90-day window, not the 30-day one", async () => {
+    purgeScanLogsBefore.mockResolvedValue(0);
+    purgeSourceHealthChecksBefore.mockResolvedValue(0);
+    purgeResolvedDataQualityFindingsBefore.mockResolvedValue(0);
+
+    await purgeExpiredOperationalRecords({ now: NOW });
+
+    expect(purgeResolvedDataQualityFindingsBefore).toHaveBeenCalledWith(
+      "2026-05-01T12:00:00.000Z",
+      500,
+    );
+    expect(purgeSourceHealthChecksBefore).toHaveBeenCalledWith("2026-06-30T12:00:00.000Z", 500);
+  });
+
+  // One table failing must not stop the others from being cleaned.
+  it("keeps purging the remaining tables when one fails", async () => {
+    purgeScanLogsBefore.mockRejectedValue(new Error("pool exhausted"));
+    purgeSourceHealthChecksBefore.mockResolvedValue(5);
+    purgeResolvedDataQualityFindingsBefore.mockResolvedValue(1);
+
+    const report = await purgeExpiredOperationalRecords({ now: NOW });
+
+    expect(report.scanLogs.error).toContain("pool exhausted");
+    expect(report.sourceHealthChecks).toMatchObject({ deleted: 5 });
+    expect(report.resolvedFindings).toMatchObject({ deleted: 1 });
   });
 });

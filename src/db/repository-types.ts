@@ -221,6 +221,14 @@ export interface AiRegulationRepository {
    * grown enough to blow the statement timeout would simply re-create it.
    */
   purgeScanLogsBefore(cutoffIso: string, batchSize?: number): Promise<number>;
+  /** Same bounded contract as purgeScanLogsBefore, over source_health_checks.checked_at. */
+  purgeSourceHealthChecksBefore(cutoffIso: string, batchSize?: number): Promise<number>;
+  /**
+   * Deletes only findings whose resolved_at is set and older than the cutoff.
+   * Unresolved findings are never touched — deleting an open problem is how it
+   * gets forgotten.
+   */
+  purgeResolvedDataQualityFindingsBefore(cutoffIso: string, batchSize?: number): Promise<number>;
   listRawRegulatoryItems(limit?: number, sourceId?: string): Promise<RawRegulatoryItem[]>;
   listProcessingLogs(limit?: number): Promise<AiProcessingLog[]>;
   createAiProcessingLog(input: AiProcessingLogInput): Promise<AiProcessingLog>;

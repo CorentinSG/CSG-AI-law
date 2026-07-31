@@ -988,6 +988,37 @@ export class MemoryAiRegulationRepository implements AiRegulationRepository {
     return typeof limit === "number" ? checks.slice(0, limit) : checks;
   }
 
+  async purgeSourceHealthChecksBefore(cutoffIso: string, batchSize = 500) {
+    const store = getMockStore();
+    const doomed = store.sourceHealthChecks
+      .filter((check) => check.checkedAt < cutoffIso)
+      .sort((a, b) => a.checkedAt.localeCompare(b.checkedAt))
+      .slice(0, batchSize);
+    if (doomed.length === 0) return 0;
+
+    const doomedIds = new Set(doomed.map((check) => check.id));
+    store.sourceHealthChecks = store.sourceHealthChecks.filter(
+      (check) => !doomedIds.has(check.id),
+    );
+    return doomed.length;
+  }
+
+  async purgeResolvedDataQualityFindingsBefore(cutoffIso: string, batchSize = 500) {
+    const store = getMockStore();
+    // Only resolved findings are eligible; an open finding is never purged.
+    const doomed = store.dataQualityFindings
+      .filter((finding) => finding.resolvedAt !== null && finding.resolvedAt < cutoffIso)
+      .sort((a, b) => (a.resolvedAt ?? "").localeCompare(b.resolvedAt ?? ""))
+      .slice(0, batchSize);
+    if (doomed.length === 0) return 0;
+
+    const doomedIds = new Set(doomed.map((finding) => finding.id));
+    store.dataQualityFindings = store.dataQualityFindings.filter(
+      (finding) => !doomedIds.has(finding.id),
+    );
+    return doomed.length;
+  }
+
   async createSourceHealthCheck(input: SourceHealthCheckInput) {
     const record: SourceHealthCheck = {
       ...input,
