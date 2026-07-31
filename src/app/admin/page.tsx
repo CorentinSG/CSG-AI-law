@@ -4,6 +4,7 @@ import { updateRepository } from "@/agents/ai-regulation/processors/updateReposi
 import { getSourceRuntimeHealthSummaries } from "@/agents/ai-regulation/sourceRuntimeHealth";
 import {
   listGlobalMonitoringAgents,
+  summariseAgentProvisioning,
 } from "@/agents/ai-regulation/globalMonitoringSupervisorAgent";
 import { listAgentApiCapabilities } from "@/agents/ai-regulation/agentApiCapabilities";
 import { buildHealthSnapshot } from "@/lib/health";
@@ -56,6 +57,12 @@ export default async function AdminDashboardPage() {
     ]);
 
   const agents = listGlobalMonitoringAgents();
+  // The agent count itself is real — these agents exist and run. What the tile
+  // hid is that 79 of them declare a source mandate whose every entry is still
+  // `aspirational_not_wired`. Scanning happens off `regulationSourcesSeed`, not
+  // off these mandates, so the gap is a claim the dashboard was repeating rather
+  // than a monitor that collects nothing.
+  const agentProvisioning = summariseAgentProvisioning(agents.regionalSupervisors);
   const capabilities = listAgentApiCapabilities();
   const healthSnapshot = await buildHealthSnapshot({ access: "authenticated" });
 
@@ -219,7 +226,7 @@ export default async function AdminDashboardPage() {
         <IntelligenceSignal theme="dark" tone="positive" label="Published DB entries" value={String(updatesPublished)} note={`${updatesNeedsReview} awaiting review`} />
         <IntelligenceSignal theme="dark" tone={sourcesNeedingAttention > 0 ? "warning" : "positive"} label="Active sources" value={`${sourcesActive}/${sources.length}`} note={`${sourcesNeedingAttention} need attention`} />
         <IntelligenceSignal theme="dark" tone={countriesNeedsReview > 0 ? "warning" : "positive"} label="Verified countries" value={`${countriesVerified}/${countries.length}`} note={`${countriesNeedsReview} need review`} />
-        <IntelligenceSignal theme="dark" tone="neutral" label="Monitoring agents" value={String(agents.regionalSupervisors.reduce((acc, r) => acc + r.managedAgents.length, 0))} note={`${agents.regionalSupervisors.length} regional supervisors`} />
+        <IntelligenceSignal theme="dark" tone={agentProvisioning.aspirational > 0 ? "warning" : "neutral"} label="Monitoring agents" value={String(agentProvisioning.total)} note={agentProvisioning.aspirational > 0 ? `${agentProvisioning.aspirational} declare source mandates that are not wired` : `${agents.regionalSupervisors.length} regional supervisors`} />
         <IntelligenceSignal theme="dark" tone={scansFailed > 0 ? "warning" : "positive"} label="Recent scans" value={`${scansSucceeded} ok`} note={`${scansFailed} failed of last ${scanLogs.length}`} />
         <IntelligenceSignal theme="dark" tone={leadsUnresolved > 0 ? "informative" : "neutral"} label="Open discovery leads" value={String(leadsUnresolved)} note={`${leads.length} tracked`} />
         <IntelligenceSignal theme="dark" tone="neutral" label="Connectors" value={`${count(capabilities, (c) => c.status === "available")}/${capabilities.length}`} note="API / MCP capabilities ready" />
