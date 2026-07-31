@@ -337,9 +337,80 @@ export function evaluateSelector(
   };
 }
 
+/** Derived candidates tried per page, after the curated list. */
+const MAX_DERIVED_SELECTORS = 25;
+
+/**
+ * An upper bound on how many elements a listing repeats. Past this the
+ * signature is structural chrome (every `div`, every `li` in the page), not a
+ * publication list, and testing it wastes a pass.
+ */
+const MAX_LISTING_REPEATS = 200;
+
+/**
+ * Reads candidate selectors off the page instead of guessing them.
+ *
+ * The curated list covers the CMSs these authorities mostly run, but 35 of the
+ * gated lanes load a page it does not match — their listing markup simply is not
+ * in it, and no amount of adding patterns by hand converges. A listing is a
+ * repeated structure containing a link, so this groups elements by tag and class
+ * signature and returns the signatures that repeat like a list.
+ *
+ * This does not loosen anything: every derived candidate still has to clear the
+ * same evidence bar as a curated one. It only widens what gets *offered* to that
+ * bar.
+ */
+export function derivedSelectors(html: string): string[] {
+  const $ = cheerio.load(html);
+  const counts = new Map<string, number>();
+
+  $("body *").each((_, element) => {
+    // Only containers that hold a link can be a publication row.
+    if ($(element).find("a[href]").length === 0) return;
+
+    const tag = (element as { tagName?: string }).tagName;
+    if (!tag) return;
+    const classes = ($(element).attr("class") ?? "")
+      .trim()
+      .split(/\s+/)
+      .filter(Boolean)
+      // Utility and state classes vary per row and would fragment the signature.
+      .filter((name) => !/^(is-|has-|js-)/.test(name) && !/\d{3,}/.test(name));
+    if (classes.length === 0) return;
+
+    // Two granularities: the full class set, and the first class alone. The
+    // first is precise when rows are uniform; the second survives rows that
+    // carry an extra modifier class. Deduped, because a single-class element
+    // yields the same string twice and would otherwise be counted double —
+    // which would misreport how often the signature actually repeats.
+    const signatures = new Set([`${tag}.${classes.join(".")}`, `${tag}.${classes[0]}`]);
+    for (const signature of signatures) {
+      counts.set(signature, (counts.get(signature) ?? 0) + 1);
+    }
+  });
+
+  return [...counts.entries()]
+    .filter(([, count]) => count >= MIN_ITEMS && count <= MAX_LISTING_REPEATS)
+    .sort((a, b) => {
+      // More classes first: a specific signature beats a broad one that happens
+      // to also repeat. Then fewer repeats first, because a publication listing
+      // is short and page chrome is long.
+      const specificity = b[0].split(".").length - a[0].split(".").length;
+      return specificity !== 0 ? specificity : a[1] - b[1];
+    })
+    .slice(0, MAX_DERIVED_SELECTORS)
+    .map(([signature]) => signature);
+}
+
 export function bestSelector(html: string, baseUrl: string): SelectorEvidence | null {
   const $ = cheerio.load(html);
+  // Curated patterns first: they are precise and their names are meaningful to
+  // whoever reads the report. Derived ones only get a turn once those fail.
   for (const selector of CANDIDATE_SELECTORS) {
+    const evidence = evaluateSelector($, selector, baseUrl);
+    if (evidence) return evidence;
+  }
+  for (const selector of derivedSelectors(html)) {
     const evidence = evaluateSelector($, selector, baseUrl);
     if (evidence) return evidence;
   }

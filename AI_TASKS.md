@@ -11,9 +11,9 @@ Each agent edits only its own rows. Status vocabulary: `CLAIMED` · `WIP` · `BL
 
 | Task ID | Owner | Status | Branch @ sha | Locked files | Graph anchor | Updated |
 |---|---|---|---|---|---|---|
-| T-SITE-BACKLOG-WAVE (plan 1.7/1.14, 2.2/2.11, 4.3/4.4/4.6/4.8/4.9) | Claude Code | MERGED | `main` @ `9514b3d` (#41) | none (released) | `reportRepositoryFallback()`, `parseSourceReferences()`, `extractVerificationMetadata()`, `buildCentralMonitoringSchedule()`, `livePanelCopy`, community "Source Runtime Health", "DB Repository Layer", "UI Components and Utilities" | 2026-07-28 |
-| T-SOURCE-EXTRACTION-VERIFICATION | Claude Code | MERGED | `main` @ `28df5d1` (#42→#44) | none (released) | `bestSelector()`, `buildCountryMonitoringSources()`, `requiresSourceReview()`, `getQueuedScanJobs()`, community "Data Ingestion Pipeline" | 2026-07-28 |
-| T-DEAD-SOURCE-TRIAGE | Claude Code | REVIEW | `claude/github-monitoring-recovery-lz4dos` @ `a8b90c9` (PR #45) | none (released) | `diagnosePageFailure()`, `listingCandidates()`, `recoverFromRoot()`, community "Data Ingestion Pipeline" | 2026-07-28 |
+| T-DB-RESILIENCE | Claude Code | MERGED | `main` @ `a276f67` (#48→#50) | none (released) | `purgeExpiredScanLogs()`, `isMonitoringStale()`, community "DB Repository Layer", "Source Runtime Health" | 2026-07-31 |
+| T-MIGRATION-031 | Claude Code | MERGED | `main` @ `921af26` (#51→#52) | none (released) | `audit-constraint-drift.ts`, community "DB Repository Layer" | 2026-07-31 |
+| T-BROWSER-FETCH-MEASUREMENT | Claude Code | MERGED | `main` @ `3829f85` (#49) | none (released) | `scanStaticSourceWithBrowserFallback()`, community "Data Ingestion Pipeline" | 2026-07-31 |
 | T-TOTAL-PROJECT-OWNERSHIP | Claude Code | MERGED | `main` | entire repository | all Graphify communities; start with the total handoff document | 2026-07-25 |
 | TOOLING-GRAPH-PROTOCOL | Claude Code | REVIEW | `ops/t-ops9-ux` @ `30bc31c` | `AGENTS.md`, `AI_TASKS.md`, `.gitignore`, `.git/hooks/*` | n/a (tooling, no app code) | 2026-06-20 |
 | T-OPS9-UX | Claude Code | WIP | `ops/t-ops9-ux` @ `30bc31c` | `src/app/**`, shared UI components | community "UI Components and Utilities", "Intelligence Hub UI" | 2026-06-20 |
