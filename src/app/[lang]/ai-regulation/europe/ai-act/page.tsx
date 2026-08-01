@@ -56,6 +56,9 @@ const COPY: Record<Locale, {
   applicationCalendar: string;
   keyArticles: string;
   backToHub: string;
+  checklistEyebrow: string;
+  checklistTitle: string;
+  checklistDescription: string;
 }> = {
   en: {
     breadcrumbHub: "AI Law Hub",
@@ -77,6 +80,10 @@ const COPY: Record<Locale, {
     applicationCalendar: "Phased application calendar",
     keyArticles: "Key articles and annexes",
     backToHub: "← Back to Europe hub",
+    checklistEyebrow: "Applies 2 August 2026",
+    checklistTitle: "Article 50 compliance checklist",
+    checklistDescription:
+      "Interactive transparency checklist for providers and deployers: 18 controls by role, with owners, evidence to retain, and sample disclosure wording.",
   },
   fr: {
     breadcrumbHub: "Hub Droit de l'IA",
@@ -98,6 +105,10 @@ const COPY: Record<Locale, {
     applicationCalendar: "Calendrier d'application",
     keyArticles: "Articles et annexes clés",
     backToHub: "← Retour au hub Europe",
+    checklistEyebrow: "Applicable le 2 août 2026",
+    checklistTitle: "Checklist de conformité — article 50",
+    checklistDescription:
+      "Checklist interactive de transparence pour fournisseurs et déployeurs : 18 contrôles par rôle, avec responsables, preuves à conserver et exemples de mentions.",
   },
 };
 
@@ -183,6 +194,30 @@ export default async function EuAiActPage({
           </MotionStaggerItem>
         ))}
       </MotionStagger>
+
+      {/* Article 50 checklist — dedicated sub-page */}
+      <MotionReveal>
+        <Link
+          id="article-50-checklist"
+          href={localeHref(lang, "/ai-regulation/europe/ai-act/article-50-checklist")}
+          className="group flex scroll-mt-28 items-center justify-between gap-4 rounded-[1.8rem] border border-amber-400/25 bg-amber-400/[0.04] p-5 transition-colors hover:bg-amber-400/[0.08]"
+        >
+          <div>
+            <p className="font-mono text-[9px] uppercase tracking-[0.26em] text-amber-400">
+              {t.checklistEyebrow}
+            </p>
+            <p className="mt-1.5 font-display text-lg font-medium tracking-[-0.02em] text-zinc-950">
+              {t.checklistTitle}
+            </p>
+            <p className="mt-1 max-w-2xl text-sm leading-6 text-zinc-500">
+              {t.checklistDescription}
+            </p>
+          </div>
+          <span className="shrink-0 font-mono text-[10px] uppercase tracking-[0.2em] text-zinc-400 transition-colors group-hover:text-zinc-700">
+            {lang === "fr" ? "Ouvrir →" : "Open →"}
+          </span>
+        </Link>
+      </MotionReveal>
 
       {/* Application calendar — dedicated sub-page */}
       <MotionReveal>
