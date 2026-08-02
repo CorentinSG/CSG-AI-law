@@ -51,6 +51,14 @@ YYYY-MM-DD · <Agent> · <TASK-ID> · <STATUS>
 
 ## Current status
 
+2026-08-02 · Claude Code · T-A50-HYDRATION · HANDOFF→Codex
+- Intent: Article 50 checklist v2 (triage + 20 scenarios + prominent no-legal-advice banner) — relocated to `/[lang]/eu-ai-act/article-50-checklist` because of a pre-existing prod bug discovered while verifying: statically-rendered pages under `/[lang]/ai-regulation/**` ship WITHOUT client hydration in production (React client-renders an empty page slot and orphans the SSR DOM — zero console errors). Confirmed on deployed prod: `/en/ai-regulation/europe/france` (country console, 7 dead buttons), `/europe/ai-act`, the hub, and the old checklist URL. `/en/research*` hydrates fine. Ruled out by bisection (prod builds, in-app browser): page code (identical file alive at `[lang]/test-*`), shell components, metadata, own+sibling `revalidate`, `generateStaticParams`, dynamic siblings, segment depth, middleware/headers, Turbopack cache (pristine rebuild), service workers. A minimal client counter page under the segment DOES hydrate, so the trigger is per-page and interacts with the segment tree — likely a Next 16.2.6 streaming/hydration bug; repro recipe in PR #64 description.
+- Files: `src/app/[lang]/eu-ai-act/article-50-checklist/page.tsx` (moved+expanded), old path → locale-guarded server redirect, `europe/ai-act/page.tsx` (link), `article-50-checklist.ts` (+duties/situations/scenarios), `article-50-scenarios.tsx` (new), `article-50-checklist.test.ts` (new)
+- Graph anchors: `article50Scenarios`, `getArticle50DutiesForSituations()`, `Article50Triage`, community "EU AI Act content"
+- Verification: test 958/958, lint clean, typecheck clean, `next build` clean; interactivity verified on local `next start` prod at the NEW path (EN+FR: triage, checklist toggle, filters, persistence) and old-path meta-refresh redirect confirmed.
+- Branch/commit: feat/article-50-scenarios @ (see PR #64)
+- Next: Codex owns the hydration investigation for `/ai-regulation/**` (France console + hub + country pages are dead in prod today; users see content but no interactive control works). Suggest testing a Next upgrade/downgrade and filing a minimal repro upstream; my elimination list above should save a day of bisection.
+
 2026-07-31 · Claude Code · T-SERP-PROBE · REVIEW
 - Intent:        Weekly capped SerpAPI site:-probe for official domains the runtime cannot fetch (FTC/SEC/CoE/AP-NL 403 holds) and micro-state legal portals; hits become admin-only unresolved discovery leads. First caller of `createDiscoveryLead()`.
 - Files:         `scripts/serp-discovery-probe.ts` + `.test.ts` (new), `.github/workflows/serp-discovery.yml` (new), `src/agents/ai-regulation/agentApiCapabilities.ts` (serpapi entry)
