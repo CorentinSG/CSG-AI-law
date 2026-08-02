@@ -582,3 +582,445 @@ export const article50Sources: Article50Source[] = [
 export function getArticle50ItemsByGroup(group: Article50GroupId) {
   return article50Items.filter((item) => item.group === group);
 }
+
+// ---------------------------------------------------------------------------
+// Situation triage — "which obligations apply to you?"
+// ---------------------------------------------------------------------------
+
+export type Article50DutyId =
+  | "duty-50-1"
+  | "duty-50-2"
+  | "duty-50-3"
+  | "duty-50-4-deepfake"
+  | "duty-50-4-text"
+  | "duty-scope"
+  | "duty-grace"
+  | "duty-both-roles";
+
+export type Article50Duty = {
+  id: Article50DutyId;
+  label: string;
+  summary: string;
+  /** Checklist groups to work through when this duty applies. */
+  groups: Article50GroupId[];
+};
+
+export const article50Duties: Article50Duty[] = [
+  {
+    id: "duty-50-1",
+    label: "Art. 50(1) — direct-interaction disclosure",
+    summary:
+      "People must be informed they are interacting with AI, at the latest at the first interaction, in every channel and locale. The “obvious to a reasonable person” exception is interpreted restrictively.",
+    groups: ["providers", "product"],
+  },
+  {
+    id: "duty-50-2",
+    label: "Art. 50(2) — machine-readable marking",
+    summary:
+      "Synthetic audio, image, video and text outputs must be marked machine-readable and detectable as artificially generated or manipulated — effective, interoperable, robust and reliable so far as technically feasible. Test that marks survive export, compression and platform upload.",
+    groups: ["providers", "product", "vendors"],
+  },
+  {
+    id: "duty-50-3",
+    label: "Art. 50(3) — emotion recognition & biometric categorisation",
+    summary:
+      "People exposed to the system must be informed it is operating, at the latest at first exposure. The notice is necessary but not sufficient: GDPR still requires a lawful basis, and often a DPIA.",
+    groups: ["deployers", "legal", "vendors"],
+  },
+  {
+    id: "duty-50-4-deepfake",
+    label: "Art. 50(4) — deepfake labelling",
+    summary:
+      "Deepfake image, audio or video content must carry a visible or audible disclosure at first exposure. Machine-readable marks alone are not enough.",
+    groups: ["deployers", "comms"],
+  },
+  {
+    id: "duty-50-4-text",
+    label: "Art. 50(4) — public-interest text",
+    summary:
+      "AI-generated text published to inform the public on matters of public interest must be disclosed — unless it underwent substantive human review and a person holds editorial responsibility. Spell-checking is not enough.",
+    groups: ["deployers", "comms"],
+  },
+  {
+    id: "duty-scope",
+    label: "Territorial scope (Art. 2)",
+    summary:
+      "Non-EU providers and deployers can still be in scope where the system's output is used in the Union. Assign an owner for EU-facing compliance even without an EU establishment.",
+    groups: ["legal"],
+  },
+  {
+    id: "duty-grace",
+    label: "Transition to 2 December 2026 — Art. 50(2) only",
+    summary:
+      "Systems placed on the market before 2 August 2026 have until 2 December 2026 for the machine-readable marking duty only. Every other Article 50 duty applies from 2 August 2026 — the grace period does not postpone them.",
+    groups: ["providers", "legal"],
+  },
+  {
+    id: "duty-both-roles",
+    label: "Dual role — provider and deployer",
+    summary:
+      "A single company can be provider for some workflows and deployer for others. Allocate the role per use case in one register, and assign each Article 50 duty accordingly.",
+    groups: ["legal"],
+  },
+];
+
+export type Article50Situation = {
+  id: string;
+  statement: string;
+  duties: Article50DutyId[];
+};
+
+export const article50Situations: Article50Situation[] = [
+  {
+    id: "sit-interaction",
+    statement:
+      "A system we offer or operate interacts directly with people — chat, voice assistant, avatar, kiosk.",
+    duties: ["duty-50-1"],
+  },
+  {
+    id: "sit-generation",
+    statement:
+      "We develop or offer a system that generates or manipulates audio, images, video or text.",
+    duties: ["duty-50-2"],
+  },
+  {
+    id: "sit-deepfake",
+    statement:
+      "We publish AI-generated or AI-manipulated images, audio or video that appear real (deepfakes) — including in ads, training or brand content.",
+    duties: ["duty-50-4-deepfake"],
+  },
+  {
+    id: "sit-text",
+    statement:
+      "We publish AI-generated text that informs the public on matters of public interest — politics, health, law, justice, security, environment, consumer safety.",
+    duties: ["duty-50-4-text"],
+  },
+  {
+    id: "sit-biometric",
+    statement:
+      "We use emotion recognition or biometric categorisation — workplace analytics, kiosks, CCTV analytics, access control, fraud tools.",
+    duties: ["duty-50-3"],
+  },
+  {
+    id: "sit-non-eu",
+    statement:
+      "We are established outside the EU, but outputs of our AI systems are used in the Union.",
+    duties: ["duty-scope"],
+  },
+  {
+    id: "sit-legacy",
+    statement:
+      "Some of our in-scope systems were placed on the market before 2 August 2026.",
+    duties: ["duty-grace"],
+  },
+  {
+    id: "sit-both",
+    statement:
+      "Different business units both build AI systems and use third-party AI tools.",
+    duties: ["duty-both-roles"],
+  },
+];
+
+// ---------------------------------------------------------------------------
+// Scenario library — edge cases and special situations
+// ---------------------------------------------------------------------------
+
+export type Article50ScenarioCategory = "provider" | "deployer" | "special";
+
+export type Article50Scenario = {
+  id: string;
+  category: Article50ScenarioCategory;
+  title: string;
+  situation: string;
+  applies: string[];
+  traps?: string[];
+};
+
+export const article50ScenarioCategories: {
+  id: Article50ScenarioCategory;
+  label: string;
+}[] = [
+  { id: "provider", label: "Provider situations" },
+  { id: "deployer", label: "Deployer situations" },
+  { id: "special", label: "Special cases" },
+];
+
+export const article50Scenarios: Article50Scenario[] = [
+  // --- Provider situations ---
+  {
+    id: "sc-chatbot",
+    category: "provider",
+    title: "Customer-facing chatbot or voice assistant",
+    situation:
+      "You build or offer a system intended to interact directly with natural persons.",
+    applies: [
+      "Art. 50(1): design the disclosure into the system before market placement — default greeting, banner or voice prompt, in every channel and locale.",
+      "Disclosure at the latest at the first interaction.",
+    ],
+    traps: [
+      "The “obvious AI interaction” exception is interpreted restrictively — document any reliance on it.",
+      "A disclosure that exists in one channel but not in an embedded widget or API wrapper is a gap.",
+    ],
+  },
+  {
+    id: "sc-genai-product",
+    category: "provider",
+    title: "Generative AI product — image, audio, video or text",
+    situation:
+      "Your system produces synthetic content within Article 50(2).",
+    applies: [
+      "Machine-readable marking, detectable as artificially generated or manipulated.",
+      "Solutions effective, interoperable, robust and reliable so far as technically feasible — document feasibility limits by modality.",
+    ],
+    traps: [
+      "Marks that do not survive export, compression, API delivery or platform upload.",
+      "Relying on marking alone where a deployer also needs a visible disclosure.",
+    ],
+  },
+  {
+    id: "sc-editing",
+    category: "provider",
+    title: "Assistive or standard-editing features only",
+    situation:
+      "Your AI feature retouches, corrects or adjusts content without substantially altering the input.",
+    applies: [
+      "No marking duty where the input is not substantially altered (standard-editing exception).",
+    ],
+    traps: [
+      "The line between “standard editing” and generation is factual — document the analysis per feature, and revisit when features gain generative capability.",
+    ],
+  },
+  {
+    id: "sc-legacy",
+    category: "provider",
+    title: "System placed on the market before 2 August 2026",
+    situation: "An in-scope system predates the application date.",
+    applies: [
+      "Transition until 2 December 2026 — but only for the Art. 50(2) machine-readable marking duty.",
+      "All other Article 50 duties apply from 2 August 2026.",
+    ],
+    traps: [
+      "Treating the grace period as a general postponement — it is not.",
+      "Systems placed on the market on or after 2 August 2026 get no transition at all.",
+    ],
+  },
+  {
+    id: "sc-b2b",
+    category: "provider",
+    title: "B2B, machine-to-machine or closed-loop industrial outputs",
+    situation:
+      "Outputs are source code, short symbol strings, machine-to-machine data, or non-final industrial outputs.",
+    applies: [
+      "These can fall outside the Art. 50(2) marking duty; the guidelines also describe a narrow B2B or industrial exemption under stated conditions.",
+    ],
+    traps: [
+      "The exemption is narrow and conditional — keep a documented rationale per output type, signed off by an owner.",
+      "An “industrial” output that later reaches consumers re-enters scope.",
+    ],
+  },
+  {
+    id: "sc-non-eu-provider",
+    category: "provider",
+    title: "Non-EU provider with users in the Union",
+    situation:
+      "You have no EU establishment, but your system's outputs are used in the EU.",
+    applies: [
+      "Article 2 scope: non-EU providers and deployers can still be in scope where outputs are used in the Union.",
+    ],
+    traps: [
+      "Assuming geography alone puts you out of scope — map where outputs actually land, not where servers sit.",
+    ],
+  },
+
+  // --- Deployer situations ---
+  {
+    id: "sc-embedded-chatbot",
+    category: "deployer",
+    title: "Vendor chatbot embedded on your site or app",
+    situation:
+      "You deploy a third-party conversational system under your authority.",
+    applies: [
+      "The provider builds the disclosure; you need operational controls so it actually appears in use — in your theme, your locales, your channels.",
+    ],
+    traps: [
+      "A custom skin or integration that hides the provider's disclosure.",
+      "No contractual clarity on who answers a regulator's question.",
+    ],
+  },
+  {
+    id: "sc-deepfake-marketing",
+    category: "deployer",
+    title: "Deepfake in marketing, training or entertainment content",
+    situation:
+      "You publish AI-generated or manipulated image, audio or video that appears real.",
+    applies: [
+      "Art. 50(4): visible or audible disclosure at first exposure — player overlay, opening frame, caption or audible introduction.",
+    ],
+    traps: [
+      "Relying on the provider's hidden metadata alone — it does not satisfy the visible-disclosure duty.",
+      "Labels that disappear when content is downloaded, shared, embedded or reposted.",
+    ],
+  },
+  {
+    id: "sc-artistic",
+    category: "deployer",
+    title: "Evidently artistic, satirical or fictional work",
+    situation:
+      "The deepfake is part of a film, satire, fiction or analogous work.",
+    applies: [
+      "Disclosure may be given in a way that does not hamper enjoyment of the work.",
+    ],
+    traps: [
+      "Over-claiming the allowance for content that is not evidently artistic — classify and document each asset.",
+    ],
+  },
+  {
+    id: "sc-news-text",
+    category: "deployer",
+    title: "AI-drafted articles on public-interest topics",
+    situation:
+      "You publish AI-generated text informing the public on politics, health, law, justice, security, environment, consumer safety or major public debate.",
+    applies: [
+      "Label the text — or run it through substantive human review with a person holding editorial responsibility.",
+    ],
+    traps: [
+      "Spell-checking or grammar passes do not qualify as substantive review.",
+      "“Editorial responsibility” left undefined — name the person.",
+    ],
+  },
+  {
+    id: "sc-internal-text",
+    category: "deployer",
+    title: "Internal-only AI text, never published",
+    situation:
+      "AI drafts internal reports, memos or emails that are not published to inform the public.",
+    applies: [
+      "The Art. 50(4) text duty targets text published to inform the public on matters of public interest — purely internal documents are generally outside it.",
+    ],
+    traps: [
+      "Internal content that later gets published — build the labelling check into the publication step, not the drafting step.",
+    ],
+  },
+  {
+    id: "sc-hr-emotion",
+    category: "deployer",
+    title: "Emotion recognition in HR, sales or support",
+    situation:
+      "Workplace analytics, interview tools or call-centre systems infer emotions.",
+    applies: [
+      "Art. 50(3): inform exposed persons the system is operating, at first exposure.",
+      "GDPR in parallel: lawful basis, transparency, and likely a DPIA — a notice alone is not compliance.",
+    ],
+    traps: [
+      "Forgetting that other AI Act chapters (including high-risk duties) may apply on top of Article 50.",
+    ],
+  },
+  {
+    id: "sc-kiosk-biometric",
+    category: "deployer",
+    title: "Biometric categorisation in physical spaces",
+    situation:
+      "Kiosks, retail analytics or CCTV-linked systems categorise people on biometric data.",
+    applies: [
+      "Art. 50(3) notice at first exposure — posted where people actually see it.",
+      "Large-scale monitoring of publicly accessible areas is a typical DPIA trigger under the GDPR.",
+    ],
+    traps: [
+      "A notice hidden in a privacy policy no one sees before exposure.",
+    ],
+  },
+  {
+    id: "sc-old-content",
+    category: "deployer",
+    title: "Content created before 2 August 2026",
+    situation: "Your archives contain AI-generated content from before the application date.",
+    applies: [
+      "No retroactive labelling is required; the Commission encourages voluntary labelling where feasible.",
+    ],
+    traps: [
+      "Re-publishing or re-cutting old content after 2 August 2026 — treat that as a new publication decision.",
+    ],
+  },
+
+  // --- Special cases ---
+  {
+    id: "sc-both-roles",
+    category: "special",
+    title: "You are both provider and deployer",
+    situation:
+      "One business unit ships an AI product; another uses third-party AI tools.",
+    applies: [
+      "Allocate the role per use case in a single register, and assign each Article 50 duty accordingly.",
+    ],
+    traps: [
+      "Duties falling into the gap between two teams that each assume the other owns them.",
+    ],
+  },
+  {
+    id: "sc-employees",
+    category: "special",
+    title: "Employees using AI tools at work",
+    situation:
+      "Staff use AI systems in the course of their job.",
+    applies: [
+      "Employees acting under the authority and control of a legal entity are generally not separate deployers — the company holds the duties.",
+    ],
+    traps: [
+      "Shadow AI: tools adopted by teams without appearing in the company's use-case register.",
+    ],
+  },
+  {
+    id: "sc-eu-institutions",
+    category: "special",
+    title: "EU institutions, bodies and agencies",
+    situation: "The provider or deployer is an EU institution.",
+    applies: [
+      "The European Data Protection Supervisor is the competent authority; the Commission fact page notes fines up to €750,000.",
+    ],
+  },
+  {
+    id: "sc-sme",
+    category: "special",
+    title: "SMEs and start-ups",
+    situation: "You are a small company with limited compliance resources.",
+    applies: [
+      "The duties are the same, but fines carry lower caps under the AI Act's proportionality rules (general ceiling: €15 million or 3% of worldwide annual turnover).",
+    ],
+    traps: [
+      "Deferring scoping because of size — the register and front-end notices are the minimum viable controls.",
+    ],
+  },
+  {
+    id: "sc-gpai",
+    category: "special",
+    title: "System built on your own GPAI model, or integrated into a designated platform",
+    situation:
+      "The same entity provides both the system and the general-purpose model, or the system is integrated into a designated very large online platform or search engine.",
+    applies: [
+      "The AI Office has a specific enforcement role in these configurations, alongside national market surveillance authorities.",
+    ],
+  },
+  {
+    id: "sc-law-enforcement",
+    category: "special",
+    title: "Law-enforcement uses",
+    situation:
+      "The system is used for the detection, prevention, investigation or prosecution of criminal offences.",
+    applies: [
+      "Specific exceptions exist across Art. 50(1)–(4), under the conditions stated in each paragraph.",
+    ],
+    traps: [
+      "The exceptions are conditional, not a blanket carve-out — document the reliance conditions for each use.",
+    ],
+  },
+];
+
+export function getArticle50DutiesForSituations(situationIds: string[]) {
+  const dutyIds = new Set<Article50DutyId>();
+  for (const situation of article50Situations) {
+    if (situationIds.includes(situation.id)) {
+      situation.duties.forEach((duty) => dutyIds.add(duty));
+    }
+  }
+  return article50Duties.filter((duty) => dutyIds.has(duty.id));
+}

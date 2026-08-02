@@ -83,7 +83,7 @@ const COPY: Record<Locale, {
     checklistEyebrow: "Applies 2 August 2026",
     checklistTitle: "Article 50 compliance checklist",
     checklistDescription:
-      "Interactive transparency checklist for providers and deployers: 18 controls by role, with owners, evidence to retain, and sample disclosure wording.",
+      "Interactive transparency toolkit for providers and deployers: situation triage, 18 controls by role, 20 edge-case scenarios, and sample disclosure wording. Indicative only — not legal advice.",
   },
   fr: {
     breadcrumbHub: "Hub Droit de l'IA",
@@ -108,7 +108,7 @@ const COPY: Record<Locale, {
     checklistEyebrow: "Applicable le 2 août 2026",
     checklistTitle: "Checklist de conformité — article 50",
     checklistDescription:
-      "Checklist interactive de transparence pour fournisseurs et déployeurs : 18 contrôles par rôle, avec responsables, preuves à conserver et exemples de mentions.",
+      "Boîte à outils interactive de transparence pour fournisseurs et déployeurs : triage par situation, 18 contrôles par rôle, 20 scénarios de cas limites et exemples de mentions. Purement indicatif — pas un conseil juridique.",
   },
 };
 
@@ -199,7 +199,7 @@ export default async function EuAiActPage({
       <MotionReveal>
         <Link
           id="article-50-checklist"
-          href={localeHref(lang, "/ai-regulation/europe/ai-act/article-50-checklist")}
+          href={localeHref(lang, "/eu-ai-act/article-50-checklist")}
           className="group flex scroll-mt-28 items-center justify-between gap-4 rounded-[1.8rem] border border-amber-400/25 bg-amber-400/[0.04] p-5 transition-colors hover:bg-amber-400/[0.08]"
         >
           <div>
