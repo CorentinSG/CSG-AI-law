@@ -563,6 +563,18 @@ export class MemoryAiRegulationRepository implements AiRegulationRepository {
     return typeof limit === "number" ? items.slice(0, limit) : items;
   }
 
+  async listRawItemIdentitiesBySource(sourceId: string, limit = 200) {
+    return getMockStore()
+      .rawItems.filter((item) => item.sourceId === sourceId)
+      .slice(0, limit)
+      .map((item) => ({
+        id: item.id,
+        rawUrl: item.rawUrl,
+        rawTitle: item.rawTitle,
+        hash: item.hash,
+      }));
+  }
+
   async listProcessingLogs(limit?: number) {
     const logs = getMockStore().processingLogs;
     return typeof limit === "number" ? logs.slice(0, limit) : logs;

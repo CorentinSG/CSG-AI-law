@@ -230,6 +230,16 @@ export interface AiRegulationRepository {
    */
   purgeResolvedDataQualityFindingsBefore(cutoffIso: string, batchSize?: number): Promise<number>;
   listRawRegulatoryItems(limit?: number, sourceId?: string): Promise<RawRegulatoryItem[]>;
+  /**
+   * Slim identity projection (id, rawUrl, rawTitle, hash) of a source's most
+   * recent raw items. Exists for the per-scan republication-duplicate check:
+   * the full row carries raw_metadata JSONB that is far too heavy to pull by
+   * the hundreds on every scanned source.
+   */
+  listRawItemIdentitiesBySource(
+    sourceId: string,
+    limit?: number,
+  ): Promise<Array<{ id: string; rawUrl: string; rawTitle: string; hash: string }>>;
   listProcessingLogs(limit?: number): Promise<AiProcessingLog[]>;
   createAiProcessingLog(input: AiProcessingLogInput): Promise<AiProcessingLog>;
   listSourceReferences(
