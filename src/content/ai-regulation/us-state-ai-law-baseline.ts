@@ -210,12 +210,12 @@ const prioritySources: Record<string, UsStateOfficialSource[]> = {
       institution: "California Legislative Information",
       url: "https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?lawCode=BPC&sectionNum=22757.12.",
       sourceType: "state_code",
-      runtimeAccessible: null,
-      responseStatus: null,
+      runtimeAccessible: true,
+      responseStatus: 200,
       parserStatus: "manual_reference",
       recommendation: "manual_review",
       note:
-        "Official codified text of SB 53 (Stats. 2025, Ch. 138) confirmed through the Legal Data Hunter legislation corpus; runtime accessibility pending the baseline verification pass.",
+        "Official codified text of SB 53 (Stats. 2025, Ch. 138) confirmed through the Legal Data Hunter legislation corpus; runtime verification run 30759577030 returned HTTP 200 with all content markers present.",
     }),
   ],
   CO: [
@@ -236,12 +236,12 @@ const prioritySources: Record<string, UsStateOfficialSource[]> = {
       institution: "Colorado General Assembly",
       url: "https://leg.colorado.gov/bills/sb25b-004",
       sourceType: "legislature",
-      runtimeAccessible: null,
-      responseStatus: null,
+      runtimeAccessible: true,
+      responseStatus: 200,
       parserStatus: "manual_reference",
       recommendation: "manual_review",
       note:
-        "Candidate source for the 2025 special-session bill adjusting the Colorado AI Act's effective date. Do not state a revised effective date publicly until the baseline verification pass confirms this page.",
+        "Official bill page for the 2025 special-session bill adjusting the Colorado AI Act's effective date; runtime verification run 30759577030 returned HTTP 200. The revised date itself still requires item-level review of the page before being stated publicly.",
     }),
   ],
   NY: [
@@ -315,12 +315,12 @@ const prioritySources: Record<string, UsStateOfficialSource[]> = {
       institution: "Texas Statutes",
       url: "https://statutes.capitol.texas.gov/Docs/BC/htm/BC.552.htm",
       sourceType: "state_code",
-      runtimeAccessible: null,
-      responseStatus: null,
+      runtimeAccessible: false,
+      responseStatus: 200,
       parserStatus: "manual_reference",
       recommendation: "manual_review",
       note:
-        "Official codified text of the Texas Responsible Artificial Intelligence Governance Act (HB 149, 2025) confirmed through the Legal Data Hunter legislation corpus (e.g. § 552.053 social scoring); runtime accessibility pending the baseline verification pass.",
+        "Official codified text of the Texas Responsible Artificial Intelligence Governance Act (HB 149, 2025) confirmed through the Legal Data Hunter legislation corpus (e.g. § 552.053 social scoring). Runtime verification run 30759577030 returned HTTP 200 but the statute text is client-rendered, so the page is a manual reference, not a scannable source.",
     }),
   ],
   CT: [
@@ -342,12 +342,12 @@ const prioritySources: Record<string, UsStateOfficialSource[]> = {
       institution: "Connecticut General Assembly",
       url: "https://www.cga.ct.gov/current/pub/chap_870.htm",
       sourceType: "state_code",
-      runtimeAccessible: null,
+      runtimeAccessible: false,
       responseStatus: null,
       parserStatus: "manual_reference",
       recommendation: "manual_review",
       note:
-        "Official codified statute confirmed through the Legal Data Hunter legislation corpus (codifying the 2023 SB 1103 state AI inventory and assessment duties); runtime accessibility pending the baseline verification pass.",
+        "Official codified statute confirmed through the Legal Data Hunter legislation corpus (codifying the 2023 SB 1103 state AI inventory and assessment duties). Runtime verification run 30759577030 could not fetch cga.ct.gov (connection refused to this runner), matching the legislature source above; manual reference only.",
     }),
   ],
   UT: [
@@ -368,12 +368,12 @@ const prioritySources: Record<string, UsStateOfficialSource[]> = {
       institution: "Utah State Legislature",
       url: "https://le.utah.gov/xcode/Title13/13.html",
       sourceType: "state_code",
-      runtimeAccessible: null,
-      responseStatus: null,
+      runtimeAccessible: false,
+      responseStatus: 200,
       parserStatus: "manual_reference",
       recommendation: "manual_review",
       note:
-        "Official codified text confirmed through the Legal Data Hunter legislation corpus (e.g. § 13-77-104 generative-AI disclosure safe harbor); runtime accessibility pending the baseline verification pass.",
+        "Official codified text confirmed through the Legal Data Hunter legislation corpus (e.g. § 13-77-104 generative-AI disclosure safe harbor). Runtime verification run 30759577030 returned HTTP 200 but the chapter text is not present server-side on this table-of-contents page, so it is a manual reference, not a scannable source.",
     }),
   ],
   VA: [
