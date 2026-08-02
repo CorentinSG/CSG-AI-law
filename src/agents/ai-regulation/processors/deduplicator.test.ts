@@ -8,15 +8,28 @@ describe("deduplicator", () => {
       sourceId: "src-test",
       title: "AI rule",
       url: "https://example.gov/item?utm_source=rss",
-      text: "Official AI rule text",
     });
     const second = deduplicator.createHash({
       sourceId: "src-test",
       title: "AI rule",
       url: "https://example.gov/item",
-      text: "Official AI rule text",
     });
 
     expect(first).toBe(second);
+  });
+
+  it("keeps different items distinct", () => {
+    const first = deduplicator.createHash({
+      sourceId: "src-test",
+      title: "AI rule",
+      url: "https://example.gov/item-1",
+    });
+    const second = deduplicator.createHash({
+      sourceId: "src-test",
+      title: "Another AI rule",
+      url: "https://example.gov/item-2",
+    });
+
+    expect(first).not.toBe(second);
   });
 });

@@ -27,6 +27,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import {
   filterNewsItems,
   normalizeNewsItemRecord,
+  prepareNewsItemsForDisplay,
   type NormalizedNewsItemRecord,
 } from "@/content/ai-regulation/news";
 import { getPriorityEuropeCountryProfiles } from "@/content/ai-regulation/europe-country-profiles";
@@ -126,7 +127,7 @@ async function getPublicNewsItems(afterCursor: import("@/lib/pagination").Cursor
 
   return {
     ...result,
-    items: result.items.map(normalizeNewsItemRecord),
+    items: prepareNewsItemsForDisplay(result.items.map(normalizeNewsItemRecord)),
   };
 }
 

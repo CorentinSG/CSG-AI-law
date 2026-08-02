@@ -18,6 +18,8 @@ import {
   deriveScanStatus,
 } from "@/agents/ai-regulation/processors/scanDiagnostics";
 import { buildAuthorityTag } from "@/agents/ai-regulation/utils/authority";
+import { clampFutureIsoDate } from "@/agents/ai-regulation/utils/dates";
+import { buildIdentityKey } from "@/agents/ai-regulation/utils/hash";
 import { buildCandidateSourceReference } from "@/agents/ai-regulation/citations";
 import {
   buildCorroborationMetadataPatch,
@@ -290,6 +292,26 @@ async function scanSourcesForCandidates(
       state.parsingWarnings.push(...scanResult.warnings);
       state.extractionErrors.push(...scanResult.errors);
 
+      // Same source URL + same normalized title = same logical item, whatever
+      // date or excerpt the source shows today. The hash upsert alone cannot
+      // see this: rows written under the old hash composition (date + text
+      // were part of identity) carry hashes the new composition will never
+      // reproduce, so without this map every republished item would re-insert
+      // once. One slim query per scanned source, checked in memory.
+      const knownByIdentity = new Map<string, { id: string; hash: string }>();
+      if (candidates.length > 0) {
+        const recentItems = await getAiRegulationRepository().listRawRegulatoryItems(
+          300,
+          source.id,
+        );
+        for (const item of recentItems) {
+          knownByIdentity.set(buildIdentityKey(item.rawUrl, item.rawTitle), {
+            id: item.id,
+            hash: item.hash,
+          });
+        }
+      }
+
       for (const candidate of candidates) {
         const processingStartedAt = new Date().toISOString();
         const candidateMetadata = (candidate.metadata ?? {}) as Record<string, unknown>;
@@ -297,10 +319,25 @@ async function scanSourcesForCandidates(
           sourceId: source.id,
           title: candidate.title,
           url: candidate.url,
-          publicationDate: candidate.publicationDate,
           stableId: candidate.stableId,
-          text: candidate.text,
         });
+        const identityKey = buildIdentityKey(candidate.url, candidate.title);
+        const knownItem = knownByIdentity.get(identityKey);
+        if (knownItem && knownItem.hash !== hash) {
+          state.duplicatesDetected += 1;
+          await updateRepository.addProcessingLog({
+            rawItemId: knownItem.id,
+            regulatoryUpdateId: null,
+            modelUsed: "deduplicator",
+            promptVersion: "identity.v1",
+            processingStartedAt,
+            processingFinishedAt: new Date().toISOString(),
+            status: "skipped",
+            errorMessage:
+              "Duplicate item detected via source URL + title identity (existing row predates the current hash composition).",
+          });
+          continue;
+        }
         // Build verification metadata using candidate + source data.
         // This is computed before createRawItem so it can be included in the
         // initial write, eliminating the separate updateRawItemMetadata call
@@ -395,6 +432,13 @@ async function scanSourcesForCandidates(
           });
           continue;
         }
+        knownByIdentity.set(identityKey, { id: rawItem.id, hash });
+
+        // A future publication date would pin the item above every real
+        // development in the date-sorted public monitor. The traceability
+        // record above keeps whatever the source stated; everything derived
+        // from here on treats an impossible date as unstated.
+        candidate.publicationDate = clampFutureIsoDate(candidate.publicationDate);
 
         const relevance = relevanceFilter.evaluate(candidate, source);
         if (!relevance.relevant) {
@@ -669,7 +713,7 @@ async function processAllCandidates(
         country: entry.source.country,
         developmentType: entry.classification.developmentType,
         legalArea: entry.classification.legalArea,
-        publicationDate: entry.classification.publicationDate,
+        publicationDate: clampFutureIsoDate(entry.classification.publicationDate),
         detectedDate: new Date().toISOString().slice(0, 10),
         oneSentenceSummary:
           discoveryCopy?.oneSentenceSummary ?? summary.oneSentenceSummary,

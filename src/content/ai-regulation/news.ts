@@ -13,6 +13,8 @@ import {
   isDiscoveryOnlySource,
   isMediaDiscoverySource,
 } from "@/agents/ai-regulation/utils/discovery";
+import { clampFutureIsoDate } from "@/agents/ai-regulation/utils/dates";
+import { normalizeTitle } from "@/agents/ai-regulation/utils/hash";
 import { extractVerificationMetadata } from "@/agents/ai-regulation/verification";
 import { slugify } from "@/lib/utils";
 import {
@@ -414,6 +416,49 @@ export function filterNewsItems(items: AiLawNewsItem[], params: NewsFilterParams
 
     return true;
   });
+}
+
+/**
+ * Read-side guard for the public news lists. Two defects already sitting in
+ * stored rows would otherwise stay on screen until the rows expire:
+ *
+ * - Republication duplicates: the same source page ingested more than once
+ *   (identity used to include the shifting publication date). Same source +
+ *   same normalized title = one story; the freshest record wins.
+ * - Future event dates: date-sorted lists pin them above every real
+ *   development. They are demoted to the detection date and the impossible
+ *   date is dropped from display.
+ *
+ * Ingestion now prevents both, but the read layer stays defensive — stored
+ * data is not trusted to be clean.
+ */
+export function prepareNewsItemsForDisplay<
+  T extends {
+    title: string;
+    sourceName: string;
+    detectedAt: string;
+    eventDate: string | null;
+    publicationDate: string | null;
+  },
+>(items: T[], now: Date = new Date()): T[] {
+  const byStory = new Map<string, T>();
+  for (const item of items) {
+    const key = `${item.sourceName.trim().toLowerCase()}::${normalizeTitle(item.title)}`;
+    const existing = byStory.get(key);
+    if (!existing || item.detectedAt > existing.detectedAt) {
+      byStory.set(key, item);
+    }
+  }
+
+  const cleaned = [...byStory.values()].map((item) => ({
+    ...item,
+    eventDate: clampFutureIsoDate(item.eventDate, now),
+    publicationDate: clampFutureIsoDate(item.publicationDate, now),
+  }));
+
+  const sortDate = (item: T) =>
+    item.publicationDate ?? item.eventDate ?? item.detectedAt;
+  return cleaned.sort((a, b) => sortDate(b).localeCompare(sortDate(a)));
 }
 
 export function getNewsVerificationLabel(item: NewsVerificationLabelInput) {
