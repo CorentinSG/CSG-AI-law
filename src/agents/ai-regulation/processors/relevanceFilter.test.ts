@@ -136,3 +136,54 @@ describe("relevanceFilter", () => {
     expect(decision.matchedAiTerms).toContain("iso/iec 42001");
   });
 });
+
+// The Federal Register feed is a full-text search: it returns any document
+// whose *body* mentions AI, which published grant notices and export rules on
+// the public monitor. For that source the title or excerpt must carry the AI
+// signal.
+describe("relevanceFilter — broad search-feed sources", () => {
+  const federalRegister: RegulationSource = {
+    ...source,
+    id: "src-federal-register-ai",
+    name: "Federal Register AI Search Feed",
+  };
+
+  it("rejects items that only mention AI deep in the body", () => {
+    const decision = relevanceFilter.evaluate(
+      makeCandidate({
+        title:
+          "Notice of Final Issuance on the Adoption of Administration Program Policies",
+        text: "The program office notes that grantees may use artificial intelligence tools under existing regulation and guidance frameworks.",
+      }),
+      federalRegister,
+    );
+
+    expect(decision.relevant).toBe(false);
+    expect(decision.reason).toContain("title or excerpt");
+  });
+
+  it("accepts items whose title states the AI subject", () => {
+    const decision = relevanceFilter.evaluate(
+      makeCandidate({
+        title:
+          "Policy Statement Concerning the Suppression of Accuracy in Artificial Intelligence Systems",
+        text: "The Commission issues a policy statement under its regulation authority addressing artificial intelligence system accuracy.",
+      }),
+      federalRegister,
+    );
+
+    expect(decision.relevant).toBe(true);
+  });
+
+  it("leaves ordinary official sources free to match on body text", () => {
+    const decision = relevanceFilter.evaluate(
+      makeCandidate({
+        title: "Commission opens consultation on automated systems",
+        text: "The consultation covers artificial intelligence obligations under the regulation and related guidance.",
+      }),
+      source,
+    );
+
+    expect(decision.relevant).toBe(true);
+  });
+});

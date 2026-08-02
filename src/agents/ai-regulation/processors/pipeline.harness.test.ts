@@ -44,6 +44,7 @@ const mocks = vi.hoisted(() => ({
   },
   repository: {
     upsertRawItem: vi.fn(),
+    listRawRegulatoryItems: vi.fn(),
   },
   relevanceFilter: {
     evaluate: vi.fn(),
@@ -234,6 +235,7 @@ beforeEach(() => {
     item: { ...rawItem },
     inserted: true,
   });
+  mocks.repository.listRawRegulatoryItems.mockResolvedValue([]);
   mocks.updateRepository.updateRawItemMetadata.mockImplementation(
     async (id: string, metadata: Record<string, unknown>) => ({
       ...rawItem,
@@ -323,6 +325,45 @@ describe("runAiRegulationScan harness wiring", () => {
     expect(result.duplicatesDetected).toBe(1);
     expect(result.newItemsDetected).toBe(0);
     expect(mocks.updateRepository.createUpdate).not.toHaveBeenCalled();
+  });
+
+  // Rows written before the hash composition changed carry hashes the new
+  // composition never reproduces. The URL+title identity prefetch must catch
+  // the republished item before the upsert would re-insert it.
+  it("treats a same-URL same-title item under a legacy hash as a duplicate", async () => {
+    mocks.sourceScanner.scanSource.mockResolvedValue({
+      items: [{ id: "item-1" }],
+      itemsFetched: 1,
+      warnings: [],
+      errors: [],
+      responseStatus: 200,
+      zeroResultsReason: null,
+    });
+    mocks.itemExtractor.extract.mockReturnValue([
+      {
+        title: "AI courts rule",
+        url: "https://example.eu/item-1",
+        text: "AI rule text",
+        metadata: {},
+        // The republication drift that used to mint a new item every scan.
+        publicationDate: "2026-06-15",
+      },
+    ]);
+    mocks.repository.listRawRegulatoryItems.mockResolvedValue([
+      { ...rawItem, hash: "legacy-hash-composed-with-date-and-text" },
+    ]);
+
+    const { runAiRegulationScan } = await import(
+      "@/agents/ai-regulation/processors/pipeline"
+    );
+    const [result] = await runAiRegulationScan(source.id);
+
+    expect(mocks.repository.upsertRawItem).not.toHaveBeenCalled();
+    expect(result.duplicatesDetected).toBe(1);
+    expect(result.newItemsDetected).toBe(0);
+    expect(mocks.updateRepository.addProcessingLog).toHaveBeenCalledWith(
+      expect.objectContaining({ promptVersion: "identity.v1", rawItemId: rawItem.id }),
+    );
   });
 
   it("serializes concurrent pipeline attempts into one raw row and one update", async () => {

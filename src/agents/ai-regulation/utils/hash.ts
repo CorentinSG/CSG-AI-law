@@ -28,22 +28,32 @@ export function normalizeTitle(title: string) {
     .trim();
 }
 
+// Identity is source + stableId + title + URL — nothing else. The hash once
+// included publicationDate and a text prefix, which made identity track
+// *presentation*: official pages that republish the same document with a
+// shifted date or reworded lede minted a fresh "unique" item on every scan
+// (the same EU AI Office page appeared three times on the public hub).
 export function buildStableHash(input: {
   sourceId?: string;
   title: string;
   url: string;
-  publicationDate?: string | null;
   stableId?: string;
-  text: string;
 }) {
   const value = [
     input.sourceId?.trim().toLowerCase() ?? "",
     input.stableId?.trim().toLowerCase() ?? "",
     normalizeTitle(input.title),
     normalizeUrl(input.url).toLowerCase(),
-    input.publicationDate?.trim().toLowerCase() ?? "",
-    input.text.trim().slice(0, 500).toLowerCase(),
   ].join("::");
 
   return createHash("sha256").update(value).digest("hex");
+}
+
+/**
+ * In-memory key for "same logical item" checks against rows written before
+ * the hash composition above changed. Same source URL + same normalized
+ * title = same item, whatever date or excerpt the source shows today.
+ */
+export function buildIdentityKey(url: string, title: string) {
+  return `${normalizeUrl(url).toLowerCase()}::${normalizeTitle(title)}`;
 }

@@ -6,9 +6,7 @@ export const deduplicator = {
     sourceId: string;
     title: string;
     url: string;
-    publicationDate?: string | null;
     stableId?: string;
-    text: string;
   }) {
     return buildStableHash(input);
   },

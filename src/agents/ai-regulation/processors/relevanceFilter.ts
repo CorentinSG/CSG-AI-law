@@ -18,6 +18,13 @@ function collectMatches(haystack: string, terms: readonly string[]) {
   return terms.filter((term) => haystack.includes(normalizeForSearch(term)));
 }
 
+// Broad full-text search feeds match documents that merely *mention* AI deep
+// in the body — the Federal Register feed published grant notices and export
+// rules whose titles have nothing to do with AI. For these sources the AI
+// signal must appear in the title or excerpt, where a document says what it
+// is actually about.
+const TITLE_SIGNAL_REQUIRED_SOURCE_IDS = new Set(["src-federal-register-ai"]);
+
 export const relevanceFilter = {
   evaluate(candidate: ExtractedCandidateItem, source: RegulationSource): RelevanceDecision {
     const candidateHaystack = normalizeForSearch(
@@ -68,6 +75,23 @@ export const relevanceFilter = {
     const titleExcerptHaystack = normalizeForSearch(
       `${candidate.title} ${candidate.excerpt ?? ""}`,
     );
+
+    if (TITLE_SIGNAL_REQUIRED_SOURCE_IDS.has(source.id)) {
+      const titleAiMatches = collectMatches(
+        titleExcerptHaystack,
+        aiRegulationKeywordConfig.aiTerms,
+      );
+      if (titleAiMatches.length === 0) {
+        return {
+          relevant: false,
+          reason:
+            "Broad search-feed source: no AI term in the title or excerpt, so the document merely mentions AI in passing.",
+          matchedAiTerms,
+          matchedRegulatoryTerms,
+        };
+      }
+    }
+
     const hasStrongTitleSignal =
       matchedAiTerms.length > 0 &&
       (matchedRegulatoryTerms.length > 0 ||
