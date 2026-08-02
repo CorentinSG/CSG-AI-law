@@ -1,0 +1,44 @@
+name: US baseline source verification
+
+# Fetches every U.S. state-profile source still marked
+# needs_manual_verification, records HTTP status and content-marker hits, and
+# uploads the report. Read-only: no database access, no publication — the
+# report is evidence for flipping runtimeAccessible flags by hand.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify-sources:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: Check baseline sources
+        env:
+          APP_DATA_MODE: memory
+          ALLOW_MEMORY_MODE_IN_PRODUCTION: "true"
+        run: |
+          # Env validation demands ADMIN_AUTH_SECRET on import; this job never
+          # touches admin sessions, so a throwaway value satisfies it.
+          secret="$(openssl rand -hex 32)"
+          echo "::add-mask::$secret"
+          export ADMIN_AUTH_SECRET="$secret"
+          npx tsx scripts/verify-us-baseline-sources.ts --out us-baseline-verification.md
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: us-baseline-verification
+          path: us-baseline-verification.md
+          if-no-files-found: warn

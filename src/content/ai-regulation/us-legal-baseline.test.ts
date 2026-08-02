@@ -98,6 +98,41 @@ describe("U.S. state baseline", () => {
     expect(newYork?.publicSummary).toContain("New York Courts Part 161");
   });
 
+  // First populated pass of the state-by-state review. Each pinned status is
+  // backed by codified text confirmed in the Legal Data Hunter corpus or a
+  // runtime-verified official bill page — see populatedStateBaselines.
+  it("records the source-confirmed enacted state AI laws", () => {
+    const byCode = new Map(
+      getUsStateAiLawProfiles().map((profile) => [profile.stateCode, profile]),
+    );
+
+    expect(byCode.get("CO")?.aiLawStatus).toBe("enacted_comprehensive_ai_law");
+    expect(byCode.get("CO")?.enactedAIStatutes.join(" ")).toContain("SB24-205");
+
+    expect(byCode.get("TX")?.aiLawStatus).toBe("enacted_comprehensive_ai_law");
+    expect(byCode.get("TX")?.enactedAIStatutes.join(" ")).toContain("HB 149");
+    expect(
+      byCode.get("TX")?.officialSourceUrls.some((url) => url.includes("statutes.capitol.texas.gov")),
+    ).toBe(true);
+
+    expect(byCode.get("CA")?.aiLawStatus).toBe("enacted_sector_specific_ai_law");
+    expect(byCode.get("CA")?.enactedAIStatutes.join(" ")).toContain("22757");
+
+    expect(byCode.get("UT")?.aiLawStatus).toBe("enacted_sector_specific_ai_law");
+    expect(byCode.get("UT")?.enactedAIStatutes.join(" ")).toContain("Chapter 77");
+
+    expect(byCode.get("CT")?.aiLawStatus).toBe("enacted_sector_specific_ai_law");
+    expect(byCode.get("CT")?.enactedAIStatutes.join(" ")).toContain("51-10e");
+  });
+
+  it("shows enacted states on the public map instead of zero", () => {
+    const enacted = usStateMapStatuses.filter((state) =>
+      state.status.startsWith("enacted_"),
+    );
+
+    expect(enacted.map((state) => state.code).sort()).toEqual(["CA", "CO", "CT", "TX", "UT"]);
+  });
+
   it("maps all state profiles into the U.S. map", () => {
     expect(usStateMapStatuses).toHaveLength(51);
     expect(usStateMapStatuses.find((state) => state.code === "CA")?.href).toBe(

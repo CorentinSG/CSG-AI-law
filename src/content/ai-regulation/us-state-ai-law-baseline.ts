@@ -204,6 +204,19 @@ const prioritySources: Record<string, UsStateOfficialSource[]> = {
       note:
         "Official California privacy agency rulemaking page; runtime verification returned 200.",
     }),
+    source({
+      label:
+        "Business and Professions Code, Chapter 25.1 — Transparency in Frontier Artificial Intelligence Act (§§ 22757.10–22757.16)",
+      institution: "California Legislative Information",
+      url: "https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?lawCode=BPC&sectionNum=22757.12.",
+      sourceType: "state_code",
+      runtimeAccessible: null,
+      responseStatus: null,
+      parserStatus: "manual_reference",
+      recommendation: "manual_review",
+      note:
+        "Official codified text of SB 53 (Stats. 2025, Ch. 138) confirmed through the Legal Data Hunter legislation corpus; runtime accessibility pending the baseline verification pass.",
+    }),
   ],
   CO: [
     source({
@@ -216,7 +229,19 @@ const prioritySources: Record<string, UsStateOfficialSource[]> = {
       parserStatus: "manual_reference",
       recommendation: "manual_review",
       note:
-        "Official Colorado legislature bill page verified as reachable. Baseline flags it for source verification before detailed statutory claims.",
+        "Official Colorado legislature bill page for the Colorado AI Act (Consumer Protections for Artificial Intelligence), verified as reachable.",
+    }),
+    source({
+      label: "Colorado SB25B-004 bill page (AI Act implementation-date change)",
+      institution: "Colorado General Assembly",
+      url: "https://leg.colorado.gov/bills/sb25b-004",
+      sourceType: "legislature",
+      runtimeAccessible: null,
+      responseStatus: null,
+      parserStatus: "manual_reference",
+      recommendation: "manual_review",
+      note:
+        "Candidate source for the 2025 special-session bill adjusting the Colorado AI Act's effective date. Do not state a revised effective date publicly until the baseline verification pass confirms this page.",
     }),
   ],
   NY: [
@@ -284,6 +309,19 @@ const prioritySources: Record<string, UsStateOfficialSource[]> = {
       note:
         "Official Texas legislative source verified as reachable; specific AI bills or statutes require item-level review.",
     }),
+    source({
+      label:
+        "Business & Commerce Code, Chapter 552 — artificial intelligence protections (TRAIGA codification)",
+      institution: "Texas Statutes",
+      url: "https://statutes.capitol.texas.gov/Docs/BC/htm/BC.552.htm",
+      sourceType: "state_code",
+      runtimeAccessible: null,
+      responseStatus: null,
+      parserStatus: "manual_reference",
+      recommendation: "manual_review",
+      note:
+        "Official codified text of the Texas Responsible Artificial Intelligence Governance Act (HB 149, 2025) confirmed through the Legal Data Hunter legislation corpus (e.g. § 552.053 social scoring); runtime accessibility pending the baseline verification pass.",
+    }),
   ],
   CT: [
     source({
@@ -298,6 +336,19 @@ const prioritySources: Record<string, UsStateOfficialSource[]> = {
       note:
         "Official legislature URL failed from runtime verification. Keep inactive until access is reliable.",
     }),
+    source({
+      label:
+        "Connecticut General Statutes § 51-10e — artificial intelligence annual inventory, policies, assessments",
+      institution: "Connecticut General Assembly",
+      url: "https://www.cga.ct.gov/current/pub/chap_870.htm",
+      sourceType: "state_code",
+      runtimeAccessible: null,
+      responseStatus: null,
+      parserStatus: "manual_reference",
+      recommendation: "manual_review",
+      note:
+        "Official codified statute confirmed through the Legal Data Hunter legislation corpus (codifying the 2023 SB 1103 state AI inventory and assessment duties); runtime accessibility pending the baseline verification pass.",
+    }),
   ],
   UT: [
     source({
@@ -311,6 +362,18 @@ const prioritySources: Record<string, UsStateOfficialSource[]> = {
       recommendation: "manual_review",
       note:
         "Official Utah legislature source verified as reachable; specific AI bills or statutes require item-level review.",
+    }),
+    source({
+      label: "Utah Code, Title 13, Chapter 77 — Artificial Intelligence Policy Act",
+      institution: "Utah State Legislature",
+      url: "https://le.utah.gov/xcode/Title13/13.html",
+      sourceType: "state_code",
+      runtimeAccessible: null,
+      responseStatus: null,
+      parserStatus: "manual_reference",
+      recommendation: "manual_review",
+      note:
+        "Official codified text confirmed through the Legal Data Hunter legislation corpus (e.g. § 13-77-104 generative-AI disclosure safe harbor); runtime accessibility pending the baseline verification pass.",
     }),
   ],
   VA: [
@@ -411,17 +474,95 @@ const states = [
   ["DC", "District of Columbia"],
 ] as const;
 
+// State-by-state populated review (first pass, 2026-08). Every entry below is
+// backed by an official source in `prioritySources` for the same state, and
+// every statute named was confirmed either against the Legal Data Hunter
+// legislation corpus (codified text with an official URL) or against a
+// runtime-verified official bill page. Nothing here is inferred from press
+// coverage. States absent from this record keep the source-reachability
+// heuristic until their review lands.
+interface PopulatedStateBaseline {
+  status: UsStateAiLawStatus;
+  confidence: UsStateConfidence;
+  enactedAIStatutes: string[];
+  pendingAIBills?: string[];
+  stateGovernmentUseRules?: string[];
+  privateSectorRules?: string[];
+  publicSummary: string;
+}
+
+const populatedStateBaselines: Record<string, PopulatedStateBaseline> = {
+  CO: {
+    status: "enacted_comprehensive_ai_law",
+    confidence: "high",
+    enactedAIStatutes: [
+      "Colorado AI Act — SB24-205, Consumer Protections for Artificial Intelligence (signed May 17, 2024 per the official bill page): duties for developers and deployers of high-risk AI systems concerning algorithmic discrimination.",
+    ],
+    pendingAIBills: [
+      "SB25B-004 (2025 special session) adjusts the Colorado AI Act's implementation date; its official bill page is queued for the baseline verification pass before the revised date is stated publicly.",
+    ],
+    publicSummary:
+      "Colorado enacted the first U.S. cross-sector AI law, SB24-205 (Consumer Protections for Artificial Intelligence), imposing duties on developers and deployers of high-risk AI systems. A 2025 special-session bill adjusted its implementation date; item-level review of implementing guidance continues.",
+  },
+  CA: {
+    status: "enacted_sector_specific_ai_law",
+    confidence: "high",
+    enactedAIStatutes: [
+      "Transparency in Frontier Artificial Intelligence Act — SB 53 (Stats. 2025, Ch. 138), codified at Business and Professions Code §§ 22757.10–22757.16: safety-framework publication and incident-disclosure duties for frontier AI developers.",
+    ],
+    privateSectorRules: [
+      "Business and Professions Code §§ 22757.10–22757.16 impose transparency and reporting duties on large frontier AI developers.",
+    ],
+    publicSummary:
+      "California enacted the Transparency in Frontier Artificial Intelligence Act (SB 53, Stats. 2025, Ch. 138), codified in the Business and Professions Code, alongside active CPPA rulemaking on automated decision-making. Additional enacted AI statutes are under item-level review before being listed.",
+  },
+  TX: {
+    status: "enacted_comprehensive_ai_law",
+    confidence: "high",
+    enactedAIStatutes: [
+      "Texas Responsible Artificial Intelligence Governance Act — HB 149 (2025), codified in Business & Commerce Code Chapter 552 (e.g. § 552.053 prohibiting government social scoring) with the Texas Artificial Intelligence Council in Chapter 554.",
+    ],
+    stateGovernmentUseRules: [
+      "Business & Commerce Code Chapter 552 prohibits specified governmental AI uses, including social scoring (§ 552.053).",
+    ],
+    publicSummary:
+      "Texas enacted the Responsible Artificial Intelligence Governance Act (HB 149, 2025), codified in Business & Commerce Code Chapters 552–554, combining prohibited-use rules with an AI Council. Item-level review of its private-sector provisions continues.",
+  },
+  UT: {
+    status: "enacted_sector_specific_ai_law",
+    confidence: "high",
+    enactedAIStatutes: [
+      "Artificial Intelligence Policy Act — SB 149 (2024), codified at Utah Code Title 13, Chapter 77: generative-AI disclosure duties in consumer transactions and regulated services, with a disclosure safe harbor (§ 13-77-104).",
+    ],
+    privateSectorRules: [
+      "Utah Code § 13-77-104 provides a safe harbor where generative AI clearly and conspicuously discloses itself at the outset of covered interactions.",
+    ],
+    publicSummary:
+      "Utah enacted the Artificial Intelligence Policy Act (SB 149, 2024), codified at Utah Code Title 13, Chapter 77, establishing generative-AI disclosure duties and a regulatory learning framework. Later amendments are under item-level review.",
+  },
+  CT: {
+    status: "enacted_sector_specific_ai_law",
+    confidence: "high",
+    enactedAIStatutes: [
+      "Connecticut General Statutes § 51-10e (enacted 2023 as SB 1103): annual inventory, policies, procedures and impact-assessment duties for state agencies' artificial intelligence systems.",
+    ],
+    stateGovernmentUseRules: [
+      "CGS § 51-10e requires an annual inventory and assessment regime for AI systems used by state government.",
+    ],
+    publicSummary:
+      "Connecticut enacted state-government AI governance duties (CGS § 51-10e, from 2023's SB 1103): annual inventories, policies and assessments for agency AI systems. Broader private-sector AI legislation has been debated but is not verified as enacted.",
+  },
+};
+
 function createProfile(code: string, name: string): UsStateAiLawProfile {
   const sources = prioritySources[code] ?? [];
   const sourceReferences = sources.map(stateReference);
   const hasReachableOfficialSource = sources.some((entry) => entry.runtimeAccessible);
-  const status: UsStateAiLawStatus =
-    code === "CO" && hasReachableOfficialSource
-      ? "pending_ai_legislation"
-      : code === "CA" && hasReachableOfficialSource
-        ? "ai_related_privacy_or_automated_decision_rules"
-      : code === "NY" && hasReachableOfficialSource
-        ? "agency_guidance_or_enforcement"
+  const populated = populatedStateBaselines[code];
+  const status: UsStateAiLawStatus = populated
+    ? populated.status
+    : code === "NY" && hasReachableOfficialSource
+      ? "agency_guidance_or_enforcement"
       : hasReachableOfficialSource
         ? "no_specific_ai_law_verified"
         : "needs_review";
@@ -434,20 +575,23 @@ function createProfile(code: string, name: string): UsStateAiLawProfile {
     aiLawStatus: status,
     aiLawStatusLabel: usStateAiLawStatusTaxonomy[status].label,
     aiLawStatusDescription: usStateAiLawStatusTaxonomy[status].description,
-    confidenceLevel: hasReachableOfficialSource ? "medium" : "needs_review",
-    enactedAIStatutes: [],
-    pendingAIBills:
-      code === "CO" && hasReachableOfficialSource
-        ? ["Colorado SB24-205 requires item-level legal review before detailed public summary."]
-        : [],
+    confidenceLevel: populated
+      ? populated.confidence
+      : hasReachableOfficialSource
+        ? "medium"
+        : "needs_review",
+    enactedAIStatutes: populated?.enactedAIStatutes ?? [],
+    pendingAIBills: populated?.pendingAIBills ?? [],
     failedAIBills: [],
-    stateGovernmentUseRules:
-      code === "NY"
+    stateGovernmentUseRules: [
+      ...(populated?.stateGovernmentUseRules ?? []),
+      ...(code === "NY"
         ? [
             "Part 161 of the Rules of the Chief Administrator governs use of artificial intelligence technology in preparing court papers and became effective June 1, 2026.",
           ]
-        : [],
-    privateSectorRules: [],
+        : []),
+    ],
+    privateSectorRules: populated?.privateSectorRules ?? [],
     employmentAIRules: [],
     biometricRules: [],
     deepfakeSyntheticMediaRules: [],
@@ -470,21 +614,27 @@ function createProfile(code: string, name: string): UsStateAiLawProfile {
     sourceVerificationStatus: hasReachableOfficialSource
       ? "partially_verified"
       : "needs_review",
-    lastReviewedDate: verifiedAt,
+    lastReviewedDate: populated ? "2026-08-02" : verifiedAt,
     missingSourceWarnings: [
       ...(sourceReferences.length === 0 ? ["No official state source verified yet."] : []),
-      "No comprehensive state-by-state AI law review completed yet.",
+      ...(populated
+        ? [
+            "Populated first-pass review: statutes listed are source-confirmed, but the state's full AI-law landscape (bills, agency actions, case law) is broader than this profile.",
+          ]
+        : ["No comprehensive state-by-state AI law review completed yet."]),
       "No official case-law source verified for this state profile.",
     ],
     editorialNotes: [
       "This state profile is baseline coverage only and should not be read as exhaustive.",
       "Do not infer absence of state AI law from missing verified entries.",
     ],
-    publicSummary: hasReachableOfficialSource
-      ? code === "NY"
-        ? `${name} has multiple official sources verified for baseline monitoring, including the New York Courts Part 161 rule page, but item-level legal review remains necessary before stronger public conclusions about broader state AI law coverage are made.`
-        : `${name} has at least one official state source verified for baseline monitoring, but specific AI laws, bills, or agency actions still require item-level review.`
-      : `${name} is included in the U.S. state baseline, but no official state source has been verified in this phase.`,
+    publicSummary: populated
+      ? populated.publicSummary
+      : hasReachableOfficialSource
+        ? code === "NY"
+          ? `${name} has multiple official sources verified for baseline monitoring, including the New York Courts Part 161 rule page, but item-level legal review remains necessary before stronger public conclusions about broader state AI law coverage are made.`
+          : `${name} has at least one official state source verified for baseline monitoring, but specific AI laws, bills, or agency actions still require item-level review.`
+        : `${name} is included in the U.S. state baseline, but no official state source has been verified in this phase.`,
   };
 }
 
