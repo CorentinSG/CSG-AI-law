@@ -44,7 +44,7 @@ const mocks = vi.hoisted(() => ({
   },
   repository: {
     upsertRawItem: vi.fn(),
-    listRawRegulatoryItems: vi.fn(),
+    listRawItemIdentitiesBySource: vi.fn(),
   },
   relevanceFilter: {
     evaluate: vi.fn(),
@@ -235,7 +235,7 @@ beforeEach(() => {
     item: { ...rawItem },
     inserted: true,
   });
-  mocks.repository.listRawRegulatoryItems.mockResolvedValue([]);
+  mocks.repository.listRawItemIdentitiesBySource.mockResolvedValue([]);
   mocks.updateRepository.updateRawItemMetadata.mockImplementation(
     async (id: string, metadata: Record<string, unknown>) => ({
       ...rawItem,
@@ -349,8 +349,13 @@ describe("runAiRegulationScan harness wiring", () => {
         publicationDate: "2026-06-15",
       },
     ]);
-    mocks.repository.listRawRegulatoryItems.mockResolvedValue([
-      { ...rawItem, hash: "legacy-hash-composed-with-date-and-text" },
+    mocks.repository.listRawItemIdentitiesBySource.mockResolvedValue([
+      {
+        id: rawItem.id,
+        rawUrl: rawItem.rawUrl,
+        rawTitle: rawItem.rawTitle,
+        hash: "legacy-hash-composed-with-date-and-text",
+      },
     ]);
 
     const { runAiRegulationScan } = await import(

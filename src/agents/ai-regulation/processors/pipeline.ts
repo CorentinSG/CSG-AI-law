@@ -297,12 +297,13 @@ async function scanSourcesForCandidates(
       // see this: rows written under the old hash composition (date + text
       // were part of identity) carry hashes the new composition will never
       // reproduce, so without this map every republished item would re-insert
-      // once. One slim query per scanned source, checked in memory.
+      // once. Identity projection only — pulling full rows here (with their
+      // raw_metadata JSONB) measurably pressured the connection pool.
       const knownByIdentity = new Map<string, { id: string; hash: string }>();
       if (candidates.length > 0) {
-        const recentItems = await getAiRegulationRepository().listRawRegulatoryItems(
-          300,
+        const recentItems = await getAiRegulationRepository().listRawItemIdentitiesBySource(
           source.id,
+          200,
         );
         for (const item of recentItems) {
           knownByIdentity.set(buildIdentityKey(item.rawUrl, item.rawTitle), {

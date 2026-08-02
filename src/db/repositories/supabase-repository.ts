@@ -1790,6 +1790,28 @@ export class SupabaseAiRegulationRepository implements AiRegulationRepository {
     return ((data ?? []) as unknown as Row[]).map(mapRawItemRow);
   }
 
+  async listRawItemIdentitiesBySource(sourceId: string, limit = 200) {
+    const client = requireAdminClient();
+    const { data, error } = await client
+      .from("raw_regulatory_items")
+      .select("id,raw_url,raw_title,hash")
+      .eq("source_id", sourceId)
+      .order("detected_at", { ascending: false })
+      .limit(limit);
+    handleError("Failed to list raw item identities", error);
+    return ((data ?? []) as Array<{
+      id: string;
+      raw_url: string;
+      raw_title: string;
+      hash: string;
+    }>).map((row) => ({
+      id: row.id,
+      rawUrl: row.raw_url,
+      rawTitle: row.raw_title,
+      hash: row.hash,
+    }));
+  }
+
   async listProcessingLogs(limit = 20) {
     const client = requireAdminClient();
     const { data, error } = await client
