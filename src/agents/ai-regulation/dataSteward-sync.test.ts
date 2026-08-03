@@ -119,4 +119,80 @@ describe("syncLegalIntelligenceDataStewardFindings", () => {
       }),
     );
   });
+  // A scan that has already succeeded and persisted its results must not be
+  // reported as failed because this bookkeeping write hit the pooler.
+  describe("resilience", () => {
+    function minimalReport(sourceCount: number) {
+      return {
+        generatedAt: "2026-08-03T18:00:00.000Z",
+        summary: {
+          sourceFindings: sourceCount,
+          sourceAttention: sourceCount,
+          europeCoverageFindings: 0,
+          usCoverageFindings: 0,
+          citationWarnings: 0,
+          discoveryLeadsNeedingVerification: 0,
+          highPriorityReviewItems: 0,
+          staleOrDueCoverageItems: 0,
+          europeMaintenanceItems: 0,
+        },
+        latestScheduledScan: null,
+        sources: Array.from({ length: sourceCount }, (_, index) => ({
+          sourceId: `src-${index}`,
+          sourceName: `Source ${index}`,
+          active: true,
+          freshnessStatus: "stale" as const,
+          reviewPriority: "high" as const,
+          lastReviewedAt: "2026-05-01T00:00:00.000Z",
+          lastScannedAt: null,
+          latestResponseStatus: 200,
+          latestScanStatus: "success",
+          itemsFetched: 0,
+          newItemsDetected: 0,
+          duplicatesDetected: 0,
+          accessibilityWarnings: ["stale source"],
+          parserWarnings: [],
+          reliabilityNotes: [],
+        })),
+        europeCoverage: [],
+        usCoverage: [],
+        citationFindings: [],
+        discoveryFindings: [],
+        reviewQueue: [],
+        europeMaintenanceQueue: [],
+      } as unknown as Parameters<typeof syncLegalIntelligenceDataStewardFindings>[0];
+    }
+
+    it("reports a failed write instead of throwing", async () => {
+      upsertDataQualityFinding
+        .mockResolvedValueOnce({})
+        .mockRejectedValueOnce(new Error("upstream connect error: connection timeout"))
+        .mockResolvedValue({});
+
+      const result = await syncLegalIntelligenceDataStewardFindings(minimalReport(3));
+
+      expect(result.syncedCount).toBe(2);
+      expect(result.failedCount).toBe(1);
+      expect(result.error).toContain("connection timeout");
+    });
+
+    // The pooler answered "upstream connect error" precisely because every
+    // finding was upserted at once.
+    it("never opens more than a handful of writes at a time", async () => {
+      let inFlight = 0;
+      let peak = 0;
+      upsertDataQualityFinding.mockImplementation(async () => {
+        inFlight += 1;
+        peak = Math.max(peak, inFlight);
+        await Promise.resolve();
+        inFlight -= 1;
+        return {};
+      });
+
+      const result = await syncLegalIntelligenceDataStewardFindings(minimalReport(20));
+
+      expect(result.syncedCount).toBe(20);
+      expect(peak).toBeLessThanOrEqual(4);
+    });
+  });
 });

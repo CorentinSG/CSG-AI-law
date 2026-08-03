@@ -612,18 +612,48 @@ export async function syncLegalIntelligenceDataStewardFindings(
     })),
   ];
 
-  await Promise.all(
-    findings.map((finding) =>
-      updateRepository.upsertDataQualityFinding({
-        ...finding,
-        firstDetectedAt: report.generatedAt,
-        lastDetectedAt: report.generatedAt,
-        resolvedAt: null,
-      }),
-    ),
-  );
+  // Bounded fan-out, and never fatal.
+  //
+  // This used to be one Promise.all over every finding: dozens of simultaneous
+  // upserts against the connection pooler, which answered with "upstream
+  // connect error … connection timeout". Worse, this sync runs *after* a scan
+  // has already succeeded and persisted its results, so a single rejected
+  // write propagated out of runDataStewardSync() and marked the whole scan job
+  // failed — production runs reported failures for scans that had actually
+  // worked. Bookkeeping must never take down a scan run (same rule as the
+  // retention purges).
+  const CONCURRENCY = 4;
+  let syncedCount = 0;
+  const errors: string[] = [];
+
+  for (let index = 0; index < findings.length; index += CONCURRENCY) {
+    const batch = findings.slice(index, index + CONCURRENCY);
+    const results = await Promise.allSettled(
+      batch.map((finding) =>
+        updateRepository.upsertDataQualityFinding({
+          ...finding,
+          firstDetectedAt: report.generatedAt,
+          lastDetectedAt: report.generatedAt,
+          resolvedAt: null,
+        }),
+      ),
+    );
+    for (const result of results) {
+      if (result.status === "fulfilled") {
+        syncedCount += 1;
+      } else {
+        errors.push(
+          result.reason instanceof Error ? result.reason.message : String(result.reason),
+        );
+      }
+    }
+  }
 
   return {
-    syncedCount: findings.length,
+    syncedCount,
+    failedCount: errors.length,
+    // First message only: enough to diagnose, without pasting an HTML error
+    // page into a scan summary.
+    error: errors[0] ?? null,
   };
 }
