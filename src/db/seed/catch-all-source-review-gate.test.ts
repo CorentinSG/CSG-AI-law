@@ -30,12 +30,14 @@ describe("generated catch-all source review gate", () => {
     (source) => source.config?.itemSelector === GENERATED_CATCH_ALL_SELECTOR,
   );
 
-  // 54, down from the original 66: four lanes moved to verified RSS feeds
-  // (Croatia, Malta, Monaco DPAs and the Greek government) and eight to verified
-  // selectors (Greece, Luxembourg, Portugal, Norway, Finland and Slovakia DPAs,
-  // the Slovenian and Latvian governments).
+  // 45, down from the original 66. First wave (→54): four lanes to verified
+  // RSS (Croatia, Malta, Monaco DPAs, Greek government) and eight to verified
+  // selectors. Second wave (run 30717524115, 2026-08-01 → 45): six lanes to
+  // verified feeds (Czech, Romanian, Andorran, Albanian, Serbian DPAs and the
+  // Montenegrin government) and three to verified selectors (Latvian,
+  // Liechtenstein, San Marino DPAs).
   it("covers the generated shells with neither a feed nor a verified selector", () => {
-    expect(catchAllSources.length).toBe(54);
+    expect(catchAllSources.length).toBe(45);
     expect(
       catchAllSources.every(
         (source) => source.id.endsWith("-dpa-ai") || source.id.endsWith("-government-ai"),
@@ -53,7 +55,7 @@ describe("generated catch-all source review gate", () => {
   });
 
   // The flag must never spread beyond sources that genuinely extract with a bare
-  // anchor selector: the 54 remaining generated shells plus the 6 hand-authored
+  // anchor selector: the 45 remaining generated shells plus the 6 hand-authored
   // main-scoped ones. Anything else appearing here means a verified official
   // lane was pulled out of the automatic publication path by mistake.
   it("keeps the flag confined to sources with a bare anchor selector", () => {
@@ -65,7 +67,7 @@ describe("generated catch-all source review gate", () => {
       );
     });
 
-    expect(flagged.length).toBe(60);
+    expect(flagged.length).toBe(51);
     expect(flagged.map((source) => source.id).sort()).toEqual(
       anchorCatchAll.map((source) => source.id).sort(),
     );
@@ -131,6 +133,13 @@ const VERIFIED_FEEDS: Record<string, string> = {
   "src-mc-dpa-ai": "https://www.ccin.mc/rss",
   "src-gr-government-ai": "https://gslegal.gov.gr/rss",
   "src-nl-ap-ai": "https://www.autoriteitpersoonsgegevens.nl/rss",
+  // Second wave (run 30717524115, 2026-08-01): all parse with dated items.
+  "src-cz-dpa-ai": "https://uoou.gov.cz/feed/en-rss.xml",
+  "src-ro-dpa-ai": "https://www.dataprotection.ro/feed",
+  "src-ad-dpa-ai": "https://www.apda.ad/feed",
+  "src-al-dpa-ai": "https://idp.al/feed/",
+  "src-rs-dpa-ai": "https://www.poverenik.rs/rss",
+  "src-me-government-ai": "https://rss.gov.me/",
 };
 
 describe("sources promoted to a verified feed", () => {
@@ -166,6 +175,10 @@ const VERIFIED_SELECTORS: Record<string, string> = {
   // Recovered from the authority's own root after the seeded deep link 404'd
   // (run 30397833023).
   "src-no-dpa-ai": "main ul li:has(a[href]):has(time)",
+  // Second wave (run 30717524115, 2026-08-01): 100% dated items on each page.
+  "src-lv-dpa-ai": "div.article-info",
+  "src-li-dpa-ai": "div.columns.small-12.medium-9",
+  "src-sm-dpa-ai": "ul.list.list-marked.list-marked-icon.text-dark.inset-left-0.list-marked-gray",
   "src-at-dsb-ai": "main li:has(a[href])",
   // Found by deriving candidates from the page rather than matching a curated
   // pattern (run 30600418373) — no hand-written list would contain these names.

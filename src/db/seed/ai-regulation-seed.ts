@@ -91,6 +91,8 @@ const remainingEuMemberStateSourceInputs = [
     country: "Czechia",
     dpaName: "Czech Office for Personal Data Protection",
     dpaUrl: "https://uoou.gov.cz/en",
+    // verified 2026-08-01 (run 30717524115): link-rel declared feed; only 2 items, latest 2024-04 — official but slow-moving
+    dpaFeedUrl: "https://uoou.gov.cz/feed/en-rss.xml",
     governmentName: "Czech Ministry of Industry and Trade AI Act implementation",
     // The seeded link is a single 2024 press release — one article, which
     // publishes nothing further. The ministry's root is its newsroom. URL only:
@@ -188,6 +190,8 @@ const remainingEuMemberStateSourceInputs = [
     country: "Latvia",
     dpaName: "Latvian Data State Inspectorate",
     dpaUrl: "https://www.dvi.gov.lv/en",
+    // verified 2026-08-01 (run 30717524115): 5 items, 100% dated, data-protection headlines
+    dpaSelector: "div.article-info",
     governmentName: "Likumi.lv official legislation database",
     // The seeded URL was already right; only the selector was missing. Verified
     // by run 30600418373: 5 items, 100% dated — Cabinet regulation amendments.
@@ -275,6 +279,8 @@ const remainingEuMemberStateSourceInputs = [
     country: "Romania",
     dpaName: "Romanian National Supervisory Authority for Personal Data Processing",
     dpaUrl: "https://www.dataprotection.ro/",
+    // verified 2026-08-01 (run 30717524115): conventional path, 5 dated items, latest 2026-07-31 (press releases)
+    dpaFeedUrl: "https://www.dataprotection.ro/feed",
     governmentName: "Romanian national AI strategy",
     governmentUrl:
       "https://www.research.gov.ro/programe-nationale/strategia-nationala-in-domeniul-inteligentei-artificiale-2024-2027/",
@@ -386,6 +392,8 @@ const nonEuEuropeSourceInputs = [
     country: "Liechtenstein",
     dpaName: "Liechtenstein Data Protection Office",
     dpaUrl: "https://www.datenschutzstelle.li/",
+    // verified 2026-08-01 (run 30717524115): 5 items, 100% dated, incl. case-law updates
+    dpaSelector: "div.columns.small-12.medium-9",
     governmentName: "Liechtenstein legal information system",
     governmentUrl: "https://www.gesetze.li/",
     newsQuery:
@@ -414,6 +422,8 @@ const nonEuEuropeSourceInputs = [
     country: "Andorra",
     dpaName: "Andorran Data Protection Agency",
     dpaUrl: "https://www.apda.ad/",
+    // verified 2026-08-01 (run 30717524115): conventional path, 10 dated items, latest 2026-05-19
+    dpaFeedUrl: "https://www.apda.ad/feed",
     governmentName: "Butlleti Oficial del Principat d'Andorra",
     governmentUrl: "https://www.bopa.ad/",
     newsQuery:
@@ -427,6 +437,8 @@ const nonEuEuropeSourceInputs = [
     country: "San Marino",
     dpaName: "San Marino Data Protection Authority",
     dpaUrl: "https://www.garanteprivacy.sm/",
+    // verified 2026-08-01 (run 30717524115): 6 items, 100% dated, incl. Convention 108+ ratification
+    dpaSelector: "ul.list.list-marked.list-marked-icon.text-dark.inset-left-0.list-marked-gray",
     governmentName: "San Marino institutional legal sources",
     governmentUrl: "https://www.consigliograndeegenerale.sm/",
     newsQuery:
@@ -453,6 +465,8 @@ const nonEuEuropeSourceInputs = [
     country: "Albania",
     dpaName: "Information and Data Protection Commissioner",
     dpaUrl: "https://www.idp.al/",
+    // verified 2026-08-01 (run 30717524115): link-rel declared, 10 dated items, latest 2026-07-23
+    dpaFeedUrl: "https://idp.al/feed/",
     governmentName: "Albanian official publications center",
     governmentUrl: "https://qbz.gov.al/",
     newsQuery:
@@ -494,6 +508,8 @@ const nonEuEuropeSourceInputs = [
     dpaUrl: "https://www.azlp.me/",
     governmentName: "Government of Montenegro legal and policy portal",
     governmentUrl: "https://www.gov.me/",
+    // verified 2026-08-01 (run 30717524115): link-rel declared, 42 dated items, latest 2026-08-01; broad government feed, keyword filtering essential
+    governmentFeedUrl: "https://rss.gov.me/",
     newsQuery:
       '(("artificial intelligence" OR "AI Act" OR algorithm) AND Montenegro AND (law OR regulation OR legal OR data protection))',
     gdeltQuery:
@@ -518,6 +534,8 @@ const nonEuEuropeSourceInputs = [
     country: "Serbia",
     dpaName: "Commissioner for Information of Public Importance and Personal Data Protection",
     dpaUrl: "https://www.poverenik.rs/",
+    // verified 2026-08-01 (run 30717524115): conventional path, 10 dated items, latest 2026-07-30 (case decisions)
+    dpaFeedUrl: "https://www.poverenik.rs/rss",
     governmentName: "Serbian legal information system",
     governmentUrl: "https://www.pravno-informacioni-sistem.rs/",
     newsQuery:
