@@ -1790,6 +1790,31 @@ export class SupabaseAiRegulationRepository implements AiRegulationRepository {
     return ((data ?? []) as unknown as Row[]).map(mapRawItemRow);
   }
 
+  async countPublicUpdatesForRegions(regions: readonly string[]) {
+    if (regions.length === 0) return 0;
+    const client = requirePublicReadClient();
+    // head: true transfers no rows — only the count header.
+    const { count, error } = await client
+      .from("ai_regulatory_updates")
+      .select("*", { count: "exact", head: true })
+      .eq("status", "published")
+      .in("region", [...regions]);
+    handleError("Failed to count public regulatory updates", error);
+    return count ?? 0;
+  }
+
+  async countPublicNewsItemsForRegions(regions: readonly string[]) {
+    if (regions.length === 0) return 0;
+    const client = requirePublicReadClient();
+    const { count, error } = await client
+      .from("news_items")
+      .select("*", { count: "exact", head: true })
+      .eq("public_visibility_status", "public")
+      .in("region", [...regions]);
+    handleError("Failed to count public news items", error);
+    return count ?? 0;
+  }
+
   async listRawItemIdentitiesBySource(sourceId: string, limit = 200) {
     const client = requireAdminClient();
     const { data, error } = await client

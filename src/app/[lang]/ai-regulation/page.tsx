@@ -98,27 +98,6 @@ function parseView(value: string | undefined): HubView {
   return "overview";
 }
 
-function isInternationalSignal(input: {
-  region?: string | null;
-  jurisdiction?: string | null;
-  sourceName?: string | null;
-  tags?: string[];
-}) {
-  const haystack = [
-    input.region,
-    input.jurisdiction,
-    input.sourceName,
-    ...(input.tags ?? []),
-  ]
-    .filter(Boolean)
-    .join(" ")
-    .toLowerCase();
-
-  return /\b(international|global|oecd|unesco|iso|iec|ieee|council of europe|standards?)\b/.test(
-    haystack,
-  );
-}
-
 async function getPublicNewsItems(afterCursor: import("@/lib/pagination").CursorPosition | null) {
   const result = await updateRepository.getPublicNewsItemsCursorPage({
     limit: pageSize,
@@ -206,13 +185,35 @@ export default async function AiRegulationPage({
   const overviewNewsItems = newsPage.items.slice(0, 5);
   const overviewUpdates = updates.slice(0, 3);
 
-  // Region-filtered news for portal cards
-  const europeNewsCount = newsPage.items.filter((i) => i.region === "Europe").length;
-  const usNewsCount = newsPage.items.filter(
-    (i) => i.region === "United States" || i.region === "North America",
-  ).length;
-  const internationalNewsCount = newsPage.items.filter(isInternationalSignal).length;
-  const internationalDatabaseCount = updatesPage.items.filter(isInternationalSignal).length;
+  // Regional totals for the portal cards.
+  //
+  // These used to be computed by filtering the single fetched page: the news
+  // counts saw only the newest 18 rows (so any region absent from that slice
+  // read as 0), and the Europe/U.S. database counts were `updatesPage.items
+  // .length` — the page size itself, which is why both claimed "18 entries".
+  // They are now exact counts over the published tables, fetched head-only.
+  // A failure degrades to undefined, which makes the card omit the number
+  // entirely — an absent figure rather than a wrong one.
+  const regionCounts = await Promise.all(
+    (
+      [
+        ["Europe"],
+        ["United States", "North America"],
+        ["International"],
+      ] as const
+    ).flatMap((regions) => [
+      updateRepository.countPublicNewsItemsForRegions(regions).catch(() => undefined),
+      updateRepository.countPublicUpdatesForRegions(regions).catch(() => undefined),
+    ]),
+  );
+  const [
+    europeNewsCount,
+    europeDatabaseCount,
+    usNewsCount,
+    usDatabaseCount,
+    internationalNewsCount,
+    internationalDatabaseCount,
+  ] = regionCounts;
 
   // Slim, serializable projection for the client-side database explorer.
   const explorerEntries: ExplorerEntry[] = updates.map((update) => {
@@ -329,7 +330,7 @@ export default async function AiRegulationPage({
                   href={href("/ai-regulation/europe")}
                   liveLabel="Europe news"
                   liveCount={europeNewsCount}
-                  dbCount={updatesPage.items.length}
+                  dbCount={europeDatabaseCount}
                   highlights={europeProfiles.map((p) => ({ label: p.countryName, href: `/ai-regulation/europe/${p.slug}` }))}
                   isLive
                 />
@@ -343,7 +344,7 @@ export default async function AiRegulationPage({
                   href={href("/ai-regulation/united-states")}
                   liveLabel="U.S. news"
                   liveCount={usNewsCount}
-                  dbCount={updatesPage.items.length}
+                  dbCount={usDatabaseCount}
                   highlights={usProfiles.map((p) => ({ label: p.stateName, href: `/ai-regulation/united-states/${p.slug}` }))}
                   isLive
                 />

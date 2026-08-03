@@ -283,6 +283,12 @@ export const updateRepository = {
   async updateDiscoveryLead(id: string, patch: Partial<DiscoveryLead>): Promise<DiscoveryLead> {
     return getAiRegulationRepository().updateDiscoveryLead(id, patch);
   },
+  async countPublicUpdatesForRegions(regions: readonly string[]) {
+    return getAiRegulationRepository().countPublicUpdatesForRegions(regions);
+  },
+  async countPublicNewsItemsForRegions(regions: readonly string[]) {
+    return getAiRegulationRepository().countPublicNewsItemsForRegions(regions);
+  },
   async listCountryIntelligence(region?: CountryIntelligence["region"]) {
     return getAiRegulationRepository().listCountryIntelligence(region);
   },

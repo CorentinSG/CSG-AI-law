@@ -1,8 +1,14 @@
 import { beforeEach, describe, expect, it } from "vitest";
 
-import { resetMockStore } from "@/db/mock-store";
+import { getMockStore, resetMockStore } from "@/db/mock-store";
 import { MemoryAiRegulationRepository } from "@/db/repositories/memory-repository";
 import { RepositoryOperationError } from "@/db/repository-types";
+
+function seedUpdatesFor(regions: string[]) {
+  return getMockStore().updates.filter(
+    (update) => update.status === "published" && regions.includes(update.region),
+  ).length;
+}
 
 describe("MemoryAiRegulationRepository", () => {
   const repository = new MemoryAiRegulationRepository();
@@ -183,6 +189,60 @@ describe("MemoryAiRegulationRepository", () => {
     await expect(
       repository.transitionReviewStatus("upd-008", "published"),
     ).rejects.toBeInstanceOf(RepositoryOperationError);
+  });
+
+  // The hub's regional cards used to count a fetched page instead of the
+  // table: news counts saw only the newest 18 rows, and the Europe/U.S.
+  // database counts were the page length itself, so both read "18 entries".
+  // These counts must therefore span the whole published set.
+  describe("regional counts for the hub cards", () => {
+    it("counts published updates across the whole table, not a page", async () => {
+      const europe = await repository.countPublicUpdatesForRegions(["Europe"]);
+      const seededEurope = seedUpdatesFor(["Europe"]);
+
+      expect(europe).toBe(seededEurope);
+    });
+
+    it("treats both U.S. region labels as one bucket", async () => {
+      const split = await repository.countPublicUpdatesForRegions(["North America"]);
+      const combined = await repository.countPublicUpdatesForRegions([
+        "United States",
+        "North America",
+      ]);
+
+      expect(combined).toBeGreaterThanOrEqual(split);
+      expect(combined).toBe(seedUpdatesFor(["United States", "North America"]));
+    });
+
+    it("excludes drafts, so a new unpublished update does not inflate the card", async () => {
+      const before = await repository.countPublicUpdatesForRegions(["Europe"]);
+      const draft = getMockStore().updates.find((u) => u.region === "Europe");
+      expect(draft, "fixture needs at least one Europe update").toBeDefined();
+
+      getMockStore().updates.push({
+        ...draft!,
+        id: "upd-draft-europe",
+        status: "needs_review",
+      });
+
+      expect(await repository.countPublicUpdatesForRegions(["Europe"])).toBe(before);
+    });
+
+    it("counts only publicly visible news items", async () => {
+      const count = await repository.countPublicNewsItemsForRegions(["Europe"]);
+      const expected = getMockStore().newsItems.filter(
+        (item) => item.region === "Europe" && item.publicVisibilityStatus === "public",
+      ).length;
+
+      expect(count).toBe(expected);
+    });
+
+    it("returns zero for a region with no rows instead of throwing", async () => {
+      await expect(
+        repository.countPublicUpdatesForRegions(["Antarctica"]),
+      ).resolves.toBe(0);
+      await expect(repository.countPublicUpdatesForRegions([])).resolves.toBe(0);
+    });
   });
 
   it("can create and update a source through the repository abstraction", async () => {

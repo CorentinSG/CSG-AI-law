@@ -360,6 +360,16 @@ export interface AiRegulationRepository {
   createSourceHealthCheck(
     input: SourceHealthCheckInput,
   ): Promise<SourceHealthCheck>;
+  /**
+   * Exact number of published updates whose region is one of `regions`.
+   *
+   * Head-only count: the hub's regional cards need totals over the whole
+   * table, and counting a fetched page instead reports the page size, which
+   * is how Europe and the U.S. both came to claim the same "18 entries".
+   */
+  countPublicUpdatesForRegions(regions: readonly string[]): Promise<number>;
+  /** Same contract for publicly visible news items. */
+  countPublicNewsItemsForRegions(regions: readonly string[]): Promise<number>;
   listCountryIntelligence(region?: CountryIntelligence["region"]): Promise<CountryIntelligence[]>;
   getCountryIntelligenceBySlug(slug: string): Promise<CountryIntelligence | null>;
   upsertCountryIntelligence(input: CountryIntelligenceUpsertInput): Promise<CountryIntelligence>;
