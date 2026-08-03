@@ -166,9 +166,45 @@ describe("U.S. state baseline", () => {
 });
 
 describe("U.S. case law and soft law baseline", () => {
-  it("prepares case-law sources without inventing cases", () => {
+  it("keeps monitored case-law sources declared", () => {
     expect(usAiCaseLawSources.length).toBeGreaterThan(0);
-    expect(usAiCaseLawEntries).toEqual([]);
+  });
+
+  // A prior version of this suite pinned usAiCaseLawEntries to [] ("no
+  // invented cases"). The populated socle keeps that promise differently:
+  // every entry must carry a verified reference and a real docket identity —
+  // an invented case cannot satisfy these invariants.
+  it("publishes only source-backed case-law entries", () => {
+    expect(usAiCaseLawEntries.length).toBeGreaterThanOrEqual(9);
+
+    for (const entry of usAiCaseLawEntries) {
+      expect(entry.docketNumber, entry.id).toBeTruthy();
+      expect(entry.courtListenerUrl, entry.id).toMatch(/^https:\/\/www\.courtlistener\.com\//);
+      expect(entry.sourceReferences.length, entry.id).toBeGreaterThan(0);
+      for (const reference of entry.sourceReferences) {
+        expectPreciseReference(reference);
+        expect(reference.verificationStatus).toBe("verified");
+      }
+      if (entry.status === "published") {
+        expect(["high", "medium"]).toContain(entry.confidenceLevel);
+        expect(entry.holdingOrOutcome, entry.id).toBeTruthy();
+      }
+    }
+  });
+
+  it("anchors the reference AI disputes", () => {
+    const ids = usAiCaseLawEntries.map((entry) => entry.id);
+
+    expect(ids).toEqual(
+      expect.arrayContaining([
+        "case-thomson-reuters-ross",
+        "case-bartz-anthropic",
+        "case-kadrey-meta",
+        "case-nyt-openai-microsoft",
+        "case-mobley-workday",
+        "case-mata-avianca",
+      ]),
+    );
   });
 
   it("classifies soft-law and standards as non-binding unless separately incorporated", () => {

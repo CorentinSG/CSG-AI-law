@@ -36,7 +36,8 @@ const rawEnvSchema = z.object({
   // DEPRECATED: use AI_ENABLE_PROCESSING instead. Kept for backward compat. Remove in a future env cleanup (F4).
   AI_PROCESSING_ENABLED: booleanString.optional().default(false),
   AI_ENABLE_PROCESSING: booleanString.optional(),
-  AI_MONTHLY_BUDGET_USD: z.coerce.number().positive().default(20),
+  // Owner-set cap (2026-08-02): $5/month while the AI lane proves itself.
+  AI_MONTHLY_BUDGET_USD: z.coerce.number().positive().default(5),
   AI_MAX_INPUT_TOKENS_PER_ITEM: z.coerce.number().int().positive().default(12000),
   AI_MAX_ITEMS_PER_SCAN: z.coerce.number().int().positive().default(10),
   AI_MODEL_RELEVANCE: z.string().default("gpt-5.4-nano"),
@@ -165,7 +166,7 @@ function buildEnv(): AppEnv {
     OPENAI_MODEL: rawEnv.OPENAI_MODEL ?? "gpt-4.1-mini",
     AI_PROCESSING_ENABLED: rawEnv.AI_PROCESSING_ENABLED ?? "false",
     AI_ENABLE_PROCESSING: rawEnv.AI_ENABLE_PROCESSING,
-    AI_MONTHLY_BUDGET_USD: rawEnv.AI_MONTHLY_BUDGET_USD ?? "20",
+    AI_MONTHLY_BUDGET_USD: rawEnv.AI_MONTHLY_BUDGET_USD ?? "5",
     AI_MAX_INPUT_TOKENS_PER_ITEM:
       rawEnv.AI_MAX_INPUT_TOKENS_PER_ITEM ?? "12000",
     AI_MAX_ITEMS_PER_SCAN: rawEnv.AI_MAX_ITEMS_PER_SCAN ?? "10",

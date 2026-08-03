@@ -96,7 +96,7 @@ jobs:
           # needed at enable time: set the repository *variable*
           # AI_ENABLE_PROCESSING to "true" (Settings → Secrets and variables →
           # Actions → Variables) and add the OPENAI_API_KEY secret. Cost stays
-          # inside the existing guardrails (AI_MONTHLY_BUDGET_USD default $20,
+          # inside the existing guardrails (AI_MONTHLY_BUDGET_USD default $5,
           # 10 items/scan, 12k input tokens/item); without the key, items are
           # cleanly marked skipped_due_to_missing_api_key rather than erroring.
           AI_ENABLE_PROCESSING: ${{ vars.AI_ENABLE_PROCESSING || 'false' }}
