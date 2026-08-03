@@ -13,6 +13,7 @@ Each agent edits only its own rows. Status vocabulary: `CLAIMED` · `WIP` · `BL
 |---|---|---|---|---|---|---|
 | T-EFFICIENCY-PLAN (P0→P2) | Claude Code | MERGED | `main` @ `897d2b5` (#56–#61) | none (released) | `buildWeeklyDigestMarkdown()`, `deriveProvisioning()`, `purgeExpiredOperationalRecords()`, `localeAlternates()`, community "Scan Job Management", "DB Repository Layer" | 2026-07-31 |
 | T-SERP-PROBE | Claude Code | MERGED | `main` @ `080bfb0` (#62) | none (released) | `createDiscoveryLead()`, `listAgentApiCapabilities()`, community "DB Repository Layer" | 2026-08-01 |
+| T-SITE-RECOVERY | Claude Code | MERGED | `main` @ `a1432f2` (#65-#70) | none (released) | `buildStableHash()`, `clampFutureIsoDate()`, `populatedStateBaselines`, `usAiCaseLawEntries`, `listRawItemIdentitiesBySource()`, community "Scan Pipeline" | 2026-08-03 |
 | T-TOTAL-PROJECT-OWNERSHIP | Claude Code | MERGED | `main` | entire repository | all Graphify communities; start with the total handoff document | 2026-07-25 |
 | TOOLING-GRAPH-PROTOCOL | Claude Code | REVIEW | `ops/t-ops9-ux` @ `30bc31c` | `AGENTS.md`, `AI_TASKS.md`, `.gitignore`, `.git/hooks/*` | n/a (tooling, no app code) | 2026-06-20 |
 | T-OPS9-UX | Claude Code | WIP | `ops/t-ops9-ux` @ `30bc31c` | `src/app/**`, shared UI components | community "UI Components and Utilities", "Intelligence Hub UI" | 2026-06-20 |
@@ -45,6 +46,14 @@ YYYY-MM-DD · <Agent> · <TASK-ID> · <STATUS>
 ```
 
 ## Current status
+
+2026-08-03 · Claude Code · T-SITE-RECOVERY · MERGED
+- Intent:        Owner review found the site empty/noisy; six PRs fixed mechanics and populated content.
+- Files:         PRs #65 (dedup identity + future-date clamp + FR relevance + read guard), #66/#67 (US baselines: 5 enacted states), #68 (slim prefetch + migration 033), #69 (case-law socle + AI budget $5), #70 (9 source promotions, gate 54->45).
+- Graph anchors: `buildStableHash()`, `prepareNewsItemsForDisplay()`, `populatedStateBaselines`, `usAiCaseLawEntries`, `listRawItemIdentitiesBySource()`
+- Verification:  979 tests green per PR; keys validated live (SerpAPI 40 leads, aiEnabled true, CourtListener 83 items).
+- Branch/commit: `main` @ `a1432f2`
+- Next:          Owner: run migration 033. Watch: Supabase 522s; Estonia repoint + NL-RDI/CH selectors pending.
 
 2026-08-02 · Claude Code · T-A50-HYDRATION · HANDOFF→Codex
 - Intent: Article 50 checklist v2 (triage + 20 scenarios + prominent no-legal-advice banner) — relocated to `/[lang]/eu-ai-act/article-50-checklist` because of a pre-existing prod bug discovered while verifying: statically-rendered pages under `/[lang]/ai-regulation/**` ship WITHOUT client hydration in production (React client-renders an empty page slot and orphans the SSR DOM — zero console errors). Confirmed on deployed prod: `/en/ai-regulation/europe/france` (country console, 7 dead buttons), `/europe/ai-act`, the hub, and the old checklist URL. `/en/research*` hydrates fine. Ruled out by bisection (prod builds, in-app browser): page code (identical file alive at `[lang]/test-*`), shell components, metadata, own+sibling `revalidate`, `generateStaticParams`, dynamic siblings, segment depth, middleware/headers, Turbopack cache (pristine rebuild), service workers. A minimal client counter page under the segment DOES hydrate, so the trigger is per-page and interacts with the segment tree — likely a Next 16.2.6 streaming/hydration bug; repro recipe in PR #64 description.
