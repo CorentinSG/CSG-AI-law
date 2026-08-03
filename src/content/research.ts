@@ -53,6 +53,176 @@ export type ResearchEntry = {
 const author = "Corentin Saint-Girons";
 export const researchEntries: ResearchEntry[] = [
   {
+    slug: "eu-ai-act-changing-how-law-firms-use-ai",
+    title: "The EU AI Act is changing how law firms use artificial intelligence",
+    subtitle:
+      "Article 50 applies from 2 August 2026. It does not ban AI in legal practice, and it does not require a label on every AI-assisted document — but it does create targeted duties that most firms have not yet mapped.",
+    author,
+    status: "published",
+    category: "EU AI Law",
+    tags: [
+      "EU AI Act",
+      "Article 50",
+      "Law firms",
+      "Transparency obligations",
+      "Professional responsibility",
+      "Confidentiality",
+    ],
+    jurisdiction: "European Union",
+    readingTime: "13 min read",
+    summary:
+      "From 2 August 2026, Article 50 of the EU AI Act creates transparency duties for direct AI interactions, synthetic content, deepfakes and certain public-interest publications. A practical guide for law firms: provider or deployer, chatbot notices, the human-review exception, confidentiality, AI literacy, and what a proportionate compliance programme looks like.",
+    abstract:
+      "From 2 August 2026, law firms operating in or connected to the European Union must pay closer attention to how they use artificial intelligence. Article 50 of the EU Artificial Intelligence Act introduces new transparency obligations for systems that interact directly with individuals, generate synthetic content, use emotion recognition or biometric categorisation, or produce deepfakes and certain publications intended to inform the public.",
+    image: "/images/research/law-firms-ai-act-article-50.png",
+    publishedAt: "2026-08-03",
+    featured: true,
+    relatedSlugs: [
+      "when-ai-makes-legal-filings-easier-but-justice-harder",
+      "ai-summaries-rule-1006-admissibility",
+      "white-collar-revolution-law-firms-ai",
+    ],
+    body: [
+      {
+        heading: "What Article 50 actually requires",
+        paragraphs: [
+          "From 2 August 2026, law firms operating in or connected to the European Union must pay closer attention to how they use artificial intelligence. Article 50 of the EU Artificial Intelligence Act introduces new transparency obligations for systems that interact directly with individuals, generate synthetic content, use emotion recognition or biometric categorisation, or produce deepfakes and certain publications intended to inform the public.[2]",
+          "These rules do not mean that lawyers must disclose every use of artificial intelligence. A contract, legal memorandum, email or court submission does not automatically need an AI label simply because an AI tool helped prepare a first draft. The obligations depend on the type of system, the role played by the law firm and the way the resulting content is presented to clients or the public.",
+        ],
+      },
+      {
+        heading: "Provider or deployer: the first question",
+        paragraphs: [
+          "For most law firms, the starting point is determining whether the firm is acting as a provider or a deployer of an AI system.",
+          "A firm is ordinarily a deployer when it uses a product developed and supplied by a third party. This will generally be the case when a firm subscribes to an existing legal research assistant, document review platform, translation tool or generative AI service.",
+          "The situation changes when the firm develops its own system, commissions another company to develop one, materially modifies an existing system or presents a white-labelled system under the firm's own name. In those circumstances, the firm may become a provider. A firm that develops and operates its own client-facing legal chatbot may be both the provider and the deployer, because it places the system into service under its name and controls how it is used.",
+          "Individual lawyers working within a law firm will not normally be treated as separate deployers when they use AI under the firm's authority and instructions. The legal entity exercising control over the system is generally the deployer. A sole practitioner who independently selects and operates an AI system may, however, personally fall within that definition.",
+          "This distinction does not remove the individual lawyer's professional responsibilities. Regardless of how the firm is classified under the AI Act, lawyers remain responsible for confidentiality, competence, independence, factual accuracy and their conduct towards clients and courts.",
+        ],
+      },
+      {
+        heading: "Client-facing chatbots and intake systems",
+        paragraphs: [
+          "One of the most visible changes concerns client-facing chatbots, voice assistants and automated intake systems. When a person directly interacts with an AI system, the provider must normally ensure that the person is informed that they are communicating with artificial intelligence.",
+          "The disclosure should appear at the beginning of the interaction. Hiding the information in terms and conditions, a privacy policy or technical documentation is unlikely to be sufficient. The notice must also be clear, distinguishable and accessible.",
+          "A law firm chatbot could therefore begin by stating that the user is interacting with an artificial intelligence assistant operated for the firm. The firm may then add that the assistant provides general information, does not create a lawyer-client relationship, should not receive confidential information and may produce incomplete or inaccurate answers.",
+          "These additional warnings do not arise directly from Article 50, but they help address professional responsibility, confidentiality and consumer protection risks. A third-party vendor may remain legally responsible for implementing the AI interaction notice, but the law firm should still test the system and ensure that its customisation has not removed or obscured the disclosure.",
+        ],
+      },
+      {
+        heading: "Synthetic content and machine-readable marking",
+        paragraphs: [
+          "Article 50 also regulates synthetic audio, images, video and text. Providers of systems that generate or manipulate this type of content may be required to include machine-readable marks that allow the content to be detected as artificially generated or modified.",
+          "This technical obligation generally falls on the provider of the synthetic content system, rather than every lawyer who uses a generative AI tool. A law firm using a third-party text generator will not normally be expected to engineer its own watermarking system. The analysis may be different when the firm develops, substantially modifies or distributes the system under its own name.",
+          "The rules contain an exception for tools that perform standard editing without substantially changing the meaning of the original content. Grammar correction, spelling checks, formatting and minor stylistic improvements may fall within this exception. Material rewriting, restructuring or changes to the substance, tone or intended message require a more careful assessment.",
+        ],
+      },
+      {
+        heading: "Deepfakes in firm communications",
+        paragraphs: [
+          "Deepfakes are subject to a separate obligation. A law firm that publishes realistic AI-generated or manipulated audio, images or video that falsely appear to depict a real person, object, place or event must provide a clear disclosure.",
+          "Potential examples include a cloned partner's voice used in advertising, a realistic digital avatar presented as a real lawyer, or an AI reconstruction of an accident or transaction that could be mistaken for authentic footage. The disclosure must be visible or audible when the content is first presented. Hidden metadata or an invisible provider watermark will not satisfy the deployer's obligation to inform the audience.",
+          "The context remains important. An obviously fictional or stylised animation may not meet the definition of a deepfake. Artistic, satirical and fictional works are subject to a more flexible disclosure standard, but they are not completely exempt.",
+        ],
+      },
+      {
+        heading: "Public-interest publications and the human-review exception",
+        paragraphs: [
+          "Another important rule concerns AI-generated or materially manipulated text published for the purpose of informing the public about a matter of public interest. This category may include legal updates, regulatory analyses, court reports, election law commentary, public policy articles and communications relating to consumer protection or fundamental rights.",
+          "However, Article 50 provides an important exception where the publication has undergone genuine human review and a natural or legal person assumes editorial responsibility.",
+          "For law firms, this exception is likely to become the main route to compliance for AI-assisted legal publications. The reviewing lawyer must do more than approve the text quickly or correct its grammar. The reviewer should examine the substance, verify the facts and legal authorities, assess the reliability of the sources and have the authority to modify or reject the publication.",
+          "A second AI tool cannot replace this human review. Similarly, if substantial AI-generated changes are made after the lawyer approves the publication, the revised version should be reviewed again.",
+        ],
+      },
+      {
+        heading: "Court filings and verification duties",
+        paragraphs: [
+          "A conventional court filing will not automatically fall within the public-interest publication rule merely because it later becomes accessible through a public court record. The purpose of the publication remains relevant. The document must be published with the intention of informing the public about a matter of public interest. National procedural rules and court orders may nevertheless create separate disclosure obligations.",
+          "The AI Act also does not create a general obligation to tell a court or opposing counsel that artificial intelligence was used for legal research or drafting. Lawyers must instead examine the rules applicable to the particular court or tribunal. Some courts may require certifications, declarations or restrictions concerning AI use.",
+          "Even where no disclosure is required, the lawyer must personally verify every factual statement, legal authority, quotation and procedural representation submitted to the court. Artificial intelligence output should be treated as unverified material until it has been checked against authoritative sources and the evidential record.",
+          "Fabricated cases and inaccurate quotations can expose lawyers to disciplinary proceedings, contempt findings, professional negligence claims and serious reputational damage. The fact that the error originated from an AI system does not transfer responsibility away from the lawyer who relied on it.",
+        ],
+      },
+      {
+        heading: "Confidentiality, vendors and conflicts",
+        paragraphs: [
+          "Confidentiality is another central concern. The main risk often arises before an AI system generates any output, when a lawyer enters a client's information into the system.",
+          "Prompts, pleadings, contracts, correspondence, recordings and document collections may be retained, accessed by vendor personnel, shared with subprocessors or used to improve a model. Law firms should therefore understand how a provider processes information before allowing confidential or privileged material to be uploaded.",
+          "This concern is not limited to obvious chatbots. Artificial intelligence is increasingly integrated into email platforms, PDF software, transcription services, translation tools, browsers, document management systems and productivity applications. Some functions may be activated automatically without the lawyer realising that information is being processed by an AI system.",
+          "Law firms should maintain an approved list of tools, use enterprise accounts where possible and prohibit the entry of confidential information into unapproved public systems. Vendor agreements should address data retention, model training, security, subprocessors, deletion, audit rights and incident notification. Matter-level access restrictions, encryption and redaction may also be necessary.",
+          "The use of AI can create conflicts of interest when information relating to different clients is placed in shared workspaces, retrieval systems or training datasets. Firms should ensure that confidential information cannot be retrieved across matters and that access is limited according to professional ethical walls and matter permissions.",
+        ],
+      },
+      {
+        heading: "Information, not consent — usually",
+        paragraphs: [
+          "Article 50 generally requires information rather than consent. It does not impose a universal rule requiring every client to approve every use of artificial intelligence. Consent may still be necessary under professional conduct rules, data protection law, engagement terms, outside counsel guidelines or because of the sensitivity of a particular matter.",
+          "Firms should consider providing general information about controlled AI use in their engagement letters or privacy notices. More specific client approval may be appropriate when identifiable or confidential documents will be processed, when client material may be used for training or fine-tuning, or when an automated system provides client-facing legal guidance.",
+        ],
+      },
+      {
+        heading: "AI literacy as an organisational duty",
+        paragraphs: [
+          "Artificial intelligence literacy is also an organisational obligation. Providers and deployers must take measures to ensure that lawyers, staff members and contractors using AI on their behalf possess an appropriate understanding of the technology.",
+          "Training should reflect the person's role and the risks of the system. Lawyers may need training on hallucinations, source verification, confidentiality and professional independence. Human resources teams may require guidance on biometric tools and employment discrimination. Marketing teams should understand the rules governing deepfakes and public-interest publications. Procurement and technology personnel should understand provider classification, data flows and vendor obligations.",
+        ],
+      },
+      {
+        heading: "A proportionate compliance programme",
+        paragraphs: [
+          "The AI Act does not require every firm to build an extensive compliance department. A small practice can implement a proportionate programme consisting of a responsible partner, an approved tool list, basic training, a chatbot notice where necessary, a publication review process and a written incident response procedure.[1]",
+          "Larger firms may need more complex governance structures, including central AI registers, jurisdiction-specific role assessments, technical testing, matter segregation, vendor monitoring and formal review of public communications.",
+        ],
+      },
+      {
+        heading: "Preparing for AI incidents",
+        paragraphs: [
+          "Law firms should also prepare for incidents involving artificial intelligence. These may include the disclosure of confidential information, fabricated authority in a filing, an unlabelled deepfake, a failure to display a chatbot notice, loss of provenance data or publication of AI-generated content without appropriate human review.",
+          "When an incident occurs, the firm should stop or isolate the affected system, preserve relevant evidence, identify the clients or matters involved and assess whether notification is required. The analysis may involve professional conduct rules, court duties, insurance policies, contractual obligations and the General Data Protection Regulation.",
+        ],
+      },
+      {
+        heading: "Penalties and timing",
+        paragraphs: [
+          "Failure to comply with Article 50 can lead to administrative fines of up to €15 million or 3 percent of the organisation's worldwide annual turnover for the preceding financial year. Small and medium-sized firms may benefit from more favourable penalty ceilings, but they are not exempt from the transparency obligations.[4]",
+          "The main Article 50 transparency obligations apply from 2 August 2026. There is no general grace period for chatbot disclosures, deepfake labels, public-interest text or notices concerning emotion recognition and biometric categorisation. A limited transition until 2 December 2026 applies only to certain providers of synthetic content systems that were already placed on the market before 2 August 2026.[3]",
+        ],
+      },
+      {
+        heading: "What this means in practice",
+        paragraphs: [
+          "The practical consequence for the legal profession is not that artificial intelligence becomes prohibited. Nor does every AI-assisted legal document require a warning. Instead, firms must understand the systems they use, determine their legal role, protect confidential information, introduce the required disclosures and ensure meaningful human supervision.[1]",
+          "Article 50 applies from 2 August 2026 and creates targeted duties for direct AI interactions, synthetic content, deepfakes and certain public-interest publications. For most law firms, however, the decisive principles will remain familiar ones: professional judgement, careful verification, protection of client information and individual accountability for the quality and integrity of legal work.",
+        ],
+      },
+    ],
+    references: [
+      {
+        label:
+          "[1] Article 50 compliance checklist — interactive tool on this site",
+        href: "/eu-ai-act/article-50-checklist",
+        note: "Situation triage, 18 controls by role with owners and evidence to retain, 20 edge-case scenarios, and sample disclosure wording. Indicative only — not legal advice.",
+      },
+      {
+        label:
+          "[2] Article 50 — Regulation (EU) 2024/1689 (AI Act Service Desk)",
+        href: "https://ai-act-service-desk.ec.europa.eu/en/ai-act/article-50",
+        note: "Core legal text: duties, timing, accessibility, and exceptions.",
+      },
+      {
+        label:
+          "[3] Commission FAQ — Transparency obligations under Article 50",
+        href: "https://digital-strategy.ec.europa.eu/en/faqs/transparency-obligations-under-article-50-ai-act",
+        note: "Operational source for scope, exceptions, human review, and the limited transition to 2 December 2026.",
+      },
+      {
+        label: "[4] Article 99 — Penalties",
+        href: "https://ai-act-service-desk.ec.europa.eu/en/ai-act/article-99",
+        note: "Penalty ceilings applicable to Article 50 breaches.",
+      },
+    ],
+  },
+  {
     slug: "when-ai-makes-legal-filings-easier-but-justice-harder",
     title: "When AI makes legal filings easier but justice harder",
     subtitle:
@@ -76,7 +246,6 @@ export const researchEntries: ResearchEntry[] = [
       "On July 22, 2026, the Florida Fourth District Court of Appeal issued a decision that offers a striking illustration of a growing problem in American courts. The decision is more than another warning about artificial intelligence hallucinations: it illustrates the growing distance between the ability to produce something that looks like a legal brief and the ability to present a legally viable argument.",
     image: "/images/research/gouldy-chiasson-ai-filings.png",
     publishedAt: "2026-07-24",
-    featured: true,
     relatedSlugs: [
       "generative-ai-access-to-justice-pro-se",
       "ai-summaries-rule-1006-admissibility",
