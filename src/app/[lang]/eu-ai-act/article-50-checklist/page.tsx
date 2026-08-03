@@ -12,7 +12,12 @@ import { BreadcrumbNav } from "@/components/site/breadcrumb-nav";
 import { MotionReveal } from "@/components/site/motion-reveal";
 import { SectionHeading } from "@/components/site/section-heading";
 import { SiteShell } from "@/components/site/shell";
-import { article50Sources } from "@/content/ai-regulation/article-50-checklist";
+import {
+  ARTICLE_50_LAST_REVIEWED,
+  ARTICLE_50_OMNIBUS_NOTE,
+  ARTICLE_50_PENALTIES,
+  article50Sources,
+} from "@/content/ai-regulation/article-50-checklist";
 import { isLocale, type Locale } from "@/lib/i18n/config";
 import { localeHref } from "@/lib/i18n/href";
 import { localeAlternates } from "@/lib/seo";
@@ -47,6 +52,9 @@ const COPY: Record<
     description: string;
     howTo: string;
     howToBody: string[];
+    lastReviewed: string;
+    omnibusTitle: string;
+    penaltiesTitle: string;
     bannerTitle: string;
     bannerBody: string;
     triageTitle: string;
@@ -70,6 +78,9 @@ const COPY: Record<
     title: "Article 50 compliance checklist",
     description:
       "Article 50 creates transparency duties for providers and deployers of certain AI systems. Work through the controls below by role, mark what is done, and keep the evidence each control produces.",
+    lastReviewed: "Content last reviewed",
+    omnibusTitle: "The AI Omnibus did not postpone Article 50",
+    penaltiesTitle: "What non-compliance costs",
     howTo: "How to use this checklist",
     howToBody: [
       "Start with the legal and compliance controls: the first question is not “do we use AI?” but which business units are providers, which are deployers, and which outputs reach people directly. A single company is often both.",
@@ -101,6 +112,9 @@ const COPY: Record<
     title: "Checklist de conformité — article 50",
     description:
       "L'article 50 crée des obligations de transparence pour les fournisseurs et les déployeurs de certains systèmes d'IA. Parcourez les contrôles ci-dessous par rôle, cochez ce qui est fait, et conservez les preuves produites par chaque contrôle.",
+    lastReviewed: "Contenu vérifié le",
+    omnibusTitle: "L'AI Omnibus n'a pas reporté l'article 50",
+    penaltiesTitle: "Ce que coûte le non-respect",
     howTo: "Comment utiliser cette checklist",
     howToBody: [
       "Commencez par les contrôles juridiques : la première question n'est pas « utilisons-nous de l'IA ? » mais quelles entités sont fournisseurs, lesquelles sont déployeurs, et quels résultats atteignent directement des personnes. Une même société est souvent les deux.",
@@ -157,6 +171,10 @@ export default async function Article50ChecklistPage({
           description={t.description}
         />
 
+        <p className="font-mono text-[9.5px] uppercase tracking-[0.22em] text-zinc-500">
+          {t.lastReviewed} {ARTICLE_50_LAST_REVIEWED}
+        </p>
+
         {/* Prominent indicative-use notice — this is not legal advice. */}
         <div
           role="note"
@@ -171,6 +189,40 @@ export default async function Article50ChecklistPage({
               {t.bannerBody}
             </p>
           </div>
+        </div>
+
+        {/* The Omnibus postponed high-risk, not Article 50 — the single most
+            common misreading in circulation right now. */}
+        <div className="rounded-[1.8rem] border border-black/6 bg-white p-6">
+          <p className="font-mono text-[9px] uppercase tracking-[0.26em] text-zinc-400">
+            {t.omnibusTitle}
+          </p>
+          <p className="mt-2.5 max-w-4xl text-sm leading-7 text-zinc-700 hyphens-auto text-justify">
+            {ARTICLE_50_OMNIBUS_NOTE[lang]}
+          </p>
+        </div>
+
+        {/* Penalties, stated up front rather than buried in a card. */}
+        <div className="rounded-[1.8rem] border border-black/6 bg-white p-6">
+          <p className="font-mono text-[9px] uppercase tracking-[0.26em] text-zinc-400">
+            {t.penaltiesTitle}
+          </p>
+          <p className="mt-2 font-display text-xl font-medium tracking-[-0.02em] text-zinc-950">
+            {ARTICLE_50_PENALTIES[lang].headline}
+          </p>
+          <ul className="mt-3 space-y-2 text-sm leading-7 text-zinc-700">
+            {[
+              ARTICLE_50_PENALTIES[lang].company,
+              ARTICLE_50_PENALTIES[lang].sme,
+              ARTICLE_50_PENALTIES[lang].institutions,
+              ARTICLE_50_PENALTIES[lang].enforcement,
+            ].map((line) => (
+              <li key={line} className="flex gap-3">
+                <span className="mt-3 size-1 shrink-0 rounded-full bg-zinc-400" />
+                <span className="hyphens-auto text-justify">{line}</span>
+              </li>
+            ))}
+          </ul>
         </div>
 
         <div className="rounded-[1.8rem] border border-black/6 bg-zinc-50 p-6">
