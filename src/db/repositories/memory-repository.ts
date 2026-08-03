@@ -563,6 +563,19 @@ export class MemoryAiRegulationRepository implements AiRegulationRepository {
     return typeof limit === "number" ? items.slice(0, limit) : items;
   }
 
+  async countPublicUpdatesForRegions(regions: readonly string[]) {
+    return getMockStore().updates.filter(
+      (update) => update.status === "published" && regions.includes(update.region),
+    ).length;
+  }
+
+  async countPublicNewsItemsForRegions(regions: readonly string[]) {
+    return getMockStore().newsItems.filter(
+      (item) =>
+        item.publicVisibilityStatus === "public" && regions.includes(item.region),
+    ).length;
+  }
+
   async listRawItemIdentitiesBySource(sourceId: string, limit = 200) {
     return getMockStore()
       .rawItems.filter((item) => item.sourceId === sourceId)
