@@ -1,5 +1,5 @@
+import type { CorroborationCandidate } from "@/db/repository-types";
 import type {
-  AiRegulatoryUpdate,
   RawRegulatoryItem,
   RegulationSource,
 } from "@/agents/ai-regulation/types";
@@ -28,7 +28,7 @@ export const CORROBORATION_WINDOW_DAYS = 14;
 export const CORROBORATION_MAX_MATCHES = 3;
 
 export interface CorroborationMatch {
-  update: AiRegulatoryUpdate;
+  update: CorroborationCandidate;
   source: RegulationSource | null;
 }
 
@@ -86,7 +86,7 @@ function sameGeography(a: CorroborationProbe, b: CorroborationProbe) {
 
 export function findCorroboratingUpdates(input: {
   update: CorroborationProbe;
-  recentUpdates: AiRegulatoryUpdate[];
+  recentUpdates: CorroborationCandidate[];
   sourcesById: Map<string, RegulationSource>;
   windowDays?: number;
   maxMatches?: number;
@@ -125,7 +125,7 @@ function referenceSourceType(source: RegulationSource | null): SourceReferenceTy
 }
 
 export function buildCorroboratingReference(input: {
-  counterpart: AiRegulatoryUpdate;
+  counterpart: CorroborationCandidate;
   counterpartSource: RegulationSource | null;
   now: string;
 }): SourceReference {

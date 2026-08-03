@@ -283,6 +283,12 @@ export const updateRepository = {
   async updateDiscoveryLead(id: string, patch: Partial<DiscoveryLead>): Promise<DiscoveryLead> {
     return getAiRegulationRepository().updateDiscoveryLead(id, patch);
   },
+  async listCorroborationCandidates(limit: number) {
+    return getAiRegulationRepository().listCorroborationCandidates(limit);
+  },
+  async listAiSpendLogsForMonth(monthPrefix: string, limit?: number) {
+    return getAiRegulationRepository().listAiSpendLogsForMonth(monthPrefix, limit);
+  },
   async countPublicUpdatesForRegions(regions: readonly string[]) {
     return getAiRegulationRepository().countPublicUpdatesForRegions(regions);
   },
