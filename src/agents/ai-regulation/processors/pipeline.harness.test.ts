@@ -30,6 +30,8 @@ const mocks = vi.hoisted(() => ({
   updateRepository: {
     getProcessingLogs: vi.fn(),
     listUpdatesPage: vi.fn(),
+    listCorroborationCandidates: vi.fn(),
+    listAiSpendLogsForMonth: vi.fn(),
     getSources: vi.fn(),
     getRawItem: vi.fn(),
     createRawItem: vi.fn(),
@@ -221,6 +223,8 @@ beforeEach(() => {
   mocks.deduplicator.createHash.mockReturnValue("hash-1");
   mocks.deduplicator.findDuplicate.mockResolvedValue(null);
   mocks.updateRepository.getProcessingLogs.mockResolvedValue([]);
+  mocks.updateRepository.listCorroborationCandidates.mockResolvedValue([]);
+  mocks.updateRepository.listAiSpendLogsForMonth.mockResolvedValue([]);
   mocks.updateRepository.listUpdatesPage.mockResolvedValue({
     items: [],
     total: 0,

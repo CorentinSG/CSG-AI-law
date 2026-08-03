@@ -76,6 +76,25 @@ export type CountryIntelligenceSourceWriteInput = CountryIntelligenceSourceInput
   id: string;
 };
 
+/** The only fields cross-source corroboration reads from a candidate. */
+export type CorroborationCandidate = Pick<
+  AiRegulatoryUpdate,
+  | "id"
+  | "rawItemId"
+  | "sourceId"
+  | "status"
+  | "title"
+  | "jurisdiction"
+  | "region"
+  | "country"
+  | "publicationDate"
+  | "detectedDate"
+  | "sourceName"
+  | "sourceUrl"
+  | "authorityType"
+  | "developmentType"
+>;
+
 export interface RegulatoryUpdateFilters {
   status?: string;
   jurisdiction?: string;
@@ -360,6 +379,24 @@ export interface AiRegulationRepository {
   createSourceHealthCheck(
     input: SourceHealthCheckInput,
   ): Promise<SourceHealthCheck>;
+  /**
+   * Slim projection of recent updates for cross-source corroboration.
+   *
+   * Corroboration compares identity, geography, dates and titles — it never
+   * reads the prose. Pulling full rows for this (400 per scan batch, each
+   * carrying summary/whatHappened/whyItMatters/practicalImpact/…) was the
+   * single largest source of database egress in the system.
+   */
+  listCorroborationCandidates(limit: number): Promise<CorroborationCandidate[]>;
+  /**
+   * AI processing logs for one month (`YYYY-MM`), projected to the two fields
+   * the spend estimator reads. It previously pulled 2000 full rows per scan
+   * batch and filtered the month in memory.
+   */
+  listAiSpendLogsForMonth(
+    monthPrefix: string,
+    limit?: number,
+  ): Promise<Array<Pick<AiProcessingLog, "createdAt" | "errorMessage">>>;
   /**
    * Exact number of published updates whose region is one of `regions`.
    *

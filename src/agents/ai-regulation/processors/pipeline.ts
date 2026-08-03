@@ -568,8 +568,14 @@ async function applyReciprocalCorroboration(input: {
       counterpartRawItem.id,
       patch.rawMetadata,
     );
+    // The candidate projection is deliberately slim, but rebuilding the
+    // counterpart's news item needs its prose. Loaded here, per actual match
+    // (at most three, and only when a same-story counterpart was found) —
+    // never for the 400 candidates scanned.
+    const counterpartUpdate = await updateRepository.getUpdate(match.update.id);
+    if (!counterpartUpdate) continue;
     const counterpartNewsItem = buildNewsItemFromUpdate({
-      update: match.update,
+      update: counterpartUpdate,
       rawItem: updatedCounterpartRawItem,
       source: match.source,
     });
@@ -593,14 +599,20 @@ async function processAllCandidates(
   // Corroboration context, loaded once per batch: the recent-update window
   // that new candidates are matched against, and the source registry used to
   // qualify counterpart sources.
-  const [recentUpdatesPage, allSources] = await Promise.all([
-    updateRepository.listUpdatesPage(undefined, { limit: 400, offset: 0 }),
+  // Both reads are projections on purpose. Fetching full update rows here
+  // (400 of them, each carrying summary/whatHappened/whyItMatters/…) and 2000
+  // full processing logs, on every scan batch, was the largest single source
+  // of database egress in the system — enough to matter against the hosting
+  // quota. Corroboration reads identity, geography, dates and titles only;
+  // the spend estimator reads two fields of the current month.
+  const [recentUpdates, allSources] = await Promise.all([
+    updateRepository.listCorroborationCandidates(400),
     updateRepository.getSources(),
   ]);
-  const recentUpdates = recentUpdatesPage.items;
   const sourcesById = new Map(allSources.map((source) => [source.id, source]));
-  const existingProcessingLogs = await updateRepository.getProcessingLogs(2000);
-  const monthlyEstimatedSpendUsd = estimateMonthlyAiSpend(existingProcessingLogs);
+  const monthlyEstimatedSpendUsd = estimateMonthlyAiSpend(
+    await updateRepository.listAiSpendLogsForMonth(new Date().toISOString().slice(0, 7)),
+  );
   const corroborationProbeFor = (entry: ProcessableCandidate) => ({
     id: entry.rawItem.id,
     sourceId: entry.source.id,

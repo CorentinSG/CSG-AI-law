@@ -3,7 +3,12 @@ name: Legal Monitoring
 on:
   workflow_dispatch:
   schedule:
-    - cron: "7,22,37,52 * * * *"
+    # Twice an hour, not four times (2026-08-03). The per-source cadences
+    # (live/hourly/daily) already decide what is actually due; the extra wakeups
+    # mostly drained an empty queue while still paying the database round trips.
+    # Halving them halves that fixed cost, and no monitored authority publishes
+    # faster than this.
+    - cron: "7,37 * * * *"
 
 concurrency:
   group: legal-monitoring-production

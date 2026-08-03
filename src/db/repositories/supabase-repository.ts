@@ -84,6 +84,7 @@ import type {
   ScanLogInput,
   VisibilityScope,
 } from "@/db/repository-types";
+import type { CorroborationCandidate } from "@/db/repository-types";
 import {
   RepositoryConfigurationError,
   RepositoryOperationError,
@@ -1788,6 +1789,51 @@ export class SupabaseAiRegulationRepository implements AiRegulationRepository {
     const { data, error } = await query;
     handleError("Failed to list raw regulatory items", error);
     return ((data ?? []) as unknown as Row[]).map(mapRawItemRow);
+  }
+
+  async listCorroborationCandidates(limit: number) {
+    const client = requireAdminClient();
+    const { data, error } = await client
+      .from("ai_regulatory_updates")
+      .select(
+        "id,raw_item_id,source_id,status,title,jurisdiction,region,country,publication_date,detected_date,source_name,source_url,authority_type,development_type",
+      )
+      .order("publication_date", { ascending: false, nullsFirst: false })
+      .order("created_at", { ascending: false })
+      .limit(limit);
+    handleError("Failed to list corroboration candidates", error);
+    return ((data ?? []) as Array<Record<string, string | null>>).map((row) => ({
+      id: row.id as string,
+      rawItemId: row.raw_item_id,
+      sourceId: row.source_id as string,
+      status: row.status as AiRegulatoryUpdate["status"],
+      title: row.title as string,
+      jurisdiction: row.jurisdiction ?? "",
+      region: row.region ?? "",
+      country: row.country ?? "",
+      publicationDate: row.publication_date,
+      detectedDate: row.detected_date as string,
+      sourceName: row.source_name ?? "",
+      sourceUrl: row.source_url ?? "",
+      authorityType: row.authority_type,
+      developmentType: row.development_type ?? "",
+    })) as CorroborationCandidate[];
+  }
+
+  async listAiSpendLogsForMonth(monthPrefix: string, limit = 2000) {
+    const client = requireAdminClient();
+    // Filter the month server-side: the estimator only sums the current
+    // month, so shipping older rows is pure waste.
+    const { data, error } = await client
+      .from("ai_processing_logs")
+      .select("created_at,error_message")
+      .gte("created_at", `${monthPrefix}-01`)
+      .order("created_at", { ascending: false })
+      .limit(limit);
+    handleError("Failed to list AI spend logs", error);
+    return ((data ?? []) as Array<{ created_at: string; error_message: string | null }>).map(
+      (row) => ({ createdAt: row.created_at, errorMessage: row.error_message }),
+    );
   }
 
   async countPublicUpdatesForRegions(regions: readonly string[]) {

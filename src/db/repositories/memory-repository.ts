@@ -563,6 +563,34 @@ export class MemoryAiRegulationRepository implements AiRegulationRepository {
     return typeof limit === "number" ? items.slice(0, limit) : items;
   }
 
+  async listCorroborationCandidates(limit: number) {
+    return getMockStore()
+      .updates.slice(0, limit)
+      .map((update) => ({
+        id: update.id,
+        rawItemId: update.rawItemId,
+        sourceId: update.sourceId,
+        status: update.status,
+        title: update.title,
+        jurisdiction: update.jurisdiction,
+        region: update.region,
+        country: update.country,
+        publicationDate: update.publicationDate,
+        detectedDate: update.detectedDate,
+        sourceName: update.sourceName,
+        sourceUrl: update.sourceUrl,
+        authorityType: update.authorityType,
+        developmentType: update.developmentType,
+      }));
+  }
+
+  async listAiSpendLogsForMonth(monthPrefix: string, limit = 2000) {
+    return getMockStore()
+      .processingLogs.filter((log) => log.createdAt.startsWith(monthPrefix))
+      .slice(0, limit)
+      .map((log) => ({ createdAt: log.createdAt, errorMessage: log.errorMessage }));
+  }
+
   async countPublicUpdatesForRegions(regions: readonly string[]) {
     return getMockStore().updates.filter(
       (update) => update.status === "published" && regions.includes(update.region),
