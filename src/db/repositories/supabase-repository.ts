@@ -84,7 +84,7 @@ import type {
   ScanLogInput,
   VisibilityScope,
 } from "@/db/repository-types";
-import type { CorroborationCandidate } from "@/db/repository-types";
+import type { CorroborationCandidate, PublicUpdateSummary } from "@/db/repository-types";
 import {
   RepositoryConfigurationError,
   RepositoryOperationError,
@@ -529,6 +529,15 @@ function isAfterCursor(
 // - List views never accidentally load expensive JSONB blobs not needed for cards
 //
 // ai_regulatory_updates: all columns used by mapUpdateRow
+// What the public hub renders — see PublicUpdateSummary. The seven long prose
+// fields are deliberately absent.
+const PUBLIC_UPDATE_SUMMARY_COLUMNS = [
+  "id", "title", "one_sentence_summary", "summary", "region", "country",
+  "jurisdiction", "legal_area", "importance_level", "publication_date",
+  "source_name", "source_url", "authority_type", "development_type",
+  "tags", "created_at",
+].join(",");
+
 const UPDATE_LIST_COLUMNS = [
   "id", "source_id", "raw_item_id", "title", "source_name", "source_url",
   "jurisdiction", "region", "country", "development_type", "legal_area",
@@ -1789,6 +1798,65 @@ export class SupabaseAiRegulationRepository implements AiRegulationRepository {
     const { data, error } = await query;
     handleError("Failed to list raw regulatory items", error);
     return ((data ?? []) as unknown as Row[]).map(mapRawItemRow);
+  }
+
+  async listPublicUpdateSummariesCursorPage(
+    filters?: RegulatoryUpdateFilters,
+    page?: ListCursorParams,
+  ): Promise<CursorPagedResult<PublicUpdateSummary>> {
+    const limit = Math.max(1, page?.limit ?? 24);
+    const cursor = page?.after ?? null;
+    const client = requirePublicReadClient();
+    let query = client
+      .from("ai_regulatory_updates")
+      .select(PUBLIC_UPDATE_SUMMARY_COLUMNS)
+      .eq("status", "published")
+      .order("publication_date", { ascending: false, nullsFirst: false })
+      .order("created_at", { ascending: false })
+      .limit(limit + 1);
+
+    if (cursor) {
+      if (cursor.date !== "") {
+        query = query.or(
+          `publication_date.lt.${cursor.date},and(publication_date.eq.${cursor.date},created_at.lt.${cursor.tiebreaker}),publication_date.is.null`,
+        );
+      } else {
+        query = query.is("publication_date", null).lt("created_at", cursor.tiebreaker);
+      }
+    }
+
+    applyUpdateFilters(query, filters);
+    const { data, error } = await query;
+    handleError("Failed to cursor-page public update summaries", error);
+    const rows: PublicUpdateSummary[] = (
+      (data ?? []) as unknown as Array<Record<string, unknown>>
+    ).map((row) => ({
+      id: row.id as string,
+      title: row.title as string,
+      oneSentenceSummary: (row.one_sentence_summary as string) ?? "",
+      summary: (row.summary as string) ?? "",
+      region: row.region as PublicUpdateSummary["region"],
+      country: (row.country as string) ?? "",
+      jurisdiction: row.jurisdiction as PublicUpdateSummary["jurisdiction"],
+      legalArea: row.legal_area as PublicUpdateSummary["legalArea"],
+      importanceLevel: row.importance_level as PublicUpdateSummary["importanceLevel"],
+      publicationDate: (row.publication_date as string | null) ?? null,
+      sourceName: (row.source_name as string) ?? "",
+      sourceUrl: (row.source_url as string) ?? "",
+      authorityType:
+        (row.authority_type as PublicUpdateSummary["authorityType"]) ?? undefined,
+      developmentType: row.development_type as PublicUpdateSummary["developmentType"],
+      tags: (row.tags as string[]) ?? [],
+      createdAt: row.created_at as string,
+    }));
+    const hasMore = rows.length > limit;
+    const items = hasMore ? rows.slice(0, limit) : rows;
+    const lastItem = items[items.length - 1];
+    const nextCursor: CursorPosition | null =
+      hasMore && lastItem
+        ? { date: lastItem.publicationDate ?? "", tiebreaker: lastItem.createdAt }
+        : null;
+    return { items, limit, hasMore, nextCursor };
   }
 
   async listCorroborationCandidates(limit: number) {

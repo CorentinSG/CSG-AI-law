@@ -149,7 +149,7 @@ export default async function AiRegulationPage({
   const dbAfterCursor = parseCursorParam(params.dbafter);
 
   const [updatesPage, newsPage] = await Promise.all([
-    updateRepository.listPublicUpdatesCursorPage(params as RegulatoryUpdateFilters, {
+    updateRepository.listPublicUpdateSummariesCursorPage(params as RegulatoryUpdateFilters, {
       limit: activeView === "database" ? databasePageSize : pageSize,
       after: dbAfterCursor,
     }),

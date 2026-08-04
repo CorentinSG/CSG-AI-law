@@ -283,6 +283,12 @@ export const updateRepository = {
   async updateDiscoveryLead(id: string, patch: Partial<DiscoveryLead>): Promise<DiscoveryLead> {
     return getAiRegulationRepository().updateDiscoveryLead(id, patch);
   },
+  async listPublicUpdateSummariesCursorPage(
+    filters?: RegulatoryUpdateFilters,
+    page?: ListCursorParams,
+  ) {
+    return getAiRegulationRepository().listPublicUpdateSummariesCursorPage(filters, page);
+  },
   async listCorroborationCandidates(limit: number) {
     return getAiRegulationRepository().listCorroborationCandidates(limit);
   },

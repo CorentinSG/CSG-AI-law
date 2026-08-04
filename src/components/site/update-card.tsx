@@ -1,6 +1,26 @@
 import Link from "next/link";
 
 import type { AiRegulatoryUpdate } from "@/agents/ai-regulation/types";
+
+// The card renders a headline, a one-sentence summary and provenance — never
+// the long-form prose. Typed to that so the hub can hand it a projection
+// instead of a full row (public reads are the site's largest DB egress).
+export type UpdateCardUpdate = Pick<
+  AiRegulatoryUpdate,
+  | "title"
+  | "oneSentenceSummary"
+  | "summary"
+  | "region"
+  | "country"
+  | "legalArea"
+  | "importanceLevel"
+  | "publicationDate"
+  | "sourceName"
+  | "sourceUrl"
+  | "developmentType"
+  | "tags"
+  | "authorityType"
+>;
 import {
   deriveUpdateAuthorityType,
   getAuthorityPresentation,
@@ -20,7 +40,7 @@ export function UpdateCard({
   href,
   lang = DEFAULT_LOCALE,
 }: {
-  update: AiRegulatoryUpdate;
+  update: UpdateCardUpdate;
   href: string;
   lang?: Locale;
 }) {
