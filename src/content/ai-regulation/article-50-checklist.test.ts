@@ -76,8 +76,55 @@ describe("article 50 checklist content integrity", () => {
     const all = getArticle50DutiesForSituations(ids(article50Situations));
     expect(ids(all).sort()).toEqual(ids(article50Duties).sort());
 
-    const one = getArticle50DutiesForSituations(["sit-biometric"]);
-    expect(ids(one)).toEqual(["duty-50-3"]);
+    // Selecting twice must not duplicate a shared duty.
+    const shared = getArticle50DutiesForSituations([
+      "sit-deepfake",
+      "sit-text",
+    ]);
+    expect(ids(shared).filter((id) => id === "duty-50-5")).toHaveLength(1);
+  });
+
+  it("attaches Art. 50(5) to every duty that informs natural persons", () => {
+    // 50(5) governs how the information under paragraphs 1-4 is given.
+    for (const situation of ["sit-interaction", "sit-biometric", "sit-deepfake", "sit-text"]) {
+      expect(
+        ids(getArticle50DutiesForSituations([situation])),
+        `${situation} should surface Art. 50(5)`,
+      ).toContain("duty-50-5");
+    }
+  });
+
+  it("does not attach Art. 50(5) to the marking duty alone", () => {
+    // Paragraph 2 is a technical marking duty, not information addressed to
+    // natural persons — pairing it with 50(5) would overstate the obligation.
+    expect(ids(getArticle50DutiesForSituations(["sit-generation"]))).not.toContain(
+      "duty-50-5",
+    );
+  });
+
+  it("offers the Code of Practice exactly where it is adequate evidence", () => {
+    // The Commission and the AI Board assessed it for Art. 50(2), (4) and (5).
+    for (const situation of ["sit-generation", "sit-deepfake", "sit-text"]) {
+      expect(
+        ids(getArticle50DutiesForSituations([situation])),
+        `${situation} should offer the Code of Practice`,
+      ).toContain("duty-code-of-practice");
+    }
+    // Not a route for the paragraph 1 or paragraph 3 notices on their own.
+    for (const situation of ["sit-interaction", "sit-biometric"]) {
+      expect(
+        ids(getArticle50DutiesForSituations([situation])),
+      ).not.toContain("duty-code-of-practice");
+    }
+  });
+
+  it("keeps every situation resolving to at least one duty", () => {
+    for (const situation of article50Situations) {
+      expect(
+        getArticle50DutiesForSituations([situation.id]).length,
+        `${situation.id} resolves to nothing`,
+      ).toBeGreaterThan(0);
+    }
   });
 
   it("pins the legal dates the UI displays", () => {
