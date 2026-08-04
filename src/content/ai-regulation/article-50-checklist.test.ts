@@ -10,7 +10,10 @@ import {
   article50Sources,
   article50Templates,
   ARTICLE_50_APPLICATION_DATE,
+  ARTICLE_50_LAST_REVIEWED,
   ARTICLE_50_MARKING_GRACE_DATE,
+  ARTICLE_50_OMNIBUS_NOTE,
+  ARTICLE_50_PENALTIES,
   getArticle50DutiesForSituations,
 } from "./article-50-checklist";
 
@@ -80,6 +83,40 @@ describe("article 50 checklist content integrity", () => {
   it("pins the legal dates the UI displays", () => {
     expect(ARTICLE_50_APPLICATION_DATE).toBe("2026-08-02");
     expect(ARTICLE_50_MARKING_GRACE_DATE).toBe("2026-12-02");
+  });
+
+  it("states the penalty arithmetic in both directions, in both locales", () => {
+    for (const lang of ["en", "fr"] as const) {
+      const p = ARTICLE_50_PENALTIES[lang];
+      // Undertakings pay the higher figure; SMEs the lower. Losing either half
+      // of that contrast is the failure mode this guards against.
+      expect(p.company).toMatch(/higher|plus élevé/i);
+      expect(p.sme).toMatch(/lower|plus bas/i);
+      expect(p.sme).toMatch(/99\(6\)/);
+      expect(p.headline).toMatch(/15|3\s?%/);
+      expect(p.institutions).toMatch(/750/);
+    }
+  });
+
+  it("keeps the Omnibus note saying Article 50 was NOT postponed", () => {
+    expect(ARTICLE_50_OMNIBUS_NOTE.en).toMatch(/did not postpone Article 50/i);
+    expect(ARTICLE_50_OMNIBUS_NOTE.fr).toMatch(/pas reporté l'article 50/i);
+    // It did amend 50(2) — that is where the December date comes from.
+    for (const lang of ["en", "fr"] as const) {
+      expect(ARTICLE_50_OMNIBUS_NOTE[lang]).toMatch(/50\(2\)/);
+    }
+  });
+
+  it("flags the public-interest topic list as illustrative, not exhaustive", () => {
+    const item = article50Items.find(
+      (entry) => entry.id === "deployer-public-interest-text",
+    );
+    expect(item).toBeDefined();
+    expect(item!.actions.join(" ")).toMatch(/illustrative, not exhaustive/i);
+  });
+
+  it("carries a review date so the page can be dated", () => {
+    expect(ARTICLE_50_LAST_REVIEWED).toMatch(/^\d{4}-\d{2}-\d{2}$/);
   });
 
   it("only cites https official sources", () => {

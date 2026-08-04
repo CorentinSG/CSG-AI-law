@@ -44,8 +44,52 @@ export const ARTICLE_50_APPLICATION_DATE = "2026-08-02";
  * Limited transition: applies only to the Article 50(2) machine-readable
  * marking duty, and only for systems placed on the market before 2 Aug 2026.
  * It does not postpone any other Article 50 duty.
+ *
+ * This date is not in the 2024 text of the Regulation — Article 50(2) was
+ * amended by the AI Omnibus. A reader checking the original EUR-Lex version
+ * will not find it there.
  */
 export const ARTICLE_50_MARKING_GRACE_DATE = "2026-12-02";
+
+/** Shown next to the title: this content moves month to month. */
+export const ARTICLE_50_LAST_REVIEWED = "2026-08-03";
+
+/**
+ * The AI Omnibus postponed the high-risk regime, not Article 50. This is the
+ * single most common misreading in circulation, so the page answers it head-on.
+ */
+export const ARTICLE_50_OMNIBUS_NOTE = {
+  en: "The AI Omnibus postponed the high-risk regime — Annex III systems to 2 December 2027 and Annex I systems to 2 August 2028 — but it did not postpone Article 50. The transparency duties still apply from 2 August 2026. The Omnibus did amend Article 50(2), adding the limited marking transition to 2 December 2026 below.",
+  fr: "L'AI Omnibus a reporté le régime « haut risque » — systèmes de l'annexe III au 2 décembre 2027 et de l'annexe I au 2 août 2028 — mais il n'a pas reporté l'article 50. Les obligations de transparence s'appliquent bien depuis le 2 août 2026. L'Omnibus a en revanche modifié l'article 50(2), en y ajoutant la transition limitée au 2 décembre 2026 ci-dessous.",
+} as const;
+
+/**
+ * Article 99(4)(g) ceiling for Article 50 breaches. The arithmetic is
+ * inverted for SMEs and start-ups by Article 99(6), which is the detail most
+ * summaries omit.
+ */
+export const ARTICLE_50_PENALTIES = {
+  en: {
+    headline: "Up to €15 million or 3% of worldwide annual turnover",
+    company:
+      "For undertakings, the applicable ceiling is the higher of the two figures.",
+    sme: "For SMEs and start-ups, Article 99(6) inverts the calculation: the ceiling is the lower of the two figures.",
+    institutions:
+      "For EU institutions, bodies and agencies, the Commission fact page states fines up to €750,000; the EDPS is the competent authority.",
+    enforcement:
+      "Enforcement is decentralised — national market surveillance authorities handle Article 50 in the first instance.",
+  },
+  fr: {
+    headline: "Jusqu'à 15 millions d'euros ou 3 % du chiffre d'affaires mondial annuel",
+    company:
+      "Pour les entreprises, le plafond applicable est le plus élevé des deux montants.",
+    sme: "Pour les PME et les jeunes pousses, l'article 99(6) inverse le calcul : le plafond est le plus bas des deux montants.",
+    institutions:
+      "Pour les institutions, organes et organismes de l'UE, la fiche officielle de la Commission indique des amendes pouvant atteindre 750 000 € ; le CEPD est l'autorité compétente.",
+    enforcement:
+      "L'application est décentralisée — les autorités nationales de surveillance du marché traitent l'article 50 en première ligne.",
+  },
+} as const;
 
 export const article50Groups: Article50Group[] = [
   {
@@ -254,7 +298,7 @@ export const article50Items: Article50Item[] = [
     purpose:
       "AI-generated or manipulated text published to inform the public on matters of public interest must be disclosed, unless it underwent substantive human review and a person holds editorial responsibility. Spell-checking or grammar checks are not enough.",
     actions: [
-      "Flag content involving politics, public health, law, justice, security, environment, consumer safety, or major economic, scientific and cultural debate.",
+      "Flag content involving politics, public health, law, justice, security, environment, consumer safety, or major economic, scientific and cultural debate. The Regulation says only “matters of public interest” — this list comes from the Commission guidelines and is illustrative, not exhaustive. A topic outside it is not automatically outside scope.",
       "Either label it, or route it through a substantive human review and editorial responsibility workflow.",
     ],
     teams: ["Editorial", "Public affairs", "Legal", "Communications"],
@@ -383,7 +427,7 @@ export const article50Items: Article50Item[] = [
       "Make disclosures understandable and consistent across channels.",
     actions: [
       "Adopt a style rule for where labels appear on articles, videos, audio players, social posts, and campaign assets.",
-      "Use the optional EU icon if helpful, but pair it with plain-language text as the safer default unless usability testing shows icon-only disclosure is clearly understood.",
+      "The Commission provides three optional EU icons for labelling AI-generated content. Use them where helpful, but pair an icon with plain-language text as the safer default unless usability testing shows icon-only disclosure is clearly understood.",
     ],
     teams: ["Brand", "Communications", "UX", "Legal"],
     evidence: [
@@ -565,12 +609,17 @@ export const article50Sources: Article50Source[] = [
   {
     label: "Quick facts — Transparency rules for AI systems",
     href: "https://digital-strategy.ec.europa.eu/en/factpages/quick-facts-transparency-rules-ai-systems",
-    note: "Official summary of obligations, penalties, grace period, and optional icons.",
+    note: "Official summary of obligations, penalties, the grace period, and the three optional EU icons — which can be downloaded from this page.",
   },
   {
     label: "Article 99 — Penalties",
     href: "https://ai-act-service-desk.ec.europa.eu/en/ai-act/article-99",
-    note: "Penalty ceilings applicable to Article 50 breaches.",
+    note: "Ceilings for Article 50 breaches: the higher of the two figures for undertakings, the lower for SMEs and start-ups under Article 99(6).",
+  },
+  {
+    label: "AI Omnibus — amendment to Article 50(2)",
+    href: "https://digital-strategy.ec.europa.eu/en/factpages/quick-facts-transparency-rules-ai-systems",
+    note: "The 2 December 2026 marking transition is not in the 2024 text of the Regulation: Article 50(2) was amended by the AI Omnibus, which also postponed the high-risk regime while leaving Article 50 on its 2 August 2026 date. The Commission fact page records both points.",
   },
   {
     label: "Article 2 — Scope",
@@ -984,10 +1033,27 @@ export const article50Scenarios: Article50Scenario[] = [
     title: "SMEs and start-ups",
     situation: "You are a small company with limited compliance resources.",
     applies: [
-      "The duties are the same, but fines carry lower caps under the AI Act's proportionality rules (general ceiling: €15 million or 3% of worldwide annual turnover).",
+      "The duties are identical — size does not change what Article 50 requires.",
+      "Only the arithmetic of the ceiling changes. For undertakings generally, the ceiling is the higher of €15 million or 3% of worldwide annual turnover; Article 99(6) inverts this for SMEs and start-ups, making it the lower of the two.",
     ],
     traps: [
+      "Reading the SME rule as a lighter obligation rather than a lower ceiling — the duties themselves are unchanged.",
       "Deferring scoping because of size — the register and front-end notices are the minimum viable controls.",
+    ],
+  },
+  {
+    id: "sc-vlop-dsa",
+    category: "special",
+    title: "Content distributed on a very large online platform",
+    situation:
+      "Your AI-generated content is published on a designated very large online platform or search engine.",
+    applies: [
+      "Article 50 duties continue to apply to you as provider or deployer.",
+      "The platform carries its own DSA systemic-risk obligations for generative content, including marking where feasible — those duties sit on the platform, not on you, and do not discharge your Article 50 disclosure.",
+      "Where the same entity provides both the system and the underlying general-purpose model, or the system is integrated into a designated platform, the AI Office has a specific enforcement role alongside national authorities.",
+    ],
+    traps: [
+      "Assuming a platform's automatic AI label satisfies your own deployer disclosure — it does not.",
     ],
   },
   {
