@@ -642,6 +642,8 @@ export type Article50DutyId =
   | "duty-50-3"
   | "duty-50-4-deepfake"
   | "duty-50-4-text"
+  | "duty-50-5"
+  | "duty-code-of-practice"
   | "duty-scope"
   | "duty-grace"
   | "duty-both-roles";
@@ -659,8 +661,8 @@ export const article50Duties: Article50Duty[] = [
     id: "duty-50-1",
     label: "Art. 50(1) — direct-interaction disclosure",
     summary:
-      "People must be informed they are interacting with AI, at the latest at the first interaction, in every channel and locale. The “obvious to a reasonable person” exception is interpreted restrictively.",
-    groups: ["providers", "product"],
+      "People must be informed they are interacting with AI, at the latest at the first interaction, in every channel and locale. The “obvious to a reasonable person” exception is interpreted restrictively. The duty is drafted on the provider — but if you deploy someone else's system, you still need operational controls so the provider-built disclosure actually appears in your theme, your locales and your embeds.",
+    groups: ["providers", "deployers", "product"],
   },
   {
     id: "duty-50-2",
@@ -680,15 +682,29 @@ export const article50Duties: Article50Duty[] = [
     id: "duty-50-4-deepfake",
     label: "Art. 50(4) — deepfake labelling",
     summary:
-      "Deepfake image, audio or video content must carry a visible or audible disclosure at first exposure. Machine-readable marks alone are not enough.",
+      "Deepfake image, audio or video content must carry a visible or audible disclosure at first exposure. Machine-readable marks alone are not enough. If you also generated the content yourself, the separate Art. 50(2) marking duty applies on top — tick the generation statement above as well.",
     groups: ["deployers", "comms"],
   },
   {
     id: "duty-50-4-text",
     label: "Art. 50(4) — public-interest text",
     summary:
-      "AI-generated text published to inform the public on matters of public interest must be disclosed — unless it underwent substantive human review and a person holds editorial responsibility. Spell-checking is not enough.",
+      "AI-generated text published to inform the public on matters of public interest must be disclosed — unless it underwent substantive human review and a person holds editorial responsibility. Spell-checking is not enough. The Regulation says only “matters of public interest”: the topic list above comes from the Commission guidelines and is illustrative, so a subject outside it is not automatically outside scope.",
     groups: ["deployers", "comms"],
+  },
+  {
+    id: "duty-50-5",
+    label: "Art. 50(5) — how the information must be given",
+    summary:
+      "Whenever Article 50 requires you to inform people, the information must be clear, distinguishable and accessible, and given at the latest at the first interaction or exposure. This is a separate requirement: a disclosure that exists but is buried in a privacy policy, unreadable on mobile, invisible to a screen reader or shown only after the fact does not satisfy it.",
+    groups: ["product", "comms"],
+  },
+  {
+    id: "duty-code-of-practice",
+    label: "Code of Practice — your evidence route",
+    summary:
+      "The Code of Practice on Transparency of AI-Generated Content is voluntary, but the Commission and the AI Board assessed it as an adequate way to demonstrate compliance with Article 50(2), (4) and (5) — which are exactly the duties you have just triggered. Signing gives a predictable path; not signing is equally lawful but means you must be ready to prove adequacy by other means. Decide deliberately, and write the decision down.",
+    groups: ["legal"],
   },
   {
     id: "duty-scope",
@@ -720,35 +736,40 @@ export type Article50Situation = {
 };
 
 export const article50Situations: Article50Situation[] = [
+  // Article 50(5) rides along with every duty that requires informing people
+  // (paragraphs 1, 3 and 4). It does not attach to the paragraph 2 marking
+  // duty, which is technical and not addressed to natural persons.
+  // The Code of Practice is offered wherever it is assessed as adequate
+  // evidence — Article 50(2) and (4).
   {
     id: "sit-interaction",
     statement:
       "A system we offer or operate interacts directly with people — chat, voice assistant, avatar, kiosk.",
-    duties: ["duty-50-1"],
+    duties: ["duty-50-1", "duty-50-5"],
   },
   {
     id: "sit-generation",
     statement:
       "We develop or offer a system that generates or manipulates audio, images, video or text.",
-    duties: ["duty-50-2"],
+    duties: ["duty-50-2", "duty-code-of-practice"],
   },
   {
     id: "sit-deepfake",
     statement:
       "We publish AI-generated or AI-manipulated images, audio or video that appear real (deepfakes) — including in ads, training or brand content.",
-    duties: ["duty-50-4-deepfake"],
+    duties: ["duty-50-4-deepfake", "duty-50-5", "duty-code-of-practice"],
   },
   {
     id: "sit-text",
     statement:
       "We publish AI-generated text that informs the public on matters of public interest — politics, health, law, justice, security, environment, consumer safety.",
-    duties: ["duty-50-4-text"],
+    duties: ["duty-50-4-text", "duty-50-5", "duty-code-of-practice"],
   },
   {
     id: "sit-biometric",
     statement:
       "We use emotion recognition or biometric categorisation — workplace analytics, kiosks, CCTV analytics, access control, fraud tools.",
-    duties: ["duty-50-3"],
+    duties: ["duty-50-3", "duty-50-5"],
   },
   {
     id: "sit-non-eu",
