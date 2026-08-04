@@ -54,6 +54,7 @@ import type {
   RegulatoryUpdateFilterOptions,
   RegulatoryUpdateDraftInput,
   RegulatoryUpdateFilters,
+  PublicUpdateSummary,
   ScanLogInput,
   VisibilityScope,
 } from "@/db/repository-types";
@@ -561,6 +562,34 @@ export class MemoryAiRegulationRepository implements AiRegulationRepository {
       ? getMockStore().rawItems.filter((item) => item.sourceId === sourceId)
       : getMockStore().rawItems;
     return typeof limit === "number" ? items.slice(0, limit) : items;
+  }
+
+  async listPublicUpdateSummariesCursorPage(
+    filters?: RegulatoryUpdateFilters,
+    page?: ListCursorParams,
+  ): Promise<CursorPagedResult<PublicUpdateSummary>> {
+    const full = await this.listRegulatoryUpdatesCursorPage(filters, "public", page);
+    return {
+      ...full,
+      items: full.items.map((update) => ({
+        id: update.id,
+        title: update.title,
+        oneSentenceSummary: update.oneSentenceSummary,
+        summary: update.summary,
+        region: update.region,
+        country: update.country,
+        jurisdiction: update.jurisdiction,
+        legalArea: update.legalArea,
+        importanceLevel: update.importanceLevel,
+        publicationDate: update.publicationDate,
+        sourceName: update.sourceName,
+        sourceUrl: update.sourceUrl,
+        authorityType: update.authorityType,
+        developmentType: update.developmentType,
+        tags: update.tags,
+        createdAt: update.createdAt,
+      })),
+    };
   }
 
   async listCorroborationCandidates(limit: number) {

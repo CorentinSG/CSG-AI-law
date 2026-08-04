@@ -95,6 +95,34 @@ export type CorroborationCandidate = Pick<
   | "developmentType"
 >;
 
+/**
+ * Fields the public hub actually renders (cards + database explorer).
+ *
+ * `summary` stays because deriveUpdateAuthorityType infers from it when a row
+ * carries no authority tag — dropping it would silently change labels. What
+ * goes is the bulk: whatHappened, whyItMatters, practicalImpact,
+ * affectedParties, keyObligations, complianceDeadlines, enforcementRisk.
+ */
+export type PublicUpdateSummary = Pick<
+  AiRegulatoryUpdate,
+  | "id"
+  | "title"
+  | "oneSentenceSummary"
+  | "summary"
+  | "region"
+  | "country"
+  | "jurisdiction"
+  | "legalArea"
+  | "importanceLevel"
+  | "publicationDate"
+  | "sourceName"
+  | "sourceUrl"
+  | "authorityType"
+  | "developmentType"
+  | "tags"
+  | "createdAt"
+>;
+
 export interface RegulatoryUpdateFilters {
   status?: string;
   jurisdiction?: string;
@@ -388,6 +416,16 @@ export interface AiRegulationRepository {
    * single largest source of database egress in the system.
    */
   listCorroborationCandidates(limit: number): Promise<CorroborationCandidate[]>;
+  /**
+   * Keyset page of published updates, projected to what the public hub
+   * renders. The hub is force-dynamic, so every visit (including every
+   * crawler hit) was fetching up to 96 complete rows — prose included — to
+   * display a card and a filter table.
+   */
+  listPublicUpdateSummariesCursorPage(
+    filters?: RegulatoryUpdateFilters,
+    page?: ListCursorParams,
+  ): Promise<CursorPagedResult<PublicUpdateSummary>>;
   /**
    * AI processing logs for one month (`YYYY-MM`), projected to the two fields
    * the spend estimator reads. It previously pulled 2000 full rows per scan
