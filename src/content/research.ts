@@ -26,6 +26,38 @@ export type ResearchReference = {
   note?: string;
 };
 
+/** Languages a note can be read in. Independent of the site's UI locale. */
+export type ArticleLanguage = "en" | "fr" | "es";
+
+export const ARTICLE_LANGUAGES: ArticleLanguage[] = ["en", "fr", "es"];
+
+export const ARTICLE_LANGUAGE_LABELS: Record<ArticleLanguage, string> = {
+  en: "English",
+  fr: "Français",
+  es: "Español",
+};
+
+/**
+ * A rendition of a note in one language. Everything a reader sees changes;
+ * metadata that is language-neutral (dates, image, tags) does not.
+ */
+export type ResearchTranslation = {
+  title: string;
+  subtitle: string;
+  readingTime: string;
+  summary: string;
+  abstract: string;
+  body: ResearchBodySection[];
+  references?: ResearchReference[];
+  /**
+   * False when the author has not personally checked this rendition. The
+   * article page then says so — machine-translated legal analysis must not be
+   * presented as the author's own words, and Article 50(4) of the AI Act is
+   * itself about disclosing AI-generated public-interest text.
+   */
+  humanReviewed?: boolean;
+};
+
 export type ResearchEntry = {
   slug: string;
   title: string;
@@ -45,6 +77,10 @@ export type ResearchEntry = {
   relatedSlugs?: string[];
   body: ResearchBodySection[];
   references?: ResearchReference[];
+  /** The language the author wrote in. Defaults to English. */
+  originalLanguage?: ArticleLanguage;
+  /** Renditions in other languages, offered through the language switcher. */
+  translations?: Partial<Record<ArticleLanguage, ResearchTranslation>>;
 };
 
 // Public registry consumed by the research routes and tests.
@@ -52,6 +88,361 @@ export type ResearchEntry = {
 // --- ARCHIVE : entrées retirées temporairement, à republier avec contenu rédigé ---
 const author = "Corentin Saint-Girons";
 export const researchEntries: ResearchEntry[] = [
+  {
+    slug: "ai-office-pouvoirs-enquete-sanction-gpai",
+    title:
+      "L'AI Office européen peut désormais enquêter sur les fournisseurs d'IA et les sanctionner",
+    subtitle:
+      "Depuis le 2 août 2026, la Commission dispose enfin des pouvoirs qui manquaient à un an d'obligations GPAI. Les règles n'ont pas changé : c'est le pouvoir de les faire respecter qui est né.",
+    author,
+    status: "published",
+    category: "EU AI Law",
+    tags: [
+      "AI Office",
+      "GPAI",
+      "Enforcement",
+      "Règlement IA",
+      "Sanctions",
+      "Modèles à usage général",
+    ],
+    jurisdiction: "Union européenne",
+    readingTime: "9 min de lecture",
+    originalLanguage: "fr",
+    summary:
+      "Depuis le 2 août 2026, le Bureau européen de l'IA dispose de pouvoirs formels d'enquête et de sanction sur les fournisseurs de modèles à usage général : accès aux modèles, mesures correctives, retrait du marché, amendes jusqu'à 15 M€ ou 3 % du chiffre d'affaires mondial. Compétence exclusive et centralisée, portée extraterritoriale assumée.",
+    abstract:
+      "Depuis le dimanche 2 août 2026, le Bureau européen de l'IA (AI Office), rattaché à la Commission européenne, dispose de pouvoirs formels d'enquête et de sanction à l'égard des fournisseurs de modèles d'IA à usage général (GPAI), les modèles qui sous-tendent ChatGPT, Claude, Gemini ou Le Chat. Le 2 août 2026 ne crée aucune obligation nouvelle : il transforme des obligations vieilles d'un an en obligations opposables.",
+    publishedAt: "2026-08-05",
+    featured: true,
+    relatedSlugs: [
+      "eu-ai-act-changing-how-law-firms-use-ai",
+      "when-ai-makes-legal-filings-easier-but-justice-harder",
+      "ai-summaries-rule-1006-admissibility",
+    ],
+    body: [
+      {
+        heading: "L'essentiel",
+        paragraphs: [
+          "Depuis le dimanche 2 août 2026, le Bureau européen de l'IA (AI Office), rattaché à la Commission européenne, dispose de pouvoirs formels d'enquête et de sanction à l'égard des fournisseurs de modèles d'IA à usage général (GPAI), les modèles qui sous-tendent ChatGPT, Claude, Gemini ou Le Chat. La Commission l'a annoncé officiellement dans un communiqué du 31 juillet 2026 : « À partir du 2 août 2026, l'AI Office de la Commission européenne, avec les autorités nationales, commencera à faire appliquer le règlement sur l'IA. »[1]",
+          "Concrètement, l'AI Office peut désormais exiger la documentation technique d'un modèle, mener ses propres évaluations (y compris via un accès à l'interface ou au code), ordonner des mesures correctives, restreindre ou retirer un modèle du marché européen, et proposer des amendes pouvant atteindre 15 millions d'euros ou 3 % du chiffre d'affaires annuel mondial, le montant le plus élevé étant retenu.[2]",
+        ],
+      },
+      {
+        heading: "Pourquoi maintenant ? Une année d'obligations sans dents",
+        paragraphs: [
+          "Le règlement (UE) 2024/1689 (l'« AI Act »), entré en vigueur le 1er août 2024, s'applique par étapes. Les obligations de fond des fournisseurs de modèles GPAI (chapitre V, articles 53 à 55 : tenir une documentation technique à jour, informer les développeurs en aval, adopter une politique de respect du droit d'auteur, publier un résumé des contenus d'entraînement, et, pour les modèles à « risque systémique » au-delà de 10²⁵ FLOP d'entraînement, évaluer les modèles, atténuer les risques, notifier les incidents graves et assurer la cybersécurité) s'appliquent depuis le 2 août 2025 en vertu de l'article 113.[4]",
+          "Mais pendant un an, ces obligations étaient dépourvues de mécanisme de contrainte : les colégislateurs avaient expressément différé l'article 101 (amendes GPAI) et le chapitre IX (pouvoirs d'enquête, articles 88 à 94) au 2 août 2026. La Commission l'avait elle-même écrit dans ses lignes directrices du 19 novembre 2025 : « Durant la première année à compter du 2 août 2025, la Commission ne peut prendre aucune mesure d'exécution, car ses pouvoirs d'exécution n'entrent en application que le 2 août 2026. » Comme le résume Tech Policy Press : « Bien que ces obligations aient commencé à s'appliquer l'an dernier, la Commission ne peut qu'à présent enquêter, ordonner des mesures correctives et imposer des amendes. »[7]",
+          "Les règles n'ont donc pas changé le 2 août 2026 ; c'est le pouvoir de les faire respecter qui est né.",
+        ],
+      },
+      {
+        heading: "Quels pouvoirs, exactement ?",
+        paragraphs: [
+          "Selon la page officielle de la Commission sur le cadre d'enforcement, l'AI Office dispose de deux familles de pouvoirs.[2]",
+          "Pouvoirs d'enquête. L'AI Office peut adresser des demandes d'information (RFI) pour vérifier la conformité : soit des RFI « simples », soit des RFI adoptées par décision formelle de la Commission. Répondre de façon inexacte ou trompeuse à une RFI simple est en soi passible d'amende ; ne pas répondre, ou répondre incomplètement, à une RFI par décision l'est aussi. Pour les modèles GPAI, l'AI Office, ou des experts indépendants qu'il désigne, peut exiger l'accès au modèle pour conduire ses propres évaluations (article 92, y compris via l'interface ou le code source), et demander au fournisseur de prendre des mesures allant jusqu'à la restriction de la disponibilité publique du modèle. Pour les systèmes d'IA relevant de sa compétence, il peut aussi mener des auditions et des inspections dans les locaux des fournisseurs.[9]",
+          "Pouvoirs de sanction. Si l'AI Office établit une violation intentionnelle ou par négligence, la Commission peut adopter une décision d'amende. Les manquements aux obligations GPAI sont plafonnés à 15 M€ ou 3 % du chiffre d'affaires mondial (article 101). Les pratiques d'IA interdites (article 5 : notation sociale, manipulation, exploitation de vulnérabilités…) relèvent du plafond supérieur de 35 M€ ou 7 % ; la fourniture d'informations inexactes ou trompeuses aux autorités relève d'un plancher de 7,5 M€ ou 1 %.[2]",
+          "Point structurel décisif : en vertu de l'article 88, la Commission détient une compétence exclusive et centralisée pour superviser et faire respecter les obligations des fournisseurs de modèles GPAI, exercée via l'AI Office, contrairement au reste de l'AI Act, confié aux autorités nationales de surveillance du marché. Les autorités nationales peuvent demander à la Commission d'agir, mais ne peuvent pas agir elles-mêmes contre les fournisseurs de modèles. L'AI Office est également compétent pour les systèmes d'IA développés par le même fournisseur que le modèle sous-jacent (ou son groupe), et pour les systèmes d'IA intégrés aux très grandes plateformes désignées sous le DSA.[8]",
+          "L'AI Office s'appuie en outre sur trois canaux de signalement lancés à cette occasion : un outil de plainte ouvert à toute personne physique ou morale, un outil sécurisé pour lanceurs d'alerte internes, et un canal de plainte réservé aux fournisseurs en aval qui intègrent le modèle GPAI d'un tiers.[1]",
+        ],
+      },
+      {
+        heading: "Une portée mondiale assumée",
+        paragraphs: [
+          "Ces pouvoirs s'appliquent à tout fournisseur mettant un modèle GPAI à disposition dans l'UE, quel que soit son lieu d'établissement. « Une adresse américaine ne place pas un laboratoire hors de portée du régulateur européen », a déclaré à CNBC Elisabetta Righini, associée du cabinet Sidley Austin, qui rappelle que les fournisseurs non européens doivent en outre désigner un représentant autorisé établi dans l'UE (article 54). Elle souligne un point souvent sous-estimé : « La responsabilité GPAI ne se limite pas aux manquements de fond : refuser une demande d'information, donner des réponses trompeuses ou bloquer une évaluation de modèle est sanctionnable en soi. »[5]",
+          "Anthropic, OpenAI, Google, Meta, Mistral et xAI sont donc tous dans le périmètre. Le rapporteur du texte au Parlement européen, Brando Benifei, présente l'AI Office comme « la première autorité au monde dotée de véritables pouvoirs d'enquête et d'exécution sur les modèles d'IA avancés ».",
+        ],
+      },
+      {
+        heading: "Ce qui s'applique aussi, et ce qui a été reporté",
+        paragraphs: [
+          "La même date a activé deux autres volets, souvent confondus avec le volet GPAI. D'abord la transparence : l'article 50 devient exécutoire, les chatbots doivent dire qu'ils sont des IA, les deepfakes doivent être étiquetés, et les contenus générés ou modifiés par IA doivent porter un marquage lisible par machine. Seule exception : le marquage machine de l'article 50(2) bénéficie d'un délai au 2 décembre 2026 pour les systèmes déjà sur le marché avant le 2 août 2026.[10] Ensuite, le régime général de sanctions et la pleine compétence des autorités nationales de surveillance du marché s'activent également.",
+          "En revanche, le « Digital Omnibus sur l'IA » (règlement (UE) 2026/1744, entré en vigueur le 27 juillet 2026 après un vote du Parlement du 16 juin) a reporté les obligations relatives aux systèmes à haut risque : au 2 décembre 2027 pour les cas d'usage sensibles de l'annexe III (recrutement, crédit, éducation, services essentiels…) et au 2 août 2028 pour l'IA intégrée aux produits réglementés de l'annexe I. Le calendrier GPAI, lui, n'a pas bougé, et c'est un choix délibéré : donner du temps aux utilisateurs de systèmes à haut risque, mais maintenir la pression sur la poignée d'entreprises dont les modèles servent de fondation à tout le reste.[10]",
+          "À noter aussi : les modèles mis sur le marché de l'Union avant le 2 août 2025 bénéficient, eux, d'un délai de mise en conformité jusqu'au 2 août 2027 (article 111(3)).[9]",
+        ],
+      },
+      {
+        heading: "Le Code de bonnes pratiques devient la ligne de partage",
+        paragraphs: [
+          "Le Code de bonnes pratiques GPAI, voie volontaire de démonstration de conformité, compte parmi ses signataires Amazon, Anthropic, Google, IBM, Microsoft, Mistral AI et OpenAI, mais pas Meta, tandis que xAI n'a signé que le chapitre sûreté et sécurité. Pour les signataires, la supervision se concentre sur le respect du Code ; les non-signataires devront démontrer une conformité équivalente « par d'autres moyens adéquats », ce qui expose à des demandes d'information plus détaillées. Un second code, sur la transparence des contenus générés par IA, a réuni plus de 180 signataires selon la Commission.[11]",
+        ],
+      },
+      {
+        heading: "L'accès aux modèles devient un rapport de force juridique",
+        paragraphs: [
+          "L'UE a négocié pendant des mois l'accès au modèle avancé Mythos d'Anthropic avant que l'entreprise n'accepte de le partager avec l'agence de cybersécurité ENISA, après un déplacement de hauts fonctionnaires de la Commission à San Francisco ; OpenAI avait auparavant offert un accès à son modèle GPT-5.5-Cyber. Désormais, l'article 92 permet d'exiger cet accès. La Commission est par ailleurs en discussion avec OpenAI et Anthropic à la suite d'incidents de cyberattaques impliquant leurs modèles, selon Reuters.[5]",
+        ],
+      },
+      {
+        heading: "Un nouveau front dans les tensions transatlantiques",
+        paragraphs: [
+          "Ces pouvoirs arrivent quelques semaines après l'amende d'environ 1 milliard de dollars infligée à Google au titre du DMA en juillet 2026, qui avait conduit le président américain Donald Trump à menacer l'UE de droits de douane « substantiels ». L'enforcement de l'AI Act donne à Bruxelles un levier supplémentaire sur les entreprises américaines, et les laboratoires américains se retrouvent face à deux gouvernements exigeant des formes de contrôle pré-déploiement, de part et d'autre de l'Atlantique.[5]",
+        ],
+      },
+      {
+        heading: "Pour l'écosystème en aval : une assurance et un risque de dépendance",
+        paragraphs: [
+          "Les entreprises qui construisent des produits sur le modèle d'un tiers ne portent pas les obligations des articles 53 à 55 (celles-ci pèsent sur le fournisseur du modèle), mais elles y gagnent un droit à l'information (annexe XII) et un canal de plainte officiel. Revers de la médaille : si l'AI Office ordonne la restriction, le retrait ou le rappel d'un modèle (article 93), tous les produits construits dessus sont affectés.[9]",
+          "Attention également à la requalification : un fine-tuning dépassant un tiers du compute d'entraînement d'origine, ou la mise sur le marché d'un modèle sous sa propre marque, fait de l'entreprise un fournisseur soumis à la supervision de l'AI Office.",
+        ],
+      },
+      {
+        heading: "Un démarrage probablement graduel",
+        paragraphs: [
+          "Au « jour zéro », aucune amende publique n'avait été prononcée au titre des articles 99 ou 101, et seuls 9 des 27 États membres avaient pleinement désigné leurs autorités nationales compétentes.[11] Un responsable de la Commission a indiqué à Tech Policy Press que l'AI Office entendait maintenir un « dialogue constructif » avec les fournisseurs. Les premières réactions des entreprises vont dans le même sens : OpenAI dit avoir « collaboré étroitement avec la Commission européenne » et vouloir « continuer à travailler ensemble », et Google se dit « déterminé à respecter toutes les règles applicables ».[5]",
+        ],
+      },
+      {
+        heading: "Conclusion",
+        paragraphs: [
+          "Le 2 août 2026 ne crée aucune obligation nouvelle pour les fournisseurs de modèles : il transforme des obligations vieilles d'un an en obligations opposables, adossées à un régulateur central unique, doté d'un droit de regard sur les modèles eux-mêmes et d'amendes indexées sur le chiffre d'affaires mondial.",
+          "Comme le formule Tech Policy Press, les premiers mois d'enforcement diront « si l'AI Act devient un cadre de responsabilité effectif ou reste largement un ensemble d'obligations sur le papier ». La question n'est plus de savoir si Bruxelles a le pouvoir d'enquêter et de sanctionner les grands laboratoires d'IA : elle l'a, depuis dimanche. La question est de savoir quand, et contre qui, elle l'utilisera pour la première fois.",
+        ],
+      },
+    ],
+    references: [
+      {
+        label:
+          "[1] Commission européenne, communiqué de presse du 31 juillet 2026 (IP/26/1714)",
+        href: "https://ec.europa.eu/commission/presscorner/home/en",
+        note: "« Commission starts enforcing AI Act rules and new transparency requirements on 2 August ».",
+      },
+      {
+        label:
+          "[2] Commission européenne, The enforcement framework of the AI Act",
+        href: "https://digital-strategy.ec.europa.eu/en/policies/ai-act-enforcement",
+        note: "Pouvoirs d'enquête et de sanction de l'AI Office, plafonds d'amendes.",
+      },
+      {
+        label: "[3] AI Act, calendrier d'application (Shaping Europe's digital future)",
+        href: "https://digital-strategy.ec.europa.eu/en/policies/regulatory-framework-ai",
+      },
+      {
+        label:
+          "[4] Règlement (UE) 2024/1689, EUR-Lex (articles 53-55, 88-94, 99, 101, 111, 113)",
+        href: "https://eur-lex.europa.eu/eli/reg/2024/1689/oj",
+      },
+      {
+        label:
+          "[5] CNBC, « Anthropic, OpenAI among firms facing new EU AI Act enforcement powers » (3 août 2026)",
+      },
+      {
+        label:
+          "[6] Reuters, « EU says necessary to monitor high-risk AI systems… » (31 juillet 2026)",
+      },
+      {
+        label:
+          "[7] Tech Policy Press, « Brussels Gains New AI Act Enforcement Powers… » (30 juillet 2026)",
+      },
+      {
+        label:
+          "[8] artificialintelligenceact.eu (Future of Life Institute), « Enforcement of Chapter V under the EU AI Act »",
+        href: "https://artificialintelligenceact.eu/",
+      },
+      {
+        label: "[9] Bratby Law, « GPAI enforcement: fines begin 2 August 2026 » (1er août 2026)",
+      },
+      {
+        label:
+          "[10] Gaming Tech Law (Giulio Coraggio), « EU AI Act 2 August 2026: What Applies and What Was Delayed » (2 août 2026)",
+      },
+      {
+        label:
+          "[11] Axis Intelligence, « EU AI Act Enforcement Statistics 2026: Day 0 Compliance Data » (2 août 2026)",
+        note: "Décompte des signataires et des autorités nationales désignées, adossé au tracker du Future of Life Institute.",
+      },
+      {
+        label: "Checklist interactive : obligations de transparence (article 50)",
+        href: "/eu-ai-act/article-50-checklist",
+        note: "Outil gratuit : triage par situation, contrôles par rôle, cas limites. Purement indicatif, pas un conseil juridique.",
+      },
+    ],
+    translations: {
+      en: {
+        humanReviewed: false,
+        title:
+          "The EU AI Office can now investigate AI providers and fine them",
+        subtitle:
+          "Since 2 August 2026, the Commission finally holds the powers that a year of GPAI obligations lacked. The rules did not change: the power to enforce them came into being.",
+        readingTime: "9 min read",
+        summary:
+          "Since 2 August 2026, the European AI Office holds formal investigation and sanction powers over providers of general-purpose AI models: model access, corrective measures, market withdrawal, and fines up to €15 million or 3% of worldwide turnover. Exclusive centralised competence, with deliberate extraterritorial reach.",
+        abstract:
+          "Since Sunday 2 August 2026, the European AI Office, part of the European Commission, holds formal powers to investigate and sanction providers of general-purpose AI (GPAI), the models behind ChatGPT, Claude, Gemini and Le Chat. 2 August 2026 creates no new obligation: it turns year-old obligations into enforceable ones.",
+        body: [
+          {
+            heading: "The essentials",
+            paragraphs: [
+              "Since Sunday 2 August 2026, the European AI Office, part of the European Commission, holds formal powers to investigate and sanction providers of general-purpose AI (GPAI), the models behind ChatGPT, Claude, Gemini and Le Chat. The Commission announced it in a press release of 31 July 2026: “From 2 August 2026, the European Commission's AI Office, together with national authorities, will start enforcing the AI Act.”[1]",
+              "In practice, the AI Office can now require a model's technical documentation, run its own evaluations (including through interface or code access), order corrective measures, restrict or withdraw a model from the European market, and propose fines of up to €15 million or 3% of worldwide annual turnover, whichever is higher.[2]",
+            ],
+          },
+          {
+            heading: "Why now? A year of obligations without teeth",
+            paragraphs: [
+              "Regulation (EU) 2024/1689, the AI Act, entered into force on 1 August 2024 and applies in stages. The substantive obligations of GPAI model providers (Chapter V, Articles 53 to 55: maintaining up-to-date technical documentation, informing downstream developers, adopting a copyright policy, publishing a summary of training content, and, for models with systemic risk above 10²⁵ training FLOP, evaluating models, mitigating risks, reporting serious incidents and ensuring cybersecurity) have applied since 2 August 2025 under Article 113.[4]",
+              "But for a year those obligations had no enforcement mechanism: the co-legislators had expressly deferred Article 101 (GPAI fines) and Chapter IX (investigation powers, Articles 88 to 94) to 2 August 2026. The Commission wrote as much in its guidelines of 19 November 2025: “During the first year from 2 August 2025, the Commission cannot take any enforcement action, as its enforcement powers only become applicable on 2 August 2026.” As Tech Policy Press puts it: “Although these obligations began to apply last year, only now can the Commission investigate, order corrective measures and impose fines.”[7]",
+              "So the rules did not change on 2 August 2026; the power to enforce them came into being.",
+            ],
+          },
+          {
+            heading: "Which powers, exactly?",
+            paragraphs: [
+              "According to the Commission's official page on the enforcement framework, the AI Office holds two families of powers.[2]",
+              "Investigation powers. The AI Office can issue requests for information (RFIs) to verify compliance: either “simple” RFIs or RFIs adopted by formal Commission decision. Answering a simple RFI inaccurately or misleadingly is itself finable; failing to answer, or answering incompletely, an RFI by decision is too. For GPAI models, the AI Office, or independent experts it designates, can require access to the model to run its own evaluations (Article 92, including through the interface or source code), and require the provider to take measures up to restricting the model's public availability. For AI systems within its competence, it can also conduct hearings and inspections at providers' premises.[9]",
+              "Sanction powers. Where the AI Office establishes an intentional or negligent infringement, the Commission can adopt a fining decision. Breaches of GPAI obligations are capped at €15 million or 3% of worldwide turnover (Article 101). Prohibited AI practices (Article 5: social scoring, manipulation, exploitation of vulnerabilities) fall under the higher ceiling of €35 million or 7%; supplying inaccurate or misleading information to authorities falls under a floor of €7.5 million or 1%.[2]",
+              "One decisive structural point: under Article 88, the Commission holds exclusive, centralised competence to supervise and enforce the obligations of GPAI model providers, exercised through the AI Office, unlike the rest of the AI Act, which is entrusted to national market surveillance authorities. National authorities can ask the Commission to act, but cannot act themselves against model providers. The AI Office is also competent for AI systems developed by the same provider as the underlying model (or its group), and for AI systems integrated into very large online platforms designated under the DSA.[8]",
+              "The AI Office also relies on three reporting channels launched for the occasion: a complaint tool open to any natural or legal person, a secure tool for internal whistleblowers, and a complaint channel reserved for downstream providers integrating a third party's GPAI model.[1]",
+            ],
+          },
+          {
+            heading: "A deliberately global reach",
+            paragraphs: [
+              "These powers apply to any provider making a GPAI model available in the EU, wherever it is established. “A US address does not put a lab beyond the reach of the European regulator,” Elisabetta Righini, a partner at Sidley Austin, told CNBC, noting that non-EU providers must also designate an authorised representative established in the EU (Article 54). She stresses an often-underestimated point: “GPAI liability is not limited to substantive breaches: refusing a request for information, giving misleading answers or blocking a model evaluation is sanctionable in itself.”[5]",
+              "Anthropic, OpenAI, Google, Meta, Mistral and xAI are therefore all within scope. The Parliament's rapporteur on the text, Brando Benifei, presents the AI Office as “the first authority in the world with genuine investigation and enforcement powers over advanced AI models”.",
+            ],
+          },
+          {
+            heading: "What else applies, and what was postponed",
+            paragraphs: [
+              "The same date activated two other strands, often confused with the GPAI one. First, transparency: Article 50 becomes enforceable, chatbots must say they are AI, deepfakes must be labelled, and AI-generated or modified content must carry machine-readable marking. The single exception: the machine marking of Article 50(2) benefits from a transition to 2 December 2026 for systems already on the market before 2 August 2026.[10] Second, the general penalty regime and the full competence of national market surveillance authorities also activate.",
+              "By contrast, the “Digital Omnibus on AI” (Regulation (EU) 2026/1744, in force on 27 July 2026 after a Parliament vote of 16 June) postponed the high-risk system obligations: to 2 December 2027 for the sensitive use cases of Annex III (recruitment, credit, education, essential services) and to 2 August 2028 for AI embedded in the regulated products of Annex I. The GPAI timetable did not move, and that is a deliberate choice: give time to users of high-risk systems, but keep the pressure on the handful of companies whose models underpin everything else.[10]",
+              "Note also: models placed on the Union market before 2 August 2025 have until 2 August 2027 to comply (Article 111(3)).[9]",
+            ],
+          },
+          {
+            heading: "The Code of Practice becomes the dividing line",
+            paragraphs: [
+              "The GPAI Code of Practice, a voluntary route for demonstrating compliance, counts Amazon, Anthropic, Google, IBM, Microsoft, Mistral AI and OpenAI among its signatories, but not Meta, while xAI signed only the safety and security chapter. For signatories, supervision focuses on adherence to the Code; non-signatories must demonstrate equivalent compliance “by other adequate means”, which exposes them to more detailed information requests. A second code, on transparency of AI-generated content, gathered more than 180 signatories according to the Commission.[11]",
+            ],
+          },
+          {
+            heading: "Model access becomes a legal power relationship",
+            paragraphs: [
+              "The EU negotiated for months over access to Anthropic's advanced Mythos model before the company agreed to share it with the cybersecurity agency ENISA, after senior Commission officials travelled to San Francisco; OpenAI had previously offered access to its GPT-5.5-Cyber model. Article 92 now allows that access to be required. The Commission is moreover in discussions with OpenAI and Anthropic following cyberattack incidents involving their models, according to Reuters.[5]",
+            ],
+          },
+          {
+            heading: "A new front in transatlantic tensions",
+            paragraphs: [
+              "These powers arrive a few weeks after the roughly $1 billion fine imposed on Google under the DMA in July 2026, which led US President Donald Trump to threaten the EU with “substantial” tariffs. AI Act enforcement gives Brussels additional leverage over American companies, and US labs now face two governments demanding forms of pre-deployment control, on either side of the Atlantic.[5]",
+            ],
+          },
+          {
+            heading: "For the downstream ecosystem: assurance and dependency risk",
+            paragraphs: [
+              "Companies building products on a third party's model do not carry the Article 53 to 55 obligations (those sit on the model provider), but they gain a right to information (Annex XII) and an official complaint channel. The flip side: if the AI Office orders the restriction, withdrawal or recall of a model (Article 93), every product built on it is affected.[9]",
+              "Watch out for reclassification too: fine-tuning beyond a third of the original training compute, or placing a model on the market under your own brand, makes the company a provider subject to AI Office supervision.",
+            ],
+          },
+          {
+            heading: "A likely gradual start",
+            paragraphs: [
+              "At “day zero”, no public fine had been issued under Articles 99 or 101, and only 9 of the 27 Member States had fully designated their competent national authorities.[11] A Commission official told Tech Policy Press that the AI Office intended to maintain a “constructive dialogue” with providers. Early company reactions point the same way: OpenAI says it has “worked closely with the European Commission” and wants to “keep working together”, and Google says it is “determined to comply with all applicable rules”.[5]",
+            ],
+          },
+          {
+            heading: "Conclusion",
+            paragraphs: [
+              "2 August 2026 creates no new obligation for model providers: it turns year-old obligations into enforceable ones, backed by a single central regulator with a right to look into the models themselves and fines indexed on worldwide turnover.",
+              "As Tech Policy Press puts it, the first months of enforcement will tell “whether the AI Act becomes an effective accountability framework or remains largely a set of obligations on paper”. The question is no longer whether Brussels has the power to investigate and sanction the major AI labs: it has, since Sunday. The question is when, and against whom, it will use it for the first time.",
+            ],
+          },
+        ],
+      },
+      es: {
+        humanReviewed: false,
+        title:
+          "La Oficina Europea de IA ya puede investigar y sancionar a los proveedores de IA",
+        subtitle:
+          "Desde el 2 de agosto de 2026, la Comisión dispone por fin de las competencias que le faltaban tras un año de obligaciones GPAI. Las normas no han cambiado: lo que ha nacido es el poder de hacerlas cumplir.",
+        readingTime: "9 min de lectura",
+        summary:
+          "Desde el 2 de agosto de 2026, la Oficina Europea de IA dispone de competencias formales de investigación y sanción sobre los proveedores de modelos de IA de uso general: acceso a los modelos, medidas correctoras, retirada del mercado y multas de hasta 15 millones de euros o el 3 % del volumen de negocios mundial. Competencia exclusiva y centralizada, con alcance extraterritorial asumido.",
+        abstract:
+          "Desde el domingo 2 de agosto de 2026, la Oficina Europea de IA, dependiente de la Comisión Europea, dispone de competencias formales para investigar y sancionar a los proveedores de modelos de IA de uso general (GPAI), los modelos que sustentan ChatGPT, Claude, Gemini o Le Chat. El 2 de agosto de 2026 no crea ninguna obligación nueva: convierte obligaciones de hace un año en obligaciones exigibles.",
+        body: [
+          {
+            heading: "Lo esencial",
+            paragraphs: [
+              "Desde el domingo 2 de agosto de 2026, la Oficina Europea de IA, dependiente de la Comisión Europea, dispone de competencias formales para investigar y sancionar a los proveedores de modelos de IA de uso general (GPAI), los modelos que sustentan ChatGPT, Claude, Gemini o Le Chat. La Comisión lo anunció en un comunicado del 31 de julio de 2026: «A partir del 2 de agosto de 2026, la Oficina de IA de la Comisión Europea, junto con las autoridades nacionales, comenzará a aplicar el Reglamento de IA».[1]",
+              "En la práctica, la Oficina de IA puede ahora exigir la documentación técnica de un modelo, realizar sus propias evaluaciones (incluido el acceso a la interfaz o al código), ordenar medidas correctoras, restringir o retirar un modelo del mercado europeo y proponer multas de hasta 15 millones de euros o el 3 % del volumen de negocios anual mundial, aplicándose el importe más elevado.[2]",
+            ],
+          },
+          {
+            heading: "¿Por qué ahora? Un año de obligaciones sin dientes",
+            paragraphs: [
+              "El Reglamento (UE) 2024/1689, o «Reglamento de IA», en vigor desde el 1 de agosto de 2024, se aplica por etapas. Las obligaciones sustantivas de los proveedores de modelos GPAI (capítulo V, artículos 53 a 55: mantener documentación técnica actualizada, informar a los desarrolladores posteriores, adoptar una política de respeto de los derechos de autor, publicar un resumen de los contenidos de entrenamiento y, para los modelos con «riesgo sistémico» por encima de 10²⁵ FLOP de entrenamiento, evaluar los modelos, mitigar los riesgos, notificar incidentes graves y garantizar la ciberseguridad) se aplican desde el 2 de agosto de 2025 en virtud del artículo 113.[4]",
+              "Pero durante un año esas obligaciones carecieron de mecanismo de coerción: los colegisladores habían aplazado expresamente el artículo 101 (multas GPAI) y el capítulo IX (competencias de investigación, artículos 88 a 94) al 2 de agosto de 2026. La propia Comisión lo escribió en sus directrices del 19 de noviembre de 2025: «Durante el primer año a partir del 2 de agosto de 2025, la Comisión no puede adoptar ninguna medida de ejecución, ya que sus competencias de ejecución solo son aplicables a partir del 2 de agosto de 2026». Como resume Tech Policy Press: «Aunque estas obligaciones empezaron a aplicarse el año pasado, solo ahora puede la Comisión investigar, ordenar medidas correctoras e imponer multas».[7]",
+              "Las normas, por tanto, no cambiaron el 2 de agosto de 2026; lo que nació fue el poder de hacerlas cumplir.",
+            ],
+          },
+          {
+            heading: "¿Qué competencias, exactamente?",
+            paragraphs: [
+              "Según la página oficial de la Comisión sobre el marco de ejecución, la Oficina de IA dispone de dos familias de competencias.[2]",
+              "Competencias de investigación. La Oficina de IA puede dirigir solicitudes de información (RFI) para verificar el cumplimiento, ya sean RFI «simples» o RFI adoptadas por decisión formal de la Comisión. Responder de forma inexacta o engañosa a una RFI simple es en sí mismo sancionable; no responder, o responder de forma incompleta, a una RFI por decisión también lo es. Para los modelos GPAI, la Oficina de IA, o expertos independientes que designe, puede exigir el acceso al modelo para realizar sus propias evaluaciones (artículo 92, incluido el acceso a la interfaz o al código fuente) y exigir al proveedor medidas que pueden llegar a restringir la disponibilidad pública del modelo. Para los sistemas de IA de su competencia, puede además celebrar audiencias e inspecciones en los locales de los proveedores.[9]",
+              "Competencias sancionadoras. Si la Oficina de IA acredita una infracción intencionada o por negligencia, la Comisión puede adoptar una decisión de multa. Los incumplimientos de las obligaciones GPAI están limitados a 15 millones de euros o el 3 % del volumen de negocios mundial (artículo 101). Las prácticas de IA prohibidas (artículo 5: puntuación social, manipulación, explotación de vulnerabilidades) se sitúan en el límite superior de 35 millones de euros o el 7 %; facilitar información inexacta o engañosa a las autoridades corresponde a un umbral de 7,5 millones de euros o el 1 %.[2]",
+              "Un punto estructural decisivo: en virtud del artículo 88, la Comisión ostenta una competencia exclusiva y centralizada para supervisar y hacer cumplir las obligaciones de los proveedores de modelos GPAI, ejercida a través de la Oficina de IA, a diferencia del resto del Reglamento, encomendado a las autoridades nacionales de vigilancia del mercado. Las autoridades nacionales pueden pedir a la Comisión que actúe, pero no pueden actuar por sí mismas contra los proveedores de modelos. La Oficina de IA es también competente para los sistemas de IA desarrollados por el mismo proveedor que el modelo subyacente (o su grupo) y para los sistemas de IA integrados en las plataformas en línea de muy gran tamaño designadas conforme al DSA.[8]",
+              "La Oficina de IA se apoya además en tres canales de notificación lanzados con este motivo: una herramienta de denuncia abierta a cualquier persona física o jurídica, una herramienta segura para denunciantes internos y un canal de denuncia reservado a los proveedores posteriores que integran el modelo GPAI de un tercero.[1]",
+            ],
+          },
+          {
+            heading: "Un alcance mundial asumido",
+            paragraphs: [
+              "Estas competencias se aplican a todo proveedor que ponga un modelo GPAI a disposición en la UE, con independencia de su lugar de establecimiento. «Una dirección estadounidense no sitúa a un laboratorio fuera del alcance del regulador europeo», declaró a CNBC Elisabetta Righini, socia del despacho Sidley Austin, que recuerda que los proveedores no europeos deben además designar un representante autorizado establecido en la UE (artículo 54). Subraya un punto a menudo subestimado: «La responsabilidad GPAI no se limita a los incumplimientos sustantivos: negarse a una solicitud de información, dar respuestas engañosas o bloquear una evaluación de modelo es sancionable por sí mismo».[5]",
+              "Anthropic, OpenAI, Google, Meta, Mistral y xAI están, por tanto, todos dentro del perímetro. El ponente del texto en el Parlamento Europeo, Brando Benifei, presenta la Oficina de IA como «la primera autoridad del mundo dotada de verdaderas competencias de investigación y ejecución sobre los modelos de IA avanzados».",
+            ],
+          },
+          {
+            heading: "Qué se aplica también, y qué se ha aplazado",
+            paragraphs: [
+              "La misma fecha activó otros dos ámbitos, a menudo confundidos con el ámbito GPAI. En primer lugar, la transparencia: el artículo 50 pasa a ser exigible, los chatbots deben indicar que son IA, los deepfakes deben etiquetarse y los contenidos generados o modificados por IA deben llevar un marcado legible por máquina. Única excepción: el marcado automático del artículo 50(2) dispone de un plazo hasta el 2 de diciembre de 2026 para los sistemas ya comercializados antes del 2 de agosto de 2026.[10] En segundo lugar, se activan igualmente el régimen general de sanciones y la plena competencia de las autoridades nacionales de vigilancia del mercado.",
+              "En cambio, el «Digital Omnibus sobre IA» (Reglamento (UE) 2026/1744, en vigor el 27 de julio de 2026 tras una votación del Parlamento el 16 de junio) aplazó las obligaciones relativas a los sistemas de alto riesgo: al 2 de diciembre de 2027 para los casos de uso sensibles del anexo III (contratación, crédito, educación, servicios esenciales) y al 2 de agosto de 2028 para la IA integrada en los productos regulados del anexo I. El calendario GPAI, en cambio, no se ha movido, y es una elección deliberada: dar tiempo a los usuarios de sistemas de alto riesgo pero mantener la presión sobre el puñado de empresas cuyos modelos sirven de base a todo lo demás.[10]",
+              "Cabe señalar también que los modelos comercializados en la Unión antes del 2 de agosto de 2025 disponen de un plazo de adaptación hasta el 2 de agosto de 2027 (artículo 111(3)).[9]",
+            ],
+          },
+          {
+            heading: "El Código de buenas prácticas se convierte en la línea divisoria",
+            paragraphs: [
+              "El Código de buenas prácticas GPAI, vía voluntaria de demostración del cumplimiento, cuenta entre sus firmantes con Amazon, Anthropic, Google, IBM, Microsoft, Mistral AI y OpenAI, pero no con Meta, mientras que xAI solo firmó el capítulo de seguridad. Para los firmantes, la supervisión se centra en el respeto del Código; los no firmantes deberán demostrar un cumplimiento equivalente «por otros medios adecuados», lo que los expone a solicitudes de información más detalladas. Un segundo código, sobre la transparencia de los contenidos generados por IA, reunió a más de 180 firmantes según la Comisión.[11]",
+            ],
+          },
+          {
+            heading: "El acceso a los modelos se vuelve una relación de fuerza jurídica",
+            paragraphs: [
+              "La UE negoció durante meses el acceso al modelo avanzado Mythos de Anthropic antes de que la empresa aceptara compartirlo con la agencia de ciberseguridad ENISA, tras un desplazamiento de altos funcionarios de la Comisión a San Francisco; OpenAI había ofrecido previamente acceso a su modelo GPT-5.5-Cyber. Ahora, el artículo 92 permite exigir ese acceso. La Comisión mantiene además conversaciones con OpenAI y Anthropic a raíz de incidentes de ciberataques que implican a sus modelos, según Reuters.[5]",
+            ],
+          },
+          {
+            heading: "Un nuevo frente en las tensiones transatlánticas",
+            paragraphs: [
+              "Estas competencias llegan pocas semanas después de la multa de unos 1.000 millones de dólares impuesta a Google en virtud del DMA en julio de 2026, que llevó al presidente estadounidense Donald Trump a amenazar a la UE con aranceles «sustanciales». La ejecución del Reglamento de IA da a Bruselas una palanca adicional sobre las empresas estadounidenses, y los laboratorios estadounidenses se encuentran ante dos gobiernos que exigen formas de control previo al despliegue, a ambos lados del Atlántico.[5]",
+            ],
+          },
+          {
+            heading: "Para el ecosistema posterior: una garantía y un riesgo de dependencia",
+            paragraphs: [
+              "Las empresas que construyen productos sobre el modelo de un tercero no soportan las obligaciones de los artículos 53 a 55 (que recaen sobre el proveedor del modelo), pero ganan un derecho a la información (anexo XII) y un canal de denuncia oficial. La otra cara de la moneda: si la Oficina de IA ordena la restricción, la retirada o la recuperación de un modelo (artículo 93), todos los productos construidos sobre él se ven afectados.[9]",
+              "Atención también a la reclasificación: un ajuste fino que supere un tercio del cómputo de entrenamiento original, o la comercialización de un modelo bajo marca propia, convierte a la empresa en proveedor sujeto a la supervisión de la Oficina de IA.",
+            ],
+          },
+          {
+            heading: "Un arranque probablemente gradual",
+            paragraphs: [
+              "En el «día cero» no se había impuesto ninguna multa pública en virtud de los artículos 99 o 101, y solo 9 de los 27 Estados miembros habían designado plenamente sus autoridades nacionales competentes.[11] Un responsable de la Comisión indicó a Tech Policy Press que la Oficina de IA pretendía mantener un «diálogo constructivo» con los proveedores. Las primeras reacciones de las empresas apuntan en el mismo sentido: OpenAI afirma haber «colaborado estrechamente con la Comisión Europea» y querer «seguir trabajando juntos», y Google se declara «decidido a cumplir todas las normas aplicables».[5]",
+            ],
+          },
+          {
+            heading: "Conclusión",
+            paragraphs: [
+              "El 2 de agosto de 2026 no crea ninguna obligación nueva para los proveedores de modelos: convierte obligaciones de hace un año en obligaciones exigibles, respaldadas por un regulador central único, dotado de un derecho de examen sobre los propios modelos y de multas indexadas al volumen de negocios mundial.",
+              "Como lo formula Tech Policy Press, los primeros meses de ejecución dirán «si el Reglamento de IA se convierte en un marco de responsabilidad efectivo o sigue siendo en gran medida un conjunto de obligaciones sobre el papel». La cuestión ya no es si Bruselas tiene el poder de investigar y sancionar a los grandes laboratorios de IA: lo tiene, desde el domingo. La cuestión es cuándo, y contra quién, lo utilizará por primera vez.",
+            ],
+          },
+        ],
+      },
+    },
+  },
   {
     slug: "eu-ai-act-changing-how-law-firms-use-ai",
     title: "The EU AI Act is changing how law firms use artificial intelligence",
@@ -76,7 +467,6 @@ export const researchEntries: ResearchEntry[] = [
       "From 2 August 2026, law firms operating in or connected to the European Union must pay closer attention to how they use artificial intelligence. Article 50 of the EU Artificial Intelligence Act introduces new transparency obligations for systems that interact directly with individuals, generate synthetic content, use emotion recognition or biometric categorisation, or produce deepfakes and certain publications intended to inform the public.",
     image: "/images/research/law-firms-ai-act-article-50.png",
     publishedAt: "2026-08-03",
-    featured: true,
     relatedSlugs: [
       "when-ai-makes-legal-filings-easier-but-justice-harder",
       "ai-summaries-rule-1006-admissibility",
@@ -963,6 +1353,60 @@ function sortResearchEntries(entries: ResearchEntry[]) {
     if (!a.featured && b.featured) return 1;
     return a.title.localeCompare(b.title);
   });
+}
+
+/** The language an entry was written in. */
+export function getOriginalLanguage(entry: ResearchEntry): ArticleLanguage {
+  return entry.originalLanguage ?? "en";
+}
+
+/**
+ * Languages this entry can actually be read in — the original first, then any
+ * rendition that exists. Nothing is offered that would render empty.
+ */
+export function getAvailableLanguages(entry: ResearchEntry): ArticleLanguage[] {
+  const original = getOriginalLanguage(entry);
+  const translated = ARTICLE_LANGUAGES.filter(
+    (language) => language !== original && Boolean(entry.translations?.[language]),
+  );
+  return [original, ...translated];
+}
+
+/**
+ * The rendition to display. Falls back to the original whenever the requested
+ * language is missing, so a bad URL or a stale link never blanks the page.
+ */
+export function getResearchRendition(
+  entry: ResearchEntry,
+  language: ArticleLanguage,
+): ResearchTranslation & { language: ArticleLanguage; isOriginal: boolean } {
+  const original = getOriginalLanguage(entry);
+  const translation = language === original ? undefined : entry.translations?.[language];
+
+  if (!translation) {
+    return {
+      language: original,
+      isOriginal: true,
+      humanReviewed: true,
+      title: entry.title,
+      subtitle: entry.subtitle,
+      readingTime: entry.readingTime,
+      summary: entry.summary,
+      abstract: entry.abstract,
+      body: entry.body,
+      references: entry.references,
+    };
+  }
+
+  return {
+    ...translation,
+    // Sources are largely language-neutral — official titles, publications and
+    // URLs. A translation that omits them keeps the original's list rather
+    // than dropping the citations entirely.
+    references: translation.references ?? entry.references,
+    language,
+    isOriginal: false,
+  };
 }
 
 export function getAllResearchEntries() {
