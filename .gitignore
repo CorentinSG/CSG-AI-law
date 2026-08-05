@@ -78,3 +78,7 @@ tools/llm-council/
 
 # Impeccable design-skill local cache
 .impeccable/
+
+# Throwaway git worktrees created for agent sessions
+.worktrees/
+.claude/worktrees/

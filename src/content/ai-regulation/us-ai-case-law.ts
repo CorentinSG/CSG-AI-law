@@ -168,7 +168,8 @@ function courtListenerDocketReference(input: { title: string; url: string }): So
   };
 }
 
-export const usAiCaseLawEntries: UsAiCaseLawEntry[] = [
+// Entries whose ruling has been reviewed and can carry a holding.
+const reviewedAiCaseLawEntries: UsAiCaseLawEntry[] = [
   {
     id: "case-thomson-reuters-ross",
     caseName: "Thomson Reuters Enterprise Centre GmbH v. ROSS Intelligence Inc.",
@@ -453,6 +454,223 @@ export const usAiCaseLawEntries: UsAiCaseLawEntry[] = [
     authorityType: "case_law",
     citationQualityStatus: "partial",
   },
+];
+
+// Second case-law pass (2026-08). These are live dockets surfaced through the
+// CourtListener search API and kept deliberately thin: case name, court,
+// docket number, filing date, assigned judge and nature-of-suit code come
+// straight from the docket record, and nothing else is asserted. None of them
+// has a reviewed ruling, so every entry stays `needs_review` with a null
+// `holdingOrOutcome` — the monitor surfaces that the dispute exists without
+// putting an unverified holding in front of a reader.
+const recentDocketVerifiedAt = "2026-08-05T00:00:00.000Z";
+
+function recentAiDocket(input: {
+  id: string;
+  caseName: string;
+  court: string;
+  jurisdiction: string;
+  dateFiled: string;
+  docketNumber: string;
+  path: string;
+  legalArea: string;
+  aiIssue: string;
+  natureOfSuit: string | null;
+}): UsAiCaseLawEntry {
+  const url = `https://www.courtlistener.com${input.path}`;
+  return {
+    id: input.id,
+    caseName: input.caseName,
+    court: input.court,
+    jurisdiction: "United States federal",
+    stateOrFederal: "federal",
+    date: input.dateFiled,
+    docketNumber: input.docketNumber,
+    citation: null,
+    officialSourceUrl: null,
+    courtListenerUrl: url,
+    legalArea: input.legalArea,
+    aiIssue: input.aiIssue,
+    proceduralPosture: "Docket record only — no ruling reviewed in this pass.",
+    factualBackground: null,
+    holdingOrOutcome: null,
+    legalSignificance: null,
+    sourceReferences: [
+      {
+        sourceRole: "primary",
+        title: `Docket ${input.docketNumber} (${input.jurisdiction})`,
+        institution: "Free Law Project / CourtListener (PACER-derived docket)",
+        url,
+        canonicalUrl: url,
+        sourceType: "tracker",
+        authorityType: "Secondary court database",
+        publicationDate: input.dateFiled,
+        detectedAt: recentDocketVerifiedAt,
+        retrievedAt: recentDocketVerifiedAt,
+        lastVerifiedAt: recentDocketVerifiedAt,
+        jurisdiction: "United States",
+        documentType: "Docket record",
+        excerpt: null,
+        pinpoint: null,
+        reliabilityLevel: "medium",
+        verificationStatus: "verified",
+        archivedUrl: null,
+        accessLimitations: null,
+        notes:
+          `Case name, court, docket number and filing date returned by the CourtListener search API on 2026-08-05` +
+          (input.natureOfSuit
+            ? `; the docket's nature-of-suit code is ${input.natureOfSuit}.`
+            : ".") +
+          " CourtListener mirrors PACER records but is not the official court register, and no ruling in this matter has been reviewed.",
+      },
+    ],
+    confidenceLevel: "medium",
+    status: "needs_review",
+    authorityType: "case_law",
+    citationQualityStatus: "partial",
+  };
+}
+
+const recentAiDocketEntries: UsAiCaseLawEntry[] = [
+  recentAiDocket({
+    id: "docket-sony-music-uncharted-labs",
+    caseName: "Sony Music Entertainment v. Uncharted Labs, Inc.",
+    court: "U.S. District Court, Southern District of New York (Judge Alvin K. Hellerstein)",
+    jurisdiction: "S.D.N.Y.",
+    dateFiled: "2026-07-20",
+    docketNumber: "1:26-cv-06120",
+    path: "/docket/73641108/sony-music-entertainment-v-uncharted-labs-inc/",
+    legalArea: "Copyright / generative AI",
+    aiIssue: "Copyright action against the developer of a generative music AI service.",
+    natureOfSuit: "820 Copyright",
+  }),
+  recentAiDocket({
+    id: "docket-hachette-google",
+    caseName: "Hachette Book Group, Inc. v. Google LLC",
+    court: "U.S. District Court, Southern District of New York (Judge Loretta A. Preska)",
+    jurisdiction: "S.D.N.Y.",
+    dateFiled: "2026-07-10",
+    docketNumber: "1:26-cv-05870",
+    path: "/docket/73603888/hachette-book-group-inc-v-google-llc/",
+    legalArea: "Copyright / generative AI",
+    aiIssue: "Publisher copyright action against Google.",
+    natureOfSuit: "820 Copyright",
+  }),
+  recentAiDocket({
+    id: "docket-jamendo-suno",
+    caseName: "S.A. Jamendo v. Suno Inc.",
+    court: "U.S. District Court, District of Massachusetts (Judge Angel Kelley)",
+    jurisdiction: "D. Mass.",
+    dateFiled: "2026-06-29",
+    docketNumber: "1:26-cv-12966",
+    path: "/docket/73547746/sa-jamendo-v-suno-inc/",
+    legalArea: "Copyright / generative AI",
+    aiIssue: "Copyright action against the developer of a generative music AI service.",
+    natureOfSuit: "820 Copyright",
+  }),
+  recentAiDocket({
+    id: "docket-evox-stability",
+    caseName: "EVOX Productions LLC v. Stability AI, Inc.",
+    court: "U.S. District Court, Central District of California (Judge Christina A. Snyder)",
+    jurisdiction: "C.D. Cal.",
+    dateFiled: "2026-07-02",
+    docketNumber: "2:26-cv-07201",
+    path: "/docket/73569472/evox-productions-llc-v-stability-ai-inc/",
+    legalArea: "Copyright / generative AI",
+    aiIssue: "Copyright action against a generative image-model developer.",
+    natureOfSuit: "820 Copyright",
+  }),
+  recentAiDocket({
+    id: "docket-jamendo-nvidia",
+    caseName: "S.A. Jamendo v. Nvidia Corporation",
+    court: "U.S. District Court, Northern District of California (Judge Noel Wise)",
+    jurisdiction: "N.D. Cal.",
+    dateFiled: "2026-06-22",
+    docketNumber: "5:26-cv-06206",
+    path: "/docket/73517096/sa-jamendo-v-nvidia-corporation/",
+    legalArea: "Copyright / generative AI",
+    aiIssue: "Copyright action against a model developer over training material.",
+    natureOfSuit: "820 Copyright",
+  }),
+  recentAiDocket({
+    id: "docket-cnn-perplexity",
+    caseName: "Cable News Network Inc v. Perplexity AI, Inc.",
+    court: "U.S. District Court, Southern District of New York (Judge Loretta A. Preska)",
+    jurisdiction: "S.D.N.Y.",
+    dateFiled: "2026-05-28",
+    docketNumber: "1:26-cv-04427",
+    path: "/docket/73402641/cable-news-network-inc-v-perplexity-ai-inc/",
+    legalArea: "Publisher dispute / AI answer engines",
+    aiIssue: "Broadcaster action against an AI answer-engine provider.",
+    natureOfSuit: null,
+  }),
+  recentAiDocket({
+    id: "docket-dw-character-technologies",
+    caseName: "D.W. v. Character Technologies, Inc.",
+    court: "U.S. District Court, Eastern District of Virginia (Judge Raymond Alvin Jackson)",
+    jurisdiction: "E.D. Va.",
+    dateFiled: "2025-12-19",
+    docketNumber: "2:25-cv-00824",
+    path: "/docket/72062057/dw-v-character-technologies-inc/",
+    legalArea: "AI companion services",
+    aiIssue:
+      "Claim brought by a pseudonymous individual plaintiff against the operator of an AI companion chatbot service.",
+    natureOfSuit: null,
+  }),
+  recentAiDocket({
+    id: "docket-pj-character-technologies",
+    caseName: "P.J. v. Character Technologies, Inc.",
+    court: "U.S. District Court, Northern District of New York (Judge Mae Avila D'Agostino)",
+    jurisdiction: "N.D.N.Y.",
+    dateFiled: "2025-09-16",
+    docketNumber: "1:25-cv-01295",
+    path: "/docket/71359395/pj-v-character-technologies-inc/",
+    legalArea: "AI companion services",
+    aiIssue:
+      "Claim brought by a pseudonymous individual plaintiff against the operator of an AI companion chatbot service.",
+    natureOfSuit: null,
+  }),
+  recentAiDocket({
+    id: "docket-lampert-altman",
+    caseName: "Lampert v. Altman",
+    court: "U.S. District Court, Northern District of California (Judge Jacqueline Scott Corley)",
+    jurisdiction: "N.D. Cal.",
+    dateFiled: "2026-04-29",
+    docketNumber: "3:26-cv-03706",
+    path: "/docket/73260599/lampert-v-altman/",
+    legalArea: "AI chatbot services",
+    aiIssue: "Individual claim naming the chief executive of an AI chatbot developer.",
+    natureOfSuit: null,
+  }),
+  recentAiDocket({
+    id: "docket-stacey-altman",
+    caseName: "Stacey v. Altman",
+    court: "U.S. District Court, Northern District of California (Judge Jacqueline Scott Corley)",
+    jurisdiction: "N.D. Cal.",
+    dateFiled: "2026-04-29",
+    docketNumber: "3:26-cv-03701",
+    path: "/docket/73260511/stacey-v-altman/",
+    legalArea: "AI chatbot services",
+    aiIssue: "Individual claim naming the chief executive of an AI chatbot developer.",
+    natureOfSuit: null,
+  }),
+  recentAiDocket({
+    id: "docket-mwansa-altman",
+    caseName: "Mwansa, Sr. v. Altman",
+    court: "U.S. District Court, Northern District of California (Judge Maxine M. Chesney)",
+    jurisdiction: "N.D. Cal.",
+    dateFiled: "2026-04-29",
+    docketNumber: "3:26-cv-03703",
+    path: "/docket/73260522/mwansa-sr-v-altman/",
+    legalArea: "AI chatbot services",
+    aiIssue: "Individual claim naming the chief executive of an AI chatbot developer.",
+    natureOfSuit: null,
+  }),
+];
+
+export const usAiCaseLawEntries: UsAiCaseLawEntry[] = [
+  ...reviewedAiCaseLawEntries,
+  ...recentAiDocketEntries,
 ];
 
 export const usAiCaseLawTopics = [

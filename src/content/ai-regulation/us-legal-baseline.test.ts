@@ -88,7 +88,11 @@ describe("U.S. state baseline", () => {
   it("strengthens New York with official court-rule coverage for Part 161", () => {
     const newYork = getUsStateAiLawProfiles().find((profile) => profile.stateCode === "NY");
 
-    expect(newYork?.aiLawStatus).toBe("agency_guidance_or_enforcement");
+    // Provenance: New York moved off the source-reachability heuristic once the
+    // LOADinG Act (Chapter 674 of the Laws of 2024) and its chapter amendment
+    // S822 were reviewed at nysenate.gov, so the pin is now an enacted status.
+    // Part 161 court coverage below is unchanged.
+    expect(newYork?.aiLawStatus).toBe("enacted_sector_specific_ai_law");
     expect(
       newYork?.courtSourceUrls.some((url) => url.includes("/rules/chiefadmin/161.shtml")),
     ).toBe(true);
@@ -123,6 +127,26 @@ describe("U.S. state baseline", () => {
 
     expect(byCode.get("CT")?.aiLawStatus).toBe("enacted_sector_specific_ai_law");
     expect(byCode.get("CT")?.enactedAIStatutes.join(" ")).toContain("51-10e");
+
+    // Second populated pass (2026-08). Each pin quotes the citation carried in
+    // populatedStateBaselines, which in turn names the official source.
+    expect(byCode.get("IL")?.enactedAIStatutes.join(" ")).toContain("103-0804");
+    expect(byCode.get("NY")?.enactedAIStatutes.join(" ")).toContain("Chapter 674");
+    expect(byCode.get("TN")?.enactedAIStatutes.join(" ")).toContain("Public Chapter 588");
+    expect(byCode.get("MT")?.enactedAIStatutes.join(" ")).toContain("2-21-103");
+    expect(byCode.get("KY")?.enactedAIStatutes.join(" ")).toContain("42.731");
+    expect(byCode.get("MD")?.enactedAIStatutes.join(" ")).toContain("3.5-803");
+    expect(byCode.get("ND")?.enactedAIStatutes.join(" ")).toContain("16.1-10-04.2");
+    expect(byCode.get("NM")?.enactedAIStatutes.join(" ")).toContain("1-19-26.4");
+    expect(byCode.get("AZ")?.enactedAIStatutes.join(" ")).toContain("16-1024");
+    expect(byCode.get("SD")?.enactedAIStatutes.join(" ")).toContain("12-26-32");
+    expect(byCode.get("AR")?.enactedAIStatutes.join(" ")).toContain("Act 927");
+
+    // Washington is deliberately pinned as pending: the LDH Washington corpus
+    // returns bill texts only (SB 6120, HB 1170/1168 series), no enacted AI act.
+    expect(byCode.get("WA")?.aiLawStatus).toBe("pending_ai_legislation");
+    expect(byCode.get("WA")?.enactedAIStatutes).toHaveLength(0);
+    expect(byCode.get("WA")?.pendingAIBills.join(" ")).toContain("SB 6120");
   });
 
   it("shows enacted states on the public map instead of zero", () => {
@@ -130,7 +154,37 @@ describe("U.S. state baseline", () => {
       state.status.startsWith("enacted_"),
     );
 
-    expect(enacted.map((state) => state.code).sort()).toEqual(["CA", "CO", "CT", "TX", "UT"]);
+    // Provenance for each added code (all verified at an official source before
+    // being pinned here — see populatedStateBaselines for the exact citation):
+    //   AR  Act 927 of 2025 (HB 1876), arkleg.state.ar.us bill-status page
+    //   AZ  ARS § 16-1024, azleg.gov
+    //   IL  Public Act 103-0804 (HB 3773), ilga.gov bill-status page
+    //   KY  KRS §§ 42.722, 42.731, apps.legislature.ky.gov
+    //   MD  State Finance and Procurement §§ 3.5-801 to 3.5-806, mgaleg.maryland.gov
+    //   MT  MCA §§ 2-10-203/205, 2-21-101 to 104, 13-35-801, mca.legmt.gov
+    //   ND  NDCC §§ 16.1-10-04.2, 12.1-17-07, ndlegis.gov
+    //   NM  NMSA 1978 § 1-19-26.4 (Laws 2024, ch. 57), nmonesource.com
+    //   NY  Chapter 674 of the Laws of 2024 + S822, nysenate.gov
+    //   SD  S.D. Codified Laws §§ 12-26-32 to 12-26-37, sdlegislature.gov
+    //   TN  Public Chapter 588 (HB 2091), publications.tnsosfiles.com
+    expect(enacted.map((state) => state.code).sort()).toEqual([
+      "AR",
+      "AZ",
+      "CA",
+      "CO",
+      "CT",
+      "IL",
+      "KY",
+      "MD",
+      "MT",
+      "ND",
+      "NM",
+      "NY",
+      "SD",
+      "TN",
+      "TX",
+      "UT",
+    ]);
   });
 
   it("maps all state profiles into the U.S. map", () => {
