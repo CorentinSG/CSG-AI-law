@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import Image from "next/image";
-import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import {
@@ -11,6 +10,14 @@ import {
 import { BreadcrumbNav } from "@/components/site/breadcrumb-nav";
 import { MotionReveal } from "@/components/site/motion-reveal";
 import { MotionStagger } from "@/components/site/motion-stagger";
+import {
+  ArticleLanguageProvider,
+  ArticleLanguageSwitcher,
+  ArticleReadingTime,
+  ArticleTitle,
+  ArticleTranslationNotice,
+  ResearchArticleBody,
+} from "@/components/site/research-article-body";
 import { ResearchCard } from "@/components/site/research-card";
 import { ResearchStatusBadge } from "@/components/site/research-status-badge";
 import { SiteShell } from "@/components/site/shell";
@@ -71,6 +78,7 @@ export default async function ResearchArticlePage({
   );
 
   return (
+    <ArticleLanguageProvider entry={entry} lang={lang}>
     <SiteShell className="space-y-14 md:space-y-20">
       <script
         type="application/ld+json"
@@ -98,12 +106,8 @@ export default async function ResearchArticlePage({
             </p>
             <ResearchStatusBadge status={entry.status} />
           </div>
-          <h1 className="max-w-5xl font-serif text-4xl leading-[0.96] text-zinc-950 md:text-6xl">
-            {entry.title}
-          </h1>
-          <p className="max-w-4xl text-lg leading-8 text-zinc-600">
-            {entry.subtitle}
-          </p>
+          <ArticleTitle />
+          <ArticleLanguageSwitcher />
         </div>
 
         <Card className="glass-panel-soft rounded-[2rem] border-black/6 text-zinc-950">
@@ -118,7 +122,7 @@ export default async function ResearchArticlePage({
               <p className="text-[11px] uppercase tracking-[0.22em] text-zinc-500">
                 {t.readingTime}
               </p>
-              <p className="text-sm text-zinc-800">{entry.readingTime}</p>
+              <ArticleReadingTime />
             </div>
             <div className="space-y-1">
               <p className="text-[11px] uppercase tracking-[0.22em] text-zinc-500">
@@ -165,66 +169,10 @@ export default async function ResearchArticlePage({
 
       <section className="grid gap-10 xl:grid-cols-[minmax(0,1fr)_19rem]">
         <article className="space-y-10">
-          <div className="space-y-4">
-            <p className="text-xs uppercase tracking-[0.26em] text-zinc-500">
-              {t.abstract}
-            </p>
-            <p className="max-w-4xl text-base leading-8 text-zinc-700 hyphens-auto text-justify md:text-lg">
-              {entry.abstract}
-            </p>
-          </div>
-
-          <div className="space-y-10">
-            {entry.body.map((section) => (
-              <section key={section.heading} className="space-y-4">
-                <h2 className="font-serif text-3xl text-zinc-950">
-                  {section.heading}
-                </h2>
-                <div className="space-y-4 text-base leading-8 text-zinc-700 hyphens-auto text-justify">
-                  {section.paragraphs.map((paragraph) => (
-                    <p key={paragraph}>{paragraph}</p>
-                  ))}
-                </div>
-                {section.bullets?.length ? (
-                  <ul className="space-y-3 text-base leading-8 text-zinc-700">
-                    {section.bullets.map((bullet) => (
-                      <li key={bullet} className="flex gap-3">
-                        <span className="mt-3 size-1.5 rounded-full bg-zinc-400" />
-                        <span>{bullet}</span>
-                      </li>
-                    ))}
-                  </ul>
-                ) : null}
-              </section>
-            ))}
-          </div>
-
-          {entry.references?.length ? (
-            <section className="space-y-4 border-t border-black/6 pt-8">
-              <h2 className="font-serif text-3xl text-zinc-950">{t.references}</h2>
-              <div className="space-y-3 text-sm leading-7 text-zinc-700">
-                {entry.references.map((reference) => (
-                  <div key={reference.label}>
-                    {reference.href ? (
-                      <Link
-                        href={
-                          reference.href.startsWith("/")
-                            ? `/${lang}${reference.href}`
-                            : reference.href
-                        }
-                        className="text-zinc-900 underline decoration-black/15 underline-offset-4"
-                      >
-                        {reference.label}
-                      </Link>
-                    ) : (
-                      <span className="text-zinc-900">{reference.label}</span>
-                    )}
-                    {reference.note ? <p>{reference.note}</p> : null}
-                  </div>
-                ))}
-              </div>
-            </section>
-          ) : null}
+          <ArticleTranslationNotice />
+          <ResearchArticleBody
+            t={{ abstract: t.abstract, references: t.references }}
+          />
         </article>
 
         <aside className="space-y-5">
@@ -294,5 +242,6 @@ export default async function ResearchArticlePage({
         </section>
       ) : null}
     </SiteShell>
+    </ArticleLanguageProvider>
   );
 }
