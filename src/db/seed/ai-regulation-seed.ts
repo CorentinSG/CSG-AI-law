@@ -3814,6 +3814,154 @@ export const regulationSourcesSeed: RegulationSource[] = [
     createdAt: now,
     updatedAt: now,
   },
+
+  // U.S. state-level monitoring pass (2026-08). Every feed below was fetched on
+  // 2026-08-05 and checked for three things: HTTP 200, an XML feed content-type,
+  // and a non-empty <item>/<entry> list. Candidates that failed are recorded in
+  // the notes of the nearest entry rather than being added as dead sources:
+  // governor.mt.gov/feed (404), news.mt.gov/rss (404), courts.mt.gov/feed (404),
+  // ag.ky.gov/feed (404), kycourts.gov/feed (404), governor.ky.gov/news/feed
+  // (404), apps.legislature.ky.gov/rss/news.xml (404), governor.wa.gov/feed
+  // (403), courts.wa.gov opinions RSS (200 but text/html, no items).
+  {
+    id: "src-us-mt-doj",
+    name: "Montana Department of Justice newsroom",
+    jurisdiction: "Montana",
+    region: "North America",
+    country: "United States",
+    sourceUrl: "https://dojmt.gov/feed/",
+    sourceType: "RSS",
+    scanFrequency: "daily",
+    active: true,
+    lastScannedAt: null,
+    notes:
+      "Official Montana DOJ (Attorney General) RSS feed. Verified 2026-08-05: HTTP 200, application/rss+xml, 10 items. The host sits behind Cloudflare and returns an interstitial challenge page to a default user agent, so the scanner must send a real User-Agent header. The feed is broader than AI, so deterministic AI filtering is required.",
+    reliabilityLevel: "high",
+    preferredExtractionMethod: "rss",
+    ingestionMethod: "existing",
+    sourceCategory: "regulator",
+    config: {
+      rssScope: "montana_doj_newsroom",
+      requiresUserAgentHeader: true,
+      maxItems: 10,
+    },
+    createdAt: now,
+    updatedAt: now,
+  },
+  {
+    id: "src-us-wa-ag",
+    name: "Washington State Attorney General newsroom",
+    jurisdiction: "Washington",
+    region: "North America",
+    country: "United States",
+    sourceUrl: "https://www.atg.wa.gov/rss.xml",
+    sourceType: "RSS",
+    scanFrequency: "daily",
+    active: true,
+    lastScannedAt: null,
+    notes:
+      "Official Washington Attorney General RSS feed. Verified 2026-08-05: HTTP 200, application/rss+xml, 10 items with real article titles. The feed carries both English and Spanish items and is broader than AI, so deterministic AI filtering is required.",
+    reliabilityLevel: "high",
+    preferredExtractionMethod: "rss",
+    ingestionMethod: "existing",
+    sourceCategory: "regulator",
+    config: {
+      rssScope: "washington_ag_newsroom",
+      maxItems: 10,
+    },
+    createdAt: now,
+    updatedAt: now,
+  },
+
+  // State supreme court opinion feeds. CourtListener publishes a per-court Atom
+  // feed; each was verified on 2026-08-05 (HTTP 200, application/atom+xml, 20
+  // entries) and the channel title confirms the court identity. These mirror
+  // court output rather than being the court's own register, so they stay
+  // medium reliability and discovery-grade.
+  {
+    id: "src-us-courts-mont",
+    name: "Montana Supreme Court opinions (CourtListener feed)",
+    jurisdiction: "Montana",
+    region: "North America",
+    country: "United States",
+    sourceUrl: "https://www.courtlistener.com/feed/court/mont/",
+    sourceType: "court_database",
+    scanFrequency: "daily",
+    active: true,
+    lastScannedAt: null,
+    notes:
+      "Verified 2026-08-05: HTTP 200, application/atom+xml, 20 entries, channel title 'CourtListener.com: All opinions for the Montana Supreme Court'. Secondary mirror of court output, not the official court register; use for discovery and confirm citations against the court before any legal-database entry.",
+    reliabilityLevel: "medium",
+    preferredExtractionMethod: "rss",
+    ingestionMethod: "existing",
+    sourceCategory: "court",
+    config: { rssScope: "courtlistener_court_feed", courtId: "mont", maxItems: 20 },
+    createdAt: now,
+    updatedAt: now,
+  },
+  {
+    id: "src-us-courts-wash",
+    name: "Washington Supreme Court opinions (CourtListener feed)",
+    jurisdiction: "Washington",
+    region: "North America",
+    country: "United States",
+    sourceUrl: "https://www.courtlistener.com/feed/court/wash/",
+    sourceType: "court_database",
+    scanFrequency: "daily",
+    active: true,
+    lastScannedAt: null,
+    notes:
+      "Verified 2026-08-05: HTTP 200, application/atom+xml, 20 entries, channel title 'CourtListener.com: All opinions for the Washington Supreme Court'. Added because the Washington Courts' own opinions RSS endpoint returned HTTP 200 but text/html with no items. Secondary mirror, not the official register.",
+    reliabilityLevel: "medium",
+    preferredExtractionMethod: "rss",
+    ingestionMethod: "existing",
+    sourceCategory: "court",
+    config: { rssScope: "courtlistener_court_feed", courtId: "wash", maxItems: 20 },
+    createdAt: now,
+    updatedAt: now,
+  },
+  {
+    id: "src-us-courts-ky",
+    name: "Kentucky Supreme Court opinions (CourtListener feed)",
+    jurisdiction: "Kentucky",
+    region: "North America",
+    country: "United States",
+    sourceUrl: "https://www.courtlistener.com/feed/court/ky/",
+    sourceType: "court_database",
+    scanFrequency: "daily",
+    active: true,
+    lastScannedAt: null,
+    notes:
+      "Verified 2026-08-05: HTTP 200, application/atom+xml, 20 entries, channel title 'CourtListener.com: All opinions for the Kentucky Supreme Court'. This is currently the only working Kentucky feed found: every ag.ky.gov, kycourts.gov, governor.ky.gov and legislature.ky.gov RSS candidate returned 404. Secondary mirror, not the official register.",
+    reliabilityLevel: "medium",
+    preferredExtractionMethod: "rss",
+    ingestionMethod: "existing",
+    sourceCategory: "court",
+    config: { rssScope: "courtlistener_court_feed", courtId: "ky", maxItems: 20 },
+    createdAt: now,
+    updatedAt: now,
+  },
+  {
+    id: "src-us-courts-ill",
+    name: "Illinois Supreme Court opinions (CourtListener feed)",
+    jurisdiction: "Illinois",
+    region: "North America",
+    country: "United States",
+    sourceUrl: "https://www.courtlistener.com/feed/court/ill/",
+    sourceType: "court_database",
+    scanFrequency: "daily",
+    active: true,
+    lastScannedAt: null,
+    notes:
+      "Verified 2026-08-05: HTTP 200, application/atom+xml, 20 entries, channel title 'CourtListener.com: All opinions for the Illinois Supreme Court'. Added alongside the Illinois AI employment-discrimination statute (Public Act 103-0804) so litigation under it is visible. Secondary mirror, not the official register.",
+    reliabilityLevel: "medium",
+    preferredExtractionMethod: "rss",
+    ingestionMethod: "existing",
+    sourceCategory: "court",
+    config: { rssScope: "courtlistener_court_feed", courtId: "ill", maxItems: 20 },
+    createdAt: now,
+    updatedAt: now,
+  },
 ];
 
 export const rawRegulatoryItemsSeed: RawRegulatoryItem[] = [

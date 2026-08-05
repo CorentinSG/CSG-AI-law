@@ -11,7 +11,15 @@ export default defineConfig({
   test: {
     environment: "node",
     // Playwright e2e specs live in `e2e/` and must not be run by Vitest.
-    exclude: [...configDefaults.exclude, "e2e/**"],
+    // `.worktrees/` and `.claude/worktrees/` hold throwaway git worktrees for
+    // agent sessions; they contain full stale checkouts whose old specs would
+    // otherwise be collected and fail against the current source tree.
+    exclude: [
+      ...configDefaults.exclude,
+      "e2e/**",
+      "**/.worktrees/**",
+      "**/.claude/worktrees/**",
+    ],
     testTimeout: 60_000,
     hookTimeout: 60_000,
     coverage: {

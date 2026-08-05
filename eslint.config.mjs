@@ -19,6 +19,11 @@ const eslintConfig = defineConfig([
     ".impeccable/**",
     // Standalone tool sub-projects ship their own lint config and tooling.
     "tools/**",
+    // Throwaway git worktrees for agent sessions: each is a full checkout,
+    // including its own node_modules and .next, and linting them buries the
+    // real findings under six figures of noise.
+    ".worktrees/**",
+    ".claude/worktrees/**",
   ]),
 ]);
 

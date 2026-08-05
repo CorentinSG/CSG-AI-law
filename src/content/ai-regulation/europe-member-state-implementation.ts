@@ -830,6 +830,60 @@ const germanyAiActImplementationPage: CountrySourceRecord = {
     "Official Federal Government page stating on 11 February 2026 that the cabinet decided how the EU AI Regulation should be implemented in Germany. This supports an implementation-in-progress label, not a final authority-designation claim.",
 };
 
+// Authority-designation pass (2026-08). Each record below was opened and read
+// at the issuing institution's own site, and its runtime status recorded as
+// observed on 2026-08-05.
+const germanyBnetzaMarketSurveillancePage: CountrySourceRecord = {
+  label: "Bundesnetzagentur — market surveillance under the AI Regulation",
+  url: "https://www.bundesnetzagentur.de/DE/Fachthemen/Digitales/KI/14_Marktueberwachung/start.html",
+  institution: "Bundesnetzagentur",
+  sourceType: "regulator",
+  official: true,
+  public: true,
+  runtimeAccessible: true,
+  responseStatus: 200,
+  publicationDate: null,
+  lastCheckedDate: "2026-08-05",
+  parserStatus: "manual_reference",
+  recommendation: "manual_review",
+  note:
+    "Official Bundesnetzagentur page describing its market-surveillance role under the AI Regulation: it cites Article 70 (each Member State designates at least one market surveillance authority), covers Annex I harmonised areas such as radio equipment under Directive 2014/53/EU and Annex III areas such as critical infrastructure and law enforcement, and gives 2 August 2026 for Annex III and 2 August 2027 for Annex I. The page itself states the arrangement is subject to a different decision by a future legislature in a national implementing act, so the designation is not recorded here as final. Runtime check 2026-08-05 returned HTTP 200.",
+};
+
+const italyLaw132of2025Article20: CountrySourceRecord = {
+  label: "Legge 23 settembre 2025, n. 132, art. 20 — national authorities for artificial intelligence",
+  url: "https://www.gazzettaufficiale.it/atto/serie_generale/caricaArticolo?art.versione=1&art.idGruppo=3&art.flagTipoArticolo=0&art.codiceRedazionale=25G00143&art.idArticolo=20&art.idSottoArticolo=1&art.idSottoArticolo1=10&art.dataPubblicazioneGazzetta=2025-09-25&art.progressivo=0",
+  institution: "Gazzetta Ufficiale della Repubblica Italiana",
+  sourceType: "legislation",
+  official: true,
+  public: true,
+  runtimeAccessible: true,
+  responseStatus: 200,
+  publicationDate: "2025-09-25",
+  lastCheckedDate: "2026-08-05",
+  parserStatus: "manual_reference",
+  recommendation: "manual_review",
+  note:
+    "Article 20 of Law 132/2025 read directly in the Gazzetta Ufficiale: it names AgID and ACN as national authorities for artificial intelligence, gives AgID the notification, assessment and accreditation functions, gives ACN surveillance including inspection and sanctioning powers plus the single point of contact under Article 70 of Regulation (EU) 2024/1689, and preserves Banca d'Italia, CONSOB and IVASS as market surveillance authorities. Runtime check 2026-08-05 returned HTTP 200.",
+};
+
+const irelandDeteAuthorityDesignationNews: CountrySourceRecord = {
+  label: "DETE — Ireland's designated national competent authorities for the EU AI Act",
+  url: "https://enterprise.gov.ie/en/news-and-events/department-news/2025/september/20250916.html",
+  institution: "Department of Enterprise, Tourism and Employment",
+  sourceType: "government",
+  official: true,
+  public: true,
+  runtimeAccessible: true,
+  responseStatus: 200,
+  publicationDate: "2025-09-16",
+  lastCheckedDate: "2026-08-05",
+  parserStatus: "manual_reference",
+  recommendation: "manual_review",
+  note:
+    "Official departmental announcement read at the source: 'Ireland has to date designated 15 national competent authorities for oversight and enforcement of the EU AI ACT in Ireland', under a distributed model with a designated central authority for coordination, a national single point of contact inside the department, and a National AI Office to be established by 2 August 2026. Runtime check 2026-08-05 returned HTTP 200.",
+};
+
 const germanyBfdiAiConsultationPage: CountrySourceRecord = {
   label: "BfDI consultation on personal data in AI models",
   url: "https://www.bfdi.bund.de/DE/BfDI/Inhalte/Konsultationsverfahren/KI-pbD/KI-pbD-Einleitung.html",
@@ -2719,7 +2773,9 @@ const firstWaveProfiles: EuropeCountryProfile[] = [
       "Bundesrat statement stage reflected in Bundestag materials on 2 April 2026.",
     ],
     nationalCompetentAuthorities: [],
-    marketSurveillanceAuthorities: [],
+    marketSurveillanceAuthorities: [
+      "Bundesnetzagentur — states on its own AI Regulation market-surveillance page that it carries the Article 70 market-surveillance role, covering Annex I harmonised areas (including radio equipment under Directive 2014/53/EU) and Annex III areas such as critical infrastructure and law enforcement, with 2 August 2026 for Annex III and 2 August 2027 for Annex I. The page adds that this remains subject to a different decision by a future legislature in a national implementing act.",
+    ],
     notifyingAuthorities: [],
     dataProtectionAuthority: "BfDI",
     relevantMinistriesOrAgencies: [
@@ -2734,6 +2790,7 @@ const firstWaveProfiles: EuropeCountryProfile[] = [
       germanyAiActImplementationPage,
       germanyBundestagAiImplementationPage,
       germanyBundestagBundesratAiPage,
+      germanyBnetzaMarketSurveillancePage,
     ],
     nationalAIRegulationNotes:
       "Germany now has a stronger official-source baseline including the Federal Government implementation source, official BfDI AI materials, and Bundestag processing materials. Final competent-authority designation still needs a deeper pass.",
@@ -2819,7 +2876,9 @@ const firstWaveProfiles: EuropeCountryProfile[] = [
       "Royal Decree 729/2023 approving the AESIA statute.",
       "Council of Ministers reference of 26 May 2026 on the draft organic law for the proper use and governance of artificial intelligence.",
     ],
-    nationalCompetentAuthorities: [],
+    nationalCompetentAuthorities: [
+      "Agencia Española de Supervisión de Inteligencia Artificial (AESIA) — created by Real Decreto 729/2023, de 22 de agosto (BOE-A-2023-18911), which approves its Statute. The Statute is the verified legal basis for the agency; it does not by itself record Spain's final Article 70 designation under Regulation (EU) 2024/1689.",
+    ],
     marketSurveillanceAuthorities: [],
     notifyingAuthorities: [],
     dataProtectionAuthority: "AEPD",
@@ -2959,29 +3018,40 @@ const firstWaveProfiles: EuropeCountryProfile[] = [
       europeImplementationStatusTaxonomy.national_implementation_identified.shortExplanation,
     implementationConfidence: "medium",
     aiActImplementationNotes:
-      "Italy now has a stronger official-source baseline including Law No. 132 of 23 September 2025, official Garante AI materials, an official government announcement on final approval of the AI law, and official AgID consultation material on AI development and procurement guidelines for the public administration. This supports a national-implementation-identified label, but not a complete verification of all AI Act authority designations.",
+      "Italy now has a stronger official-source baseline including Law No. 132 of 23 September 2025, official Garante AI materials, an official government announcement on final approval of the AI law, and official AgID consultation material on AI development and procurement guidelines for the public administration. Article 20 of that law was read directly in the Gazzetta Ufficiale and names AgID and ACN as the national AI authorities, with Banca d'Italia, CONSOB and IVASS retained as market surveillance authorities, so Italy's authority designation is verified at the source rather than open.",
     nationalImplementationMeasures: [
       "Law No. 132 of 23 September 2025 on artificial intelligence, published in the Gazzetta Ufficiale and accessible through Normattiva.",
       "AgID opened consultation on AI development and procurement guidelines for the public administration on 12 March 2026.",
+      "Article 20 of Law No. 132 of 23 September 2025 designates the national authorities for artificial intelligence.",
     ],
-    nationalCompetentAuthorities: [],
-    marketSurveillanceAuthorities: [],
-    notifyingAuthorities: [],
+    nationalCompetentAuthorities: [
+      "Agenzia per l'Italia Digitale (AgID) — named in Article 20 of Law 132/2025 as a national authority for artificial intelligence, responsible for promoting AI innovation and development and for the notification, assessment and accreditation functions for conformity verification of AI systems.",
+      "Agenzia per la cybersicurezza nazionale (ACN) — named in Article 20 of Law 132/2025 as a national authority for artificial intelligence, responsible for surveillance including inspection and sanctioning of AI systems, for AI development on cybersecurity aspects, and as the single point of contact under Article 70 of Regulation (EU) 2024/1689.",
+    ],
+    marketSurveillanceAuthorities: [
+      "Agenzia per la cybersicurezza nazionale (ACN) — Article 20 of Law 132/2025 gives it surveillance, inspection and sanctioning powers over AI systems.",
+      "Banca d'Italia, CONSOB and IVASS — Article 20 of Law 132/2025 preserves their roles as market surveillance authorities under Regulation (EU) 2024/1689.",
+    ],
+    notifyingAuthorities: [
+      "Agenzia per l'Italia Digitale (AgID) — Article 20 of Law 132/2025 assigns it the notification, assessment and accreditation functions.",
+    ],
     dataProtectionAuthority: "Garante per la protezione dei dati personali",
     relevantMinistriesOrAgencies: [
       "Agenzia per l'Italia Digitale (AgID)",
       "Dipartimento per la trasformazione digitale",
-      "Agenzia per la cybersicurezza nazionale (authority mapping still under review)",
+      "Agenzia per la cybersicurezza nazionale (ACN)",
+      "Banca d'Italia, CONSOB, IVASS (sectoral market surveillance)",
     ],
     nationalAIRegulationSources: [
       italyAiLaw132,
+      italyLaw132of2025Article20,
       italyDtdAiLawAnnouncement,
       italyAgidAiGuidelinesConsultation,
       italyDtdAiStrategy,
       garanteAi,
     ],
     nationalAIRegulationNotes:
-      "Italy now has a stronger official-source baseline combining a verified national AI law, government strategy and law-approval pages, AgID implementation-guidance consultation material, and official Garante AI materials. Competent-authority verification remains open.",
+      "Italy now has a stronger official-source baseline combining a verified national AI law, government strategy and law-approval pages, AgID implementation-guidance consultation material, and official Garante AI materials, plus the Article 20 designation text itself.",
     nationalCaseLawSources: [
       {
         ...garanteAi,
@@ -3062,9 +3132,10 @@ const firstWaveProfiles: EuropeCountryProfile[] = [
       europeImplementationStatusTaxonomy.consultation_or_draft_identified.shortExplanation,
     implementationConfidence: "medium",
     aiActImplementationNotes:
-      "The Netherlands has verified official regulator sources plus an official government announcement of a 20 April 2026 internet consultation on an AI Regulation implementing act. This supports a consultation-or-draft-identified label, not a final designation claim.",
+      "The Netherlands has verified official regulator sources plus an official government announcement of a 20 April 2026 internet consultation on the uitvoeringswet AI-verordening. That announcement, read at the source, describes the intended model — supervisors supervise AI within their own domain, the Autoriteit Persoonsgegevens is proposed for areas with no clear supervisor, and the AP and the RDI receive a coordinating role — but it is a draft under consultation, so no authority is recorded as designated.",
     nationalImplementationMeasures: [
-      "Internet consultation announced on 20 April 2026 for the proposal for an implementing act for the AI Regulation.",
+      "Internet consultation announced on 20 April 2026 for the proposal for an implementing act for the AI Regulation (uitvoeringswet AI-verordening), closing 1 June 2026.",
+      "Intended supervisory model in the draft: sectoral supervisors act within their own domain; the Autoriteit Persoonsgegevens is proposed as the authority for areas without a clear supervisor; the AP and the RDI receive a coordinating role. Draft only, not in force.",
     ],
     nationalCompetentAuthorities: [],
     marketSurveillanceAuthorities: [],
@@ -3383,16 +3454,27 @@ const firstWaveProfiles: EuropeCountryProfile[] = [
     implementationStatusLabel: europeImplementationStatusTaxonomy.implementation_in_progress.label,
     implementationStatusDescription:
       europeImplementationStatusTaxonomy.implementation_in_progress.shortExplanation,
-    implementationConfidence: "low",
+    implementationConfidence: "medium",
     aiActImplementationNotes:
-      "Ireland is an EU member state to which the EU AI Act applies directly. Official sources confirm the existence of the DPC (Data Protection Commission) and the Department of Enterprise, Trade and Employment as key national institutions relevant to AI governance. Ireland is the EU establishment of many major AI and technology companies, which increases its practical relevance under the AI Act. Specific Irish implementation acts, competent-authority designation instruments, and detailed national measures have not been verified into this baseline layer. An implementation-in-progress label reflects EU-wide applicability and visible official institutions without claiming finalized national measures.",
-    nationalImplementationMeasures: [],
-    nationalCompetentAuthorities: [],
+      "Ireland is an EU member state to which the EU AI Act applies directly, and it is the EU establishment of many major AI and technology companies, which increases its practical relevance under the Act. The Department of Enterprise, Tourism and Employment states on its own site that Ireland had designated 15 national competent authorities as of 16 September 2025, under a distributed model with a designated central authority for coordination and a national single point of contact inside the department, and that a National AI Office will be established by 2 August 2026. The individual identities of the 15 authorities are not enumerated here because the departmental announcement does not list them, so this profile records the count and the model, not a named roster.",
+    nationalImplementationMeasures: [
+      "Distributed model of competent authorities for the EU AI Act, with a designated central authority for coordination (Department of Enterprise, Tourism and Employment, 16 September 2025).",
+      "National single point of contact established within the Department of Enterprise, Tourism and Employment.",
+      "National AI Office to be established by 2 August 2026 as the central and coordinating authority.",
+    ],
+    nationalCompetentAuthorities: [
+      "15 national competent authorities designated as of 16 September 2025 per the Department of Enterprise, Tourism and Employment: 'Ireland has to date designated 15 national competent authorities for oversight and enforcement of the EU AI ACT in Ireland'. The department's announcement does not name them individually, so no roster is asserted here.",
+    ],
     marketSurveillanceAuthorities: [],
     notifyingAuthorities: [],
     dataProtectionAuthority: "Data Protection Commission (DPC)",
-    relevantMinistriesOrAgencies: ["Department of Enterprise, Trade and Employment"],
-    nationalAIRegulationSources: [irelandDpc, irelandEnterpriseDept, irelandGov],
+    relevantMinistriesOrAgencies: ["Department of Enterprise, Tourism and Employment"],
+    nationalAIRegulationSources: [
+      irelandDpc,
+      irelandEnterpriseDept,
+      irelandGov,
+      irelandDeteAuthorityDesignationNews,
+    ],
     nationalAIRegulationNotes:
       "DPC, the Department of Enterprise, Trade and Employment, and the main government portal (gov.ie) are the principal verified official institutional anchors for Irish AI and data governance. The DPC is registered as a live-monitoring candidate given its role as lead supervisory authority for many major AI and technology companies established in Ireland. Specific national AI Act implementation acts and authority-designation details remain under review.",
     nationalCaseLawSources: [],

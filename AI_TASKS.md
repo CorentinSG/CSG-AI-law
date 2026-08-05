@@ -14,6 +14,8 @@ Each agent edits only its own rows. Status vocabulary: `CLAIMED` · `WIP` · `BL
 | T-EFFICIENCY-PLAN (P0→P2) | Claude Code | MERGED | `main` @ `897d2b5` (#56–#61) | none (released) | `buildWeeklyDigestMarkdown()`, `deriveProvisioning()`, `purgeExpiredOperationalRecords()`, `localeAlternates()`, community "Scan Job Management", "DB Repository Layer" | 2026-07-31 |
 | T-SERP-PROBE | Claude Code | MERGED | `main` @ `080bfb0` (#62) | none (released) | `createDiscoveryLead()`, `listAgentApiCapabilities()`, community "DB Repository Layer" | 2026-08-01 |
 | T-SITE-RECOVERY | Claude Code | MERGED | `main` @ `a1432f2` (#65-#70) | none (released) | `buildStableHash()`, `clampFutureIsoDate()`, `populatedStateBaselines`, `usAiCaseLawEntries`, `listRawItemIdentitiesBySource()`, community "Scan Pipeline" | 2026-08-03 |
+| T-COUNTRY-DEPTH-AND-SOURCES | Claude Code | DONE-LOCAL | `claude/github-monitoring-recovery-lz4dos` | `src/content/ai-regulation/europe-member-state-implementation.ts`, `src/db/seed/ai-regulation-seed.ts`, `src/agents/ai-regulation/usMonitoringAgentDefinitions.ts` | `europeCountryProfiles`, `regulationSourcesSeed`, `buildStateDefinition()`, `stateVerifiedFeedRegistry` | 2026-08-05 |
+| T-US-STATE-BACKFILL | Claude Code | DONE-LOCAL | `claude/github-monitoring-recovery-lz4dos` | `src/content/ai-regulation/us-state-ai-law-baseline.ts`, `src/content/ai-regulation/us-ai-case-law.ts`, `src/content/ai-regulation/us-legal-baseline.test.ts` | `populatedStateBaselines`, `prioritySources`, `usAiCaseLawEntries`, `recentAiDocket()`, `usStateMapStatuses` | 2026-08-05 |
 | T-TOTAL-PROJECT-OWNERSHIP | Claude Code | MERGED | `main` | entire repository | all Graphify communities; start with the total handoff document | 2026-07-25 |
 | TOOLING-GRAPH-PROTOCOL | Claude Code | REVIEW | `ops/t-ops9-ux` @ `30bc31c` | `AGENTS.md`, `AI_TASKS.md`, `.gitignore`, `.git/hooks/*` | n/a (tooling, no app code) | 2026-06-20 |
 | T-OPS9-UX | Claude Code | WIP | `ops/t-ops9-ux` @ `30bc31c` | `src/app/**`, shared UI components | community "UI Components and Utilities", "Intelligence Hub UI" | 2026-06-20 |
@@ -46,6 +48,21 @@ YYYY-MM-DD · <Agent> · <TASK-ID> · <STATUS>
 ```
 
 ## Current status
+
+2026-08-05 · Claude Code · T-COUNTRY-DEPTH-AND-SOURCES · DONE-LOCAL
+- Intent:        close the two targets left open by T-US-STATE-BACKFILL — AI Act authority designations per member state, and live state-level monitoring sources.
+- Files:         `src/content/ai-regulation/europe-member-state-implementation.ts`, `src/db/seed/ai-regulation-seed.ts`, `src/agents/ai-regulation/usMonitoringAgentDefinitions.ts`
+- Graph anchors: `europeCountryProfiles`, `CountrySourceRecord`, `italyLaw132of2025Article20`, `germanyBnetzaMarketSurveillancePage`, `irelandDeteAuthorityDesignationNews`, `regulationSourcesSeed`, `buildStateDefinition()`, `stateVerifiedFeedRegistry`, community "Scan Pipeline"
+- Verification:  `npm test` 1003/1003 pass · `npm run lint` clean · `npm run typecheck` clean · `npm run build` succeeds.
+- Next:          Claude Code. Authority designations verified at source for IT (art. 20 L. 132/2025 → AgID + ACN, Banca d'Italia/CONSOB/IVASS retained), DE (BNetzA art. 70 market surveillance, self-declared as provisional pending a national implementing act), ES (AESIA via RD 729/2023), IE (15 authorities, distributed model, 16 Sep 2025), NL (draft uitvoeringswet only — deliberately left undesignated). Still open: the other 22 member states have no verified designation, and no member state has verified penalty provisions — the AI Act penalty regimes are set nationally and none was found in an official source in this pass. Kentucky has no working official RSS endpoint (every ag.ky.gov / kycourts.gov / governor.ky.gov / legislature.ky.gov candidate 404s); it is covered only through the CourtListener court mirror.
+
+2026-08-05 · Claude Code · T-US-STATE-BACKFILL · DONE-LOCAL
+- Intent:        fill the empty U.S. state AI-law database and surface live AI dockets, every item tied to an official source.
+- Files:         `src/content/ai-regulation/us-state-ai-law-baseline.ts`, `src/content/ai-regulation/us-ai-case-law.ts`, `src/content/ai-regulation/us-legal-baseline.test.ts`, `vitest.config.ts`, `eslint.config.mjs`, `.gitignore`
+- Graph anchors: `populatedStateBaselines`, `prioritySources`, `createProfile()`, `getPriorityUsStateProfiles()`, `usAiCaseLawEntries`, `recentAiDocket()`, `usStateMapStatuses`
+- Verification:  `npm test` 995/995 pass · `npm run lint` clean · `npm run typecheck` clean · `npm run build` succeeds (CI env needs secrets ≥16 chars; the short values in the standing snippet fail Zod on `CRON_SECRET`).
+- Branch/commit: `claude/github-monitoring-recovery-lz4dos` @ (this commit)
+- Next:          Claude Code. Done: 16 enacted states + WA pending, each with an exact citation. NOT done and still open — CIBLE 3 (country depth files, `*-national-depth.ts` / `*-ai-intelligence.ts`) and CIBLE 4 (`src/db/seed/ai-regulation-seed.ts` monitoring sources) were not touched; the Tavily connector is disconnected (auth invalidated), which removes the tool the source-liveness testing depends on. States with no verified AI statute are deliberately left on the reachability heuristic rather than asserted as "no law".
 
 2026-08-03 · Claude Code · T-SITE-RECOVERY · MERGED
 - Intent:        Owner review found the site empty/noisy; six PRs fixed mechanics and populated content.
