@@ -147,6 +147,81 @@ function slugify(value: string) {
   return value.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
 }
 
+function courtListenerCourtFeedEntry(
+  sourceId: string,
+  label: string,
+): CountryMonitoringSourceDescriptor {
+  return {
+    sourceId,
+    label,
+    category: "official_court_feed",
+    recommendedCadence: "daily",
+    // CourtListener mirrors court output rather than publishing it, so these
+    // feeds stay discovery-grade: not eligible to seed the verified baseline.
+    priorityBand: "medium",
+    freshHours: 24,
+    watchHours: 72,
+    staleHours: 168,
+    liveMonitoringEligible: true,
+    baselineEligible: false,
+    verificationEligible: false,
+  };
+}
+
+function stateSupervisionFeedEntry(
+  sourceId: string,
+  label: string,
+): CountryMonitoringSourceDescriptor {
+  return {
+    sourceId,
+    label,
+    category: "official_supervision_feed",
+    recommendedCadence: "daily",
+    priorityBand: "medium",
+    freshHours: 24,
+    watchHours: 72,
+    staleHours: 168,
+    liveMonitoringEligible: true,
+    baselineEligible: true,
+    verificationEligible: true,
+  };
+}
+
+const stateVerifiedFeedRegistry: Record<string, CountryMonitoringSourceDescriptor[]> = {
+  Montana: [
+    stateSupervisionFeedEntry(
+      "src-us-mt-doj",
+      "Montana Department of Justice - Attorney General newsroom",
+    ),
+    courtListenerCourtFeedEntry(
+      "src-us-courts-mont",
+      "Montana Supreme Court opinions (CourtListener mirror)",
+    ),
+  ],
+  Washington: [
+    stateSupervisionFeedEntry(
+      "src-us-wa-ag",
+      "Washington State Attorney General newsroom",
+    ),
+    courtListenerCourtFeedEntry(
+      "src-us-courts-wash",
+      "Washington Supreme Court opinions (CourtListener mirror)",
+    ),
+  ],
+  Kentucky: [
+    courtListenerCourtFeedEntry(
+      "src-us-courts-ky",
+      "Kentucky Supreme Court opinions (CourtListener mirror)",
+    ),
+  ],
+  Illinois: [
+    courtListenerCourtFeedEntry(
+      "src-us-courts-ill",
+      "Illinois Supreme Court opinions (CourtListener mirror)",
+    ),
+  ],
+};
+
 function buildStateDefinition(
   [stateName, postalCode]: readonly [string, string],
   jurisdictionLevel: "state" | "district",
@@ -267,6 +342,13 @@ function buildStateDefinition(
         verificationEligible: true,
       },
     );
+  }
+
+  // State-level feeds verified live on 2026-08-05 (HTTP 200, XML feed
+  // content-type, non-empty item list). Declared here so the seeded sources
+  // belong to a lane instead of being orphaned.
+  for (const extra of stateVerifiedFeedRegistry[stateName] ?? []) {
+    sourceRegistry.push(extra);
   }
 
   return {
