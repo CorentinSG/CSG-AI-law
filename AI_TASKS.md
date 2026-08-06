@@ -14,6 +14,7 @@ Each agent edits only its own rows. Status vocabulary: `CLAIMED` · `WIP` · `BL
 | T-EFFICIENCY-PLAN (P0→P2) | Claude Code | MERGED | `main` @ `897d2b5` (#56–#61) | none (released) | `buildWeeklyDigestMarkdown()`, `deriveProvisioning()`, `purgeExpiredOperationalRecords()`, `localeAlternates()`, community "Scan Job Management", "DB Repository Layer" | 2026-07-31 |
 | T-SERP-PROBE | Claude Code | MERGED | `main` @ `080bfb0` (#62) | none (released) | `createDiscoveryLead()`, `listAgentApiCapabilities()`, community "DB Repository Layer" | 2026-08-01 |
 | T-SITE-RECOVERY | Claude Code | MERGED | `main` @ `a1432f2` (#65-#70) | none (released) | `buildStableHash()`, `clampFutureIsoDate()`, `populatedStateBaselines`, `usAiCaseLawEntries`, `listRawItemIdentitiesBySource()`, community "Scan Pipeline" | 2026-08-03 |
+| T-US-STATE-DB-BATCH2 | Claude Code | DONE-LOCAL | `claude/us-state-db-batch2` @ `2799720` | `src/content/ai-regulation/us-state-ai-law-baseline.ts`, `src/content/ai-regulation/us-legal-baseline.test.ts` | `populatedStateBaselines`, `prioritySources`, `usStateMapStatuses` | 2026-08-05 |
 | T-COUNTRY-DEPTH-AND-SOURCES | Claude Code | DONE-LOCAL | `claude/github-monitoring-recovery-lz4dos` | `src/content/ai-regulation/europe-member-state-implementation.ts`, `src/db/seed/ai-regulation-seed.ts`, `src/agents/ai-regulation/usMonitoringAgentDefinitions.ts` | `europeCountryProfiles`, `regulationSourcesSeed`, `buildStateDefinition()`, `stateVerifiedFeedRegistry` | 2026-08-05 |
 | T-US-STATE-BACKFILL | Claude Code | DONE-LOCAL | `claude/github-monitoring-recovery-lz4dos` | `src/content/ai-regulation/us-state-ai-law-baseline.ts`, `src/content/ai-regulation/us-ai-case-law.ts`, `src/content/ai-regulation/us-legal-baseline.test.ts` | `populatedStateBaselines`, `prioritySources`, `usAiCaseLawEntries`, `recentAiDocket()`, `usStateMapStatuses` | 2026-08-05 |
 | T-TOTAL-PROJECT-OWNERSHIP | Claude Code | MERGED | `main` | entire repository | all Graphify communities; start with the total handoff document | 2026-07-25 |
@@ -48,6 +49,14 @@ YYYY-MM-DD · <Agent> · <TASK-ID> · <STATUS>
 ```
 
 ## Current status
+
+2026-08-05 · Claude Code · T-US-STATE-DB-BATCH2 · DONE-LOCAL
+- Intent:        continue the state-by-state AI-law database, one batch at a time.
+- Files:         `src/content/ai-regulation/us-state-ai-law-baseline.ts`, `src/content/ai-regulation/us-legal-baseline.test.ts`
+- Graph anchors: `populatedStateBaselines`, `prioritySources`, `getPriorityUsStateProfiles()`, `usStateMapStatuses`
+- Verification:  `npm test` 1010/1010 · lint clean · typecheck clean · build succeeds.
+- Branch/commit: `claude/us-state-db-batch2` @ `2799720`
+- Next:          Claude Code, next batch. Added OR, VA, NJ, FL, WI, MI — 22 enacted states now. All six are election- or fraud-focused, none cross-sector. The Legal Data Hunter connector rate-limited every request this pass, so all six were verified on the issuing site instead of the corpus. Attempted and NOT added: Indiana (iga.in.gov is JS-rendered, no server-side text) and New Hampshire (RSA 664:14-b turned out to be a 2009 caller-ID provision, not the AI one) — both left unverified rather than guessed. Remaining unpopulated: 28 states + DC.
 
 2026-08-05 · Claude Code · T-COUNTRY-DEPTH-AND-SOURCES · DONE-LOCAL
 - Intent:        close the two targets left open by T-US-STATE-BACKFILL — AI Act authority designations per member state, and live state-level monitoring sources.
