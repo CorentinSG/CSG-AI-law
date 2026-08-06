@@ -142,6 +142,15 @@ describe("U.S. state baseline", () => {
     expect(byCode.get("SD")?.enactedAIStatutes.join(" ")).toContain("12-26-32");
     expect(byCode.get("AR")?.enactedAIStatutes.join(" ")).toContain("Act 927");
 
+    // Third populated pass (2026-08-05), verified on each issuing site because
+    // the Legal Data Hunter connector was rate-limiting throughout.
+    expect(byCode.get("OR")?.enactedAIStatutes.join(" ")).toContain("Chapter 62");
+    expect(byCode.get("VA")?.enactedAIStatutes.join(" ")).toContain("18.2-213.3");
+    expect(byCode.get("NJ")?.enactedAIStatutes.join(" ")).toContain("P.L. 2025, c.40");
+    expect(byCode.get("FL")?.enactedAIStatutes.join(" ")).toContain("106.145");
+    expect(byCode.get("WI")?.enactedAIStatutes.join(" ")).toContain("11.1303(2m)");
+    expect(byCode.get("MI")?.enactedAIStatutes.join(" ")).toContain("168.932f");
+
     // Washington is deliberately pinned as pending: the LDH Washington corpus
     // returns bill texts only (SB 6120, HB 1170/1168 series), no enacted AI act.
     expect(byCode.get("WA")?.aiLawStatus).toBe("pending_ai_legislation");
@@ -167,23 +176,36 @@ describe("U.S. state baseline", () => {
     //   NY  Chapter 674 of the Laws of 2024 + S822, nysenate.gov
     //   SD  S.D. Codified Laws §§ 12-26-32 to 12-26-37, sdlegislature.gov
     //   TN  Public Chapter 588 (HB 2091), publications.tnsosfiles.com
+    // Third pass (2026-08-05), each read on the issuing site:
+    //   FL  Fla. Stat. § 106.145 (ch. 2024-126), leg.state.fl.us
+    //   MI  MCL 168.932f (2023 PA 265), legislature.mi.gov
+    //   NJ  P.L. 2025, c.40 (A3540), pub.njleg.state.nj.us
+    //   OR  SB 1571, Ch. 62 Oregon Laws 2024, olis.oregonlegislature.gov
+    //   VA  Code of Virginia § 18.2-213.3 (HB 697), legacylis.virginia.gov
+    //   WI  Wis. Stat. § 11.1303(2m) (2023 Act 123), docs.legis.wisconsin.gov
     expect(enacted.map((state) => state.code).sort()).toEqual([
       "AR",
       "AZ",
       "CA",
       "CO",
       "CT",
+      "FL",
       "IL",
       "KY",
       "MD",
+      "MI",
       "MT",
       "ND",
+      "NJ",
       "NM",
       "NY",
+      "OR",
       "SD",
       "TN",
       "TX",
       "UT",
+      "VA",
+      "WI",
     ]);
   });
 

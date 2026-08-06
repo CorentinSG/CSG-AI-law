@@ -477,6 +477,18 @@ const prioritySources: Record<string, UsStateOfficialSource[]> = {
       note:
         "Official Virginia legislative information system verified as reachable; specific AI bills or statutes require item-level review.",
     }),
+    source({
+      label: "Virginia HB 697 (2024) — enacted text adding Code of Virginia § 18.2-213.3",
+      institution: "Virginia Legislative Information System",
+      url: "https://legacylis.virginia.gov/cgi-bin/legp604.exe?241+ful+HB697H1+hil=",
+      sourceType: "legislature",
+      runtimeAccessible: true,
+      responseStatus: 200,
+      parserStatus: "manual_reference",
+      recommendation: "manual_review",
+      note:
+        "Official enacted bill text read at the source: HB 697 adds Code of Virginia § 18.2-213.3 (use of synthetic media in furtherance of crimes involving fraud) and amends §§ 8.01-45, 8.01-46 and 18.2-417. Runtime check 2026-08-05 returned HTTP 200. Note that lis.virginia.gov 301-redirects to legacylis.virginia.gov, which is the URL recorded here.",
+    }),
   ],
   WA: [
     source({
@@ -705,6 +717,88 @@ const prioritySources: Record<string, UsStateOfficialSource[]> = {
       recommendation: "manual_review",
       note:
         "Official codified South Dakota statute confirmed through the Legal Data Hunter legislation corpus: § 12-26-32 defines 'artificial intelligence' as 'any machine-based system that, for any explicit or implicit objective, infers from the inputs received by the system how to generate content, decisions, predictions, recommendations' for the deepfake provisions §§ 12-26-32 to 12-26-37. Runtime check 2026-08-05 returned HTTP 200.",
+    }),
+  ],
+  OR: [
+    source({
+      label: "Oregon SB 1571 (2024 Regular Session) — measure overview",
+      institution: "Oregon Legislative Information System",
+      url: "https://olis.oregonlegislature.gov/liz/2024r1/Measures/Overview/SB1571",
+      sourceType: "legislature",
+      runtimeAccessible: true,
+      responseStatus: 200,
+      parserStatus: "manual_reference",
+      recommendation: "manual_review",
+      note:
+        "Official OLIS measure page read at the source: SB 1571 is titled 'Relating to the use of artificial intelligence in campaign communications; declaring an emergency', carries Chapter 62 of the Oregon Laws 2024, and takes effect on passage under its emergency clause. Runtime check 2026-08-05 returned HTTP 200.",
+    }),
+    source({
+      label: "Oregon SB 1571 — enrolled text",
+      institution: "Oregon Legislative Information System",
+      url: "https://olis.oregonlegislature.gov/liz/2024R1/Downloads/MeasureDocument/SB1571/Enrolled",
+      sourceType: "legislature",
+      runtimeAccessible: true,
+      responseStatus: 200,
+      parserStatus: "manual_reference",
+      recommendation: "manual_review",
+      note:
+        "Official enrolled measure PDF. Runtime check 2026-08-05 returned HTTP 200, but the runner cannot render the PDF, so the substantive citation above rests on the OLIS measure page rather than on the enrolled text itself.",
+    }),
+  ],
+  NJ: [
+    source({
+      label: "New Jersey P.L. 2025, c.40 (A3540) — deceptive audio or visual media",
+      institution: "New Jersey Legislature",
+      url: "https://pub.njleg.state.nj.us/Bills/2024/AL25/40_.HTM",
+      sourceType: "legislature",
+      runtimeAccessible: true,
+      responseStatus: 200,
+      parserStatus: "manual_reference",
+      recommendation: "manual_review",
+      note:
+        "Official enacted chapter law read at the source: P.L. 2025, c.40 (A3540 3R ACS), approved April 2, 2025, creating N.J.S.A. 2C:21-17.7 and 2C:21-17.8, effective immediately. Runtime check 2026-08-05 returned HTTP 200.",
+    }),
+  ],
+  FL: [
+    source({
+      label: "Florida Statutes § 106.145 — use of artificial intelligence in political advertisements",
+      institution: "Florida Legislature",
+      url: "http://www.leg.state.fl.us/statutes/index.cfm?App_mode=Display_Statute&URL=0100-0199/0106/Sections/0106.145.html",
+      sourceType: "state_code",
+      runtimeAccessible: true,
+      responseStatus: 200,
+      parserStatus: "manual_reference",
+      recommendation: "manual_review",
+      note:
+        "Official codified Florida statute read at the source, including the mandated disclaimer text and the history line 'History.—s. 1, ch. 2024-126'. Runtime check 2026-08-05 returned HTTP 200. The Florida statutes site is served over HTTP, not HTTPS, at this path.",
+    }),
+  ],
+  WI: [
+    source({
+      label: "Wis. Stat. § 11.1303(2m) — synthetic media in political communications",
+      institution: "Wisconsin Legislature",
+      url: "https://docs.legis.wisconsin.gov/statutes/statutes/11/xiii/1303",
+      sourceType: "state_code",
+      runtimeAccessible: true,
+      responseStatus: 200,
+      parserStatus: "manual_reference",
+      recommendation: "manual_review",
+      note:
+        "Official codified Wisconsin statute read at the source: § 11.1303(2m)(a)2 defines 'synthetic media' as audio or video content substantially produced in whole or in part by means of generative artificial intelligence, and (2m)(b)-(c) set the required disclosure wording. Enacted by 2023 Wisconsin Act 123. Runtime check 2026-08-05 returned HTTP 200.",
+    }),
+  ],
+  MI: [
+    source({
+      label: "MCL 168.932f — distribution of materially deceptive media",
+      institution: "Michigan Legislature",
+      url: "https://www.legislature.mi.gov/Laws/MCL?objectName=mcl-168-932f",
+      sourceType: "state_code",
+      runtimeAccessible: true,
+      responseStatus: 200,
+      parserStatus: "manual_reference",
+      recommendation: "manual_review",
+      note:
+        "Official codified Michigan section read at the source, including the required disclaimer wording, the misdemeanor/felony escalation, and the credit line 'Added by 2023, Act 265; Effective February 13, 2024'. The section takes its definition of artificial intelligence from MCL 169.202 rather than defining it itself. Runtime check 2026-08-05 returned HTTP 200.",
     }),
   ],
   AR: [
@@ -1009,6 +1103,66 @@ const populatedStateBaselines: Record<string, PopulatedStateBaseline> = {
     publicSummary:
       "Washington has no verified cross-sector AI statute in force. Its legislature has a dense pipeline of AI bills across the 2025 and 2026 regular sessions — including SB 6120 on high-risk AI systems, the HB 1170 and HB 1168 transparency series, HB 2157, SB 6284 and HB 2503 — all of which remain proposals, not binding law.",
   },
+  // Third populated pass (2026-08-05). The Legal Data Hunter connector was
+  // rate-limiting throughout this pass, so every state below was verified
+  // directly on the issuing legislature's or code publisher's own site.
+  OR: {
+    status: "enacted_sector_specific_ai_law",
+    confidence: "high",
+    enactedAIStatutes: [
+      "SB 1571 (2024 Regular Session), Chapter 62 of the Oregon Laws 2024: 'Relating to the use of artificial intelligence in campaign communications; declaring an emergency'. It requires disclosure of synthetic media in campaign communications, gives the Secretary of State rulemaking authority, and carries a civil penalty of not more than $10,000 per violation. It took effect on passage under its emergency clause.",
+    ],
+    publicSummary:
+      "Oregon regulates artificial intelligence in campaign communications through SB 1571 (Chapter 62, Oregon Laws 2024), which requires synthetic media in campaign material to be disclosed, backed by Secretary of State rulemaking and a civil penalty of up to $10,000. It took effect immediately under an emergency clause.",
+  },
+  VA: {
+    status: "enacted_sector_specific_ai_law",
+    confidence: "high",
+    enactedAIStatutes: [
+      "HB 697 (2024) adds Code of Virginia § 18.2-213.3 (use of synthetic media in furtherance of crimes involving fraud) and amends §§ 8.01-45, 8.01-46 and 18.2-417. It defines 'synthetic media' as 'any image, audio recording, or video recording of an individual's appearance, speech, or conduct that has been created or intentionally manipulated with the use of generative artificial intelligence systems or other digital technology in a manner to create a realistic but false image, audio, or video'.",
+    ],
+    privateSectorRules: [
+      "Under § 18.2-213.3, using synthetic media to commit a criminal offence is a separate and distinct Class 1 misdemeanor, and an affected individual may sue for actual damages and attorney fees.",
+    ],
+    publicSummary:
+      "Virginia criminalises the use of synthetic media in furtherance of fraud offences through HB 697 (2024), codified at Code of Virginia § 18.2-213.3, with a statutory definition of synthetic media that expressly reaches generative AI, a separate Class 1 misdemeanor, and a private right of action. Virginia has no verified cross-sector AI governance statute.",
+  },
+  NJ: {
+    status: "enacted_sector_specific_ai_law",
+    confidence: "high",
+    enactedAIStatutes: [
+      "P.L. 2025, c.40 (A3540 3R ACS), approved April 2, 2025 and effective immediately, creating N.J.S.A. 2C:21-17.7 and 2C:21-17.8 on deceptive audio or visual media: creating or generating such media, or soliciting or disclosing it with criminal intent, is a crime of the third degree, and knowingly or recklessly disclosing media created in violation is a crime of the fourth degree, with a fine of up to $30,000 in addition to imprisonment.",
+    ],
+    publicSummary:
+      "New Jersey established civil and criminal liability for deceptive audio or visual media — deepfakes — through P.L. 2025, c.40 (A3540), approved April 2, 2025 and effective immediately, codified at N.J.S.A. 2C:21-17.7 and 2C:21-17.8, with third- and fourth-degree offences and fines up to $30,000.",
+  },
+  FL: {
+    status: "enacted_sector_specific_ai_law",
+    confidence: "high",
+    enactedAIStatutes: [
+      "Fla. Stat. § 106.145, 'Use of artificial intelligence' (History: s. 1, ch. 2024-126): a political advertisement containing generative-AI content that depicts a person performing an action that did not occur must carry the disclaimer 'Created in whole or in part with the use of generative artificial intelligence (AI).', with per-medium formatting rules. Omitting the disclaimer is a first-degree misdemeanor under §§ 775.082 and 775.083, alongside civil penalties and Florida Elections Commission complaints.",
+    ],
+    publicSummary:
+      "Florida requires political advertisements built with generative AI to carry a statutory disclaimer under Fla. Stat. § 106.145 (ch. 2024-126), enforced as a first-degree misdemeanor and through the Florida Elections Commission. Florida has no verified cross-sector AI governance statute.",
+  },
+  WI: {
+    status: "enacted_sector_specific_ai_law",
+    confidence: "high",
+    enactedAIStatutes: [
+      "Wis. Stat. § 11.1303(2m), enacted by 2023 Wisconsin Act 123: § 11.1303(2m)(a)2 defines 'synthetic media' as audio or video content substantially produced in whole or in part by means of generative artificial intelligence. Audio communications must carry 'Contains content generated by AI' at the beginning and the end; video communications must display 'This video content generated by AI', 'This audio content generated by AI' or 'This content generated by AI' throughout the AI-generated portion.",
+    ],
+    publicSummary:
+      "Wisconsin requires political communications containing synthetic media to carry an explicit AI disclosure under Wis. Stat. § 11.1303(2m), added by 2023 Wisconsin Act 123, with distinct wording for audio and video and penalties of up to $1,000 per violation.",
+  },
+  MI: {
+    status: "enacted_sector_specific_ai_law",
+    confidence: "high",
+    enactedAIStatutes: [
+      "MCL 168.932f (added by 2023 PA 265, effective February 13, 2024): distributing materially deceptive media is prohibited unless it carries the disclaimer 'This ____ (image, audio, or video) has been manipulated by technical means and depicts speech or conduct that did not occur.' A first violation is a misdemeanor punishable by up to 90 days or $500; a subsequent violation within five years is a felony punishable by up to 5 years or $1,000. The section takes its definition of artificial intelligence from MCL 169.202.",
+    ],
+    publicSummary:
+      "Michigan bars distribution of materially deceptive media without a statutory disclaimer under MCL 168.932f, added by 2023 PA 265 and effective February 13, 2024, escalating from misdemeanor to felony on repeat violations within five years.",
+  },
 };
 
 function createProfile(code: string, name: string): UsStateAiLawProfile {
@@ -1111,6 +1265,7 @@ export function getPriorityUsStateProfiles() {
   const priorityCodes = [
     "CA", "CO", "NY", "IL", "TX", "CT", "UT", "VA", "WA", "MD",
     "MT", "KY", "TN", "ND", "NM", "AZ", "SD", "AR",
+    "OR", "NJ", "FL", "WI", "MI",
   ];
   return usStateAiLawProfiles.filter((profile) =>
     priorityCodes.includes(profile.stateCode),
