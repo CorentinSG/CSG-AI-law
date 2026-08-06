@@ -49,6 +49,14 @@ YYYY-MM-DD · <Agent> · <TASK-ID> · <STATUS>
 
 ## Current status
 
+2026-08-06 · Claude Code · T-DATA-CASELAW-COUNTRIES · DONE-LOCAL
+- Intent:        Fill the case-law lane and the country base with source-verified data; owner's local session owns the US state base in parallel.
+- Files:         `src/content/ai-regulation/us-ai-case-law.ts` (+5 published opinions, +`courtListenerOpinionReference()`), `src/content/ai-regulation/europe-member-state-implementation.ts` (Denmark + Finland promoted from institutional stubs to statute-verified profiles; 3 optional overrides on the profile helper), `docs/handoffs/PROMPT-session-locale-scraping.md` (new).
+- Graph anchors: `usAiCaseLawEntries`, `courtListenerOpinionReference()`, `createMonitoredInstitutionProfile()`, `firstWaveProfiles`, `europeCountryProfiles`
+- Verification:  1003 tests, lint, typecheck and production build all pass. Case holdings quoted from opinion text read via the CourtListener API; Danish and Finnish designations read from the official gazette records (Retsinformation, Finlex).
+- Branch/commit: `claude/github-monitoring-recovery-lz4dos` @ `dfe6935`
+- Next:          Claude Code continues country coverage (17 EU states still carry institutional stubs only, no national measures). Dead code found, not deleted: the 8 `*-national-depth.ts` files (~2 000 lines, 1 entry each) are imported nowhere outside their own tests. Owner: watch the Supabase egress slope before 20 August.
+
 2026-08-05 · Claude Code · T-COUNTRY-DEPTH-AND-SOURCES · DONE-LOCAL
 - Intent:        close the two targets left open by T-US-STATE-BACKFILL — AI Act authority designations per member state, and live state-level monitoring sources.
 - Files:         `src/content/ai-regulation/europe-member-state-implementation.ts`, `src/db/seed/ai-regulation-seed.ts`, `src/agents/ai-regulation/usMonitoringAgentDefinitions.ts`
