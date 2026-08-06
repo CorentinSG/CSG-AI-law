@@ -463,7 +463,7 @@ export const researchEntries: ResearchEntry[] = [
       "when-ai-makes-legal-filings-easier-but-justice-harder",
       "ai-summaries-rule-1006-admissibility",
       "white-collar-revolution-law-firms-ai",
-    ],
+    ],
     translations: {
       fr: {
         title:
@@ -884,7 +884,7 @@ export const researchEntries: ResearchEntry[] = [
       "generative-ai-access-to-justice-pro-se",
       "ai-summaries-rule-1006-admissibility",
       "ai-legal-ethics-early-questions-lawyers",
-    ],
+    ],
     translations: {
       fr: {
         title: "Quand l'IA rend le dépôt plus facile et la justice plus difficile",
@@ -1234,7 +1234,7 @@ export const researchEntries: ResearchEntry[] = [
     summary:
       "A recent legal development explores how Federal Rule of Evidence 1006 could support the admissibility of AI-generated summaries, provided the underlying evidence is properly handled. If adopted by courts, it could significantly change how lawyers review and present large volumes of documents.",
     abstract:
-      "AI-generated summaries may soon have a clearer path into the courtroom. A recent legal development explores how Federal Rule of Evidence 1006 could support the admissibility of AI-generated summaries, provided the underlying evidence is properly handled. This note breaks down what this means, why it matters, and the safeguards that will still be required.",
+      "AI-generated summaries may soon have a clearer path into the courtroom. The December 1, 2024 amendment to Federal Rule of Evidence 1006 clarified that summaries of voluminous records can be admitted as substantive evidence, provided the underlying evidence is properly handled. This note breaks down what this means, why it matters, and the safeguards that will still be required.",
     image: "/images/research/rule-1006-ai-summaries.png",
     publishedAt: "2026-07-20",
     relatedSlugs: [
@@ -1254,7 +1254,7 @@ export const researchEntries: ResearchEntry[] = [
         paragraphs: [
           "Federal Rule of Evidence 1006 provides a solution. It allows a party to present a summary, chart or calculation to prove the content of voluminous admissible records that cannot conveniently be examined in court.[1]",
           "Since December 1, 2024, the rule expressly states that these summaries may be admitted as evidence, even when the underlying documents have not themselves been introduced into evidence.[1]",
-          "This clarification matters because a Rule 1006 summary is not merely a visual aid. When the proper foundation is established, the summary can become substantive evidence that the judge or jury may rely on.[2][3][4]",
+          "This clarification matters because a Rule 1006 summary is not merely a visual aid. When the proper foundation is established, the summary becomes substantive evidence that the judge or jury may rely on, a principle that federal courts of appeals had already recognized well before the amendment, which codified and clarified this line of case law rather than creating it.[2][3][4] The summary nonetheless remains subject to the Rule 403 balancing test, and may still be excluded where its probative value is substantially outweighed by a danger of unfair prejudice or of misleading the jury.[1]",
         ],
       },
       {
@@ -1274,10 +1274,10 @@ export const researchEntries: ResearchEntry[] = [
         ],
       },
       {
-        heading: "A proposed Rule 707 — not yet adopted",
+        heading: "A proposed Rule 707: revised and under further study, not adopted",
         paragraphs: [
-          "A proposed Federal Rule of Evidence 707 could eventually introduce more specific reliability requirements for evidence produced by artificial intelligence. However, the Advisory Committee on Evidence Rules stated in its May 17, 2026 report that it was not recommending adoption of the proposal at that time.[6]",
-          "For now, the existing rules already provide a possible framework.",
+          "A proposed Federal Rule of Evidence 707 could eventually introduce more specific reliability requirements for machine-generated evidence offered without an expert witness. After a public comment period that ran from August 15, 2025 to February 16, 2026 and drew more than 70 written comments, the Advisory Committee on Evidence Rules decided at its May 7, 2026 meeting not to recommend action on the proposal at that time. As stated in its May 17, 2026 report to the Standing Committee, the Committee instead revised the draft rule and plans to have it vetted by technology and AI-law experts at its Fall 2026 meeting, together with the separate question of “deepfake” evidence under a proposed Rule 901(c).[6][7]",
+          "Even if a version of Rule 707 were eventually approved, it would not take effect before December 2028 at the earliest. For the foreseeable future, the existing rules therefore provide the operative framework.",
         ],
       },
       {
@@ -1291,7 +1291,7 @@ export const researchEntries: ResearchEntry[] = [
     references: [
       {
         label:
-          "[1] Federal Rule of Evidence 1006 and Advisory Committee Note to the 2024 amendment.",
+          "[1] Federal Rule of Evidence 1006 and Advisory Committee Note to the 2024 amendment (Cornell LII).",
         href: "https://www.law.cornell.edu/rules/fre/rule_1006",
       },
       {
@@ -1308,7 +1308,11 @@ export const researchEntries: ResearchEntry[] = [
       },
       {
         label:
-          "[6] Advisory Committee on Evidence Rules, May 17, 2026 report concerning proposed Federal Rule of Evidence 707.",
+          "[6] Advisory Committee on Evidence Rules, Report to the Standing Committee, May 17, 2026 (uscourts.gov).",
+      },
+      {
+        label:
+          "[7] Advisory Committee on Evidence Rules, Spring 2026 Agenda Book (uscourts.gov).",
       },
     ],
     translations: {
@@ -1321,7 +1325,7 @@ export const researchEntries: ResearchEntry[] = [
         summary:
           "Une évolution récente explore comment la règle fédérale de preuve 1006 pourrait fonder la recevabilité de synthèses générées par IA, à condition que les pièces sous-jacentes soient correctement traitées. Si les juridictions la retiennent, elle pourrait changer nettement la façon dont les avocats examinent et présentent de gros volumes documentaires.",
         abstract:
-          "Les synthèses générées par IA disposent peut-être d'une voie plus claire vers le prétoire. Une évolution récente explore comment la règle fédérale de preuve 1006 pourrait fonder leur recevabilité, à condition que les pièces sous-jacentes soient correctement traitées. Cette note explique ce que cela signifie, pourquoi c'est important, et les garanties qui resteront exigées.",
+          "Les synthèses générées par IA disposent peut-être d'une voie plus claire vers le prétoire. L'amendement du 1er décembre 2024 à la règle fédérale de preuve 1006 a précisé que les synthèses de pièces volumineuses peuvent être admises comme preuve au fond, à condition que les pièces sous-jacentes soient correctement traitées. Cette note explique ce que cela signifie, pourquoi c'est important, et les garanties qui resteront exigées.",
         body: [
           {
             heading: "Le problème : trop de pièces à examiner",
@@ -1334,7 +1338,7 @@ export const researchEntries: ResearchEntry[] = [
             paragraphs: [
               "La règle fédérale de preuve 1006 apporte une solution. Elle permet à une partie de présenter une synthèse, un tableau ou un calcul pour établir le contenu de pièces recevables volumineuses qui ne peuvent commodément être examinées à l'audience.[1]",
               "Depuis le 1er décembre 2024, la règle prévoit expressément que ces synthèses peuvent être admises comme preuve, même lorsque les documents sous-jacents n'ont pas eux-mêmes été versés aux débats.[1]",
-              "Cette clarification compte, car une synthèse fondée sur la règle 1006 n'est pas un simple support visuel. Lorsque le fondement approprié est établi, elle peut devenir une preuve au fond sur laquelle le juge ou le jury peut s'appuyer.[2][3][4]",
+              "Cette clarification compte, car une synthèse fondée sur la règle 1006 n'est pas un simple support visuel. Lorsque le fondement approprié est établi, elle devient une preuve au fond sur laquelle le juge ou le jury peut s'appuyer, principe que les cours d'appel fédérales reconnaissaient déjà bien avant l'amendement, lequel a codifié et clarifié cette jurisprudence plutôt que de la créer.[2][3][4] La synthèse reste néanmoins soumise au test de mise en balance de la règle 403 et peut encore être écartée lorsque sa valeur probante est substantiellement contrebalancée par un risque de préjudice injuste ou d'induire le jury en erreur.[1]",
             ],
           },
           {
@@ -1354,10 +1358,10 @@ export const researchEntries: ResearchEntry[] = [
             ],
           },
           {
-            heading: "Une règle 707 proposée, pas encore adoptée",
+            heading: "Une règle 707 proposée : révisée, à l'étude, non adoptée",
             paragraphs: [
-              "Une proposition de règle fédérale de preuve 707 pourrait à terme introduire des exigences de fiabilité plus précises pour les preuves produites par intelligence artificielle. Toutefois, le comité consultatif sur les règles de preuve a indiqué dans son rapport du 17 mai 2026 qu'il n'en recommandait pas l'adoption à ce stade.[6]",
-              "Pour l'heure, les règles existantes offrent déjà un cadre possible.",
+              "Une proposition de règle fédérale de preuve 707 pourrait à terme introduire des exigences de fiabilité plus précises pour les preuves générées par machine produites sans témoin expert. À l'issue d'une période de consultation publique ouverte du 15 août 2025 au 16 février 2026, qui a recueilli plus de 70 observations écrites, le comité consultatif sur les règles de preuve a décidé lors de sa réunion du 7 mai 2026 de ne pas recommander de suite à la proposition à ce stade. Comme l'indique son rapport du 17 mai 2026 au comité permanent, le comité a préféré réviser le projet de règle et prévoit de le faire examiner par des experts en technologie et en droit de l'IA lors de sa réunion d'automne 2026, en même temps que la question distincte des preuves « hypertruquées » au titre d'une proposition de règle 901(c).[6][7]",
+              "Même si une version de la règle 707 était finalement approuvée, elle n'entrerait pas en vigueur avant décembre 2028 au plus tôt. Dans un avenir prévisible, ce sont donc les règles existantes qui fournissent le cadre opérationnel.",
             ],
           },
           {
@@ -1378,7 +1382,7 @@ export const researchEntries: ResearchEntry[] = [
         summary:
           "Un desarrollo reciente explora cómo la regla federal de prueba 1006 podría sustentar la admisibilidad de resúmenes generados por IA, siempre que los documentos subyacentes se traten correctamente. Si los tribunales la adoptan, podría cambiar de forma notable cómo los abogados revisan y presentan grandes volúmenes documentales.",
         abstract:
-          "Los resúmenes generados por IA quizá tengan una vía más clara hacia la sala de audiencias. Un desarrollo reciente explora cómo la regla federal de prueba 1006 podría sustentar su admisibilidad, siempre que los documentos subyacentes se traten correctamente. Esta nota explica qué significa, por qué importa y las garantías que seguirán siendo exigibles.",
+          "Los resúmenes generados por IA quizá tengan una vía más clara hacia la sala de audiencias. La reforma de 1 de diciembre de 2024 de la regla federal de prueba 1006 aclaró que los resúmenes de documentación voluminosa pueden admitirse como prueba de fondo, siempre que los documentos subyacentes se traten correctamente. Esta nota explica qué significa, por qué importa y las garantías que seguirán siendo exigibles.",
         body: [
           {
             heading: "El problema: demasiados documentos que revisar",
@@ -1391,7 +1395,7 @@ export const researchEntries: ResearchEntry[] = [
             paragraphs: [
               "La regla federal de prueba 1006 ofrece una solución. Permite a una parte presentar un resumen, cuadro o cálculo para acreditar el contenido de documentos admisibles voluminosos que no pueden examinarse cómodamente en el tribunal.[1]",
               "Desde el 1 de diciembre de 2024, la regla establece expresamente que esos resúmenes pueden admitirse como prueba, incluso cuando los documentos subyacentes no se hayan incorporado a los autos.[1]",
-              "Esta aclaración importa porque un resumen del artículo 1006 no es un simple apoyo visual. Cuando se establece el fundamento adecuado, puede convertirse en prueba de fondo en la que el juez o el jurado pueden basarse.[2][3][4]",
+              "Esta aclaración importa porque un resumen del artículo 1006 no es un simple apoyo visual. Cuando se establece el fundamento adecuado, se convierte en prueba de fondo en la que el juez o el jurado pueden basarse, un principio que los tribunales federales de apelación ya reconocían mucho antes de la reforma, que codificó y aclaró esa línea jurisprudencial en lugar de crearla.[2][3][4] El resumen sigue sujeto, no obstante, al test de ponderación de la regla 403, y puede excluirse cuando su valor probatorio se vea sustancialmente superado por el riesgo de perjuicio injusto o de inducir a error al jurado.[1]",
             ],
           },
           {
@@ -1411,10 +1415,10 @@ export const researchEntries: ResearchEntry[] = [
             ],
           },
           {
-            heading: "Una regla 707 propuesta, aún no adoptada",
+            heading: "Una regla 707 propuesta: revisada, en estudio, no adoptada",
             paragraphs: [
-              "Una propuesta de regla federal de prueba 707 podría llegar a introducir requisitos de fiabilidad más específicos para la prueba producida por inteligencia artificial. No obstante, el comité asesor sobre reglas de prueba indicó en su informe de 17 de mayo de 2026 que no recomendaba su adopción en ese momento.[6]",
-              "Por ahora, las reglas existentes ya ofrecen un marco posible.",
+              "Una propuesta de regla federal de prueba 707 podría llegar a introducir requisitos de fiabilidad más específicos para la prueba generada por máquina aportada sin testigo perito. Tras un período de consulta pública abierto del 15 de agosto de 2025 al 16 de febrero de 2026, que recibió más de 70 observaciones escritas, el comité asesor sobre reglas de prueba decidió en su reunión de 7 de mayo de 2026 no recomendar actuación alguna sobre la propuesta en ese momento. Como señala su informe de 17 de mayo de 2026 al comité permanente, el comité optó por revisar el borrador de la regla y prevé someterlo al examen de expertos en tecnología y derecho de la IA en su reunión de otoño de 2026, junto con la cuestión separada de la prueba «deepfake» al amparo de una propuesta de regla 901(c).[6][7]",
+              "Incluso si una versión de la regla 707 llegara a aprobarse, no entraría en vigor antes de diciembre de 2028 como muy pronto. En el futuro previsible, son por tanto las reglas existentes las que ofrecen el marco operativo.",
             ],
           },
           {
@@ -1665,7 +1669,7 @@ export const researchEntries: ResearchEntry[] = [
       "emerging-architecture-ai-regulation",
       "legal-intelligence-systems-future-regulatory-monitoring",
       "why-soft-law-matters-ai-compliance",
-    ],
+    ],
     translations: {
       fr: {
         title:
