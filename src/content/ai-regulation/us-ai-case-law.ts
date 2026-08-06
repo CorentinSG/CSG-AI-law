@@ -1,5 +1,6 @@
 import type {
   CitationQualityStatus,
+  SourcePinpoint,
   SourceReference,
 } from "@/agents/ai-regulation/citations";
 
@@ -165,6 +166,43 @@ function courtListenerDocketReference(input: { title: string; url: string }): So
     accessLimitations: null,
     notes:
       "Docket metadata verified via the authenticated CourtListener REST API on 2026-08-02. CourtListener mirrors PACER records but is not the official court register.",
+  };
+}
+
+const courtListenerOpinionVerifiedAt = "2026-08-06T00:00:00.000Z";
+
+// Published opinions carry stronger provenance than PACER-derived dockets: the
+// text itself is the authority, so these are typed as court documents.
+function courtListenerOpinionReference(input: {
+  title: string;
+  url: string;
+  court: string;
+  publicationDate: string;
+  pinpoint: SourcePinpoint | null;
+  excerpt: string | null;
+}): SourceReference {
+  return {
+    sourceRole: "primary",
+    title: input.title,
+    institution: input.court,
+    url: input.url,
+    canonicalUrl: input.url,
+    sourceType: "court",
+    authorityType: "Published court opinion",
+    publicationDate: input.publicationDate,
+    detectedAt: courtListenerOpinionVerifiedAt,
+    retrievedAt: courtListenerOpinionVerifiedAt,
+    lastVerifiedAt: courtListenerOpinionVerifiedAt,
+    jurisdiction: "United States",
+    documentType: "Court opinion",
+    excerpt: input.excerpt,
+    pinpoint: input.pinpoint,
+    reliabilityLevel: "high",
+    verificationStatus: "verified",
+    archivedUrl: null,
+    accessLimitations: null,
+    notes:
+      "Opinion text read via the authenticated CourtListener API on 2026-08-06; holding and sanction terms quoted from the opinion itself.",
   };
 }
 
@@ -446,6 +484,194 @@ export const usAiCaseLawEntries: UsAiCaseLawEntry[] = [
       courtListenerDocketReference({
         title: "Garner v. Kadince, 2025 UT App 80 (opinion record)",
         url: "https://www.courtlistener.com/opinion/10591984/garner-v-kadince/",
+      }),
+    ],
+    confidenceLevel: "medium",
+    status: "published",
+    authorityType: "case_law",
+    citationQualityStatus: "partial",
+  },
+  {
+    id: "case-scott-illinois-human-rights",
+    caseName: "Scott v. Illinois Human Rights Comm'n",
+    court: "Appellate Court of Illinois, First District",
+    jurisdiction: "United States state",
+    stateOrFederal: "state",
+    date: "2026-07-28",
+    docketNumber: "1-25-1462",
+    citation: "2026 IL App (1st) 251462",
+    officialSourceUrl: null,
+    courtListenerUrl:
+      "https://www.courtlistener.com/opinion/10935788/scott-v-illinois-human-rights-commn/",
+    legalArea: "Professional responsibility / AI-fabricated authority",
+    aiIssue:
+      "Appellate briefs containing false citations and quotations that the court found to be the product of AI hallucinations",
+    proceduralPosture:
+      "Petition for review of an order of the Illinois Human Rights Commission, No. 2023-CR-0772",
+    factualBackground:
+      "The petitioner dual-filed a discrimination charge with the EEOC and the Illinois Department of Human Rights but submitted the EEOC's determination to the Department 175 days after receiving it, against the 30-day deadline in section 7A-102(A-1)(1)(iv) of the Illinois Human Rights Act (775 ILCS 5/7A-102(A-1)(1)(iv)). Her counsel's briefs contained citations and quotations that did not exist.",
+    holdingOrOutcome:
+      "The court affirmed the dismissal, holding the 30-day deadline jurisdictional and not subject to equitable tolling, and separately ordered petitioner's attorney to pay $15,000 in sanctions to the clerk of the Appellate Court, First District, within 30 days, directing the clerk to send a copy of the opinion to the Illinois Attorney Registration and Disciplinary Commission.",
+    legalSignificance:
+      "The largest state appellate sanction for AI-fabricated citations verified in this database. The court applied the Illinois Supreme Court Policy on Artificial Intelligence (effective January 1, 2025) and stated that \"[t]he only acceptable standard is zero false citations\", noting that the Fourth District had previously fined attorneys $1,000 for the same conduct.",
+    sourceReferences: [
+      courtListenerOpinionReference({
+        title: "Scott v. Illinois Human Rights Comm'n, 2026 IL App (1st) 251462",
+        url: "https://www.courtlistener.com/opinion/10935788/scott-v-illinois-human-rights-commn/",
+        court: "Appellate Court of Illinois, First District",
+        publicationDate: "2026-07-28",
+        pinpoint: { paragraph: "¶¶ 47-50, 82" },
+        excerpt:
+          "Within 30 days of this opinion, attorney Mason Cole shall pay $15,000 as sanctions to the clerk of the Appellate Court, First District.",
+      }),
+    ],
+    confidenceLevel: "high",
+    status: "published",
+    authorityType: "case_law",
+    citationQualityStatus: "complete",
+  },
+  {
+    id: "case-lichfield-kubler",
+    caseName: "Lichfield v. Kubler",
+    court: "U.S. Court of Appeals for the Tenth Circuit",
+    jurisdiction: "United States federal",
+    stateOrFederal: "federal",
+    date: "2026-07-27",
+    docketNumber: "25-4135",
+    citation: null,
+    officialSourceUrl: null,
+    courtListenerUrl: "https://www.courtlistener.com/opinion/10935365/lichfield-v-kubler/",
+    legalArea: "Professional responsibility / AI-fabricated authority",
+    aiIssue:
+      "Misrepresentations of legal authority in an appellate brief that the court assumed resulted from generative AI use",
+    proceduralPosture: "Direct appeal; sanctions considered on the court's own assessment of the briefing",
+    factualBackground:
+      "Counsel's brief misrepresented legal authority. The court compared the errors to its earlier decision in Amarsingh v. Frontier Airlines, Inc., No. 24-1391, 2026 WL 352016 (10th Cir. Feb. 9, 2026) (unpublished), where a filer's brief cited seven cases that do not exist and two real cases that did not contain the quoted language.",
+    holdingOrOutcome:
+      "The court affirmed and declined to sanction, finding the errors materially less serious than in Amarsingh — where it had ordered a $1,000 payment and a referral to the relevant disciplinary body — but warned that counsel remains responsible for ensuring that representations to the court are warranted by the law, \"no matter the technology used to create them\".",
+    legalSignificance:
+      "A federal appellate statement that generative AI \"is no longer a novel tool\", so its novelty no longer mitigates: attorneys using it \"must be willing to also apply actual intelligence in its execution\". Establishes a visible severity gradient between warning and monetary sanction in the Tenth Circuit.",
+    sourceReferences: [
+      courtListenerOpinionReference({
+        title: "Lichfield v. Kubler, No. 25-4135 (10th Cir. July 27, 2026)",
+        url: "https://www.courtlistener.com/opinion/10935365/lichfield-v-kubler/",
+        court: "U.S. Court of Appeals for the Tenth Circuit",
+        publicationDate: "2026-07-27",
+        pinpoint: { page: "slip op. 45-46" },
+        excerpt:
+          "generative artificial intelligence is no longer a novel tool. Attorneys who choose to use it must be willing to also apply \"actual intelligence in its execution.\"",
+      }),
+    ],
+    confidenceLevel: "high",
+    status: "published",
+    authorityType: "case_law",
+    citationQualityStatus: "complete",
+  },
+  {
+    id: "case-dineen-shibata-kotchka",
+    caseName: "dineen/shibata v. Kotchka",
+    court: "Arizona Court of Appeals, Division One",
+    jurisdiction: "United States state",
+    stateOrFederal: "state",
+    date: "2026-07-15",
+    docketNumber: "1 CA-CV 25-0606 PB",
+    citation: null,
+    officialSourceUrl: null,
+    courtListenerUrl: "https://www.courtlistener.com/opinion/10931696/dineenshibata-v-kotchka/",
+    legalArea: "Professional responsibility / AI-fabricated authority",
+    aiIssue:
+      "Hallucinated and misrepresented case citations obtained through generative AI in an opening brief filed by a self-represented appellant",
+    proceduralPosture: "Appeal from admission of a will to formal probate and appointment of a personal representative",
+    factualBackground:
+      "The appellant challenged the probate of his mother's will and the appointment of his sister as personal representative. His opening brief included authorities he obtained through generative AI without verifying that they existed or said what he claimed.",
+    holdingOrOutcome:
+      "The court affirmed and imposed sanctions under Arizona Rule of Civil Appellate Procedure 25, A.R.S. § 12-349 and its inherent powers, awarding the appellee the portion of her reasonable attorneys' fees incurred because of the hallucinated and misrepresented citations, plus her costs on appeal, contingent on compliance with ARCAP 21.",
+    legalSignificance:
+      "The first published Arizona authority squarely addressing generative-AI citation errors. It adopts a calibrated rule: using Gen-AI \"is not, in and of itself, objectionable\" and may widen access to justice for people without counsel, provided the person signing the brief verifies that every cited case is real, accurately quoted, and correctly tied to the record.",
+    sourceReferences: [
+      courtListenerOpinionReference({
+        title: "dineen/shibata v. Kotchka, No. 1 CA-CV 25-0606 PB (Ariz. Ct. App. July 15, 2026)",
+        url: "https://www.courtlistener.com/opinion/10931696/dineenshibata-v-kotchka/",
+        court: "Arizona Court of Appeals, Division One",
+        publicationDate: "2026-07-15",
+        pinpoint: { paragraph: "¶¶ 2, 12, 31" },
+        excerpt:
+          "the appropriate sanction here is to award Dineen that portion of her reasonable attorneys' fees under A.R.S. Section 12-349 and ARCAP 25 incurred due to the use of hallucinated and misrepresented case citations.",
+      }),
+    ],
+    confidenceLevel: "high",
+    status: "published",
+    authorityType: "case_law",
+    citationQualityStatus: "complete",
+  },
+  {
+    id: "case-romero-corona-investments",
+    caseName: "Romero v. Corona Investments, LLC",
+    court: "U.S. Court of Appeals for the Seventh Circuit",
+    jurisdiction: "United States federal",
+    stateOrFederal: "federal",
+    date: "2026-07-20",
+    docketNumber: "25-2021",
+    citation: null,
+    officialSourceUrl: null,
+    courtListenerUrl:
+      "https://www.courtlistener.com/opinion/10932940/bernardo-romero-v-corona-investments-llc/",
+    legalArea: "Professional responsibility / AI-fabricated authority",
+    aiIssue: "Quotations in an appellee brief alleged to be the product of AI hallucinations",
+    proceduralPosture:
+      "Motion to strike portions of the appellee brief and, alternatively, for sanctions, filed more than three months after oral argument",
+    factualBackground:
+      "The appellant moved to strike parts of the appellee's brief and sought sanctions on the ground that quotations in it were the fruit of AI hallucinations. The court ordered the appellee to respond and reviewed both submissions.",
+    holdingOrOutcome:
+      "The court stopped short of striking the brief or imposing sanctions, noting the appellant's own acknowledgement that the errors may reflect a lack of care but \"did not materially affect the presentation of the appeal\", and lodged a general reminder that members of its bar must exercise care and diligence in preparing briefs.",
+    legalSignificance:
+      "Marks the lower bound of the emerging federal appellate scale: where AI-derived quotation errors do not affect the presentation of the appeal, courts may decline both striking and sanctions while still recording the lapse on the published record.",
+    sourceReferences: [
+      courtListenerOpinionReference({
+        title: "Romero v. Corona Investments, LLC, No. 25-2021 (7th Cir. July 20, 2026)",
+        url: "https://www.courtlistener.com/opinion/10932940/bernardo-romero-v-corona-investments-llc/",
+        court: "U.S. Court of Appeals for the Seventh Circuit",
+        publicationDate: "2026-07-20",
+        pinpoint: { section: "part III" },
+        excerpt:
+          "we stop short of striking Corona's brief or imposing sanctions. As Romero candidly acknowledges, any errors may reflect a lack of care on Corona's part, but they did not materially affect the presentation of the appeal.",
+      }),
+    ],
+    confidenceLevel: "high",
+    status: "published",
+    authorityType: "case_law",
+    citationQualityStatus: "complete",
+  },
+  {
+    id: "case-del-biaggio-bansen",
+    caseName: "Del Biaggio v. Bansen",
+    court: "California Court of Appeal",
+    jurisdiction: "United States state",
+    stateOrFederal: "state",
+    date: "2026-07-10",
+    docketNumber: "A174647",
+    citation: null,
+    officialSourceUrl: null,
+    courtListenerUrl: "https://www.courtlistener.com/opinion/10925595/del-biaggio-v-bansen/",
+    legalArea: "Professional responsibility / AI-fabricated authority",
+    aiIssue:
+      "Citation errors in appellate briefing that counsel attributed in part to generative-AI-assisted drafting",
+    proceduralPosture: "Appeal in a contract fee dispute, with a respondents' motion for sanctions filed in the court of appeal",
+    factualBackground:
+      "Counsel's declaration indicated he had used generative AI to make additions to his brief. The court identified citation errors it declined to catalogue in full, stating it could not say whether all of them were attributable to AI use.",
+    holdingOrOutcome:
+      "The court measured counsel's drafting protocol against the State Bar of California's \"Practical Guidance for the Use of Generative Artificial Intelligence in the Practice of Law\" and found it non-compliant, cautioning counsel to adopt a different approach to preparing briefs.",
+    legalSignificance:
+      "Applies a state bar's generative-AI guidance as the operative professional standard on appeal: a lawyer \"must review all outputs produced using AI tools for accuracy, including but not limited to analysis and citations to authority before submission to the court\".",
+    sourceReferences: [
+      courtListenerOpinionReference({
+        title: "Del Biaggio v. Bansen, No. A174647 (Cal. Ct. App. July 10, 2026)",
+        url: "https://www.courtlistener.com/opinion/10925595/del-biaggio-v-bansen/",
+        court: "California Court of Appeal",
+        publicationDate: "2026-07-10",
+        pinpoint: { page: "slip op. 17-18" },
+        excerpt:
+          "a lawyer must review all outputs produced using AI tools for accuracy, including but not limited to analysis and citations to authority before submission to the court.",
       }),
     ],
     confidenceLevel: "medium",
