@@ -463,7 +463,259 @@ export const researchEntries: ResearchEntry[] = [
       "when-ai-makes-legal-filings-easier-but-justice-harder",
       "ai-summaries-rule-1006-admissibility",
       "white-collar-revolution-law-firms-ai",
-    ],
+    ],
+    translations: {
+      fr: {
+        title:
+          "Le règlement IA change la façon dont les cabinets d'avocats utilisent l'intelligence artificielle",
+        subtitle:
+          "L'article 50 s'applique depuis le 2 août 2026. Il n'interdit pas l'IA dans la pratique du droit, et n'impose pas une mention sur chaque document assisté par IA, mais il crée des obligations ciblées que la plupart des cabinets n'ont pas encore cartographiées.",
+        readingTime: "13 min de lecture",
+        summary:
+          "Depuis le 2 août 2026, l'article 50 du règlement IA crée des obligations de transparence pour les interactions directes avec l'IA, les contenus synthétiques, les hypertrucages et certaines publications d'intérêt public. Guide pratique pour les cabinets : fournisseur ou déployeur, mentions pour les agents conversationnels, exception de relecture humaine, confidentialité, culture de l'IA, et à quoi ressemble un programme de conformité proportionné.",
+        abstract:
+          "Depuis le 2 août 2026, les cabinets d'avocats établis dans l'Union européenne ou en lien avec elle doivent prêter une attention accrue à leur usage de l'intelligence artificielle. L'article 50 du règlement européen sur l'intelligence artificielle introduit de nouvelles obligations de transparence pour les systèmes qui interagissent directement avec des personnes, génèrent des contenus synthétiques, recourent à la reconnaissance des émotions ou à la catégorisation biométrique, ou produisent des hypertrucages et certaines publications destinées à informer le public.",
+        body: [
+          {
+            heading: "Ce que l'article 50 exige réellement",
+            paragraphs: [
+              "Depuis le 2 août 2026, les cabinets d'avocats établis dans l'Union européenne ou en lien avec elle doivent prêter une attention accrue à leur usage de l'intelligence artificielle. L'article 50 du règlement européen sur l'intelligence artificielle introduit de nouvelles obligations de transparence pour les systèmes qui interagissent directement avec des personnes, génèrent des contenus synthétiques, recourent à la reconnaissance des émotions ou à la catégorisation biométrique, ou produisent des hypertrucages et certaines publications destinées à informer le public.[2]",
+              "Ces règles ne signifient pas que les avocats doivent divulguer chaque usage de l'intelligence artificielle. Un contrat, une note juridique, un courriel ou une écriture judiciaire n'ont pas automatiquement besoin d'une mention « IA » du seul fait qu'un outil d'IA a aidé à préparer un premier jet. Les obligations dépendent du type de système, du rôle joué par le cabinet et de la manière dont le contenu obtenu est présenté aux clients ou au public.",
+            ],
+          },
+          {
+            heading: "Fournisseur ou déployeur : la première question",
+            paragraphs: [
+              "Pour la plupart des cabinets, le point de départ consiste à déterminer si le cabinet agit comme fournisseur ou comme déployeur d'un système d'IA.",
+              "Un cabinet est ordinairement déployeur lorsqu'il utilise un produit développé et fourni par un tiers. Ce sera généralement le cas lorsqu'il s'abonne à un assistant de recherche juridique existant, à une plateforme de revue documentaire, à un outil de traduction ou à un service d'IA générative.",
+              "La situation change lorsque le cabinet développe son propre système, en commande le développement à une autre société, modifie substantiellement un système existant ou présente sous sa propre marque un système en marque blanche. Dans ces cas, le cabinet peut devenir fournisseur. Un cabinet qui développe et exploite son propre agent conversationnel juridique destiné aux clients peut être à la fois fournisseur et déployeur, puisqu'il met le système en service sous son nom et contrôle son utilisation.",
+              "Les avocats exerçant au sein d'un cabinet ne seront normalement pas traités comme des déployeurs distincts lorsqu'ils utilisent l'IA sous l'autorité et les instructions du cabinet. C'est l'entité juridique qui exerce le contrôle sur le système qui est en principe le déployeur. Un avocat exerçant seul, qui sélectionne et exploite lui-même un système d'IA, peut toutefois relever personnellement de cette définition.",
+              "Cette distinction ne supprime pas les responsabilités professionnelles de l'avocat pris individuellement. Quelle que soit la qualification du cabinet au regard du règlement, les avocats restent responsables de la confidentialité, de la compétence, de l'indépendance, de l'exactitude des faits et de leur comportement envers les clients et les juridictions.",
+            ],
+          },
+          {
+            heading: "Agents conversationnels et systèmes de prise de contact",
+            paragraphs: [
+              "L'un des changements les plus visibles concerne les agents conversationnels destinés aux clients, les assistants vocaux et les systèmes automatisés de prise de contact. Lorsqu'une personne interagit directement avec un système d'IA, le fournisseur doit normalement veiller à ce qu'elle soit informée qu'elle communique avec une intelligence artificielle.",
+              "L'information doit apparaître au début de l'interaction. La dissimuler dans des conditions générales, une politique de confidentialité ou une documentation technique a peu de chances de suffire. La mention doit en outre être claire, distinguable et accessible.",
+              "Un agent conversationnel de cabinet pourrait donc commencer en indiquant que l'utilisateur interagit avec un assistant d'intelligence artificielle exploité pour le compte du cabinet. Le cabinet peut ensuite ajouter que l'assistant fournit des informations générales, ne crée pas de relation avocat-client, ne doit pas recevoir d'informations confidentielles et peut produire des réponses incomplètes ou inexactes.",
+              "Ces avertissements supplémentaires ne découlent pas directement de l'article 50, mais ils aident à traiter les risques de responsabilité professionnelle, de confidentialité et de protection des consommateurs. Un prestataire tiers peut rester juridiquement responsable de mettre en œuvre la mention d'interaction avec l'IA, mais le cabinet devrait néanmoins tester le système et s'assurer que sa personnalisation n'a pas supprimé ni masqué cette mention.",
+            ],
+          },
+          {
+            heading: "Contenus synthétiques et marquage lisible par machine",
+            paragraphs: [
+              "L'article 50 encadre aussi les contenus audio, images, vidéos et textes synthétiques. Les fournisseurs de systèmes qui génèrent ou manipulent ce type de contenu peuvent être tenus d'y intégrer des marquages lisibles par machine permettant de détecter que le contenu a été généré ou modifié artificiellement.",
+              "Cette obligation technique pèse généralement sur le fournisseur du système de contenu synthétique, et non sur chaque avocat qui utilise un outil d'IA générative. Un cabinet utilisant un générateur de texte tiers ne sera normalement pas censé concevoir son propre système de filigrane. L'analyse peut différer lorsque le cabinet développe, modifie substantiellement ou distribue le système sous sa propre marque.",
+              "Les règles prévoient une exception pour les outils d'édition standard qui ne changent pas substantiellement le sens du contenu d'origine. Correction grammaticale, vérification orthographique, mise en forme et améliorations stylistiques mineures peuvent relever de cette exception. Une réécriture substantielle, une restructuration ou des changements de fond, de ton ou de message exigent une appréciation plus attentive.",
+            ],
+          },
+          {
+            heading: "Les hypertrucages dans la communication du cabinet",
+            paragraphs: [
+              "Les hypertrucages font l'objet d'une obligation distincte. Un cabinet qui publie des contenus audio, images ou vidéos réalistes, générés ou manipulés par IA, donnant faussement l'apparence de représenter une personne, un objet, un lieu ou un événement réel, doit fournir une information claire.",
+              "On peut citer la voix clonée d'un associé utilisée en publicité, un avatar numérique réaliste présenté comme un véritable avocat, ou une reconstitution par IA d'un accident ou d'une opération susceptible d'être prise pour des images authentiques. L'information doit être visible ou audible dès la première présentation du contenu. Des métadonnées cachées ou un filigrane invisible du fournisseur ne satisferont pas l'obligation d'information qui pèse sur le déployeur.",
+              "Le contexte reste déterminant. Une animation manifestement fictive ou stylisée peut ne pas correspondre à la définition de l'hypertrucage. Les œuvres artistiques, satiriques et de fiction relèvent d'un standard d'information plus souple, sans être pour autant totalement exemptées.",
+            ],
+          },
+          {
+            heading: "Publications d'intérêt public et exception de relecture humaine",
+            paragraphs: [
+              "Une autre règle importante concerne les textes générés ou substantiellement manipulés par IA et publiés dans le but d'informer le public sur une question d'intérêt public. Cette catégorie peut inclure des actualités juridiques, des analyses réglementaires, des comptes rendus de décisions, des commentaires de droit électoral, des articles de politique publique et des communications relatives à la protection des consommateurs ou aux droits fondamentaux.",
+              "L'article 50 prévoit toutefois une exception importante lorsque la publication a fait l'objet d'une véritable relecture humaine et qu'une personne physique ou morale en assume la responsabilité éditoriale.",
+              "Pour les cabinets, cette exception deviendra vraisemblablement la voie principale de conformité pour les publications juridiques assistées par IA. L'avocat relecteur doit faire davantage qu'approuver rapidement le texte ou en corriger la grammaire. Il devrait en examiner le fond, vérifier les faits et les sources juridiques, apprécier la fiabilité des références et disposer du pouvoir de modifier ou de refuser la publication.",
+              "Un second outil d'IA ne peut pas remplacer cette relecture humaine. De même, si des modifications substantielles générées par IA interviennent après l'approbation de l'avocat, la version révisée devrait être relue à nouveau.",
+            ],
+          },
+          {
+            heading: "Écritures judiciaires et devoirs de vérification",
+            paragraphs: [
+              "Une écriture judiciaire ordinaire ne relèvera pas automatiquement de la règle sur les publications d'intérêt public du seul fait qu'elle devient ensuite accessible via un registre public. La finalité de la publication reste pertinente. Le document doit être publié avec l'intention d'informer le public sur une question d'intérêt public. Les règles de procédure nationales et les décisions de justice peuvent néanmoins créer des obligations d'information distinctes.",
+              "Le règlement ne crée pas non plus d'obligation générale d'indiquer à une juridiction ou à la partie adverse que l'intelligence artificielle a été utilisée pour la recherche ou la rédaction. Les avocats doivent examiner les règles applicables devant la juridiction concernée. Certaines peuvent exiger des attestations, des déclarations ou des restrictions quant à l'usage de l'IA.",
+              "Même en l'absence d'obligation d'information, l'avocat doit vérifier personnellement chaque affirmation de fait, chaque source juridique, chaque citation et chaque affirmation procédurale soumise à la juridiction. Le résultat produit par une intelligence artificielle doit être traité comme un matériau non vérifié tant qu'il n'a pas été confronté à des sources faisant autorité et au dossier de la procédure.",
+              "Des décisions fabriquées et des citations inexactes peuvent exposer les avocats à des poursuites disciplinaires, à des condamnations pour outrage, à des actions en responsabilité professionnelle et à une atteinte sérieuse à leur réputation. Le fait que l'erreur provienne d'un système d'IA ne transfère pas la responsabilité loin de l'avocat qui s'y est fié.",
+            ],
+          },
+          {
+            heading: "Confidentialité, prestataires et conflits d'intérêts",
+            paragraphs: [
+              "La confidentialité est une autre préoccupation centrale. Le risque principal naît souvent avant même que le système produise un résultat, au moment où l'avocat saisit les informations d'un client dans le système.",
+              "Instructions, écritures, contrats, correspondance, enregistrements et ensembles documentaires peuvent être conservés, consultés par le personnel du prestataire, partagés avec des sous-traitants ou utilisés pour améliorer un modèle. Les cabinets doivent donc comprendre comment un fournisseur traite l'information avant d'autoriser le téléversement de documents confidentiels ou couverts par le secret professionnel.",
+              "Cette préoccupation ne se limite pas aux agents conversationnels évidents. L'intelligence artificielle s'intègre de plus en plus aux plateformes de messagerie, aux logiciels PDF, aux services de transcription, aux outils de traduction, aux navigateurs, aux systèmes de gestion documentaire et aux applications de productivité. Certaines fonctions peuvent s'activer automatiquement sans que l'avocat réalise que des informations sont traitées par un système d'IA.",
+              "Les cabinets devraient tenir une liste d'outils approuvés, utiliser des comptes entreprise lorsque c'est possible et interdire la saisie d'informations confidentielles dans des systèmes publics non approuvés. Les contrats avec les prestataires devraient traiter la conservation des données, l'entraînement des modèles, la sécurité, les sous-traitants, la suppression, les droits d'audit et la notification des incidents. Des restrictions d'accès par dossier, le chiffrement et l'anonymisation peuvent également s'imposer.",
+              "L'usage de l'IA peut créer des conflits d'intérêts lorsque des informations relatives à différents clients sont placées dans des espaces de travail partagés, des systèmes de recherche ou des jeux de données d'entraînement. Les cabinets devraient s'assurer que les informations confidentielles ne peuvent pas être retrouvées d'un dossier à l'autre et que l'accès est limité conformément aux murailles de Chine et aux autorisations par dossier.",
+            ],
+          },
+          {
+            heading: "Information, et non consentement, en principe",
+            paragraphs: [
+              "L'article 50 exige en principe une information plutôt qu'un consentement. Il n'impose pas de règle universelle obligeant chaque client à approuver chaque usage de l'intelligence artificielle. Un consentement peut néanmoins être nécessaire au titre des règles déontologiques, du droit de la protection des données, des conventions d'honoraires, des directives de conseil externe, ou en raison de la sensibilité d'un dossier particulier.",
+              "Les cabinets devraient envisager de donner une information générale sur un usage encadré de l'IA dans leurs lettres de mission ou leurs mentions de confidentialité. Une approbation plus spécifique du client peut être appropriée lorsque des documents identifiables ou confidentiels seront traités, lorsque les éléments du client pourraient servir à l'entraînement ou à l'affinage d'un modèle, ou lorsqu'un système automatisé fournit des indications juridiques directement aux clients.",
+            ],
+          },
+          {
+            heading: "La culture de l'IA comme obligation d'organisation",
+            paragraphs: [
+              "La maîtrise de l'intelligence artificielle constitue également une obligation d'organisation. Les fournisseurs et les déployeurs doivent prendre des mesures pour garantir que les avocats, les collaborateurs et les prestataires qui utilisent l'IA pour leur compte disposent d'une compréhension appropriée de la technologie.",
+              "La formation doit refléter le rôle de la personne et les risques du système. Les avocats peuvent avoir besoin d'une formation sur les hallucinations, la vérification des sources, la confidentialité et l'indépendance professionnelle. Les équipes de ressources humaines peuvent avoir besoin d'orientations sur les outils biométriques et la discrimination à l'embauche. Les équipes marketing devraient comprendre les règles applicables aux hypertrucages et aux publications d'intérêt public. Les fonctions achats et technologies devraient comprendre la qualification de fournisseur, les flux de données et les obligations des prestataires.",
+            ],
+          },
+          {
+            heading: "Un programme de conformité proportionné",
+            paragraphs: [
+              "Le règlement n'impose pas à chaque cabinet de bâtir un département de conformité étoffé. Une petite structure peut mettre en place un programme proportionné composé d'un associé responsable, d'une liste d'outils approuvés, d'une formation de base, d'une mention pour l'agent conversationnel lorsque c'est nécessaire, d'un processus de relecture des publications et d'une procédure écrite de réponse aux incidents.[1]",
+              "Les cabinets plus grands peuvent avoir besoin de structures de gouvernance plus complexes, incluant des registres centraux d'IA, des évaluations de rôle par juridiction, des tests techniques, le cloisonnement des dossiers, le suivi des prestataires et une relecture formelle des communications publiques.",
+            ],
+          },
+          {
+            heading: "Se préparer aux incidents liés à l'IA",
+            paragraphs: [
+              "Les cabinets devraient aussi se préparer aux incidents impliquant l'intelligence artificielle. Il peut s'agir de la divulgation d'informations confidentielles, d'une source fabriquée dans une écriture, d'un hypertrucage non étiqueté, d'un défaut d'affichage de la mention d'un agent conversationnel, de la perte de données de provenance ou de la publication de contenus générés par IA sans relecture humaine appropriée.",
+              "Lorsqu'un incident survient, le cabinet devrait arrêter ou isoler le système concerné, préserver les éléments de preuve pertinents, identifier les clients ou dossiers touchés et apprécier si une notification s'impose. L'analyse peut mobiliser les règles déontologiques, les devoirs envers les juridictions, les polices d'assurance, les obligations contractuelles et le règlement général sur la protection des données.",
+            ],
+          },
+          {
+            heading: "Sanctions et calendrier",
+            paragraphs: [
+              "Le non-respect de l'article 50 peut entraîner des amendes administratives pouvant atteindre 15 millions d'euros ou 3 % du chiffre d'affaires annuel mondial de l'organisation pour l'exercice précédent. Les cabinets de petite et moyenne taille peuvent bénéficier de plafonds plus favorables, sans être exemptés des obligations de transparence.[4]",
+              "Les principales obligations de transparence de l'article 50 s'appliquent depuis le 2 août 2026. Il n'existe pas de délai de grâce général pour les mentions relatives aux agents conversationnels, l'étiquetage des hypertrucages, les textes d'intérêt public ou les informations relatives à la reconnaissance des émotions et à la catégorisation biométrique. Une transition limitée jusqu'au 2 décembre 2026 s'applique uniquement à certains fournisseurs de systèmes de contenus synthétiques déjà mis sur le marché avant le 2 août 2026.[3]",
+            ],
+          },
+          {
+            heading: "Ce que cela signifie en pratique",
+            paragraphs: [
+              "La conséquence pratique pour la profession n'est pas que l'intelligence artificielle devient interdite. Ni que chaque document juridique assisté par IA doit porter un avertissement. Les cabinets doivent plutôt comprendre les systèmes qu'ils utilisent, déterminer leur rôle juridique, protéger les informations confidentielles, mettre en place les informations requises et assurer une supervision humaine effective.[1]",
+              "L'article 50 s'applique depuis le 2 août 2026 et crée des obligations ciblées pour les interactions directes avec l'IA, les contenus synthétiques, les hypertrucages et certaines publications d'intérêt public. Pour la plupart des cabinets, toutefois, les principes décisifs resteront familiers : le jugement professionnel, la vérification attentive, la protection des informations du client et la responsabilité individuelle quant à la qualité et à l'intégrité du travail juridique.",
+            ],
+          },
+        ],
+      },
+      es: {
+        title:
+          "El Reglamento de IA está cambiando cómo los despachos de abogados usan la inteligencia artificial",
+        subtitle:
+          "El artículo 50 se aplica desde el 2 de agosto de 2026. No prohíbe la IA en el ejercicio del derecho ni exige una advertencia en cada documento asistido por IA, pero crea obligaciones concretas que la mayoría de los despachos aún no ha cartografiado.",
+        readingTime: "13 min de lectura",
+        summary:
+          "Desde el 2 de agosto de 2026, el artículo 50 del Reglamento de IA crea obligaciones de transparencia para las interacciones directas con IA, los contenidos sintéticos, los deepfakes y ciertas publicaciones de interés público. Guía práctica para despachos: proveedor o responsable del despliegue, avisos en chatbots, excepción de revisión humana, confidencialidad, alfabetización en IA y cómo es un programa de cumplimiento proporcionado.",
+        abstract:
+          "Desde el 2 de agosto de 2026, los despachos de abogados establecidos en la Unión Europea o vinculados a ella deben prestar mayor atención a cómo usan la inteligencia artificial. El artículo 50 del Reglamento europeo de inteligencia artificial introduce nuevas obligaciones de transparencia para los sistemas que interactúan directamente con personas, generan contenidos sintéticos, emplean reconocimiento de emociones o categorización biométrica, o producen deepfakes y ciertas publicaciones destinadas a informar al público.",
+        body: [
+          {
+            heading: "Qué exige realmente el artículo 50",
+            paragraphs: [
+              "Desde el 2 de agosto de 2026, los despachos de abogados establecidos en la Unión Europea o vinculados a ella deben prestar mayor atención a cómo usan la inteligencia artificial. El artículo 50 del Reglamento europeo de inteligencia artificial introduce nuevas obligaciones de transparencia para los sistemas que interactúan directamente con personas, generan contenidos sintéticos, emplean reconocimiento de emociones o categorización biométrica, o producen deepfakes y ciertas publicaciones destinadas a informar al público.[2]",
+              "Estas normas no significan que los abogados deban divulgar cada uso de la inteligencia artificial. Un contrato, un dictamen, un correo o un escrito judicial no necesitan automáticamente una etiqueta de IA solo porque una herramienta de IA ayudara a preparar un primer borrador. Las obligaciones dependen del tipo de sistema, del papel del despacho y de cómo se presenta el contenido resultante a los clientes o al público.",
+            ],
+          },
+          {
+            heading: "Proveedor o responsable del despliegue: la primera pregunta",
+            paragraphs: [
+              "Para la mayoría de los despachos, el punto de partida es determinar si actúan como proveedor o como responsable del despliegue de un sistema de IA.",
+              "Un despacho es normalmente responsable del despliegue cuando usa un producto desarrollado y suministrado por un tercero. Suele ser el caso cuando se suscribe a un asistente de investigación jurídica existente, a una plataforma de revisión documental, a una herramienta de traducción o a un servicio de IA generativa.",
+              "La situación cambia cuando el despacho desarrolla su propio sistema, encarga su desarrollo a otra empresa, modifica sustancialmente un sistema existente o presenta bajo su propia marca un sistema de marca blanca. En esos casos, el despacho puede convertirse en proveedor. Un despacho que desarrolla y opera su propio chatbot jurídico dirigido a clientes puede ser a la vez proveedor y responsable del despliegue, ya que pone el sistema en servicio bajo su nombre y controla su uso.",
+              "Los abogados que trabajan dentro de un despacho no serán normalmente tratados como responsables del despliegue independientes cuando usen IA bajo la autoridad e instrucciones del despacho. La entidad jurídica que ejerce el control sobre el sistema es en principio la responsable. Un abogado que ejerce por cuenta propia y que selecciona y opera él mismo un sistema de IA sí puede quedar incluido personalmente en esa definición.",
+              "Esta distinción no elimina las responsabilidades profesionales del abogado individual. Con independencia de cómo se califique al despacho conforme al Reglamento, los abogados siguen siendo responsables de la confidencialidad, la competencia, la independencia, la exactitud de los hechos y su conducta ante clientes y tribunales.",
+            ],
+          },
+          {
+            heading: "Chatbots y sistemas de admisión de clientes",
+            paragraphs: [
+              "Uno de los cambios más visibles afecta a los chatbots dirigidos a clientes, los asistentes de voz y los sistemas automatizados de admisión. Cuando una persona interactúa directamente con un sistema de IA, el proveedor debe normalmente garantizar que se le informe de que está comunicándose con inteligencia artificial.",
+              "La información debe aparecer al inicio de la interacción. Ocultarla en condiciones generales, en una política de privacidad o en documentación técnica difícilmente bastará. El aviso debe además ser claro, distinguible y accesible.",
+              "Un chatbot de despacho podría por tanto comenzar indicando que el usuario interactúa con un asistente de inteligencia artificial operado para el despacho. El despacho puede añadir después que el asistente ofrece información general, no crea una relación abogado-cliente, no debe recibir información confidencial y puede producir respuestas incompletas o inexactas.",
+              "Estas advertencias adicionales no derivan directamente del artículo 50, pero ayudan a abordar riesgos de responsabilidad profesional, confidencialidad y protección del consumidor. Un proveedor externo puede seguir siendo jurídicamente responsable de implantar el aviso de interacción con IA, pero el despacho debería aun así probar el sistema y asegurarse de que su personalización no ha eliminado ni oscurecido ese aviso.",
+            ],
+          },
+          {
+            heading: "Contenido sintético y marcado legible por máquina",
+            paragraphs: [
+              "El artículo 50 regula también el audio, las imágenes, el vídeo y el texto sintéticos. Los proveedores de sistemas que generan o manipulan este tipo de contenido pueden estar obligados a incorporar marcas legibles por máquina que permitan detectar que el contenido ha sido generado o modificado artificialmente.",
+              "Esta obligación técnica recae en general sobre el proveedor del sistema de contenido sintético, no sobre cada abogado que usa una herramienta de IA generativa. De un despacho que utiliza un generador de texto de terceros no se esperará normalmente que diseñe su propio sistema de marca de agua. El análisis puede ser distinto cuando el despacho desarrolla, modifica sustancialmente o distribuye el sistema bajo su propia marca.",
+              "Las normas contienen una excepción para las herramientas de edición estándar que no cambian sustancialmente el significado del contenido original. Corrección gramatical, revisión ortográfica, formato y mejoras estilísticas menores pueden ampararse en esa excepción. Una reescritura material, una reestructuración o cambios en el fondo, el tono o el mensaje exigen una valoración más cuidadosa.",
+            ],
+          },
+          {
+            heading: "Deepfakes en la comunicación del despacho",
+            paragraphs: [
+              "Los deepfakes están sujetos a una obligación separada. Un despacho que publique audio, imágenes o vídeo realistas generados o manipulados por IA que aparenten falsamente representar a una persona, objeto, lugar o hecho real debe facilitar una información clara.",
+              "Ejemplos posibles: la voz clonada de un socio usada en publicidad, un avatar digital realista presentado como un abogado real, o una reconstrucción por IA de un accidente o una operación que pudiera confundirse con imágenes auténticas. La información debe ser visible o audible en la primera exposición al contenido. Metadatos ocultos o una marca de agua invisible del proveedor no satisfarán la obligación de informar que pesa sobre el responsable del despliegue.",
+              "El contexto sigue importando. Una animación manifiestamente ficticia o estilizada puede no encajar en la definición de deepfake. Las obras artísticas, satíricas y de ficción están sujetas a un estándar de información más flexible, pero no quedan completamente exentas.",
+            ],
+          },
+          {
+            heading: "Publicaciones de interés público y la excepción de revisión humana",
+            paragraphs: [
+              "Otra regla importante afecta al texto generado o materialmente manipulado por IA y publicado con el fin de informar al público sobre un asunto de interés público. Esta categoría puede incluir actualizaciones jurídicas, análisis regulatorios, crónicas de resoluciones, comentarios de derecho electoral, artículos de política pública y comunicaciones sobre protección del consumidor o derechos fundamentales.",
+              "El artículo 50 prevé, no obstante, una excepción importante cuando la publicación ha pasado por una revisión humana genuina y una persona física o jurídica asume la responsabilidad editorial.",
+              "Para los despachos, esta excepción será probablemente la vía principal de cumplimiento en las publicaciones jurídicas asistidas por IA. El abogado revisor debe hacer algo más que aprobar el texto rápidamente o corregir su gramática. Debería examinar el fondo, verificar los hechos y las fuentes jurídicas, valorar la fiabilidad de las referencias y tener autoridad para modificar o rechazar la publicación.",
+              "Una segunda herramienta de IA no puede sustituir esa revisión humana. Del mismo modo, si tras la aprobación del abogado se introducen cambios sustanciales generados por IA, la versión revisada debería volver a revisarse.",
+            ],
+          },
+          {
+            heading: "Escritos judiciales y deberes de verificación",
+            paragraphs: [
+              "Un escrito judicial ordinario no quedará automáticamente incluido en la regla de las publicaciones de interés público por el mero hecho de resultar después accesible a través de un registro público. La finalidad de la publicación sigue siendo relevante. El documento debe publicarse con la intención de informar al público sobre un asunto de interés público. Las normas procesales nacionales y las resoluciones judiciales pueden, no obstante, crear obligaciones de información distintas.",
+              "El Reglamento tampoco crea una obligación general de comunicar a un tribunal o a la parte contraria que se usó inteligencia artificial para la investigación o la redacción. Los abogados deben examinar las normas aplicables ante el tribunal concreto. Algunos pueden exigir certificaciones, declaraciones o restricciones sobre el uso de IA.",
+              "Incluso cuando no se exija información, el abogado debe verificar personalmente cada afirmación fáctica, cada fuente jurídica, cada cita y cada manifestación procesal presentada al tribunal. El resultado de la inteligencia artificial debe tratarse como material no verificado hasta contrastarlo con fuentes autorizadas y con el expediente probatorio.",
+              "Casos fabricados y citas inexactas pueden exponer a los abogados a expedientes disciplinarios, declaraciones de desacato, reclamaciones por negligencia profesional y un daño reputacional grave. Que el error se originara en un sistema de IA no traslada la responsabilidad lejos del abogado que confió en él.",
+            ],
+          },
+          {
+            heading: "Confidencialidad, proveedores y conflictos",
+            paragraphs: [
+              "La confidencialidad es otra preocupación central. El riesgo principal surge a menudo antes de que el sistema genere resultado alguno, cuando el abogado introduce la información de un cliente en el sistema.",
+              "Instrucciones, escritos, contratos, correspondencia, grabaciones y colecciones documentales pueden conservarse, ser consultados por personal del proveedor, compartirse con subencargados o usarse para mejorar un modelo. Los despachos deberían por tanto entender cómo trata la información un proveedor antes de permitir que se suba material confidencial o amparado por el secreto profesional.",
+              "Esta preocupación no se limita a los chatbots evidentes. La inteligencia artificial se integra cada vez más en plataformas de correo, software PDF, servicios de transcripción, herramientas de traducción, navegadores, sistemas de gestión documental y aplicaciones de productividad. Algunas funciones pueden activarse automáticamente sin que el abogado advierta que un sistema de IA está tratando información.",
+              "Los despachos deberían mantener una lista de herramientas aprobadas, usar cuentas empresariales cuando sea posible y prohibir la introducción de información confidencial en sistemas públicos no aprobados. Los contratos con proveedores deberían abordar la conservación de datos, el entrenamiento de modelos, la seguridad, los subencargados, la supresión, los derechos de auditoría y la notificación de incidentes. Restricciones de acceso por asunto, cifrado y anonimización también pueden ser necesarios.",
+              "El uso de IA puede generar conflictos de intereses cuando información de distintos clientes se coloca en espacios de trabajo compartidos, sistemas de recuperación o conjuntos de entrenamiento. Los despachos deberían asegurar que la información confidencial no pueda recuperarse entre asuntos y que el acceso esté limitado conforme a las murallas éticas y a los permisos por expediente.",
+            ],
+          },
+          {
+            heading: "Información, no consentimiento, por regla general",
+            paragraphs: [
+              "El artículo 50 exige por regla general información más que consentimiento. No impone una norma universal que obligue a cada cliente a aprobar cada uso de inteligencia artificial. El consentimiento puede seguir siendo necesario conforme a las normas deontológicas, al derecho de protección de datos, a las hojas de encargo, a las directrices de asesoramiento externo o por la sensibilidad de un asunto concreto.",
+              "Los despachos deberían valorar ofrecer información general sobre un uso controlado de la IA en sus hojas de encargo o avisos de privacidad. Una aprobación más específica del cliente puede ser adecuada cuando vayan a tratarse documentos identificables o confidenciales, cuando el material del cliente pueda usarse para entrenamiento o ajuste fino, o cuando un sistema automatizado ofrezca orientación jurídica directamente a los clientes.",
+            ],
+          },
+          {
+            heading: "La alfabetización en IA como obligación organizativa",
+            paragraphs: [
+              "La alfabetización en inteligencia artificial es además una obligación organizativa. Proveedores y responsables del despliegue deben adoptar medidas para garantizar que los abogados, empleados y colaboradores que usan IA por su cuenta posean una comprensión adecuada de la tecnología.",
+              "La formación debe reflejar el papel de cada persona y los riesgos del sistema. Los abogados pueden necesitar formación sobre alucinaciones, verificación de fuentes, confidencialidad e independencia profesional. Los equipos de recursos humanos pueden necesitar orientación sobre herramientas biométricas y discriminación laboral. Los equipos de marketing deberían conocer las reglas sobre deepfakes y publicaciones de interés público. Las áreas de compras y tecnología deberían entender la calificación como proveedor, los flujos de datos y las obligaciones de los proveedores.",
+            ],
+          },
+          {
+            heading: "Un programa de cumplimiento proporcionado",
+            paragraphs: [
+              "El Reglamento no exige que cada despacho construya un departamento de cumplimiento extenso. Una práctica pequeña puede implantar un programa proporcionado formado por un socio responsable, una lista de herramientas aprobadas, formación básica, un aviso en el chatbot cuando sea necesario, un proceso de revisión de publicaciones y un procedimiento escrito de respuesta a incidentes.[1]",
+              "Los despachos mayores pueden necesitar estructuras de gobernanza más complejas, incluidos registros centrales de IA, evaluaciones de rol por jurisdicción, pruebas técnicas, segregación de asuntos, seguimiento de proveedores y revisión formal de las comunicaciones públicas.",
+            ],
+          },
+          {
+            heading: "Prepararse para los incidentes de IA",
+            paragraphs: [
+              "Los despachos deberían prepararse también para incidentes que impliquen inteligencia artificial. Pueden incluir la divulgación de información confidencial, una autoridad fabricada en un escrito, un deepfake sin etiquetar, un fallo al mostrar el aviso de un chatbot, la pérdida de datos de procedencia o la publicación de contenido generado por IA sin la revisión humana adecuada.",
+              "Cuando se produce un incidente, el despacho debería detener o aislar el sistema afectado, preservar las pruebas relevantes, identificar a los clientes o asuntos implicados y valorar si procede notificar. El análisis puede implicar normas deontológicas, deberes ante los tribunales, pólizas de seguro, obligaciones contractuales y el Reglamento General de Protección de Datos.",
+            ],
+          },
+          {
+            heading: "Sanciones y calendario",
+            paragraphs: [
+              "El incumplimiento del artículo 50 puede acarrear multas administrativas de hasta 15 millones de euros o el 3 % del volumen de negocios anual mundial de la organización en el ejercicio anterior. Los despachos pequeños y medianos pueden beneficiarse de topes más favorables, pero no quedan exentos de las obligaciones de transparencia.[4]",
+              "Las principales obligaciones de transparencia del artículo 50 se aplican desde el 2 de agosto de 2026. No hay período de gracia general para los avisos de chatbots, el etiquetado de deepfakes, el texto de interés público o los avisos sobre reconocimiento de emociones y categorización biométrica. Una transición limitada hasta el 2 de diciembre de 2026 se aplica solo a determinados proveedores de sistemas de contenido sintético ya comercializados antes del 2 de agosto de 2026.[3]",
+            ],
+          },
+          {
+            heading: "Qué significa esto en la práctica",
+            paragraphs: [
+              "La consecuencia práctica para la profesión no es que la inteligencia artificial quede prohibida. Ni que todo documento jurídico asistido por IA requiera una advertencia. Los despachos deben, más bien, entender los sistemas que usan, determinar su papel jurídico, proteger la información confidencial, introducir la información exigida y garantizar una supervisión humana efectiva.[1]",
+              "El artículo 50 se aplica desde el 2 de agosto de 2026 y crea deberes concretos para las interacciones directas con IA, el contenido sintético, los deepfakes y ciertas publicaciones de interés público. Para la mayoría de los despachos, sin embargo, los principios decisivos seguirán siendo los de siempre: juicio profesional, verificación cuidadosa, protección de la información del cliente y responsabilidad individual por la calidad y la integridad del trabajo jurídico.",
+            ],
+          },
+        ],
+      },
+    },
     body: [
       {
         heading: "What Article 50 actually requires",
@@ -632,7 +884,215 @@ export const researchEntries: ResearchEntry[] = [
       "generative-ai-access-to-justice-pro-se",
       "ai-summaries-rule-1006-admissibility",
       "ai-legal-ethics-early-questions-lawyers",
-    ],
+    ],
+    translations: {
+      fr: {
+        title: "Quand l'IA rend le dépôt plus facile et la justice plus difficile",
+        subtitle:
+          "Une décision d'appel floridienne, portant sur un mémoire sans avocat contenant une décision fantôme et des citations fabriquées, montre la distance qui sépare une écriture soignée d'un argument juridiquement viable.",
+        readingTime: "12 min de lecture",
+        summary:
+          "Dans Gouldy v. Chiasson, la cour d'appel du quatrième district de Floride a confirmé le rejet de l'appel d'une justiciable sans avocat après avoir constaté une décision inexistante, des citations fabriquées et des dénaturations du dossier, et a émis une injonction de justifier pourquoi elle ne devrait pas être privée du droit de déposer sans avocat. La décision illustre l'écart entre produire ce qui ressemble à un mémoire et présenter un argument juridiquement viable.",
+        abstract:
+          "Le 22 juillet 2026, la cour d'appel du quatrième district de Floride a rendu une décision qui illustre de façon frappante un problème croissant devant les juridictions américaines. Elle est bien plus qu'un nouvel avertissement sur les hallucinations de l'intelligence artificielle : elle met en lumière la distance grandissante entre la capacité à produire ce qui ressemble à un mémoire et celle de présenter un argument juridiquement viable.",
+        body: [
+          {
+            heading: "Ce que la décision floridienne illustre",
+            paragraphs: [
+              "Le 22 juillet 2026, la cour d'appel du quatrième district de Floride a rendu une décision qui illustre de façon frappante un problème croissant devant les juridictions américaines. Dans Gouldy v. Chiasson, la cour a confirmé le rejet de l'appel d'une justiciable sans avocat après avoir constaté que son mémoire contenait une décision inexistante, des citations fabriquées, des dénaturations du dossier et des références qui n'étayaient pas les arguments pour lesquels elles étaient invoquées. Les juges ont également rendu une ordonnance distincte lui enjoignant d'expliquer pourquoi elle ne devrait pas être privée du droit de déposer de nouvelles écritures sans avocat devant cette cour.[1]",
+              "La décision est bien plus qu'un nouvel avertissement sur les hallucinations de l'intelligence artificielle. Elle met en lumière la distance grandissante entre la capacité à produire ce qui ressemble à un mémoire et celle de présenter un argument juridiquement viable.",
+              "L'IA générative peut aider à créer des documents qui paraissent organisés, professionnels et faisant autorité. Mais savoir produire une prose juridique convaincante n'est pas savoir identifier une prétention valable, préserver un moyen en appel, appliquer la règle de droit pertinente ou fournir une source juridique fiable.",
+              "Dans certains cas, la technologie ne se contente pas de ne pas améliorer la position du justiciable. Elle peut rendre l'écriture plus difficile à évaluer pour la juridiction et exposer celui qui l'a déposée à de lourdes sanctions.",
+            ],
+          },
+          {
+            heading: "L'affaire devant la cour floridienne",
+            paragraphs: [
+              "L'appel s'inscrivait dans un litige ancien opposant Rose Lannquist Gouldy à Timothy Chiasson, un avocat qui avait représenté d'autres parties dans une succession connexe.",
+              "Gouldy avait assigné Chiasson et d'autres pour fraude à la justice, vol civil, extorsion économique et interférence délictuelle. Le tribunal de première instance a statué en faveur de Chiasson, jugé ses prétentions abusives et mis à sa charge honoraires et dépens.",
+              "La cour d'appel avait précédemment confirmé ce jugement et alloué des honoraires d'appel supplémentaires. Sur renvoi, le tribunal a fixé à 54 780 dollars les honoraires d'appel et à 10 882,23 dollars les dépens, soit un total de 65 662,23 dollars. Gouldy a alors interjeté appel de cette décision.",
+              "Son mémoire d'appel soulevait quinze moyens, dont plusieurs comportaient des sous-moyens. La cour a conclu que ses arguments étaient soit non préservés, soit insuffisamment exposés, soit entièrement dépourvus de fondement. Plus grave, les juges ont constaté que les sources censées les étayer étaient, à plusieurs reprises, peu fiables ou fabriquées.",
+              "Le mémoire citait une décision qui n'existait pas, attribuait des formulations inventées à de véritables décisions, dénaturait des éléments du dossier et s'appuyait sur des arrêts qui n'étayaient pas les propositions avancées.",
+              "L'un des exemples les plus nets concernait une prétendue décision Barton v. McGovern, citée comme un arrêt floridien de 2020. Aucune décision de ce type n'existait. Il existait bien une affaire réelle portant ce nom, datant de 1987, mais elle ne contenait pas le passage qui lui était attribué.[2]",
+              "Le mémoire utilisait également une fausse citation d'un arrêt réel de la Cour suprême de Floride et comportait d'autres citations fabriquées tirées d'autres décisions floridiennes. Ailleurs, Gouldy affirmait que la condamnation aux honoraires s'élevait à environ 125 000 dollars, alors que le montant réel était de 65 662,23 dollars.[3]",
+              "La décision n'établit pas que Gouldy a utilisé une plateforme d'IA générative en particulier pour préparer son mémoire. La cour a néanmoins rattaché cette écriture à une tendance plus large qu'elle dit observer dans les juridictions d'appel floridiennes.",
+              "Selon les juges, de nombreux justiciables sans avocat semblent désormais utiliser des plateformes d'intelligence artificielle pour générer mémoires et requêtes d'appel. Ces écritures sont généralement lisibles, mais peuvent contenir des sources fantômes, des descriptions inexactes du dossier et des citations fabriquées.",
+              "La cour a confirmé l'appel dans son intégralité. Elle a également rendu une ordonnance distincte enjoignant à Gouldy d'expliquer pourquoi elle ne devrait pas être privée du droit de déposer sans avocat devant cette cour. Les juges ont relevé qu'elle avait déjà été avertie à deux reprises au sujet d'écritures abusives.",
+              "La restriction n'est donc pas encore définitivement prononcée. Une injonction de justifier laisse à Gouldy la possibilité de répondre avant que la cour ne décide de limiter ses futurs dépôts. La perspective d'une telle sanction montre néanmoins la gravité avec laquelle les juridictions peuvent traiter le recours répété à des sources fabriquées.",
+            ],
+          },
+          {
+            heading: "Un document soigné peut rester juridiquement vide",
+            paragraphs: [
+              "L'aspect le plus important de la décision n'est pas simplement que le mémoire contenait des erreurs. Les écritures des justiciables sans avocat en ont toujours contenu, sur les faits, la procédure et le droit.",
+              "Ce qui change, c'est l'apparence de fiabilité.",
+              "L'IA générative peut produire un document qui ressemble à un travail juridique professionnel. La prose peut être fluide. Les moyens peuvent être répartis en sections soigneusement intitulées. Le document peut évoquer la compétence, le procès équitable, la préservation des moyens, les standards de contrôle, l'interprétation des textes et les principes constitutionnels. Les citations peuvent même sembler respecter le bon format.",
+              "Cette qualité de surface peut rendre l'écriture bien plus crédible qu'elle ne l'est.",
+              "Un argument mal rédigé est souvent assez facile à repérer. Un argument soigné mais faux est plus coûteux. Un juge ou un assistant devra peut-être rechercher la décision citée, vérifier qu'elle existe, localiser le passage cité, examiner la position procédurale et déterminer si l'arrêt étaye réellement la proposition avancée.",
+              "Lorsqu'une écriture contient une citation douteuse, cela peut ne prendre qu'un temps limité. Lorsqu'elle contient de nombreuses citations inventées et des sources dénaturées, le processus de vérification peut consommer des ressources judiciaires considérables.",
+              "La cour floridienne a expressément relevé ce coût institutionnel. Parce que les juridictions d'appel doivent examiner les moyens soulevés par les parties, enquêter sur des écritures générées par IA consomme un temps qui pourrait être consacré à d'autres affaires.",
+              "C'est pourquoi les citations hallucinées ne peuvent être traitées comme d'anodines erreurs techniques. Une fois l'écriture déposée, la fausse source ne reste plus entre l'utilisateur et la machine. Elle devient un problème pour la partie adverse, pour la juridiction et pour l'administration de la justice.",
+              "Elle peut aussi masquer l'argument légitime que le justiciable pouvait avoir. La cour a reconnu que l'un des moyens de Gouldy pouvait comporter au moins une once de mérite discutable. Elle a néanmoins conclu que tout moyen potentiellement valable était noyé sous le volume d'arguments abusifs qui l'entouraient.",
+              "C'est là l'un des risques centraux d'un usage non encadré de l'IA en contentieux. La technologie peut aider à produire plus d'arguments, plus de citations et plus de pages. Mais davantage de langage juridique ne fait pas nécessairement un dossier plus solide.",
+              "Elle peut au contraire enfouir un moyen pertinent sous des arguments jamais préservés, des doctrines inapplicables et des sources qui n'existent pas.",
+            ],
+          },
+          {
+            heading: "De l'accès au dépôt à l'accès à la justice",
+            paragraphs: [
+              "La décision fait également écho à une distinction que j'ai examinée dans un article antérieur, IA générative, auto-représentation, et la distance entre l'accès au juge et l'accès à la justice.[4]",
+              "Cet article évoquait des travaux suggérant que la disponibilité généralisée de l'IA générative pourrait être associée à une hausse des contentieux civils fédéraux sans avocat et à une évolution du style des requêtes. Les écritures identifiées comme potentiellement assistées par IA paraissaient plus soignées et comportaient davantage de citations, sans pour autant obtenir de meilleurs résultats.",
+              "La question de fond était de savoir si l'IA générative élargit l'accès à la justice ou abaisse simplement la barrière du dépôt. Gouldy v. Chiasson en offre un exemple concret.",
+              "La justiciable a pu produire un long mémoire d'appel soulevant quinze moyens distincts. L'écriture employait une terminologie juridique et citait de nombreuses sources. En un sens, l'IA a pu rendre plus accessible une procédure d'appel difficile à mener sans avocat.",
+              "Mais participer n'a pas créé un appel viable.",
+              "La cour a jugé les arguments non préservés, insuffisamment développés ou dépourvus de fondement. Le supplément de langage juridique n'a pas corrigé les défaillances procédurales et de fond sous-jacentes. Au contraire, les sources fabriquées ont alourdi la charge de la juridiction et ont contribué à la possibilité que la justiciable perde le droit de former de futurs appels sans avocat.",
+              "L'affaire met donc en évidence la différence entre plusieurs formes d'accès parfois traitées comme équivalentes.",
+              "Une personne peut avoir accès à l'information juridique. Elle peut avoir accès à un outil capable de produire un document juridique. Elle peut aussi avoir un accès formel au tribunal par la faculté de déposer ce document.",
+              "Rien de tout cela ne donne nécessairement accès à un remède juridique effectif.",
+              "Un système génératif peut aider à organiser des faits, à identifier des notions juridiques possibles ou à transformer un récit informel en structure de requête ou de mémoire. Mais il ne peut pas établir automatiquement la compétence, préserver une objection en première instance, satisfaire les éléments d'une cause d'action, déterminer le standard de contrôle applicable, produire des preuves recevables ni décider si un arrêt cité étaye réellement une proposition.",
+              "Ces tâches exigent un jugement juridique, une conscience procédurale, la connaissance du dossier et une vérification indépendante.",
+              "Le danger est qu'une personne confonde la capacité à reproduire l'apparence du raisonnement juridique avec la capacité à raisonner juridiquement.",
+            ],
+          },
+          {
+            heading: "La responsabilité reste à celui qui signe l'écriture",
+            paragraphs: [
+              "La cour floridienne a également indiqué clairement que le recours à l'IA générative ne modifie pas le standard applicable aux sources fabriquées.",
+              "Citant ses décisions antérieures, la cour a expliqué que le fait de soumettre une jurisprudence fictive ou fabriquée peut être sanctionné, que l'erreur résulte de négligence, de méprise ou du recours à des outils d'intelligence artificielle générative.[5]",
+              "Ce principe compte, car les hallucinations d'IA sont parfois présentées comme des erreurs commises par la seule technologie. Or les juridictions ne reçoivent pas d'écritures de la part de logiciels. Elles reçoivent des documents signés et déposés par des justiciables et des avocats.",
+              "La personne dont le nom figure sur l'écriture demeure responsable de vérifier que les sources existent, que les citations sont exactes et que les décisions étayent l'argument avancé.",
+              "Pour les avocats, cette responsabilité est renforcée par les devoirs professionnels de compétence, de loyauté envers le tribunal, de supervision et de certification des écritures. Un avocat qui produit une jurisprudence inventée s'expose à des sanctions pécuniaires, à des poursuites disciplinaires, à une atteinte à sa réputation et à des conséquences pour son client.",
+              "Les justiciables sans avocat ne relèvent pas de la discipline du barreau, mais ils ne sont exemptés ni des règles de procédure ni des sanctions judiciaires. Les juridictions peuvent écarter des écritures, rejeter des prétentions, allouer des honoraires, prononcer des amendes ou restreindre la faculté de déposer de futurs documents sans avocat.",
+              "Cette différence explique en partie la préoccupation de la cour. Les avocats inscrits relèvent d'un système disciplinaire professionnel. Les justiciables sans avocat, non. Lorsque des avertissements répétés restent sans effet, une restriction de dépôt peut devenir l'un des rares outils disponibles pour prévenir la poursuite de l'abus.",
+            ],
+          },
+          {
+            heading: "De meilleurs outils, pas moins d'utilisateurs",
+            paragraphs: [
+              "La leçon de Gouldy ne devrait pas être qu'il faut empêcher les justiciables sans avocat d'utiliser l'IA générative.",
+              "Pour les personnes qui ne peuvent pas s'offrir un avocat, ces outils peuvent apporter une aide réelle. Ils peuvent aider à comprendre une terminologie inconnue, à organiser une chronologie, à identifier les documents pertinents, à préparer des questions et à exprimer plus clairement sa position.",
+              "Le vrai problème est l'écart entre une génération de texte à usage général et une assistance juridique fiable.",
+              "Un agent conversationnel grand public est généralement conçu pour produire une réponse, même lorsque l'information juridique pertinente est incertaine, incomplète ou indisponible. Un outil juridique responsable devrait au contraire être capable de reconnaître l'incertitude, de limiter les conclusions non étayées, de relier les propositions à des sources vérifiables, de distinguer les ordres juridiques et d'avertir l'utilisateur lorsqu'une relecture humaine devient nécessaire.",
+              "De meilleurs systèmes n'aideraient pas seulement à produire des mémoires plus longs. Ils aideraient à identifier quels faits comptent, quels arguments sont juridiquement disponibles, quels moyens ont été préservés et quelles sources peuvent être vérifiées de façon indépendante.",
+              "Les juridictions pourraient aussi avoir besoin de nouvelles formes de triage. Les organismes d'aide juridictionnelle pourraient avoir besoin de dispositifs permettant à des avocats de relire les écritures assistées par IA avant leur dépôt. Les développeurs pourraient devoir concevoir leurs produits autour des réalités de la procédure plutôt qu'autour de l'apparence d'aisance juridique.",
+              "L'objectif ne devrait pas être de faire parler chaque justiciable comme un avocat. Il devrait être d'aider les gens à comprendre ce que le système juridique exige, et à quel moment l'assistance automatisée ne suffit plus.",
+            ],
+          },
+          {
+            heading: "La distance entre l'apparence et le fond",
+            paragraphs: [
+              "La décision du 22 juillet 2026 dans Gouldy v. Chiasson montre le danger qu'il y a à confondre l'accès à la rédaction juridique avec l'accès à la justice.",
+              "L'IA générative peut faciliter la rédaction d'un mémoire. Elle peut faciliter le fait de soulever quinze arguments plutôt qu'un. Elle peut rendre une écriture plus professionnelle que ce que le justiciable aurait produit seul.",
+              "Mais elle ne peut pas rendre préservé un moyen qui ne l'a pas été. Elle ne peut pas rendre déterminante une décision hors sujet. Elle ne peut pas rendre réelle une citation inventée.",
+              "Et lorsque la distance entre l'apparence et le fond devient trop grande, la technologie qui semblait ouvrir la porte du tribunal peut finir par contribuer à la refermer.",
+            ],
+          },
+        ],
+      },
+      es: {
+        title: "Cuando la IA facilita presentar escritos y dificulta la justicia",
+        subtitle:
+          "Una sentencia de apelación de Florida, sobre un escrito sin abogado que contenía un caso fantasma y citas fabricadas, muestra la distancia que separa un escrito pulido de un argumento jurídicamente viable.",
+        readingTime: "12 min de lectura",
+        summary:
+          "En Gouldy v. Chiasson, el tribunal de apelación del cuarto distrito de Florida confirmó el rechazo del recurso de una litigante sin abogado tras constatar un caso inexistente, citas fabricadas y tergiversaciones del expediente, y dictó una orden para que justificara por qué no debería prohibírsele presentar más escritos sin abogado. La resolución ilustra la distancia entre producir algo que parece un escrito jurídico y presentar un argumento jurídicamente viable.",
+        abstract:
+          "El 22 de julio de 2026, el tribunal de apelación del cuarto distrito de Florida dictó una resolución que ilustra de forma llamativa un problema creciente en los tribunales estadounidenses. Es mucho más que otra advertencia sobre las alucinaciones de la inteligencia artificial: pone de relieve la distancia creciente entre la capacidad de producir algo que parece un escrito jurídico y la de presentar un argumento jurídicamente viable.",
+        body: [
+          {
+            heading: "Lo que ilustra la resolución de Florida",
+            paragraphs: [
+              "El 22 de julio de 2026, el tribunal de apelación del cuarto distrito de Florida dictó una resolución que ilustra de forma llamativa un problema creciente en los tribunales estadounidenses. En Gouldy v. Chiasson, el tribunal confirmó el rechazo del recurso de una litigante sin abogado tras constatar que su escrito contenía un caso inexistente, citas fabricadas, tergiversaciones del expediente y autoridades que no respaldaban los argumentos para los que se invocaban. Los jueces dictaron además una orden separada exigiéndole explicar por qué no debería prohibírsele presentar más escritos sin abogado ante ese tribunal.[1]",
+              "La resolución es mucho más que otra advertencia sobre las alucinaciones de la inteligencia artificial. Pone de relieve la distancia creciente entre la capacidad de producir algo que parece un escrito jurídico y la de presentar un argumento jurídicamente viable.",
+              "La IA generativa puede ayudar a crear documentos que parecen organizados, profesionales y con autoridad. Pero saber generar prosa jurídica convincente no es lo mismo que saber identificar una pretensión válida, preservar un motivo para la apelación, aplicar el derecho correcto o aportar una fuente jurídica fiable.",
+              "En algunos casos, la tecnología no solo deja de mejorar la posición del litigante. Puede hacer el escrito más difícil de evaluar para el tribunal y exponer a quien lo presentó a sanciones graves.",
+            ],
+          },
+          {
+            heading: "El caso ante el tribunal de Florida",
+            paragraphs: [
+              "El recurso surgía de un litigio prolongado entre Rose Lannquist Gouldy y Timothy Chiasson, un abogado que había representado a otras partes en un procedimiento sucesorio conexo.",
+              "Gouldy había demandado a Chiasson y a otros por fraude al tribunal, hurto civil, extorsión económica e interferencia ilícita. El tribunal de instancia falló a favor de Chiasson, consideró temerarias sus pretensiones y le impuso honorarios y costas.",
+              "El tribunal de apelación había confirmado antes esa sentencia y concedido honorarios adicionales de apelación. En ejecución, el tribunal fijó 54.780 dólares de honorarios de apelación y 10.882,23 dólares de costas, un total de 65.662,23 dólares. Gouldy recurrió entonces esa resolución.",
+              "Su escrito de apelación planteaba quince motivos, varios con submotivos. El tribunal concluyó que sus argumentos estaban sin preservar, insuficientemente expuestos o carecían por completo de fundamento. Más grave aún, los jueces constataron que las autoridades invocadas para sostenerlos eran, en varios casos, poco fiables o fabricadas.",
+              "El escrito citaba un caso que no existía, atribuía lenguaje inventado a resoluciones reales, tergiversaba partes del expediente y se apoyaba en casos que no respaldaban las proposiciones para las que se citaban.",
+              "Uno de los ejemplos más claros fue una supuesta resolución llamada Barton v. McGovern, citada como caso de Florida de 2020. No existía tal resolución. Sí existía un caso real con ese nombre, de 1987, pero no contenía el pasaje que se le atribuía.[2]",
+              "El escrito empleaba además una cita falsa de una resolución real del Tribunal Supremo de Florida e incluía otras citas fabricadas de otros casos floridanos. En otro punto, Gouldy afirmaba que la condena en honorarios rondaba los 125.000 dólares, cuando la cifra real era 65.662,23 dólares.[3]",
+              "La resolución no acredita que Gouldy usara una plataforma concreta de IA generativa para preparar su escrito. Aun así, el tribunal vinculó ese escrito a una tendencia más amplia que dice observar en los tribunales de apelación de Florida.",
+              "Según los jueces, muchos litigantes sin abogado parecen estar usando ahora plataformas de inteligencia artificial para generar escritos y recursos de apelación. Esos escritos suelen ser legibles, pero pueden contener autoridades fantasma, descripciones inexactas del expediente y citas fabricadas.",
+              "El tribunal confirmó el recurso en su totalidad. Dictó además una orden separada exigiendo a Gouldy explicar por qué no debería prohibírsele presentar más escritos sin abogado ante ese tribunal. Los jueces señalaron que ya había sido advertida dos veces por escritos temerarios.",
+              "La restricción, por tanto, no se ha impuesto aún de forma definitiva. La orden da a Gouldy la oportunidad de responder antes de que el tribunal decida limitar sus futuros escritos. Aun así, la posibilidad de tal sanción muestra la seriedad con que los tribunales pueden tratar el recurso reiterado a material jurídico fabricado.",
+            ],
+          },
+          {
+            heading: "Un documento pulido puede estar jurídicamente vacío",
+            paragraphs: [
+              "Lo más importante de la resolución no es simplemente que el escrito contuviera errores. Los escritos de litigantes sin abogado siempre han contenido errores fácticos, procesales y jurídicos.",
+              "Lo que cambia es la apariencia de fiabilidad.",
+              "La IA generativa puede producir un documento que se parece a un trabajo jurídico profesional. La prosa puede ser fluida. Los motivos pueden dividirse en secciones cuidadosamente rotuladas. El documento puede referirse a la competencia, al debido proceso, a la preservación de motivos, a los estándares de revisión, a la interpretación normativa y a principios constitucionales. Las citas pueden incluso parecer seguir el formato correcto.",
+              "Esa calidad superficial puede hacer que el escrito parezca mucho más creíble de lo que realmente es.",
+              "Un argumento mal redactado suele ser relativamente fácil de detectar. Un argumento pulido pero falso resulta más gravoso. Un juez o un letrado puede tener que buscar la resolución citada, confirmar que existe, localizar el pasaje citado, revisar la posición procesal y determinar si el caso respalda realmente la proposición invocada.",
+              "Cuando un escrito contiene una cita dudosa, esto puede llevar poco tiempo. Cuando contiene numerosas citas inventadas y autoridades tergiversadas, la verificación puede consumir recursos judiciales considerables.",
+              "El tribunal de Florida identificó expresamente ese coste institucional. Como los tribunales de apelación deben examinar los motivos planteados por las partes, indagar en escritos generados por IA consume tiempo que podría dedicarse a otros asuntos.",
+              "Por eso las citas alucinadas no pueden tratarse como errores tecnológicos inocuos. Una vez presentado el escrito, la autoridad falsa deja de quedar entre el usuario y la máquina. Se convierte en un problema para la parte contraria, para el tribunal y para la administración de justicia.",
+              "También puede oscurecer cualquier argumento legítimo que el litigante pudiera tener. El tribunal reconoció que uno de los motivos de Gouldy podía contener al menos un atisbo de mérito discutible. Pero concluyó que cualquier motivo potencialmente válido quedaba sepultado por el volumen de argumentos temerarios que lo rodeaban.",
+              "Ese es uno de los riesgos centrales del uso no guiado de la IA en litigios. La tecnología puede ayudar a producir más argumentos, más citas y más páginas. Pero más lenguaje jurídico no equivale necesariamente a un caso más sólido.",
+              "Puede, en cambio, enterrar un motivo relevante bajo argumentos nunca preservados, doctrinas que no aplican y autoridades que no existen.",
+            ],
+          },
+          {
+            heading: "Del acceso a presentar escritos al acceso a la justicia",
+            paragraphs: [
+              "La resolución resuena además con una distinción que examiné en un artículo anterior, IA generativa, autorrepresentación y la distancia entre el acceso a los tribunales y el acceso a la justicia.[4]",
+              "Aquel artículo trataba investigaciones que sugieren que la disponibilidad generalizada de IA generativa puede asociarse a un aumento de los litigios civiles federales sin abogado y a cambios en el estilo de las demandas. Los escritos identificados como potencialmente asistidos por IA tendían a parecer más pulidos y a contener más citas jurídicas, pero no lograban mejores resultados.",
+              "La cuestión de fondo era si la IA generativa amplía el acceso a la justicia o simplemente rebaja la barrera para presentar una demanda. Gouldy v. Chiasson ofrece un ejemplo concreto de esa distinción.",
+              "La litigante pudo producir un extenso escrito de apelación con quince motivos distintos. El escrito usaba terminología jurídica y citaba numerosas autoridades. En cierto sentido, la IA pudo facilitar la participación en un procedimiento de apelación difícil de recorrer sin abogado.",
+              "Pero participar no creó un recurso viable.",
+              "El tribunal consideró los argumentos sin preservar, insuficientemente desarrollados o infundados. El lenguaje jurídico adicional no corrigió las deficiencias procesales y sustantivas subyacentes. Al contrario, las autoridades fabricadas aumentaron la carga del tribunal y contribuyeron a la posibilidad de que la litigante pierda la facultad de presentar futuros recursos sin abogado.",
+              "El caso agudiza así la diferencia entre varias formas de acceso que a veces se tratan como intercambiables.",
+              "Una persona puede tener acceso a información jurídica. Puede tener acceso a una herramienta capaz de producir un documento jurídico. Puede tener también acceso formal al tribunal mediante la facultad de presentar ese documento.",
+              "Nada de eso proporciona necesariamente acceso a un remedio jurídico efectivo.",
+              "Un sistema generativo puede ayudar a ordenar hechos, identificar posibles conceptos jurídicos o transformar un relato informal en la estructura de una demanda o un escrito. Pero no puede establecer automáticamente la competencia, preservar una objeción en instancia, satisfacer los elementos de una causa de acción, determinar el estándar de revisión aplicable, producir prueba admisible ni decidir si un caso citado respalda realmente una proposición.",
+              "Esas tareas exigen juicio jurídico, conciencia procesal, conocimiento del expediente y verificación independiente.",
+              "El peligro es que una persona confunda la capacidad de reproducir la apariencia del razonamiento jurídico con la capacidad de razonar jurídicamente.",
+            ],
+          },
+          {
+            heading: "La responsabilidad sigue siendo de quien firma el escrito",
+            paragraphs: [
+              "El tribunal de Florida dejó claro también que recurrir a la IA generativa no altera el estándar aplicable a las autoridades fabricadas.",
+              "Citando sus resoluciones anteriores, el tribunal explicó que presentar jurisprudencia ficticia o fabricada puede sancionarse, ya proceda el error de descuido, de un malentendido o del uso de herramientas de inteligencia artificial generativa.[5]",
+              "Este principio importa porque las alucinaciones de IA se describen a veces como si fueran errores cometidos únicamente por la tecnología. Pero los tribunales no reciben escritos de programas informáticos. Reciben documentos firmados y presentados por litigantes y abogados.",
+              "La persona cuyo nombre figura en el escrito sigue siendo responsable de confirmar que las autoridades existen, que las citas son exactas y que los casos respaldan el argumento planteado.",
+              "Para los abogados, esa responsabilidad se refuerza con los deberes profesionales de competencia, lealtad hacia el tribunal, supervisión y certificación de los escritos. Un abogado que presenta jurisprudencia inventada puede enfrentarse a sanciones económicas, expedientes disciplinarios, daño reputacional y consecuencias para su cliente.",
+              "Los litigantes sin abogado no están sujetos a la disciplina colegial, pero no quedan exentos de las normas procesales ni de las sanciones judiciales. Los tribunales pueden inadmitir escritos, desestimar pretensiones, imponer honorarios, aplicar multas o restringir la facultad de presentar futuros documentos sin abogado.",
+              "Esa diferencia explica en parte la preocupación del tribunal. Los abogados colegiados operan dentro de un sistema disciplinario profesional. Los litigantes sin abogado, no. Cuando las advertencias repetidas resultan ineficaces, una restricción de presentación puede convertirse en una de las pocas herramientas disponibles para impedir que el abuso continúe.",
+            ],
+          },
+          {
+            heading: "Mejores herramientas, no menos usuarios",
+            paragraphs: [
+              "La lección de Gouldy no debería ser que hay que impedir a los litigantes sin abogado usar IA generativa.",
+              "Para quienes no pueden pagar un abogado, estas herramientas pueden ofrecer una ayuda real. Pueden ayudar a entender terminología desconocida, ordenar una cronología, identificar documentos relevantes, preparar preguntas y expresar su posición con más claridad.",
+              "El problema real es la brecha entre la generación de texto de uso general y una asistencia jurídica fiable.",
+              "Un chatbot de uso público está diseñado generalmente para producir una respuesta, incluso cuando la información jurídica pertinente es incierta, incompleta o no está disponible. Una herramienta jurídica responsable debería, en cambio, ser capaz de reconocer la incertidumbre, limitar las conclusiones no respaldadas, vincular las proposiciones a fuentes verificables, distinguir entre ordenamientos y advertir al usuario cuando la revisión humana resulta necesaria.",
+              "Mejores sistemas no ayudarían solo a generar escritos más largos. Ayudarían a identificar qué hechos importan, qué argumentos están jurídicamente disponibles, qué motivos se han preservado y qué autoridades pueden verificarse de forma independiente.",
+              "Los tribunales podrían necesitar además nuevas formas de triaje. Las organizaciones de asistencia jurídica podrían necesitar sistemas que permitan a abogados revisar los escritos asistidos por IA antes de su presentación. Los desarrolladores podrían tener que diseñar sus productos en torno a las realidades del procedimiento y no a la apariencia de fluidez jurídica.",
+              "El objetivo no debería ser que todo litigante suene como un abogado. Debería ser ayudar a las personas a entender qué exige el sistema jurídico y cuándo la asistencia automatizada deja de bastar.",
+            ],
+          },
+          {
+            heading: "La distancia entre la apariencia y el fondo",
+            paragraphs: [
+              "La resolución de 22 de julio de 2026 en Gouldy v. Chiasson muestra el peligro de confundir el acceso a la redacción jurídica con el acceso a la justicia.",
+              "La IA generativa puede facilitar la redacción de un escrito. Puede facilitar plantear quince argumentos en lugar de uno. Puede hacer que un escrito parezca más profesional de lo que el litigante habría producido por sí solo.",
+              "Pero no puede preservar un motivo que no se preservó. No puede hacer determinante una resolución irrelevante. No puede hacer real una cita inventada.",
+              "Y cuando la distancia entre la apariencia y el fondo se vuelve demasiado grande, la tecnología que parecía abrir la puerta del tribunal puede acabar ayudando a cerrarla.",
+            ],
+          },
+        ],
+      },
+    },
     body: [
       {
         heading: "What the Florida decision illustrates",
@@ -851,6 +1311,122 @@ export const researchEntries: ResearchEntry[] = [
           "[6] Advisory Committee on Evidence Rules, May 17, 2026 report concerning proposed Federal Rule of Evidence 707.",
       },
     ],
+    translations: {
+      fr: {
+        title:
+          "Comment les synthèses générées par IA pourraient entrer au prétoire sous la règle fédérale de preuve 1006",
+        subtitle:
+          "Les synthèses produites par IA disposent peut-être d'une voie plus claire vers la preuve, à condition que les pièces sous-jacentes et le processus soient correctement traités.",
+        readingTime: "6 min de lecture",
+        summary:
+          "Une évolution récente explore comment la règle fédérale de preuve 1006 pourrait fonder la recevabilité de synthèses générées par IA, à condition que les pièces sous-jacentes soient correctement traitées. Si les juridictions la retiennent, elle pourrait changer nettement la façon dont les avocats examinent et présentent de gros volumes documentaires.",
+        abstract:
+          "Les synthèses générées par IA disposent peut-être d'une voie plus claire vers le prétoire. Une évolution récente explore comment la règle fédérale de preuve 1006 pourrait fonder leur recevabilité, à condition que les pièces sous-jacentes soient correctement traitées. Cette note explique ce que cela signifie, pourquoi c'est important, et les garanties qui resteront exigées.",
+        body: [
+          {
+            heading: "Le problème : trop de pièces à examiner",
+            paragraphs: [
+              "Les avocats traitent couramment des milliers de pages de relevés financiers, de quittances de loyer, de factures, de courriels, de dossiers médicaux et d'autres documents qui ne peuvent raisonnablement être examinés un par un à l'audience.",
+            ],
+          },
+          {
+            heading: "Ce que permet la règle 1006",
+            paragraphs: [
+              "La règle fédérale de preuve 1006 apporte une solution. Elle permet à une partie de présenter une synthèse, un tableau ou un calcul pour établir le contenu de pièces recevables volumineuses qui ne peuvent commodément être examinées à l'audience.[1]",
+              "Depuis le 1er décembre 2024, la règle prévoit expressément que ces synthèses peuvent être admises comme preuve, même lorsque les documents sous-jacents n'ont pas eux-mêmes été versés aux débats.[1]",
+              "Cette clarification compte, car une synthèse fondée sur la règle 1006 n'est pas un simple support visuel. Lorsque le fondement approprié est établi, elle peut devenir une preuve au fond sur laquelle le juge ou le jury peut s'appuyer.[2][3][4]",
+            ],
+          },
+          {
+            heading: "Où l'intelligence artificielle s'insère",
+            paragraphs: [
+              "Cela ouvre une voie intéressante à l'usage de l'intelligence artificielle.",
+              "Un système d'IA pourrait aider à extraire des informations de milliers de documents, à identifier des opérations, à ordonner des dates, à calculer des totaux et à produire une synthèse claire des pièces sous-jacentes.",
+              "Mais le fait que l'IA ait contribué à créer la synthèse ne la rendrait pas automatiquement recevable.",
+            ],
+          },
+          {
+            heading: "Les garanties qui demeurent",
+            paragraphs: [
+              "Les pièces sous-jacentes doivent rester recevables. Elles doivent être mises à disposition de la partie adverse, et la synthèse finale doit refléter leur contenu de manière fidèle et exacte.[1][3]",
+              "La partie qui produit la synthèse devra également expliquer comment elle a été élaborée. Cela peut supposer de conserver les documents fournis au système d'IA, les instructions utilisées, la version du modèle, le résultat produit et le processus de vérification humaine.[5]",
+              "Surtout, un avocat ou un témoin qualifié devrait vérifier de façon indépendante chaque chiffre et assumer l'exactitude de la synthèse finale. L'approche la plus sûre n'est donc pas de présenter un résultat d'IA inexpliqué comme preuve, mais une synthèse fondée sur la règle 1006, relue par un humain et élaborée avec l'assistance de l'IA.",
+            ],
+          },
+          {
+            heading: "Une règle 707 proposée, pas encore adoptée",
+            paragraphs: [
+              "Une proposition de règle fédérale de preuve 707 pourrait à terme introduire des exigences de fiabilité plus précises pour les preuves produites par intelligence artificielle. Toutefois, le comité consultatif sur les règles de preuve a indiqué dans son rapport du 17 mai 2026 qu'il n'en recommandait pas l'adoption à ce stade.[6]",
+              "Pour l'heure, les règles existantes offrent déjà un cadre possible.",
+            ],
+          },
+          {
+            heading: "Des règles existantes, appliquées avec soin",
+            paragraphs: [
+              "L'IA peut assister la préparation de la preuve, mais la recevabilité continuera de dépendre de la fiabilité du processus, de la recevabilité des pièces sous-jacentes et de la capacité d'un témoin humain à expliquer et vérifier le résultat final.",
+              "L'avenir de la preuve générée par IA pourrait donc advenir non par un système probatoire entièrement nouveau, mais par l'application soigneuse de règles qui existent déjà.",
+            ],
+          },
+        ],
+      },
+      es: {
+        title:
+          "Cómo los resúmenes generados por IA podrían llegar a la sala bajo la regla federal de prueba 1006",
+        subtitle:
+          "Los resúmenes producidos por IA quizá tengan una vía más clara hacia la prueba, siempre que los documentos subyacentes y el proceso se traten correctamente.",
+        readingTime: "6 min de lectura",
+        summary:
+          "Un desarrollo reciente explora cómo la regla federal de prueba 1006 podría sustentar la admisibilidad de resúmenes generados por IA, siempre que los documentos subyacentes se traten correctamente. Si los tribunales la adoptan, podría cambiar de forma notable cómo los abogados revisan y presentan grandes volúmenes documentales.",
+        abstract:
+          "Los resúmenes generados por IA quizá tengan una vía más clara hacia la sala de audiencias. Un desarrollo reciente explora cómo la regla federal de prueba 1006 podría sustentar su admisibilidad, siempre que los documentos subyacentes se traten correctamente. Esta nota explica qué significa, por qué importa y las garantías que seguirán siendo exigibles.",
+        body: [
+          {
+            heading: "El problema: demasiados documentos que revisar",
+            paragraphs: [
+              "Los abogados manejan habitualmente miles de páginas de registros financieros, libros de rentas, facturas, correos, historiales médicos y otros documentos que no pueden revisarse uno a uno durante un juicio.",
+            ],
+          },
+          {
+            heading: "Lo que permite la regla 1006",
+            paragraphs: [
+              "La regla federal de prueba 1006 ofrece una solución. Permite a una parte presentar un resumen, cuadro o cálculo para acreditar el contenido de documentos admisibles voluminosos que no pueden examinarse cómodamente en el tribunal.[1]",
+              "Desde el 1 de diciembre de 2024, la regla establece expresamente que esos resúmenes pueden admitirse como prueba, incluso cuando los documentos subyacentes no se hayan incorporado a los autos.[1]",
+              "Esta aclaración importa porque un resumen del artículo 1006 no es un simple apoyo visual. Cuando se establece el fundamento adecuado, puede convertirse en prueba de fondo en la que el juez o el jurado pueden basarse.[2][3][4]",
+            ],
+          },
+          {
+            heading: "Dónde encaja la inteligencia artificial",
+            paragraphs: [
+              "Esto abre una vía interesante para el uso de la inteligencia artificial.",
+              "Un sistema de IA podría ayudar a extraer información de miles de documentos, identificar operaciones, ordenar fechas, calcular totales y producir un resumen claro de la prueba subyacente.",
+              "Pero el hecho de que la IA haya contribuido a crear el resumen no lo haría automáticamente admisible.",
+            ],
+          },
+          {
+            heading: "Las garantías que siguen aplicándose",
+            paragraphs: [
+              "Los documentos subyacentes deben seguir siendo admisibles. Deben ponerse a disposición de la parte contraria, y el resumen final debe reflejar su contenido de forma fiel y exacta.[1][3]",
+              "La parte que aporta el resumen tendrá además que explicar cómo se elaboró. Esto puede exigir conservar los documentos facilitados al sistema de IA, las instrucciones empleadas, la versión del modelo, el resultado generado y el proceso de verificación humana.[5]",
+              "Sobre todo, un abogado o testigo cualificado debería verificar de forma independiente cada cifra y asumir la exactitud del resumen final. El enfoque más seguro no es, por tanto, presentar como prueba un resultado de IA sin explicación, sino un resumen del artículo 1006 revisado por una persona y elaborado con asistencia de IA.",
+            ],
+          },
+          {
+            heading: "Una regla 707 propuesta, aún no adoptada",
+            paragraphs: [
+              "Una propuesta de regla federal de prueba 707 podría llegar a introducir requisitos de fiabilidad más específicos para la prueba producida por inteligencia artificial. No obstante, el comité asesor sobre reglas de prueba indicó en su informe de 17 de mayo de 2026 que no recomendaba su adopción en ese momento.[6]",
+              "Por ahora, las reglas existentes ya ofrecen un marco posible.",
+            ],
+          },
+          {
+            heading: "Reglas existentes, aplicadas con cuidado",
+            paragraphs: [
+              "La IA puede asistir en la preparación de la prueba, pero la admisibilidad seguirá dependiendo de la fiabilidad del proceso, de la admisibilidad de los documentos subyacentes y de la capacidad de un testigo humano para explicar y verificar el resultado final.",
+              "El futuro de la prueba generada por IA podría llegar, por tanto, no mediante un sistema probatorio enteramente nuevo, sino mediante la aplicación cuidadosa de reglas que ya existen.",
+            ],
+          },
+        ],
+      },
+    },
   },
   {
     slug: "generative-ai-access-to-justice-pro-se",
@@ -938,6 +1514,128 @@ export const researchEntries: ResearchEntry[] = [
         note: "Study analyzing ~2.8 million federal civil filings (2008–2025).",
       },
     ],
+    translations: {
+      fr: {
+        title:
+          "IA générative, auto-représentation, et la distance entre l'accès au juge et l'accès à la justice",
+        subtitle:
+          "Une nouvelle étude portant sur 2,8 millions de dossiers civils fédéraux suggère que l'IA aide davantage de personnes à saisir le tribunal, sans nécessairement les aider à obtenir gain de cause.",
+        readingTime: "5 min de lecture",
+        summary:
+          "L'IA générative abaisse peut-être la barrière d'entrée dans le système judiciaire, mais une étude des dossiers civils fédéraux montre que les requêtes sans avocat assistées par IA sont plus soignées et pourtant plus souvent rejetées, ce qui pose la question : élargit-on l'accès à la justice, ou seulement l'accès au dépôt ?",
+        abstract:
+          "L'IA générative améliore peut-être l'accès au juge. Mais améliore-t-elle l'accès à la justice ? Une étude analysant environ 2,8 millions de dossiers civils fédéraux de 2008 à 2025 constate une forte hausse de l'auto-représentation et des signes de rédaction assistée par IA, sans amélioration correspondante des résultats. L'accès à la rédaction juridique n'est pas l'accès à un remède juridique.",
+        body: [
+          {
+            heading: "L'accès au juge n'est pas l'accès à la justice",
+            paragraphs: [
+              "L'IA générative améliore peut-être l'accès au juge. Mais améliore-t-elle l'accès à la justice ?",
+              "Une nouvelle étude, The New Pro Se: Generative AI and the Surge in Federal Civil Self-Representation, a analysé environ 2,8 millions de dossiers civils fédéraux de 2008 à 2025.",
+            ],
+          },
+          {
+            heading: "Des résultats frappants",
+            paragraphs: [
+              "Les données révèlent une évolution mesurable, à la fois du volume et de l'apparence des contentieux sans avocat, après la diffusion large de l'IA générative.",
+            ],
+            bullets: [
+              "La part des affaires civiles fédérales introduites par des demandeurs sans avocat est passée de 11,33 % avant l'accès généralisé à l'IA générative à 16,94 % ensuite, soit une hausse de près de 50 %.",
+              "Parmi les requêtes non standardisées postérieures à l'IA générative, environ 13,9 % présentaient des schémas de rédaction compatibles avec une assistance par IA.",
+              "Ces requêtes étaient généralement plus soignées et comportaient davantage de citations juridiques.",
+            ],
+          },
+          {
+            heading: "Des écritures plus soignées, mais pas de meilleurs résultats",
+            paragraphs: [
+              "Les requêtes signalées comme assistées par IA affichaient un taux de rejet plus élevé, 61,1 % contre 53,6 %, se terminaient plus souvent à un stade procédural précoce, et ne présentaient aucun avantage en taux de succès.",
+              "Cela met en lumière une distinction essentielle : l'accès à la rédaction juridique n'est pas l'accès à un remède juridique.",
+            ],
+          },
+          {
+            heading: "Ce que l'IA peut et ne peut pas faire",
+            paragraphs: [
+              "L'IA générative peut aider quelqu'un à organiser son récit, à identifier des notions juridiques et à produire un document qui ressemble à une requête formelle.",
+              "Mais elle ne peut pas créer automatiquement une compétence juridictionnelle, établir des faits suffisants, préserver une action dans le délai de prescription, produire des preuves recevables, ni transformer un grief réel en cause d'action juridiquement viable.",
+              "L'étude ne démontre pas que l'IA générative a causé la hausse de l'auto-représentation. Elle fournit toutefois des indices sérieux que la diffusion des outils d'IA grand public est associée à des changements, tant dans le volume que dans l'apparence des contentieux sans avocat.",
+            ],
+          },
+          {
+            heading: "Une opportunité et un défi institutionnel",
+            paragraphs: [
+              "Pour les personnes qui ne peuvent pas s'offrir un avocat, l'IA peut rendre le tribunal plus accessible. Pour les juridictions, en revanche, des écritures de plus en plus soignées mais juridiquement défaillantes peuvent exiger plus de temps pour être examinées, comprises et rejetées.",
+              "La solution ne devrait pas être d'empêcher les justiciables sans avocat d'utiliser l'IA. Elle devrait être de développer de meilleurs outils guidés, des systèmes d'aide juridictionnelle renforcés, un triage judiciaire efficace et de véritables possibilités de relecture juridique humaine.",
+            ],
+          },
+          {
+            heading: "Accès au dépôt, ou accès à la justice ?",
+            paragraphs: [
+              "L'IA abaisse peut-être la barrière d'entrée dans le système judiciaire. Le défi suivant est de faire en sorte qu'elle aide aussi les gens à y naviguer efficacement.",
+              "Élargissons-nous l'accès à la justice, ou seulement l'accès au dépôt ?",
+            ],
+          },
+        ],
+      },
+      es: {
+        title:
+          "IA generativa, autorrepresentación y la distancia entre el acceso a los tribunales y el acceso a la justicia",
+        subtitle:
+          "Un nuevo estudio sobre 2,8 millones de expedientes civiles federales sugiere que la IA ayuda a más personas a llegar al tribunal, sin ayudarlas necesariamente a ganar una vez dentro.",
+        readingTime: "5 min de lectura",
+        summary:
+          "La IA generativa quizá esté rebajando la barrera de entrada al sistema judicial, pero un estudio de expedientes civiles federales muestra que las demandas sin abogado asistidas por IA están más pulidas y aun así se desestiman más, lo que plantea la pregunta: ¿ampliamos el acceso a la justicia o solo el acceso a presentar demandas?",
+        abstract:
+          "La IA generativa quizá esté mejorando el acceso a los tribunales. ¿Pero mejora el acceso a la justicia? Un estudio que analiza unos 2,8 millones de expedientes civiles federales de 2008 a 2025 detecta un fuerte aumento de la autorrepresentación y señales de redacción asistida por IA, sin una mejora correspondiente en los resultados. El acceso a la redacción jurídica no es el acceso a un remedio jurídico.",
+        body: [
+          {
+            heading: "El acceso a los tribunales no es el acceso a la justicia",
+            paragraphs: [
+              "La IA generativa quizá esté mejorando el acceso a los tribunales. ¿Pero mejora el acceso a la justicia?",
+              "Un nuevo estudio, The New Pro Se: Generative AI and the Surge in Federal Civil Self-Representation, analizó unos 2,8 millones de expedientes civiles federales de 2008 a 2025.",
+            ],
+          },
+          {
+            heading: "Los resultados son llamativos",
+            paragraphs: [
+              "Los datos apuntan a un cambio medible, tanto en el volumen como en la apariencia de los litigios sin abogado, tras la disponibilidad generalizada de la IA generativa.",
+            ],
+            bullets: [
+              "La proporción de asuntos civiles federales presentados por demandantes sin abogado pasó del 11,33 % antes del acceso generalizado a la IA generativa al 16,94 % después, un aumento de casi el 50 %.",
+              "Entre las demandas no formularias posteriores a la IA generativa, alrededor del 13,9 % mostraban patrones de redacción compatibles con asistencia de IA.",
+              "Esas demandas solían estar más pulidas y contenían más citas jurídicas.",
+            ],
+          },
+          {
+            heading: "Escritos más pulidos no dieron mejores resultados",
+            paragraphs: [
+              "Las demandas señaladas como asistidas por IA tuvieron una tasa de desestimación mayor, 61,1 % frente al 53,6 %, terminaron con más frecuencia en una fase procesal temprana y no mostraron ventaja alguna en la tasa de éxito.",
+              "Esto pone de relieve una distinción esencial: el acceso a la redacción jurídica no es el acceso a un remedio jurídico.",
+            ],
+          },
+          {
+            heading: "Lo que la IA puede y no puede hacer",
+            paragraphs: [
+              "La IA generativa puede ayudar a alguien a ordenar su relato, identificar conceptos jurídicos y producir un documento que parece una demanda formal.",
+              "Pero no puede crear automáticamente competencia judicial, establecer hechos suficientes, preservar una acción dentro del plazo de prescripción, producir pruebas admisibles ni transformar un agravio real en una causa de acción jurídicamente viable.",
+              "El estudio no demuestra que la IA generativa haya causado el aumento de la autorrepresentación. Sí aporta, en cambio, indicios sólidos de que la difusión de las herramientas de IA de uso público está asociada a cambios, tanto en el volumen como en la apariencia de los litigios sin abogado.",
+            ],
+          },
+          {
+            heading: "Una oportunidad y un desafío institucional",
+            paragraphs: [
+              "Para quienes no pueden pagar un abogado, la IA puede hacer el tribunal más accesible. Para los tribunales, en cambio, escritos cada vez más pulidos pero jurídicamente deficientes pueden exigir más tiempo para revisarse, entenderse y desestimarse.",
+              "La solución no debería ser impedir que los litigantes sin abogado usen IA. Debería ser desarrollar mejores herramientas guiadas, sistemas de asistencia jurídica más sólidos, un triaje judicial eficaz y oportunidades reales de revisión jurídica humana.",
+            ],
+          },
+          {
+            heading: "¿Acceso a presentar demandas o acceso a la justicia?",
+            paragraphs: [
+              "La IA quizá esté rebajando la barrera de entrada al sistema judicial. El siguiente desafío es lograr que también ayude a las personas a navegarlo con eficacia.",
+              "¿Estamos ampliando el acceso a la justicia, o solo el acceso a presentar demandas?",
+            ],
+          },
+        ],
+      },
+    },
   },
   {
     slug: "white-collar-revolution-law-firms-ai",
@@ -967,7 +1665,171 @@ export const researchEntries: ResearchEntry[] = [
       "emerging-architecture-ai-regulation",
       "legal-intelligence-systems-future-regulatory-monitoring",
       "why-soft-law-matters-ai-compliance",
-    ],
+    ],
+    translations: {
+      fr: {
+        title:
+          "La révolution des cols blancs : la transformation des cabinets d'avocats à l'ère de l'intelligence artificielle",
+        subtitle:
+          "Pourquoi le passage d'un modèle fondé sur le travail à un modèle fondé sur les systèmes redessine l'économie, l'organisation et le rôle du cabinet moderne.",
+        readingTime: "10 min de lecture",
+        summary:
+          "Comment les grands modèles de langage ne se contentent pas d'accélérer le travail juridique, mais bouleversent les fondations économiques de la pratique du droit, poussant les cabinets d'une prestation fondée sur la main-d'œuvre vers une valeur fondée sur les systèmes.",
+        abstract:
+          "Pendant des décennies, les cabinets d'avocats ont fonctionné selon un modèle qui paraissait à la fois stable et auto-entretenu. L'intelligence artificielle, en particulier les grands modèles de langage, n'accélère pas simplement le travail juridique : elle en change la nature, et avec elle les fondations économiques de la pratique du droit.",
+        body: [
+          {
+            heading: "La fin d'un modèle auto-entretenu",
+            paragraphs: [
+              "Pendant des décennies, les cabinets d'avocats ont fonctionné selon un modèle qui paraissait à la fois stable et auto-entretenu. Ils attiraient les meilleurs diplômés, les formaient par apprentissage et monétisaient leur expertise en heures facturables. Le prestige, l'expérience et la réputation institutionnelle servaient d'indicateurs de qualité. Cette structure s'est révélée remarquablement résiliente, mais elle est de plus en plus décalée par rapport à la réalité technologique qui émerge aujourd'hui.",
+              "L'intelligence artificielle, en particulier les grands modèles de langage, n'accélère pas simplement le travail juridique. Elle en change la nature. Des tâches qui exigeaient autrefois un effort humain considérable, comme la revue documentaire, la recherche juridique, la rédaction de contrats et même certains éléments du raisonnement juridique, peuvent désormais être partiellement ou largement automatisées. Le résultat n'est pas seulement un gain de productivité, mais un bouleversement des fondations économiques de la pratique du droit.",
+            ],
+          },
+          {
+            heading: "L'heure facturable sous pression",
+            paragraphs: [
+              "L'heure facturable, longtemps considérée comme la colonne vertébrale du chiffre d'affaires des cabinets, devient difficile à soutenir dans un contexte où le temps n'est plus la contrainte principale. Lorsqu'une tâche qui demandait dix heures peut être accomplie en quelques minutes, facturer l'effort plutôt que le résultat crée une tension entre efficacité et revenus. Les cabinets font face à une contradiction structurelle : plus ils adoptent l'IA pour gagner en efficacité, plus ils érodent la mesure même par laquelle ils génèrent leurs revenus.",
+            ],
+          },
+          {
+            heading: "De la prestation par le travail à la valeur par les systèmes",
+            paragraphs: [
+              "Cette tension pousse le secteur juridique vers un nouveau modèle. Un nombre croissant de cabinets s'éloignent de services purement fondés sur la main-d'œuvre pour aller vers une création de valeur fondée sur les systèmes. Ces organisations associent avocats, ingénieurs et spécialistes de l'IA, et investissent dans des outils et des flux de travail qui transforment les processus juridiques en systèmes reproductibles et industrialisables. Plutôt que de s'appuyer uniquement sur l'expertise humaine, elles inscrivent cette expertise dans une technologie qui peut être réutilisée, affinée et déployée sur de nombreux dossiers.",
+            ],
+          },
+          {
+            heading: "Comment se redéfinit la qualité juridique",
+            paragraphs: [
+              "Ce basculement modifie aussi la façon dont la qualité juridique est définie et perçue. Historiquement, les clients se fiaient à la réputation, aux titres et à la marque du cabinet comme indicateurs de compétence. Or, à mesure que l'IA permet de mesurer et de comparer les résultats, la qualité devient plus transparente et plus comparable. Un travail juridique autrefois évalué de façon subjective peut de plus en plus l'être selon des critères structurés, des cadres de test et une performance empirique. Avec le temps, cela pourrait conduire les clients à privilégier des résultats démontrables plutôt que le prestige institutionnel.",
+            ],
+          },
+          {
+            heading: "Les structures d'associés et le problème des incitations",
+            paragraphs: [
+              "Les implications pour l'organisation des cabinets sont importantes. Les structures d'association traditionnelles sont conçues pour maximiser la distribution de profits à court terme plutôt que l'investissement de long terme. Les associés sont incités à générer du revenu sur l'exercice en cours, ce qui limite la volonté de consacrer du temps et des ressources à l'expérimentation, à la recherche et à la construction de systèmes. À l'inverse, les cabinets qui adoptent une approche plus corporate, ou dont la structure favorise le réinvestissement, sont mieux placés pour développer des technologies propriétaires et capter les gains de long terme de l'automatisation.",
+            ],
+          },
+          {
+            heading: "Le rôle de l'avocat en évolution",
+            paragraphs: [
+              "Dans le même temps, le rôle de l'avocat évolue. L'intelligence artificielle est particulièrement efficace pour traiter de grands volumes de texte, identifier des schémas et exécuter des tâches structurées. Ces capacités recoupent directement de nombreuses fonctions juridiques centrales. Elles n'éliminent pas pour autant le besoin de jugement humain. La décision stratégique, la négociation, le conseil au client et les considérations déontologiques restent des domaines profondément humains. Le défi des cabinets modernes n'est donc pas de remplacer les avocats, mais de redéfinir leur rôle. Les avocats agissent de plus en plus comme superviseurs de systèmes, concepteurs de flux de travail et interprètes de résultats, plutôt que comme seuls producteurs du travail juridique.",
+            ],
+          },
+          {
+            heading: "De nouvelles dynamiques concurrentielles",
+            paragraphs: [
+              "Cette transformation introduit aussi de nouvelles dynamiques concurrentielles. Les barrières à l'entrée dans certains domaines de la pratique commencent à se déplacer. Des organisations plus petites, portées par la technologie, peuvent délivrer des services de grande qualité sans le même volume de capital humain, en s'appuyant sur des systèmes pour atteindre efficacité et régularité. Cela met sous pression les cabinets établis, en particulier là où le travail peut être standardisé et automatisé. Parallèlement, l'expertise d'élite peut devenir encore plus précieuse lorsqu'elle est combinée à la technologie, un seul avocat très qualifié pouvant être démultiplié par un réseau de processus automatisés.",
+            ],
+          },
+          {
+            heading: "Des attentes clients qui montent",
+            paragraphs: [
+              "Les attentes des clients évoluent en conséquence. À mesure que des solutions plus rapides et plus économiques deviennent disponibles, les clients exigeront davantage de transparence, de prévisibilité et d'efficacité. Ils attendront non seulement un conseil juridique exact, mais aussi une livraison dans les délais, une tarification claire et des résultats mesurables. Dans cet environnement, les cabinets qui continuent de s'appuyer uniquement sur les méthodes traditionnelles risquent d'être perçus comme inefficaces ou dépassés.",
+            ],
+          },
+          {
+            heading: "Quand les cabinets deviennent créateurs de technologie",
+            paragraphs: [
+              "La convergence du logiciel et des services juridiques accélère encore ce mouvement. Les cabinets ne sont plus seulement consommateurs de technologie. Ils en deviennent de plus en plus créateurs. En construisant des outils internes, en développant des systèmes d'IA spécialisés et en les intégrant à leurs flux de travail, ils peuvent se différencier et bâtir des avantages défendables. Avec le temps, la distinction entre un cabinet d'avocats et une société de technologie juridique pourrait devenir de plus en plus floue.",
+            ],
+          },
+          {
+            heading: "Une adoption inégale mais inévitable",
+            paragraphs: [
+              "Malgré ces évolutions, l'adoption reste inégale. La profession juridique est par nature conservatrice, avec un fort accent sur la maîtrise du risque et la fiabilité. Cela peut ralentir l'intégration de nouvelles technologies, en particulier dans les dossiers à fort enjeu. La trajectoire est néanmoins claire. À mesure que les capacités de l'IA progressent et que les premiers adoptants démontrent des bénéfices tangibles, la pression à s'adapter s'intensifiera.",
+            ],
+          },
+          {
+            heading: "Une restructuration, pas une disparition",
+            paragraphs: [
+              "La transformation des cabinets n'est donc pas une question de « si », mais de « à quelle vitesse » et « jusqu'où ». Les cabinets qui reconnaissent la nécessité de passer d'un modèle fondé sur le travail à un modèle fondé sur les systèmes seront mieux placés pour négocier cette transition. Ceux qui investissent dans la construction, la mesure et l'amélioration continue de leurs processus pourront délivrer plus de valeur avec moins de ressources.",
+              "Dans ce paysage émergent, l'avantage décisif ne tiendra pas seulement à la qualité des avocats pris individuellement, mais à la qualité des systèmes qui les soutiennent. Les cabinets qui réussiront seront ceux qui sauront inscrire l'expertise dans des processus industrialisables, articuler le jugement humain et la capacité des machines, et aligner leurs incitations économiques sur cette nouvelle réalité. La pratique du droit ne disparaît pas, mais elle est profondément restructurée.",
+            ],
+          },
+        ],
+      },
+      es: {
+        title:
+          "La revolución de los cuellos blancos: la transformación de los despachos de abogados en la era de la inteligencia artificial",
+        subtitle:
+          "Por qué el paso de un modelo basado en el trabajo a un modelo basado en sistemas está rediseñando la economía, la organización y el papel del despacho moderno.",
+        readingTime: "10 min de lectura",
+        summary:
+          "Cómo los grandes modelos de lenguaje no solo aceleran el trabajo jurídico, sino que alteran los cimientos económicos del ejercicio del derecho, empujando a los despachos de un servicio basado en la mano de obra hacia un valor basado en sistemas.",
+        abstract:
+          "Durante décadas, los despachos de abogados han operado bajo un modelo que parecía estable y autosostenido. La inteligencia artificial, y en particular los grandes modelos de lenguaje, no se limita a acelerar el trabajo jurídico: cambia su naturaleza y, con ella, los cimientos económicos del ejercicio del derecho.",
+        body: [
+          {
+            heading: "El fin de un modelo autosostenido",
+            paragraphs: [
+              "Durante décadas, los despachos de abogados han operado bajo un modelo que parecía estable y autosostenido. Atraían a los mejores titulados, los formaban mediante aprendizaje y monetizaban su experiencia en horas facturables. El prestigio, la experiencia y la reputación institucional servían como indicadores de calidad. Esa estructura ha demostrado ser notablemente resistente, pero está cada vez más desalineada con la realidad tecnológica que emerge hoy.",
+              "La inteligencia artificial, y en particular los grandes modelos de lenguaje, no se limita a acelerar el trabajo jurídico. Cambia su naturaleza. Tareas que antes exigían un esfuerzo humano considerable, como la revisión documental, la investigación jurídica, la redacción de contratos e incluso elementos del razonamiento jurídico, pueden ahora automatizarse parcial o sustancialmente. El resultado no es solo una ganancia de productividad, sino una alteración de los cimientos económicos del ejercicio del derecho.",
+            ],
+          },
+          {
+            heading: "La hora facturable bajo presión",
+            paragraphs: [
+              "La hora facturable, considerada durante mucho tiempo la columna vertebral de los ingresos de los despachos, resulta difícil de sostener en un contexto en el que el tiempo ya no es la principal restricción. Cuando una tarea que antes requería diez horas puede completarse en minutos, facturar por esfuerzo en lugar de por resultado genera tensión entre eficiencia e ingresos. Los despachos afrontan una contradicción estructural: cuanta más IA adoptan para ganar eficiencia, más erosionan la métrica misma con la que generan ingresos.",
+            ],
+          },
+          {
+            heading: "Del servicio por trabajo al valor por sistemas",
+            paragraphs: [
+              "Esa tensión empuja al sector jurídico hacia un nuevo modelo. Un número creciente de despachos se aleja de servicios puramente basados en la mano de obra para avanzar hacia una creación de valor basada en sistemas. Estas organizaciones integran abogados con ingenieros y especialistas en IA, e invierten en herramientas y flujos de trabajo que convierten los procesos jurídicos en sistemas repetibles y escalables. En lugar de depender solo de la experiencia humana, incorporan esa experiencia en tecnología que puede reutilizarse, refinarse y desplegarse en múltiples asuntos.",
+            ],
+          },
+          {
+            heading: "Cómo se redefine la calidad jurídica",
+            paragraphs: [
+              "Este cambio altera también cómo se define y percibe la calidad jurídica. Históricamente, los clientes se apoyaban en la reputación, las credenciales y la marca del despacho como indicadores de competencia. Sin embargo, a medida que la IA permite medir y comparar resultados, la calidad se vuelve más transparente y más comparable. Un trabajo jurídico antes evaluado de forma subjetiva puede valorarse cada vez más mediante criterios estructurados, marcos de prueba y rendimiento empírico. Con el tiempo, esto puede llevar a los clientes a priorizar resultados demostrables sobre el prestigio institucional.",
+            ],
+          },
+          {
+            heading: "Las estructuras de socios y el problema de los incentivos",
+            paragraphs: [
+              "Las implicaciones para la organización de los despachos son significativas. Las estructuras societarias tradicionales están diseñadas para maximizar el reparto de beneficios a corto plazo más que la inversión a largo plazo. Los socios tienen incentivos para generar ingresos dentro del ejercicio en curso, lo que limita la disposición a destinar tiempo y recursos a la experimentación, la investigación y la construcción de sistemas. En cambio, los despachos que adoptan un enfoque más corporativo, o cuya estructura favorece la reinversión, están mejor situados para desarrollar tecnologías propias y capturar las ganancias a largo plazo de la automatización.",
+            ],
+          },
+          {
+            heading: "El papel cambiante del abogado",
+            paragraphs: [
+              "Al mismo tiempo, el papel del abogado evoluciona. La inteligencia artificial es especialmente eficaz para manejar grandes volúmenes de texto, identificar patrones y ejecutar tareas estructuradas. Esas capacidades se solapan directamente con muchas funciones jurídicas centrales. No eliminan, sin embargo, la necesidad de juicio humano. La decisión estratégica, la negociación, el asesoramiento al cliente y las consideraciones deontológicas siguen siendo ámbitos profundamente humanos. El reto de los despachos modernos no es, por tanto, sustituir a los abogados, sino redefinir su papel. Los abogados actúan cada vez más como supervisores de sistemas, diseñadores de flujos de trabajo e intérpretes de resultados, más que como únicos productores del trabajo jurídico.",
+            ],
+          },
+          {
+            heading: "Nuevas dinámicas competitivas",
+            paragraphs: [
+              "Esta transformación introduce también nuevas dinámicas competitivas. Las barreras de entrada en ciertas áreas del ejercicio empiezan a desplazarse. Organizaciones más pequeñas e impulsadas por la tecnología pueden prestar servicios de alta calidad sin la misma escala de capital humano, apoyándose en sistemas para lograr eficiencia y consistencia. Esto presiona a los despachos establecidos, sobre todo donde el trabajo puede estandarizarse y automatizarse. Al mismo tiempo, la experiencia de élite puede volverse aún más valiosa combinada con tecnología, ya que un solo abogado altamente cualificado puede amplificarse mediante una red de procesos automatizados.",
+            ],
+          },
+          {
+            heading: "Expectativas crecientes de los clientes",
+            paragraphs: [
+              "Las expectativas de los clientes evolucionan en consecuencia. A medida que aparezcan soluciones más rápidas y económicas, los clientes exigirán mayor transparencia, previsibilidad y eficiencia. Esperarán no solo un asesoramiento jurídico exacto, sino también entrega puntual, precios claros y resultados medibles. En ese entorno, los despachos que sigan apoyándose únicamente en métodos tradicionales corren el riesgo de ser percibidos como ineficientes o desfasados.",
+            ],
+          },
+          {
+            heading: "Cuando los despachos se vuelven creadores de tecnología",
+            paragraphs: [
+              "La convergencia entre software y servicios jurídicos acelera aún más este cambio. Los despachos ya no son solo consumidores de tecnología. Cada vez más, se convierten en creadores. Construyendo herramientas internas, desarrollando sistemas de IA especializados e integrándolos en sus flujos de trabajo, pueden diferenciarse y crear ventajas defendibles. Con el tiempo, la distinción entre un despacho de abogados y una empresa de tecnología jurídica podría difuminarse cada vez más.",
+            ],
+          },
+          {
+            heading: "Una adopción desigual pero inevitable",
+            paragraphs: [
+              "Pese a estos cambios, la adopción sigue siendo desigual. La profesión jurídica es intrínsecamente conservadora, con un fuerte énfasis en la mitigación del riesgo y la fiabilidad. Esto puede frenar la integración de nuevas tecnologías, sobre todo en contextos de alto riesgo. La trayectoria, sin embargo, es clara. A medida que las capacidades de la IA mejoren y los primeros adoptantes demuestren beneficios tangibles, la presión para adaptarse se intensificará.",
+            ],
+          },
+          {
+            heading: "Una reestructuración, no una desaparición",
+            paragraphs: [
+              "La transformación de los despachos no es, por tanto, una cuestión de «si», sino de «con qué rapidez» y «hasta qué punto». Los despachos que reconozcan la necesidad de pasar de un modelo basado en el trabajo a uno basado en sistemas estarán mejor situados para afrontar esa transición. Los que inviertan en construir, medir y mejorar continuamente sus procesos podrán ofrecer más valor con menos recursos.",
+              "En este panorama emergente, la ventaja decisiva no residirá solo en la calidad de los abogados individuales, sino en la calidad de los sistemas que los sostienen. Los despachos que triunfen serán los que sepan codificar la experiencia en procesos escalables, integrar el juicio humano con la capacidad de las máquinas y alinear sus incentivos económicos con esta nueva realidad. El ejercicio del derecho no desaparece, pero está siendo reestructurado de raíz.",
+            ],
+          },
+        ],
+      },
+    },
     body: [
       {
         heading: "The end of a self-reinforcing model",
