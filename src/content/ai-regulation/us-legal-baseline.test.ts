@@ -164,6 +164,10 @@ describe("U.S. state baseline", () => {
     );
     expect(byCode.get("DE")?.enactedAIStatutes.join(" ")).toContain("15 Del. C. § 5145");
 
+    // Sixth populated pass (2026-08-05).
+    expect(byCode.get("NH")?.enactedAIStatutes.join(" ")).toContain("638:26-a");
+    expect(byCode.get("RI")?.enactedAIStatutes.join(" ")).toContain("Chapter 17-30");
+
     // Washington is deliberately pinned as pending: the LDH Washington corpus
     // returns bill texts only (SB 6120, HB 1170/1168 series), no enacted AI act.
     expect(byCode.get("WA")?.aiLawStatus).toBe("pending_ai_legislation");
@@ -223,11 +227,13 @@ describe("U.S. state baseline", () => {
       "MT",
       "ND",
       "NE",
+      "NH",
       "NJ",
       "NM",
       "NY",
       "OR",
       "PA",
+      "RI",
       "SD",
       "TN",
       "TX",

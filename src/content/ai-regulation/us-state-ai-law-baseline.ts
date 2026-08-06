@@ -719,6 +719,71 @@ const prioritySources: Record<string, UsStateOfficialSource[]> = {
         "Official codified South Dakota statute confirmed through the Legal Data Hunter legislation corpus: § 12-26-32 defines 'artificial intelligence' as 'any machine-based system that, for any explicit or implicit objective, infers from the inputs received by the system how to generate content, decisions, predictions, recommendations' for the deepfake provisions §§ 12-26-32 to 12-26-37. Runtime check 2026-08-05 returned HTTP 200.",
     }),
   ],
+  NH: [
+    source({
+      label: "RSA 638:26-a — fraudulent use of deepfakes",
+      institution: "New Hampshire General Court",
+      url: "https://gc.nh.gov/rsa/html/LXII/638/638-26-a.htm",
+      sourceType: "state_code",
+      runtimeAccessible: true,
+      responseStatus: 200,
+      parserStatus: "manual_reference",
+      recommendation: "manual_review",
+      note:
+        "Official codified New Hampshire section read at the source, with the credit line '2024, 243:1, eff. Jan. 1, 2025.' Runtime check 2026-08-05 returned HTTP 200.",
+    }),
+    source({
+      label: "RSA 664:14-c — synthetic media and deceptive and fraudulent deepfakes",
+      institution: "New Hampshire General Court",
+      url: "https://gc.nh.gov/rsa/html/LXIII/664/664-14-c.htm",
+      sourceType: "state_code",
+      runtimeAccessible: true,
+      responseStatus: 200,
+      parserStatus: "manual_reference",
+      recommendation: "manual_review",
+      note:
+        "Official codified section read at the source: it defines both 'synthetic media' and 'deepfake', imposes a 90-day pre-election disclosure duty naming artificial intelligence technology explicitly, and carries the credit line '2024, 345:1, eff. Aug. 1, 2024'. Runtime check 2026-08-05 returned HTTP 200.",
+    }),
+    source({
+      label: "RSA 507:8-j — civil actions for fraudulent use of deepfakes",
+      institution: "New Hampshire General Court",
+      url: "https://gc.nh.gov/rsa/html/LII/507/507-8-j.htm",
+      sourceType: "state_code",
+      runtimeAccessible: true,
+      responseStatus: 200,
+      parserStatus: "manual_reference",
+      recommendation: "manual_review",
+      note:
+        "Official codified civil-remedy section, surfaced alongside RSA 638:26-a. Runtime check 2026-08-05 returned HTTP 200. Its own credit line was not read in this pass, so no session-law citation is asserted for this section.",
+    }),
+  ],
+  RI: [
+    source({
+      label:
+        "R.I. Gen. Laws § 17-30-1 — deceptive synthetic media (Chapter 17-30, deceptive and fraudulent synthetic media in election communications)",
+      institution: "Rhode Island General Assembly",
+      url: "https://webserver.rilegislature.gov/Statutes/TITLE17/17-30/17-30-1.htm",
+      sourceType: "state_code",
+      runtimeAccessible: true,
+      responseStatus: 200,
+      parserStatus: "manual_reference",
+      recommendation: "manual_review",
+      note:
+        "Official codified Rhode Island section read at the source, with the History line 'P.L. 2025, ch. 409, § 1, effective July 2, 2025; P.L. 2025, ch. 410, § 1, effective July 2, 2025'. Runtime check 2026-08-05 returned HTTP 200.",
+    }),
+    source({
+      label: "R.I. Gen. Laws § 17-30-2 — right of action",
+      institution: "Rhode Island General Assembly",
+      url: "https://webserver.rilegislature.gov/Statutes/TITLE17/17-30/17-30-2.htm",
+      sourceType: "state_code",
+      runtimeAccessible: true,
+      responseStatus: 200,
+      parserStatus: "manual_reference",
+      recommendation: "manual_review",
+      note:
+        "Official codified right-of-action section in the same chapter. Runtime check 2026-08-05 returned HTTP 200; its text was not read item by item in this pass.",
+    }),
+  ],
   NE: [
     source({
       label:
@@ -1349,6 +1414,27 @@ const populatedStateBaselines: Record<string, PopulatedStateBaseline> = {
     publicSummary:
       "Delaware regulates election deep fakes at 15 Del. C. § 5145, combining a class B misdemeanor with a disclosure safe harbour and an expedited Court of Chancery action for the depicted candidate. A carve-out preserves security, anti-fraud and investigative activity.",
   },
+  // Sixth populated pass (2026-08-05), read on the issuing site.
+  NH: {
+    status: "enacted_sector_specific_ai_law",
+    confidence: "high",
+    enactedAIStatutes: [
+      "RSA 638:26-a, 'Fraudulent Use of Deepfakes' (2024, 243:1, eff. Jan. 1, 2025): knowingly creating, distributing or presenting a deepfake of an identifiable individual to embarrass, harass, entrap, defame, extort or otherwise cause financial or reputational harm is a class B felony. Where the deepfake results in the individual's arrest, that is a separate class B felony and the offender is liable for the victim's legal expenses and defence costs.",
+      "RSA 664:14-c, 'Synthetic Media and Deceptive and Fraudulent Deepfakes' (2024, 345:1, eff. Aug. 1, 2024): within 90 days before an election, deepfake content concerning candidates, election officials or parties may not be distributed unless accompanied by a clear disclosure that the material was manipulated or generated by artificial intelligence technology and depicts speech or conduct that did not occur. Affected candidates and election officials may seek injunctive relief and damages with attorney's fees.",
+      "RSA 507:8-j provides civil actions for fraudulent use of deepfakes.",
+    ],
+    publicSummary:
+      "New Hampshire has one of the broadest state deepfake regimes: RSA 638:26-a makes fraudulent use of a deepfake a class B felony with a second felony where it causes an arrest, RSA 664:14-c adds a 90-day pre-election disclosure duty that names artificial intelligence technology explicitly, and RSA 507:8-j supplies a civil action. Unlike most states its criminal provision is not confined to elections.",
+  },
+  RI: {
+    status: "enacted_sector_specific_ai_law",
+    confidence: "high",
+    enactedAIStatutes: [
+      "R.I. Gen. Laws Chapter 17-30, 'Deceptive and Fraudulent Synthetic Media in Election Communications' (§ 17-30-1 History: P.L. 2025, ch. 409, § 1 and ch. 410, § 1, both effective July 2, 2025): synthetic media knowingly distributed by candidates, campaign committees, political action committees or independent spenders within 90 days of an election must carry a disclosure stating that the image has been manipulated or generated by artificial intelligence, with size rules for visual media and spoken repetition every two minutes for audio. § 17-30-2 supplies the right of action.",
+    ],
+    publicSummary:
+      "Rhode Island regulates deceptive synthetic media in election communications through Chapter 17-30 of the General Laws, enacted by twin 2025 public laws effective July 2, 2025, with a 90-day pre-election window, an artificial-intelligence disclosure requirement and a statutory right of action.",
+  },
 };
 
 function createProfile(code: string, name: string): UsStateAiLawProfile {
@@ -1452,7 +1538,7 @@ export function getPriorityUsStateProfiles() {
     "CA", "CO", "NY", "IL", "TX", "CT", "UT", "VA", "WA", "MD",
     "MT", "KY", "TN", "ND", "NM", "AZ", "SD", "AR",
     "OR", "NJ", "FL", "WI", "MI",
-    "MN", "PA", "LA", "ID", "NE", "DE",
+    "MN", "PA", "LA", "ID", "NE", "DE", "NH", "RI",
   ];
   return usStateAiLawProfiles.filter((profile) =>
     priorityCodes.includes(profile.stateCode),
