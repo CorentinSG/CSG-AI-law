@@ -1689,6 +1689,24 @@ const denmarkAiActAgencyPage: CountrySourceRecord = {
     "Official Danish Agency for Digital Government anchor listed by the Commission AI Act Service Desk as providing information about the AI Act and its development.",
 };
 
+const denmarkAiActImplementingAct: CountrySourceRecord = {
+  label:
+    "Lov om supplerende bestemmelser til forordningen om kunstig intelligens (Lov nr. 467 af 14. maj 2025)",
+  url: "https://retsinformation.dk/eli/lta/2025/467",
+  institution: "Retsinformation (Lovtidende A)",
+  sourceType: "legislation",
+  official: true,
+  public: true,
+  runtimeAccessible: true,
+  responseStatus: 200,
+  publicationDate: "2025-05-14",
+  lastCheckedDate: "2026-08-06T00:00:00.000Z",
+  parserStatus: "manual_reference",
+  recommendation: "manual_review",
+  note:
+    "Binding Danish act supplementing Regulation (EU) 2024/1689. Chapter 2, section 2 designates the national competent authorities; section 2(2) designates the notifying authority and single point of contact. Text read from the official consolidated record on 2026-08-06.",
+};
+
 const denmarkDomsdatabasenCaseLaw: CountrySourceRecord = {
   label: "Domsdatabasen Danish judgment database",
   url: "https://domsdatabasen.dk/",
@@ -1755,6 +1773,24 @@ const finlandGovernmentAiSupervision: CountrySourceRecord = {
   recommendation: "manual_review",
   note:
     "Official Finnish Government press release stating that acts regulating national authorities supervising the EU AI Act enter into force on 1 January 2026, and describing market-surveillance and fundamental-rights supervision roles.",
+};
+
+const finlandAiSupervisionAct: CountrySourceRecord = {
+  label:
+    "Laki eräiden tekoälyjärjestelmien valvonnasta (1377/2025) — Act on the supervision of certain AI systems",
+  url: "https://data.finlex.fi/eli/sd/2025/1377/alkup",
+  institution: "Finlex (Finnish Government / Ministry of Justice)",
+  sourceType: "legislation",
+  official: true,
+  public: true,
+  runtimeAccessible: true,
+  responseStatus: 200,
+  publicationDate: "2025-12-22",
+  lastCheckedDate: "2026-08-06T00:00:00.000Z",
+  parserStatus: "manual_reference",
+  recommendation: "manual_review",
+  note:
+    "Binding Finnish act supplementing Regulation (EU) 2024/1689, in force 1 January 2026 (section 29). Chapter 2 allocates market-surveillance competence authority by authority; chapter 3 designates the notifying authorities; chapter 4 sets the penalty regime. Full text read from the official Finlex record on 2026-08-06.",
 };
 
 const finlandFinlexCaseLaw: CountrySourceRecord = {
@@ -1892,6 +1928,9 @@ function createMonitoredInstitutionProfile(input: {
   caseLawSources?: CountrySourceRecord[];
   implementationMeasures?: string[];
   competentAuthorities?: string[];
+  implementationStatus?: EuropeImplementationStatus;
+  implementationConfidence?: EuropeImplementationConfidence;
+  aiActImplementationNotes?: string;
   marketSurveillanceAuthorities?: string[];
   notifyingAuthorities?: string[];
   sourceVerificationStatus?: EuropeCountryProfile["sourceVerificationStatus"];
@@ -1939,13 +1978,18 @@ function createMonitoredInstitutionProfile(input: {
     slug: input.slug,
     region: "Europe",
     euMemberState: true,
-    implementationStatus: "implementation_in_progress",
+    implementationStatus: input.implementationStatus ?? "implementation_in_progress",
     implementationStatusLabel:
-      europeImplementationStatusTaxonomy.implementation_in_progress.label,
+      europeImplementationStatusTaxonomy[
+        input.implementationStatus ?? "implementation_in_progress"
+      ].label,
     implementationStatusDescription:
-      europeImplementationStatusTaxonomy.implementation_in_progress.shortExplanation,
-    implementationConfidence: "low",
+      europeImplementationStatusTaxonomy[
+        input.implementationStatus ?? "implementation_in_progress"
+      ].shortExplanation,
+    implementationConfidence: input.implementationConfidence ?? "low",
     aiActImplementationNotes:
+      input.aiActImplementationNotes ??
       `${input.countryName} is an EU member state to which the EU AI Act applies directly. Official sources verify a national data-protection authority and at least one government or official public implementation-context source relevant to AI governance. This profile does not yet verify a final national AI Act implementation act, competent-authority designation, market-surveillance authority, or notifying authority.`,
     nationalImplementationMeasures: input.implementationMeasures ?? [],
     nationalCompetentAuthorities: input.competentAuthorities ?? [],
@@ -2196,18 +2240,36 @@ const firstWaveProfiles: EuropeCountryProfile[] = [
       "Danish Data Protection Agency",
       "Agency for Digital Government",
     ],
-    additionalRegulationSources: [denmarkAiActAgencyPage],
+    additionalRegulationSources: [denmarkAiActImplementingAct, denmarkAiActAgencyPage],
     caseLawSources: [denmarkDomsdatabasenCaseLaw],
+    implementationStatus: "competent_authority_designated",
+    implementationConfidence: "high",
+    aiActImplementationNotes:
+      "Denmark has adopted a binding national act supplementing the EU AI Act: Lov om supplerende bestemmelser til forordningen om kunstig intelligens (Lov nr. 467 af 14. maj 2025, Lovtidende A). Chapter 2, section 2 designates the Agency for Digital Government, the Danish Data Protection Agency and the Danish Court Administration as national competent authorities under Article 70(1) of Regulation (EU) 2024/1689. Section 2(2) designates the Agency for Digital Government as notifying authority under Article 28(1) and as the single point of contact. A further bill (L 111) was introduced on 18 February 2026 by the Minister for Digitalisation and is not yet enacted.",
+    implementationMeasures: [
+      "Lov om supplerende bestemmelser til forordningen om kunstig intelligens (Lov nr. 467 af 14. maj 2025), published in Lovtidende A, supplementing Regulation (EU) 2024/1689 and reproducing the Regulation as Annex 1 for practical reference only.",
+      "Bill L 111, Forslag til Lov om supplerende bestemmelser til forordningen om kunstig intelligens (AI-loven), introduced 18 February 2026 by the Minister for Digitalisation — introduced, not enacted.",
+    ],
+    competentAuthorities: [
+      "Digitaliseringsstyrelsen (Agency for Digital Government) — Article 70(1)",
+      "Datatilsynet (Danish Data Protection Agency) — Article 70(1)",
+      "Domstolsstyrelsen (Danish Court Administration) — Article 70(1)",
+    ],
+    notifyingAuthorities: [
+      "Digitaliseringsstyrelsen (Agency for Digital Government) — Article 28(1), also single point of contact",
+    ],
     sourceVerificationStatus: "verified_official_sources_present",
-    missingSourceWarnings: [],
+    missingSourceWarnings: [
+      "Market-surveillance authority allocation per sector is not separately itemised in this profile.",
+    ],
     nationalCaseLawNotes:
       "Domsdatabasen is attached as Denmark's official courts judgment database. No Danish AI Act-specific decision has been individually selected into this profile yet.",
     editorialNotes: [
-      "Denmark has official Agency for Digital Government AI Act/guidance anchors and an official judgment database, but final AI Act authority designations should remain tied to a binding national law source before being displayed as final.",
+      "Authority designations are tied to the binding national act (Lov nr. 467 af 14. maj 2025, chapter 2), read from the official Retsinformation record on 2026-08-06.",
       "No Danish AI Act-specific case-law item has been selected yet; Domsdatabasen is attached as the monitoring source.",
     ],
     publicSummary:
-      "Denmark is included with verified official data-protection, Agency for Digital Government, AI Act guidance, and case-law anchors. Final authority-designation details remain under review pending binding-source confirmation.",
+      "Denmark has enacted a binding act supplementing the EU AI Act (Lov nr. 467 of 14 May 2025), designating the Agency for Digital Government, the Data Protection Agency and the Court Administration as national competent authorities, with the Agency for Digital Government as notifying authority and single point of contact. A further bill was introduced in February 2026.",
   }),
   createMonitoredInstitutionProfile({
     countryCode: "EE",
@@ -2251,23 +2313,48 @@ const firstWaveProfiles: EuropeCountryProfile[] = [
       "Finnish Transport and Communications Agency Traficom",
       "Ministry of Economic Affairs and Employment",
     ],
-    additionalRegulationSources: [finlandGovernmentAiSupervision],
+    additionalRegulationSources: [finlandAiSupervisionAct, finlandGovernmentAiSupervision],
     caseLawSources: [finlandFinlexCaseLaw],
+    implementationStatus: "competent_authority_designated",
+    implementationConfidence: "high",
+    aiActImplementationNotes:
+      "Finland has enacted the Act on the supervision of certain AI systems (1377/2025), given on 22 December 2025 and in force since 1 January 2026 (section 29), supplementing Regulation (EU) 2024/1689. Chapter 2 allocates market-surveillance competence sector by sector, chapter 3 designates the notifying authorities, and chapter 4 establishes a dedicated sanctions board and penalty ceilings. The Act does not apply to Parliament's legislative activity, the Parliamentary Office, the Parliamentary Ombudsman or the Chancellor of Justice (section 1).",
     implementationMeasures: [
-      "Finnish Government press release states that acts regulating national authorities supervising the EU AI Act enter into force on 1 January 2026.",
+      "Laki eräiden tekoälyjärjestelmien valvonnasta (1377/2025), in force 1 January 2026 (section 29); preparatory works HE 46/2025, TaVM 18/2025, EV 162/2025.",
+      "Section 6: Traficom acts as the single point of contact under Article 70(2) of the AI Act and reports to the European Commission under Article 99(11).",
+      "Section 13: a sanctions board (seuraamusmaksulautakunta) sits in connection with Traficom and imposes penalty payments on a competent market-surveillance authority's proposal.",
+      "Section 23 penalty ceilings: EUR 35 000 000 or 7% of worldwide annual turnover for prohibited practices; EUR 15 000 000 or 3% for provider, representative, importer, distributor, deployer, notified-body and transparency breaches; EUR 7 500 000 or 1% for incorrect or misleading information — whichever is higher, and for SMEs whichever is lower.",
+      "Section 24: no penalty payment may be imposed on state or municipal authorities, wellbeing services counties, independent public-law institutions, the Office of the President, or the Evangelical Lutheran and Orthodox Churches of Finland and their parishes.",
+      "Laki Finanssivalvonnasta annetun lain muuttamisesta (1380/2025) amends the Financial Supervisory Authority Act so its Director may propose a penalty payment to the sanctions board referred to in section 13 of Act 1377/2025.",
+    ],
+    competentAuthorities: [
+      "Turvallisuus- ja kemikaalivirasto (Tukes) — Annex I Section A items 4, 5, 7 and 10; items 1 and 9 for consumer products; item 2 outside Customs' remit; Annex III critical infrastructure for the gas subsector and water supply",
+      "Tulli (Finnish Customs) — Annex I Section A item 2, per the Market Surveillance Act (1137/2016) section 4(2) and the Toy Safety Act (1154/2011) section 56(2)",
+      "Liikenne- ja viestintävirasto (Traficom) — Annex I Section A items 3 and 6; Annex III critical infrastructure for road traffic and critical digital infrastructure; Article 50 transparency obligations (section 5)",
+      "Lupa- ja valvontavirasto, as occupational safety and health authority — Annex I Section A item 8, items 1 and 9 for occupational-safety products; Annex III points 5(a) and 5(d)",
+      "Lääkealan turvallisuus- ja kehittämiskeskus (Fimea) — Annex I Section A items 11 and 12",
+      "Energiavirasto (Energy Authority) — Annex III critical infrastructure where the system is a safety component in heating or electricity supply, or in gas supply for distribution and transmission system operators",
+      "Tietosuojavaltuutettu (Data Protection Ombudsman) — Annex III points 1, 3, 4 and 6-8 and use cases under point 5(b) outside the FIN-FSA's remit; also supervises prohibited AI practices under Article 5 (section 4)",
+      "Finanssivalvonta (Financial Supervisory Authority) — Annex III point 5(c), point 5(a) for unemployment and insurance funds, non-life insurers and pension institutions, and point 5(b) for its supervised entities; notifies the European Central Bank under Article 74(7) (section 7)",
+    ],
+    notifyingAuthorities: [
+      "Työ- ja elinkeinoministeriö (Ministry of Economic Affairs and Employment) — Annex I Section A items 2, 4, 5, 7 and 10, and Annex III point 1",
+      "Liikenne- ja viestintävirasto (Traficom) — Annex I Section A items 3 and 6",
+      "Lääkealan turvallisuus- ja kehittämiskeskus (Fimea) — Annex I Section A items 11 and 12",
+      "Sosiaali- ja terveysministeriö (Ministry of Social Affairs and Health) — Annex I Section A items 1, 8 and 9",
     ],
     sourceVerificationStatus: "verified_official_sources_present",
     missingSourceWarnings: [],
     nationalAIRegulationNotes:
-      "Finland has verified official AI Act implementation/supervision anchors through Traficom materials and the Finnish Government press release on national AI Act supervision. Final authority-by-authority mapping should remain tied to the enacted acts and detailed official authority materials.",
+      "Finland's authority matrix is taken directly from the enacted Act on the supervision of certain AI systems (1377/2025), sections 3 to 8, read in full from the official Finlex record. The Data Protection Ombudsman additionally acts as notified body where law-enforcement, immigration or asylum authorities deploy an Annex III point 1 high-risk system (section 11).",
     nationalCaseLawNotes:
       "Finlex is attached as Finland's official legal-information and case-law database, covering decisions of Finnish courts over several decades. No Finnish AI Act-specific decision has been individually selected into this profile yet.",
     editorialNotes: [
-      "The Finnish Government source verifies the national supervision framework entering into force on 1 January 2026, but the detailed authority matrix still needs pinpointing before public copy describes it as exhaustive.",
+      "Authority designations are pinpointed to sections 3 to 8 of Act 1377/2025; the allocation is sector-by-sector and should be cited with its Annex references rather than summarised as a single supervisor.",
       "No Finnish AI Act-specific case-law item has been selected yet; Finlex is attached as the national case-law monitoring source.",
     ],
     publicSummary:
-      "Finland is included with verified official AI Act supervision, Traficom, data-protection, and Finlex case-law anchors. The national supervision framework is tracked as entering into force on 1 January 2026, while detailed authority mapping remains under review.",
+      "Finland enacted the Act on the supervision of certain AI systems (1377/2025), in force since 1 January 2026, which distributes AI Act market surveillance across eight authorities by sector, makes Traficom the single point of contact, gives the Data Protection Ombudsman oversight of prohibited practices, and creates a dedicated sanctions board with ceilings up to EUR 35 million or 7% of worldwide turnover.",
   }),
   createMonitoredInstitutionProfile({
     countryCode: "GR",
