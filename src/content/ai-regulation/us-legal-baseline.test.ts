@@ -151,6 +151,12 @@ describe("U.S. state baseline", () => {
     expect(byCode.get("WI")?.enactedAIStatutes.join(" ")).toContain("11.1303(2m)");
     expect(byCode.get("MI")?.enactedAIStatutes.join(" ")).toContain("168.932f");
 
+    // Fourth populated pass (2026-08-05).
+    expect(byCode.get("MN")?.enactedAIStatutes.join(" ")).toContain("609.771");
+    expect(byCode.get("PA")?.enactedAIStatutes.join(" ")).toContain("4101.1");
+    expect(byCode.get("LA")?.enactedAIStatutes.join(" ")).toContain("14:73.13");
+    expect(byCode.get("ID")?.enactedAIStatutes.join(" ")).toContain("67-6628A");
+
     // Washington is deliberately pinned as pending: the LDH Washington corpus
     // returns bill texts only (SB 6120, HB 1170/1168 series), no enacted AI act.
     expect(byCode.get("WA")?.aiLawStatus).toBe("pending_ai_legislation");
@@ -183,6 +189,11 @@ describe("U.S. state baseline", () => {
     //   OR  SB 1571, Ch. 62 Oregon Laws 2024, olis.oregonlegislature.gov
     //   VA  Code of Virginia § 18.2-213.3 (HB 697), legacylis.virginia.gov
     //   WI  Wis. Stat. § 11.1303(2m) (2023 Act 123), docs.legis.wisconsin.gov
+    // Fourth pass (2026-08-05), each read on the issuing site:
+    //   ID  Idaho Code § 67-6628A (2024 ch. 172), legislature.idaho.gov
+    //   LA  La. R.S. 14:73.13 (Acts 2023 No. 457), legis.la.gov
+    //   MN  Minn. Stat. § 609.771, revisor.mn.gov
+    //   PA  18 Pa.C.S. § 4101.1 (Act 35 of 2025), legis.state.pa.us
     expect(enacted.map((state) => state.code).sort()).toEqual([
       "AR",
       "AZ",
@@ -190,16 +201,20 @@ describe("U.S. state baseline", () => {
       "CO",
       "CT",
       "FL",
+      "ID",
       "IL",
       "KY",
+      "LA",
       "MD",
       "MI",
+      "MN",
       "MT",
       "ND",
       "NJ",
       "NM",
       "NY",
       "OR",
+      "PA",
       "SD",
       "TN",
       "TX",

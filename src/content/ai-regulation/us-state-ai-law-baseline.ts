@@ -719,6 +719,74 @@ const prioritySources: Record<string, UsStateOfficialSource[]> = {
         "Official codified South Dakota statute confirmed through the Legal Data Hunter legislation corpus: § 12-26-32 defines 'artificial intelligence' as 'any machine-based system that, for any explicit or implicit objective, infers from the inputs received by the system how to generate content, decisions, predictions, recommendations' for the deepfake provisions §§ 12-26-32 to 12-26-37. Runtime check 2026-08-05 returned HTTP 200.",
     }),
   ],
+  MN: [
+    source({
+      label: "Minn. Stat. § 609.771 — use of deep fake technology to influence an election",
+      institution: "Minnesota Office of the Revisor of Statutes",
+      url: "https://www.revisor.mn.gov/statutes/cite/609.771",
+      sourceType: "state_code",
+      runtimeAccessible: true,
+      responseStatus: 200,
+      parserStatus: "manual_reference",
+      recommendation: "manual_review",
+      note:
+        "Official codified Minnesota statute read at the source, with the History line '2023 c 52 art 6 s 16; c 58 s 2; 2024 c 112 art 2 s 76-78'. The section is framed around 'deep fake' technology and does not itself use the term artificial intelligence. Runtime check 2026-08-05 returned HTTP 200.",
+    }),
+  ],
+  PA: [
+    source({
+      label: "18 Pa.C.S. Chapter 41 — § 4101.1 digital forgery",
+      institution: "Pennsylvania General Assembly",
+      url: "https://www.legis.state.pa.us/WU01/LI/LI/CT/HTM/18/00.041..HTM",
+      sourceType: "state_code",
+      runtimeAccessible: true,
+      responseStatus: 200,
+      parserStatus: "manual_reference",
+      recommendation: "manual_review",
+      note:
+        "Official codified chapter read at the source: § 4101.1 (digital forgery) sits between § 4101 (forgery) and § 4102, and defines 'forged digital likeness' as a computer-generated visual representation of an actual and identifiable individual, or an audio recording of such an individual's voice. The section does not define artificial intelligence. Runtime check 2026-08-05 returned HTTP 200.",
+    }),
+    source({
+      label: "Pennsylvania Act 35 of 2025 (SB 649) — act information page",
+      institution: "Pennsylvania General Assembly",
+      url: "https://www.palegis.us/statutes/unconsolidated/law-information?sessYr=2025&sessInd=0&actNum=0035.",
+      sourceType: "legislature",
+      runtimeAccessible: true,
+      responseStatus: 200,
+      parserStatus: "manual_reference",
+      recommendation: "manual_review",
+      note:
+        "Official act information page read at the source: Act 35 of 2025 originates from SB 649, amends the Crimes Code to create the offense of digital forgery, and was signed on July 7, 2025 with a 60-day effective delay. Runtime check 2026-08-05 returned HTTP 200.",
+    }),
+  ],
+  LA: [
+    source({
+      label: "La. R.S. 14:73.13 — unlawful deepfakes",
+      institution: "Louisiana State Legislature",
+      url: "https://www.legis.la.gov/legis/Law.aspx?d=1336015",
+      sourceType: "state_code",
+      runtimeAccessible: true,
+      responseStatus: 200,
+      parserStatus: "manual_reference",
+      recommendation: "manual_review",
+      note:
+        "Official codified Louisiana statute read at the source, heading '§ 73.13. Unlawful deepfakes' with the credit line 'Acts 2023, No. 457, §1.'. Unlike most state deepfake statutes this one is a sexual-conduct and minor-protection offence rather than an election measure. Runtime check 2026-08-05 returned HTTP 200.",
+    }),
+  ],
+  ID: [
+    source({
+      label: "Idaho Code § 67-6628A — electioneering communications, use of synthetic media",
+      institution: "Idaho State Legislature",
+      url: "https://legislature.idaho.gov/statutesrules/idstat/Title67/T67CH66/SECT67-6628A/",
+      sourceType: "state_code",
+      runtimeAccessible: true,
+      responseStatus: 200,
+      parserStatus: "manual_reference",
+      recommendation: "manual_review",
+      note:
+        "Official codified Idaho section read at the source, with the History line '[67-6628A, added 2024, ch. 172, sec. 1, p. 654.]'. Runtime check 2026-08-05 returned HTTP 200.",
+    }),
+  ],
   OR: [
     source({
       label: "Oregon SB 1571 (2024 Regular Session) — measure overview",
@@ -1163,6 +1231,43 @@ const populatedStateBaselines: Record<string, PopulatedStateBaseline> = {
     publicSummary:
       "Michigan bars distribution of materially deceptive media without a statutory disclaimer under MCL 168.932f, added by 2023 PA 265 and effective February 13, 2024, escalating from misdemeanor to felony on repeat violations within five years.",
   },
+  // Fourth populated pass (2026-08-05), same method: read on the issuing site.
+  MN: {
+    status: "enacted_sector_specific_ai_law",
+    confidence: "high",
+    enactedAIStatutes: [
+      "Minn. Stat. § 609.771, 'Use of deep fake technology to influence election' (History: 2023 c 52 art 6 s 16; c 58 s 2; 2024 c 112 art 2 s 76-78): disseminating a deep fake without the depicted individual's consent, with intent to injure a candidate or influence an election result, within defined pre-election windows, is punishable by up to 90 days or $1,000, rising to five years or $10,000 for a repeat offence within five years, and a convicted candidate forfeits the nomination or office.",
+    ],
+    publicSummary:
+      "Minnesota criminalises the use of deep fake technology to influence an election under Minn. Stat. § 609.771, with escalating penalties and forfeiture of office for a convicted candidate. The section is drafted around 'deep fake' technology rather than artificial intelligence as such.",
+  },
+  PA: {
+    status: "enacted_sector_specific_ai_law",
+    confidence: "high",
+    enactedAIStatutes: [
+      "18 Pa.C.S. § 4101.1 (digital forgery), created by Act 35 of 2025 (SB 649), signed July 7, 2025 with a 60-day effective delay: it defines 'forged digital likeness' as a computer-generated visual representation of an actual and identifiable individual, or an audio recording of such an individual's voice, and criminalises distributing one as genuine with intent to defraud, injure or deceive. The section does not itself define artificial intelligence.",
+    ],
+    publicSummary:
+      "Pennsylvania added the offence of digital forgery at 18 Pa.C.S. § 4101.1 through Act 35 of 2025 (SB 649, signed July 7, 2025), reaching computer-generated likenesses and voice recordings of identifiable individuals distributed as genuine.",
+  },
+  LA: {
+    status: "enacted_sector_specific_ai_law",
+    confidence: "high",
+    enactedAIStatutes: [
+      "La. R.S. 14:73.13, 'Unlawful deepfakes' (Acts 2023, No. 457, §1): it defines 'deepfake' as audio or visual media created, altered or digitally manipulated so as to appear to a reasonable observer to be an authentic record of an individual's actual speech or conduct, excludes work of political, public-interest or newsworthy value and clearly disclosed material, and carries imprisonment at hard labour with enhanced penalties where sexual conduct or a minor is involved.",
+    ],
+    publicSummary:
+      "Louisiana criminalises unlawful deepfakes under La. R.S. 14:73.13 (Acts 2023, No. 457). Unlike most state deepfake statutes it is a sexual-conduct and minor-protection offence rather than an election measure, and it carries hard-labour sentences with a statutory carve-out for political, newsworthy, satirical and clearly disclosed material.",
+  },
+  ID: {
+    status: "enacted_sector_specific_ai_law",
+    confidence: "high",
+    enactedAIStatutes: [
+      "Idaho Code § 67-6628A, 'Electioneering communications — use of synthetic media' (added 2024, ch. 172, sec. 1, p. 654): 'synthetic media' is an audio or video recording of an individual's speech or conduct created through generative adversarial network techniques or other digital technology to produce a realistic but false recording. A creator avoids liability by carrying the disclosure 'This (video/audio) has been manipulated.' An affected candidate may seek injunctive relief, general and special damages and attorney's fees, proving synthetic-media use by clear and convincing evidence.",
+    ],
+    publicSummary:
+      "Idaho regulates synthetic media in electioneering communications under Idaho Code § 67-6628A (2024, ch. 172), pairing a safe-harbour disclosure with a candidate's civil action subject to a clear-and-convincing standard of proof.",
+  },
 };
 
 function createProfile(code: string, name: string): UsStateAiLawProfile {
@@ -1266,6 +1371,7 @@ export function getPriorityUsStateProfiles() {
     "CA", "CO", "NY", "IL", "TX", "CT", "UT", "VA", "WA", "MD",
     "MT", "KY", "TN", "ND", "NM", "AZ", "SD", "AR",
     "OR", "NJ", "FL", "WI", "MI",
+    "MN", "PA", "LA", "ID",
   ];
   return usStateAiLawProfiles.filter((profile) =>
     priorityCodes.includes(profile.stateCode),
