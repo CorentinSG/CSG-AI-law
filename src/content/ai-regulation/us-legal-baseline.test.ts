@@ -157,6 +157,13 @@ describe("U.S. state baseline", () => {
     expect(byCode.get("LA")?.enactedAIStatutes.join(" ")).toContain("14:73.13");
     expect(byCode.get("ID")?.enactedAIStatutes.join(" ")).toContain("67-6628A");
 
+    // Fifth populated pass (2026-08-05). Nebraska is the first entry in this
+    // database that regulates AI behaviour rather than synthetic media.
+    expect(byCode.get("NE")?.enactedAIStatutes.join(" ")).toContain(
+      "Conversational Artificial Intelligence Safety Act",
+    );
+    expect(byCode.get("DE")?.enactedAIStatutes.join(" ")).toContain("15 Del. C. § 5145");
+
     // Washington is deliberately pinned as pending: the LDH Washington corpus
     // returns bill texts only (SB 6120, HB 1170/1168 series), no enacted AI act.
     expect(byCode.get("WA")?.aiLawStatus).toBe("pending_ai_legislation");
@@ -194,12 +201,17 @@ describe("U.S. state baseline", () => {
     //   LA  La. R.S. 14:73.13 (Acts 2023 No. 457), legis.la.gov
     //   MN  Minn. Stat. § 609.771, revisor.mn.gov
     //   PA  18 Pa.C.S. § 4101.1 (Act 35 of 2025), legis.state.pa.us
+    // Fifth pass (2026-08-05), read in the LDH corpus, URLs runtime-checked:
+    //   DE  15 Del. C. § 5145, delcode.delaware.gov
+    //   NE  Neb. Rev. Stat. §§ 86-1801 to 86-1807 (Laws 2026, LB525),
+    //       nebraskalegislature.gov
     expect(enacted.map((state) => state.code).sort()).toEqual([
       "AR",
       "AZ",
       "CA",
       "CO",
       "CT",
+      "DE",
       "FL",
       "ID",
       "IL",
@@ -210,6 +222,7 @@ describe("U.S. state baseline", () => {
       "MN",
       "MT",
       "ND",
+      "NE",
       "NJ",
       "NM",
       "NY",

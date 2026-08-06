@@ -719,6 +719,60 @@ const prioritySources: Record<string, UsStateOfficialSource[]> = {
         "Official codified South Dakota statute confirmed through the Legal Data Hunter legislation corpus: § 12-26-32 defines 'artificial intelligence' as 'any machine-based system that, for any explicit or implicit objective, infers from the inputs received by the system how to generate content, decisions, predictions, recommendations' for the deepfake provisions §§ 12-26-32 to 12-26-37. Runtime check 2026-08-05 returned HTTP 200.",
     }),
   ],
+  NE: [
+    source({
+      label:
+        "Neb. Rev. Stat. §§ 86-1801 to 86-1807 — Conversational Artificial Intelligence Safety Act",
+      institution: "Nebraska Legislature",
+      url: "https://nebraskalegislature.gov/laws/statutes.php?statute=86-1801",
+      sourceType: "state_code",
+      runtimeAccessible: true,
+      responseStatus: 200,
+      parserStatus: "manual_reference",
+      recommendation: "manual_review",
+      note:
+        "Official codified Nebraska statute confirmed through the Legal Data Hunter legislation corpus (snapshot 2026-07-17): § 86-1801 cites the Act with History 'Laws 2026, LB525, § 12'. Runtime check 2026-08-05 returned HTTP 200.",
+    }),
+    source({
+      label: "Neb. Rev. Stat. § 86-1802 — definitions for the Conversational AI Safety Act",
+      institution: "Nebraska Legislature",
+      url: "https://nebraskalegislature.gov/laws/statutes.php?statute=86-1802",
+      sourceType: "state_code",
+      runtimeAccessible: true,
+      responseStatus: 200,
+      parserStatus: "manual_reference",
+      recommendation: "manual_review",
+      note:
+        "Official codified definitions read in full through the Legal Data Hunter corpus, including the definition of 'conversational artificial intelligence service' and its seven exclusions, with History 'Laws 2026, LB525, § 13'. Runtime check 2026-08-05 returned HTTP 200.",
+    }),
+    source({
+      label: "Neb. Rev. Stat. § 86-1804 — mandatory disclosure that the service is artificial intelligence",
+      institution: "Nebraska Legislature",
+      url: "https://nebraskalegislature.gov/laws/statutes.php?statute=86-1804",
+      sourceType: "state_code",
+      runtimeAccessible: true,
+      responseStatus: 200,
+      parserStatus: "manual_reference",
+      recommendation: "manual_review",
+      note:
+        "Official codified disclosure duty confirmed through the Legal Data Hunter corpus. Runtime check 2026-08-05 returned HTTP 200.",
+    }),
+  ],
+  DE: [
+    source({
+      label:
+        "15 Del. C. § 5145 — use of deep fake technology to influence an election; penalty; injunctive relief",
+      institution: "Delaware Code",
+      url: "https://delcode.delaware.gov/title15/c051/sc02/index.html",
+      sourceType: "state_code",
+      runtimeAccessible: true,
+      responseStatus: 200,
+      parserStatus: "manual_reference",
+      recommendation: "manual_review",
+      note:
+        "Official codified Delaware section confirmed through the Legal Data Hunter legislation corpus (snapshot 2026-04-15), including the safe-harbour disclosure wording and the Court of Chancery remedy. The corpus rendering elides the lettered sub-paragraphs, so no session-law citation is asserted for this section. Runtime check 2026-08-05 returned HTTP 200 on the subchapter page.",
+    }),
+  ],
   MN: [
     source({
       label: "Minn. Stat. § 609.771 — use of deep fake technology to influence an election",
@@ -1268,6 +1322,33 @@ const populatedStateBaselines: Record<string, PopulatedStateBaseline> = {
     publicSummary:
       "Idaho regulates synthetic media in electioneering communications under Idaho Code § 67-6628A (2024, ch. 172), pairing a safe-harbour disclosure with a candidate's civil action subject to a clear-and-convincing standard of proof.",
   },
+  // Fifth populated pass (2026-08-05). The Legal Data Hunter connector came
+  // back during this pass, so these two were read in the corpus and their URLs
+  // runtime-checked.
+  NE: {
+    status: "enacted_sector_specific_ai_law",
+    confidence: "high",
+    enactedAIStatutes: [
+      "Conversational Artificial Intelligence Safety Act, Neb. Rev. Stat. §§ 86-1801 to 86-1807 (Laws 2026, LB525). § 86-1802 defines a 'conversational artificial intelligence service' as an AI software application, web interface or computer program accessible to the general public that primarily simulates human conversation through textual, visual or aural communications, with seven exclusions including developer/researcher tools, narrow-topic outputs, voice assistants and internal or customer-service business use.",
+      "§ 86-1804: where a reasonable person would be misled into believing they are interacting with a human, the operator must clearly and conspicuously disclose that the service is artificial intelligence.",
+      "§ 86-1805: operators must adopt a protocol for responding to user prompts regarding suicidal ideation or self-harm, including reasonable efforts to refer the user to crisis service providers.",
+      "§ 86-1806: operators may not knowingly and intentionally cause or program the service to state that it is designed to provide professional mental or behavioral health care.",
+    ],
+    privateSectorRules: [
+      "The Act binds 'operators' — any person making a conversational AI service available to the public — and expressly excludes mobile application stores and search engines that merely provide access.",
+    ],
+    publicSummary:
+      "Nebraska enacted the Conversational Artificial Intelligence Safety Act (Neb. Rev. Stat. §§ 86-1801 to 86-1807, Laws 2026, LB525), one of the few state AI statutes that regulates AI behaviour rather than synthetic media: operators of public-facing conversational AI must disclose that the service is artificial intelligence, maintain a suicide and self-harm response protocol, and must not present the service as providing professional mental or behavioral health care.",
+  },
+  DE: {
+    status: "enacted_sector_specific_ai_law",
+    confidence: "high",
+    enactedAIStatutes: [
+      "15 Del. C. § 5145, 'Use of deep fake technology to influence an election; penalty; injunctive relief': distributing a deep fake, or contracting to do so, is unlawful where the distributor knows or reasonably should know the item is a deep fake and the statutory elements are met. Subsection (c)(1) provides a safe harbour where the synthetic media carries the disclosure 'This (image/video/audio) has been altered or artificially generated.' A violation is a class B misdemeanor, and a depicted candidate may bring an expedited action for injunctive relief and damages in the Court of Chancery, with attorneys' fees available to a prevailing party.",
+    ],
+    publicSummary:
+      "Delaware regulates election deep fakes at 15 Del. C. § 5145, combining a class B misdemeanor with a disclosure safe harbour and an expedited Court of Chancery action for the depicted candidate. A carve-out preserves security, anti-fraud and investigative activity.",
+  },
 };
 
 function createProfile(code: string, name: string): UsStateAiLawProfile {
@@ -1371,7 +1452,7 @@ export function getPriorityUsStateProfiles() {
     "CA", "CO", "NY", "IL", "TX", "CT", "UT", "VA", "WA", "MD",
     "MT", "KY", "TN", "ND", "NM", "AZ", "SD", "AR",
     "OR", "NJ", "FL", "WI", "MI",
-    "MN", "PA", "LA", "ID",
+    "MN", "PA", "LA", "ID", "NE", "DE",
   ];
   return usStateAiLawProfiles.filter((profile) =>
     priorityCodes.includes(profile.stateCode),

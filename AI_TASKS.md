@@ -14,6 +14,7 @@ Each agent edits only its own rows. Status vocabulary: `CLAIMED` · `WIP` · `BL
 | T-EFFICIENCY-PLAN (P0→P2) | Claude Code | MERGED | `main` @ `897d2b5` (#56–#61) | none (released) | `buildWeeklyDigestMarkdown()`, `deriveProvisioning()`, `purgeExpiredOperationalRecords()`, `localeAlternates()`, community "Scan Job Management", "DB Repository Layer" | 2026-07-31 |
 | T-SERP-PROBE | Claude Code | MERGED | `main` @ `080bfb0` (#62) | none (released) | `createDiscoveryLead()`, `listAgentApiCapabilities()`, community "DB Repository Layer" | 2026-08-01 |
 | T-SITE-RECOVERY | Claude Code | MERGED | `main` @ `a1432f2` (#65-#70) | none (released) | `buildStableHash()`, `clampFutureIsoDate()`, `populatedStateBaselines`, `usAiCaseLawEntries`, `listRawItemIdentitiesBySource()`, community "Scan Pipeline" | 2026-08-03 |
+| T-US-STATE-DB-BATCH4 | Claude Code | DONE-LOCAL | `claude/us-state-db-batch2` | `src/content/ai-regulation/us-state-ai-law-baseline.ts`, `src/content/ai-regulation/us-legal-baseline.test.ts` | `populatedStateBaselines`, `prioritySources`, `usStateMapStatuses` | 2026-08-05 |
 | T-US-STATE-DB-BATCH3 | Claude Code | DONE-LOCAL | `claude/us-state-db-batch2` | `src/content/ai-regulation/us-state-ai-law-baseline.ts`, `src/content/ai-regulation/us-legal-baseline.test.ts` | `populatedStateBaselines`, `prioritySources`, `usStateMapStatuses` | 2026-08-05 |
 | T-US-STATE-DB-BATCH2 | Claude Code | DONE-LOCAL | `claude/us-state-db-batch2` @ `2799720` | `src/content/ai-regulation/us-state-ai-law-baseline.ts`, `src/content/ai-regulation/us-legal-baseline.test.ts` | `populatedStateBaselines`, `prioritySources`, `usStateMapStatuses` | 2026-08-05 |
 | T-COUNTRY-DEPTH-AND-SOURCES | Claude Code | DONE-LOCAL | `claude/github-monitoring-recovery-lz4dos` | `src/content/ai-regulation/europe-member-state-implementation.ts`, `src/db/seed/ai-regulation-seed.ts`, `src/agents/ai-regulation/usMonitoringAgentDefinitions.ts` | `europeCountryProfiles`, `regulationSourcesSeed`, `buildStateDefinition()`, `stateVerifiedFeedRegistry` | 2026-08-05 |
@@ -50,6 +51,14 @@ YYYY-MM-DD · <Agent> · <TASK-ID> · <STATUS>
 ```
 
 ## Current status
+
+2026-08-05 · Claude Code · T-US-STATE-DB-BATCH4 · DONE-LOCAL
+- Intent:        fifth state-by-state batch of the AI-law database.
+- Files:         `src/content/ai-regulation/us-state-ai-law-baseline.ts`, `src/content/ai-regulation/us-legal-baseline.test.ts`
+- Graph anchors: `populatedStateBaselines`, `prioritySources`, `getPriorityUsStateProfiles()`, `usStateMapStatuses`
+- Verification:  `npm test` 1010/1010 · lint clean · typecheck clean · build succeeds.
+- Branch/commit: `claude/us-state-db-batch2` @ (this commit)
+- Next:          Claude Code, next batch. Added NE and DE — 28 enacted states. Nebraska's Conversational Artificial Intelligence Safety Act (§§ 86-1801 to 86-1807, Laws 2026 LB525) is the first entry in this database that regulates AI behaviour rather than synthetic media. Searched and found nothing: OH, NV, MO, NC, HI — all left on the reachability heuristic, NOT marked "no law", because the HI corpus is a 2017 snapshot, NC a 2023-06 snapshot, and the OH/NV corpora carry no snapshot date at all. Remaining unpopulated: 22 states + DC.
 
 2026-08-05 · Claude Code · T-US-STATE-DB-BATCH3 · DONE-LOCAL
 - Intent:        fourth state-by-state batch of the AI-law database.
