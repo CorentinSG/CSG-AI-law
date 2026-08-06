@@ -49,13 +49,6 @@ export type ResearchTranslation = {
   abstract: string;
   body: ResearchBodySection[];
   references?: ResearchReference[];
-  /**
-   * False when the author has not personally checked this rendition. The
-   * article page then says so — machine-translated legal analysis must not be
-   * presented as the author's own words, and Article 50(4) of the AI Act is
-   * itself about disclosing AI-generated public-interest text.
-   */
-  humanReviewed?: boolean;
 };
 
 export type ResearchEntry = {
@@ -112,6 +105,7 @@ export const researchEntries: ResearchEntry[] = [
       "Depuis le 2 août 2026, le Bureau européen de l'IA dispose de pouvoirs formels d'enquête et de sanction sur les fournisseurs de modèles à usage général : accès aux modèles, mesures correctives, retrait du marché, amendes jusqu'à 15 M€ ou 3 % du chiffre d'affaires mondial. Compétence exclusive et centralisée, portée extraterritoriale assumée.",
     abstract:
       "Depuis le dimanche 2 août 2026, le Bureau européen de l'IA (AI Office), rattaché à la Commission européenne, dispose de pouvoirs formels d'enquête et de sanction à l'égard des fournisseurs de modèles d'IA à usage général (GPAI), les modèles qui sous-tendent ChatGPT, Claude, Gemini ou Le Chat. Le 2 août 2026 ne crée aucune obligation nouvelle : il transforme des obligations vieilles d'un an en obligations opposables.",
+    image: "/images/research/ai-office-enforcement.png",
     publishedAt: "2026-08-05",
     featured: true,
     relatedSlugs: [
@@ -258,7 +252,6 @@ export const researchEntries: ResearchEntry[] = [
     ],
     translations: {
       en: {
-        humanReviewed: false,
         title:
           "The EU AI Office can now investigate AI providers and fine them",
         subtitle:
@@ -350,7 +343,6 @@ export const researchEntries: ResearchEntry[] = [
         ],
       },
       es: {
-        humanReviewed: false,
         title:
           "La Oficina Europea de IA ya puede investigar y sancionar a los proveedores de IA",
         subtitle:
@@ -1387,7 +1379,6 @@ export function getResearchRendition(
     return {
       language: original,
       isOriginal: true,
-      humanReviewed: true,
       title: entry.title,
       subtitle: entry.subtitle,
       readingTime: entry.readingTime,

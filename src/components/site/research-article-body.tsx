@@ -8,7 +8,7 @@ import {
   type ReactNode,
 } from "react";
 import Link from "next/link";
-import { Languages, Sparkles } from "lucide-react";
+import { Languages } from "lucide-react";
 
 import {
   ARTICLE_LANGUAGE_LABELS,
@@ -22,27 +22,16 @@ import {
 type Copy = {
   readIn: string;
   original: string;
-  machineTitle: string;
-  machineBody: (original: string) => string;
-  readOriginal: string;
 };
 
 const COPY: Record<"en" | "fr", Copy> = {
   en: {
     readIn: "Read in",
     original: "original",
-    machineTitle: "Machine translation",
-    machineBody: (original) =>
-      `This rendition was produced by machine translation and has not been reviewed by the author. Legal meaning can shift in translation — the ${original} original is the authoritative text.`,
-    readOriginal: "Read the original",
   },
   fr: {
     readIn: "Lire en",
     original: "original",
-    machineTitle: "Traduction automatique",
-    machineBody: (original) =>
-      `Cette version a été produite par traduction automatique et n'a pas été relue par l'auteur. Le sens juridique peut se déplacer dans la traduction : la version ${original} fait foi.`,
-    readOriginal: "Lire la version originale",
   },
 };
 
@@ -160,44 +149,6 @@ export function ArticleLanguageSwitcher() {
           </button>
         );
       })}
-    </div>
-  );
-}
-
-/**
- * Machine-translated legal analysis must not read as the author's own words.
- * Article 50(4) of the AI Act makes the same point about AI-generated
- * public-interest text.
- */
-export function ArticleTranslationNotice() {
-  const { entry, uiLang, setSelected } = useArticleLanguage();
-  const rendition = useRendition();
-  const originalLanguage = getOriginalLanguage(entry);
-  const c = COPY[uiLang];
-
-  if (rendition.isOriginal || rendition.humanReviewed) return null;
-
-  return (
-    <div
-      role="note"
-      className="flex items-start gap-3 rounded-[1.6rem] border border-amber-400/30 bg-amber-400/[0.05] p-5"
-    >
-      <Sparkles className="mt-0.5 size-4 shrink-0 text-amber-400" />
-      <div>
-        <p className="font-display text-sm font-medium tracking-[-0.01em] text-zinc-950">
-          {c.machineTitle}
-        </p>
-        <p className="mt-1 max-w-4xl text-[13px] leading-6 text-zinc-600 hyphens-auto text-justify">
-          {c.machineBody(ARTICLE_LANGUAGE_LABELS[originalLanguage])}
-        </p>
-        <button
-          type="button"
-          onClick={() => setSelected(originalLanguage)}
-          className="mt-2 font-mono text-[9.5px] uppercase tracking-[0.18em] text-zinc-500 underline decoration-black/15 underline-offset-4 transition-colors hover:text-zinc-900"
-        >
-          {c.readOriginal}
-        </button>
-      </div>
     </div>
   );
 }
