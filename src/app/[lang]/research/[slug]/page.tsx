@@ -15,7 +15,6 @@ import {
   ArticleLanguageSwitcher,
   ArticleReadingTime,
   ArticleTitle,
-  ArticleTranslationNotice,
   ResearchArticleBody,
 } from "@/components/site/research-article-body";
 import { ResearchCard } from "@/components/site/research-card";
@@ -169,7 +168,7 @@ export default async function ResearchArticlePage({
 
       <section className="grid gap-10 xl:grid-cols-[minmax(0,1fr)_19rem]">
         <article className="space-y-10">
-          <ArticleTranslationNotice />
+          
           <ResearchArticleBody
             t={{ abstract: t.abstract, references: t.references }}
           />

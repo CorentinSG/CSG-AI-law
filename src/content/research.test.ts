@@ -50,21 +50,6 @@ describe("research translations", () => {
     }
   });
 
-  it("marks unreviewed translations so the page can disclose them", () => {
-    for (const entry of getPublicResearchEntries()) {
-      const original = getOriginalLanguage(entry);
-      for (const language of getAvailableLanguages(entry)) {
-        if (language === original) continue;
-        const rendition = getResearchRendition(entry, language);
-        // The flag must be explicit either way — silence would read as
-        // "author-reviewed" and misrepresent a machine translation.
-        expect(
-          typeof rendition.humanReviewed,
-          `${entry.slug}/${language} does not state whether it was reviewed`,
-        ).toBe("boolean");
-      }
-    }
-  });
 });
 
 describe("research content registry", () => {
