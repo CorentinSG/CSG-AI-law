@@ -1829,6 +1829,42 @@ const finlandGovernmentAiSupervision: CountrySourceRecord = {
     "Official Finnish Government press release stating that acts regulating national authorities supervising the EU AI Act enter into force on 1 January 2026, and describing market-surveillance and fundamental-rights supervision roles.",
 };
 
+const cyprusCouncilOfMinistersDesignation: CountrySourceRecord = {
+  label:
+    "DMRID press release — Council of Ministers designation of national competent authorities under Article 70 AI Act (decision of 22 January 2025)",
+  url: "https://www.gov.cy/dmrid/en/uncategorized/regulation-eu-2024-1689-establishing-harmonised-rules-on-artificial-intelligence-ai-act/",
+  institution: "Deputy Ministry of Research, Innovation and Digital Policy (Republic of Cyprus)",
+  sourceType: "government",
+  official: true,
+  public: true,
+  runtimeAccessible: true,
+  responseStatus: 200,
+  publicationDate: "2025-02-06",
+  lastCheckedDate: "2026-08-07T00:00:00.000Z",
+  parserStatus: "manual_reference",
+  recommendation: "manual_review",
+  note:
+    "Official announcement that the Council of Ministers, by decision of 22 January 2025, designated the Commissioner of Electronic Communications as notifying authority, market surveillance authority and single point of contact, and the Commissioner for Personal Data Protection as market surveillance authority for Annex III points 1, 6, 7 and 8 and for Article 5 prohibited practices within her competence. The decision was communicated to the European Commission; additional market surveillance authorities may be designated. Full text read via crawl on 2026-08-07.",
+};
+
+const sloveniaZiudhpuiAct: CountrySourceRecord = {
+  label:
+    "Zakon o izvajanju uredbe (EU) o določitvi harmoniziranih pravil o umetni inteligenci (ZIUDHPUI) — Uradni list RS 85/25",
+  url: "https://pisrs.si/Pis.web/pregledPredpisa?sop=2025-01-3035",
+  institution: "PISRS — Legal Information System of the Republic of Slovenia",
+  sourceType: "legislation",
+  official: true,
+  public: true,
+  runtimeAccessible: true,
+  responseStatus: 200,
+  publicationDate: "2025-11-06",
+  lastCheckedDate: "2026-08-07T00:00:00.000Z",
+  parserStatus: "manual_reference",
+  recommendation: "manual_review",
+  note:
+    "Slovenia's AI Act implementing statute: adopted by the National Assembly on 23 October 2025, published in Uradni list RS No. 85/25 on 6 November 2025, in force and applicable from 21 November 2025 (register data: ID ZAKO9225, EVA 2025-3150-0003, EPA 2331-IX; lead body Ministry of Digital Transformation). Articles 3 to 13 designate notifying, accreditation and market-surveillance authorities and the single point of contact, and the act establishes a national AI ethics council and the misdemeanour/fine regime. Statute text read from the official register on 2026-08-07.",
+};
+
 const lithuaniaTechnologyInnovationAmendment: CountrySourceRecord = {
   label:
     "Technologiju ir inovaciju istatymo pakeitimo istatymas Nr. XV-105 — Law amending the Law on Technology and Innovation (AI Act implementation)",
@@ -2318,26 +2354,45 @@ const firstWaveProfiles: EuropeCountryProfile[] = [
       "Commissioner for Personal Data Protection",
       "Deputy Ministry of Research, Innovation and Digital Policy",
     ],
-    additionalRegulationSources: [cyprusAiActAuthorityPortal],
-    caseLawSources: [cyprusCyLawCaseLaw],
-    implementationMeasures: [
-      "Commission AI Act Service Desk lists the Commissioner of Communications of the Republic of Cyprus as notifying authority, market surveillance authority, and national Single Point of Contact for the AI Act.",
+    additionalRegulationSources: [
+      cyprusCouncilOfMinistersDesignation,
+      cyprusAiActAuthorityPortal,
+      europeanCommissionSpocList,
     ],
-    competentAuthorities: ["Commissioner of Communications of the Republic of Cyprus"],
-    marketSurveillanceAuthorities: ["Commissioner of Communications of the Republic of Cyprus"],
-    notifyingAuthorities: ["Commissioner of Communications of the Republic of Cyprus"],
+    caseLawSources: [cyprusCyLawCaseLaw],
+    implementationStatus: "competent_authority_designated",
+    implementationConfidence: "high",
+    aiActImplementationNotes:
+      "Cyprus designated its AI Act authorities by Council of Ministers decision of 22 January 2025 under Article 70, announced by the Deputy Ministry of Research, Innovation and Digital Policy on 6 February 2025 and communicated to the European Commission. The Commissioner of Electronic Communications combines the notifying-authority, market-surveillance and single-point-of-contact roles; the Commissioner for Personal Data Protection supervises Annex III points 1, 6, 7 and 8 and enforces Article 5 prohibited practices within her competence. In November 2024 Cyprus also notified its Article 77 fundamental-rights authorities (Commissioner for Personal Data Protection, Ombudsman, Attorney-General).",
+    implementationMeasures: [
+      "Council of Ministers decision of 22 January 2025 designating the national competent authorities under Article 70, announced 6 February 2025 and communicated to the European Commission.",
+      "The Commissioner of Electronic Communications is notifying authority, market surveillance authority and single point of contact; the DMRID announcement notes additional market surveillance authorities may be designated for specific areas.",
+      "The Commissioner for Personal Data Protection is market surveillance authority for Annex III points 1, 6, 7 and 8 and enforces Article 5 prohibited practices within her domain of competence.",
+      "The Deputy Ministry of Research, Innovation and Digital Policy coordinates implementation and represents Cyprus on the European Artificial Intelligence Board; a National AI Taskforce advises the government.",
+      "The European Commission's list of Single Points of Contact records the Commissioner of Communications as Cyprus's notified single point of contact without a pending marker.",
+    ],
+    competentAuthorities: [
+      "Commissioner of (Electronic) Communications — notifying authority, market surveillance authority and single point of contact",
+      "Commissioner for Personal Data Protection — market surveillance authority for Annex III points 1, 6, 7 and 8; Article 5 prohibited practices within her competence",
+      "Deputy Ministry of Research, Innovation and Digital Policy — overall coordination and representation on the European AI Board",
+    ],
+    marketSurveillanceAuthorities: [
+      "Commissioner of (Electronic) Communications",
+      "Commissioner for Personal Data Protection (Annex III points 1, 6, 7, 8; Article 5 within competence)",
+    ],
+    notifyingAuthorities: ["Commissioner of (Electronic) Communications"],
     sourceVerificationStatus: "verified_official_sources_present",
     missingSourceWarnings: [],
     nationalAIRegulationNotes:
-      "Cyprus has a verified AI Act authority anchor: the Commission AI Act Service Desk identifies the Commissioner of Communications as notifying authority, market surveillance authority, and national Single Point of Contact. The Deputy Ministry page remains a government implementation-context source.",
+      "Cyprus's designation rests on the Council of Ministers decision of 22 January 2025 as announced by the DMRID, corroborated by the national AI portal and the European Commission's single-point-of-contact list. The designation instrument is a government decision rather than a statute; the announcement itself notes that further market surveillance authorities may be added.",
     nationalCaseLawNotes:
       "CyLaw is attached as Cyprus's national legal-information and case-law monitoring source. No Cyprus AI Act-specific decision has been individually selected into this profile yet.",
     editorialNotes: [
-      "Keep the Commissioner of Communications designation tied to the Commission AI Act Service Desk and Cyprus AI Act portal; do not generalise it beyond the AI Act functions stated there.",
+      "Designations are anchored to the Council of Ministers decision of 22 January 2025 via the official DMRID announcement; cite the split with its Annex III point numbers rather than as a single-supervisor model.",
       "No Cyprus AI Act-specific case-law item has been selected yet; CyLaw is attached as the monitoring source.",
     ],
     publicSummary:
-      "Cyprus is included with verified official AI Act authority, data-protection, government, and case-law anchors. The Commissioner of Communications is tracked as notifying authority, market surveillance authority, and national Single Point of Contact for the AI Act based on the Commission AI Act Service Desk.",
+      "Cyprus designated its AI Act authorities by Council of Ministers decision of 22 January 2025: the Commissioner of Electronic Communications is notifying authority, market surveillance authority and single point of contact, and the Commissioner for Personal Data Protection supervises the fundamental-rights-sensitive Annex III areas and Article 5 prohibited practices within her competence.",
   }),
   createMonitoredInstitutionProfile({
     countryCode: "CZ",
@@ -2757,9 +2812,56 @@ const firstWaveProfiles: EuropeCountryProfile[] = [
     governmentInstitution: "Government of Slovenia",
     governmentSourceType: "policy",
     relevantMinistriesOrAgencies: [
+      "Agency for Communication Networks and Services (AKOS)",
       "Information Commissioner",
-      "Government of Slovenia",
+      "Ministry of Digital Transformation",
+      "Bank of Slovenia",
     ],
+    additionalRegulationSources: [sloveniaZiudhpuiAct, europeanCommissionSpocList],
+    implementationStatus: "competent_authority_designated",
+    implementationConfidence: "high",
+    aiActImplementationNotes:
+      "Slovenia enacted the Act on the implementation of the EU Regulation laying down harmonised rules on artificial intelligence (ZIUDHPUI), adopted by the National Assembly on 23 October 2025, published in Uradni list RS No. 85/25 on 6 November 2025 and in force since 21 November 2025. Articles 3 to 5 designate the notifying and accreditation authorities, article 6 lists the five market surveillance authorities, article 7 makes AKOS the single point of contact, article 10 allocates supervision annex point by annex point, and article 11 gives the Information Society Inspectorate oversight of notified bodies, AI literacy and public-sector publication duties. The act also establishes a national AI ethics council and the misdemeanour and fine regime.",
+    implementationMeasures: [
+      "ZIUDHPUI (Uradni list RS 85/25): adopted 23 October 2025, in force 21 November 2025; lead body Ministry of Digital Transformation.",
+      "Article 6: market surveillance authorities are AKOS, the Information Commissioner, the Bank of Slovenia, the Insurance Supervision Agency and the Market Inspectorate.",
+      "Article 7: AKOS is the single point of contact under Article 70(2); it also runs regulatory sandboxes, the national registry of high-risk critical-infrastructure AI systems and a helpdesk per the government's national AI ecosystem page.",
+      "Article 10: the Information Commissioner supervises Article 5 prohibited practices and Annex III points 1, 3 and 6-8; the Bank of Slovenia point 5(b) for credit institutions; the Market Inspectorate point 5(b) for consumer-credit lenders; the Insurance Supervision Agency point 5(c); AKOS Annex I Section A, Annex III points 2, 4, 5(a) and 5(d), and Article 50 transparency.",
+      "Article 11: the Information Society Inspectorate supervises notified-body obligations, Article 4 AI literacy and the act's public-sector publication duty.",
+      "Article 8: enforcement tasks of AKOS, the Bank of Slovenia and the Insurance Supervision Agency under the act are financed from the state budget.",
+    ],
+    competentAuthorities: [
+      "Agencija za komunikacijska omrežja in storitve (AKOS) — market surveillance for Annex I Section A, Annex III points 2, 4, 5(a) and 5(d), Article 50 transparency; single point of contact",
+      "Informacijski pooblaščenec (Information Commissioner) — Article 5 prohibited practices; Annex III points 1, 3 and 6-8",
+      "Banka Slovenije — Annex III point 5(b) for credit institutions",
+      "Tržni inšpektorat RS (Market Inspectorate) — Annex III point 5(b) for consumer-credit lenders",
+      "Agencija za zavarovalni nadzor (Insurance Supervision Agency) — Annex III point 5(c)",
+      "Inšpekcija za informacijsko družbo (Information Society Inspectorate) — notified-body obligations, AI literacy, public-sector publication duty",
+    ],
+    marketSurveillanceAuthorities: [
+      "AKOS",
+      "Information Commissioner",
+      "Bank of Slovenia",
+      "Insurance Supervision Agency",
+      "Market Inspectorate of the Republic of Slovenia",
+    ],
+    notifyingAuthorities: [
+      "Ministry responsible for the market — Annex I Section A points 1, 3-7, 9 and 10",
+      "Ministry responsible for infrastructure — Annex I Section A point 8",
+      "Ministry responsible for health — Annex I Section A point 2",
+      "Public Agency for Medicinal Products and Medical Devices (JAZMP) — Annex I Section A points 11 and 12",
+      "Ministry responsible for the information society (Ministry of Digital Transformation) — Annex III point 1",
+    ],
+    sourceVerificationStatus: "verified_official_sources_present",
+    missingSourceWarnings: [],
+    nationalAIRegulationNotes:
+      "Slovenia's authority matrix is taken from the enacted ZIUDHPUI, articles 3 to 13, read from the official PISRS register. The European Commission's single-point-of-contact list still showed AKOS with a pending marker on its 26 September 2025 update, which predates the act's adoption; the statute is the controlling source.",
+    editorialNotes: [
+      "Designations are pinpointed to ZIUDHPUI articles 3 to 13; cite annex points rather than summarising Slovenia as having one supervisor.",
+      "No Slovenian AI Act-specific case-law item has been selected yet.",
+    ],
+    publicSummary:
+      "Slovenia enacted its AI Act implementing statute (ZIUDHPUI), in force since 21 November 2025, distributing market surveillance across five authorities, making AKOS the single point of contact and sandbox operator, giving the Information Commissioner the prohibited-practices and fundamental-rights-sensitive areas, and establishing a national AI ethics council.",
   }),
   {
     countryCode: "FR",
