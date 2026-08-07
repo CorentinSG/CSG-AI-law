@@ -1775,6 +1775,76 @@ const finlandGovernmentAiSupervision: CountrySourceRecord = {
     "Official Finnish Government press release stating that acts regulating national authorities supervising the EU AI Act enter into force on 1 January 2026, and describing market-surveillance and fundamental-rights supervision roles.",
 };
 
+const maltaIdpcDesignationRegulations: CountrySourceRecord = {
+  label:
+    "Legal Notice 227 of 2025 — Artificial Intelligence (Designation of the Information and Data Protection Commissioner for the purposes of Regulation (EU) 2024/1689) Regulations, 2025",
+  url: "https://legislation.mt/eli/ln/2025/227/eng",
+  institution: "Leġiżlazzjoni Malta (official legislation portal)",
+  sourceType: "legislation",
+  official: true,
+  public: true,
+  runtimeAccessible: true,
+  responseStatus: 200,
+  publicationDate: "2025-10-10",
+  lastCheckedDate: "2026-08-07T00:00:00.000Z",
+  parserStatus: "manual_reference",
+  recommendation: "manual_review",
+  note:
+    "Made under article 33 of the Data Protection Act (Cap. 586), published in Government Gazette No. 21,519 of 10 October 2025. Regulation 3 designates the Commissioner as market surveillance authority for high-risk biometric systems used for law enforcement, border management, and justice and democracy; regulation 5 designates the Commissioner as Article 77 fundamental-rights authority for personal-data protection; regulation 8 makes the Commissioner the notified body where law-enforcement, immigration or asylum authorities put high-risk systems into service; regulations 5 to 7 and 9 to 12 come into force on 2 August 2026. Text read from the IDPC's published copy on 2026-08-07.",
+};
+
+const maltaAiRegulations2025: CountrySourceRecord = {
+  label: "Legal Notice 226 of 2025 — Artificial Intelligence Regulations, 2025 (MDIA designation)",
+  url: "https://legislation.mt/eli/ln/2025/226/eng",
+  institution: "Leġiżlazzjoni Malta (official legislation portal)",
+  sourceType: "legislation",
+  official: true,
+  public: true,
+  runtimeAccessible: null,
+  responseStatus: null,
+  publicationDate: "2025-10-10",
+  lastCheckedDate: "2026-08-07T00:00:00.000Z",
+  parserStatus: "manual_reference",
+  recommendation: "manual_review",
+  note:
+    "Made under the Malta Digital Innovation Authority Act (Cap. 591), published in Government Gazette No. 21,519 of 10 October 2025 alongside Legal Notice 227. Designates the MDIA as market surveillance authority for AI systems generally, national single point of contact, notifying authority for conformity-assessment bodies, and operator of the national AI regulatory sandbox. URL follows the official ELI scheme verified for LN 227; the full text has not yet been fetched at runtime — designation summary corroborated by the complementary LN 227 text and practice commentary.",
+};
+
+const luxembourgBill8476Dossier: CountrySourceRecord = {
+  label:
+    "Projet de loi n° 8476 portant mise en oeuvre de certaines dispositions du règlement (UE) 2024/1689 — dossier législatif",
+  url: "https://www.chd.lu/en/dossier/8476",
+  institution: "Chambre des Députés du Grand-Duché de Luxembourg",
+  sourceType: "parliament",
+  official: true,
+  public: true,
+  runtimeAccessible: true,
+  responseStatus: 200,
+  publicationDate: "2024-12-23",
+  lastCheckedDate: "2026-08-07T00:00:00.000Z",
+  parserStatus: "candidate_for_monitoring",
+  recommendation: "manual_review",
+  note:
+    "Bill implementing parts of the AI Act and amending the CNPD, CSSF and insurance-sector organic laws; deposited 23 December 2024, in committee when checked. Article 7 of the deposited text designates the CNPD as default horizontal market surveillance authority with sectoral derogations (judicial supervisory authority, CSSF, Commissariat aux assurances, ILNAS, ILR, medicines agency, ALIA); article 12 requires the CNPD to operate at least one AI regulatory sandbox by 2 August 2026. CSSF opinion 17 January 2025; CNPD opinion 10 June 2025. Dossier and deposited text read via crawl on 2026-08-07.",
+};
+
+const luxembourgCnpdAiActNews: CountrySourceRecord = {
+  label: "CNPD — Mise en oeuvre nationale de l'AI Act : la CNPD désignée comme autorité compétente",
+  url: "https://cnpd.public.lu/fr/actualites/national/2024/11/cnpd-ai-act.html",
+  institution: "Commission nationale pour la protection des données (CNPD)",
+  sourceType: "regulator",
+  official: true,
+  public: true,
+  runtimeAccessible: true,
+  responseStatus: 200,
+  publicationDate: "2024-11-01",
+  lastCheckedDate: "2026-08-07T00:00:00.000Z",
+  parserStatus: "manual_reference",
+  recommendation: "manual_review",
+  note:
+    "CNPD announcement that the Government Council of 29 November 2024 approved the AI Act implementation bill under which the CNPD is to become single point of contact, national coordinator, default market surveillance authority, and a fundamental-rights authority alongside ALIA and the ITM, with a regulatory-sandbox obligation. Written in the future tense — the bill had not been enacted. Read via crawl on 2026-08-07.",
+};
+
 const cyprusCouncilOfMinistersDesignation: CountrySourceRecord = {
   label:
     "DMRID press release — Council of Ministers designation of national competent authorities under Article 70 AI Act (decision of 22 January 2025)",
@@ -2680,9 +2750,36 @@ const firstWaveProfiles: EuropeCountryProfile[] = [
     governmentInstitution: "Legilux",
     governmentSourceType: "legislation",
     relevantMinistriesOrAgencies: [
-      "National Commission for Data Protection",
-      "Legilux",
+      "National Commission for Data Protection (CNPD)",
+      "Chambre des Députés",
+      "Commission de Surveillance du Secteur Financier (CSSF)",
     ],
+    additionalRegulationSources: [
+      luxembourgBill8476Dossier,
+      luxembourgCnpdAiActNews,
+      europeanCommissionSpocList,
+    ],
+    implementationStatus: "consultation_or_draft_identified",
+    implementationConfidence: "high",
+    aiActImplementationNotes:
+      "Luxembourg's AI Act implementation rests on bill n° 8476, approved by the Government Council on 29 November 2024, deposited in the Chamber of Deputies on 23 December 2024, and still in committee when last checked. Article 7 of the deposited text designates the CNPD as the default horizontal market surveillance authority, with derogations for the judicial supervisory authority (courts and prosecution), the CSSF and the Commissariat aux assurances for their supervised entities, ILNAS for Annex I points 1 to 10 and Annex III point 2, the ILR for Annex III point 2 deployers that are NIS2 essential or important entities, the medicines and health-products agency for Annex I points 11 and 12, and ALIA for Article 50(2) and (4) transparency. Article 12 requires the CNPD to operate at least one AI regulatory sandbox by 2 August 2026. The European Commission's single-point-of-contact list records the CNPD with a pending-final-adoption marker.",
+    implementationMeasures: [
+      "Bill n° 8476 deposited 23 December 2024 (Government Council approval 29 November 2024); in committee — not yet enacted. The bill also amends the CNPD, CSSF and insurance-sector organic laws.",
+      "Article 7 of the deposited text: CNPD as default market surveillance authority; sectoral derogations for the judicial supervisory authority, CSSF, Commissariat aux assurances, ILNAS, ILR, the medicines agency and ALIA.",
+      "Article 12 of the deposited text: the CNPD must establish at least one AI regulatory sandbox by 2 August 2026.",
+      "CSSF opinion of 17 January 2025 and CNPD opinion of 10 June 2025 filed in the dossier.",
+      "The European Commission's list of Single Points of Contact records the CNPD as Luxembourg's single point of contact marked as pending final national adoption.",
+    ],
+    sourceVerificationStatus: "verified_official_sources_present",
+    missingSourceWarnings: [],
+    nationalAIRegulationNotes:
+      "No designation is final: bill n° 8476 remains in committee, and the Commission list carries Luxembourg's CNPD entry with a pending marker. Authority arrays are deliberately left empty until enactment; the draft allocation is recorded in the implementation measures with its article numbers.",
+    editorialNotes: [
+      "Watch the chd.lu dossier for adoption; on enactment, promote the article 7 allocation into the authority arrays and cite the Legilux publication.",
+      "No Luxembourgish AI Act-specific case-law item has been selected yet.",
+    ],
+    publicSummary:
+      "Luxembourg has a complete draft framework: bill n° 8476 would make the CNPD the default market surveillance authority and single point of contact with seven sectoral derogations, and requires a CNPD-run AI sandbox by August 2026. The bill was still in committee when last checked, so no designation is final yet.",
   }),
   createMonitoredInstitutionProfile({
     countryCode: "MT",
@@ -2695,9 +2792,41 @@ const firstWaveProfiles: EuropeCountryProfile[] = [
     governmentInstitution: "Legislation Malta",
     governmentSourceType: "legislation",
     relevantMinistriesOrAgencies: [
+      "Malta Digital Innovation Authority (MDIA)",
       "Information and Data Protection Commissioner",
-      "Legislation Malta",
     ],
+    additionalRegulationSources: [maltaAiRegulations2025, maltaIdpcDesignationRegulations],
+    implementationStatus: "competent_authority_designated",
+    implementationConfidence: "high",
+    aiActImplementationNotes:
+      "Malta designated its AI Act authorities through two legal notices published together in Government Gazette No. 21,519 of 10 October 2025. Legal Notice 226 of 2025 (under the MDIA Act, Cap. 591) makes the Malta Digital Innovation Authority the market surveillance authority for AI systems generally, the national single point of contact, the notifying authority for conformity-assessment bodies, and the operator of the national AI regulatory sandbox. Legal Notice 227 of 2025 (under the Data Protection Act, Cap. 586) designates the Information and Data Protection Commissioner as market surveillance authority for high-risk biometric systems in law-enforcement, border-management and justice contexts, as the Article 77 fundamental-rights authority for personal-data protection, and as notified body where law-enforcement, immigration or asylum authorities put high-risk systems into service; several of its regulations enter into force on 2 August 2026.",
+    implementationMeasures: [
+      "Legal Notice 226 of 2025 (Artificial Intelligence Regulations, 2025), Government Gazette No. 21,519, 10 October 2025: MDIA designated market surveillance authority, single point of contact, notifying authority, and sandbox operator.",
+      "Legal Notice 227 of 2025, same gazette: the Information and Data Protection Commissioner designated market surveillance authority for high-risk biometric systems used for law enforcement, border management, and justice and democracy (regulation 3).",
+      "LN 227 regulation 5: the Commissioner is the Article 77 fundamental-rights authority insofar as personal-data protection is concerned; regulation 8: the Commissioner acts as notified body for high-risk systems put into service by law-enforcement, immigration or asylum authorities.",
+      "LN 227 regulation 1(3): regulations 5 to 7 and 9 to 12 come into force on 2 August 2026; regulation 11 requires a national registry of the high-risk systems within the Commissioner's remit; regulation 13 provides administrative penalties with appeal to the Information and Data Protection Appeals Tribunal.",
+    ],
+    competentAuthorities: [
+      "Malta Digital Innovation Authority (MDIA) — market surveillance authority for AI systems generally; single point of contact; sandbox operator (LN 226 of 2025)",
+      "Information and Data Protection Commissioner (IDPC) — market surveillance authority for high-risk biometric systems in law-enforcement, border-management and justice contexts; Article 77 fundamental-rights authority; notified body for law-enforcement, immigration and asylum deployments (LN 227 of 2025)",
+    ],
+    marketSurveillanceAuthorities: [
+      "Malta Digital Innovation Authority (general)",
+      "Information and Data Protection Commissioner (high-risk biometric systems per LN 227 regulation 3)",
+    ],
+    notifyingAuthorities: [
+      "Malta Digital Innovation Authority — notifying authority for conformity-assessment bodies (LN 226 of 2025)",
+    ],
+    sourceVerificationStatus: "verified_official_sources_present",
+    missingSourceWarnings: [],
+    nationalAIRegulationNotes:
+      "Legal Notice 227's text was read from the IDPC's published copy; Legal Notice 226's designation summary is corroborated by the complementary LN 227 text and practice commentary, with its official ELI record still to be fetched at runtime. Both notices were published in the same Government Gazette of 10 October 2025.",
+    editorialNotes: [
+      "Fetch and pin the LN 226 text from legislation.mt to complete primary-text coverage; the MDIA-side designation currently rests on the gazette publication and corroborating sources.",
+      "No Maltese AI Act-specific case-law item has been selected yet.",
+    ],
+    publicSummary:
+      "Malta designated its AI Act authorities by legal notices of 10 October 2025: the Malta Digital Innovation Authority is market surveillance authority, single point of contact, notifying authority and sandbox operator, while the Information and Data Protection Commissioner supervises high-risk biometric systems in law-enforcement and justice contexts and serves as fundamental-rights authority, with parts of its mandate entering into force on 2 August 2026.",
   }),
   createMonitoredInstitutionProfile({
     countryCode: "PT",
