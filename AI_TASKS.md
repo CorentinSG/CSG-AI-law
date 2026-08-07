@@ -14,6 +14,7 @@ Each agent edits only its own rows. Status vocabulary: `CLAIMED` · `WIP` · `BL
 | T-EFFICIENCY-PLAN (P0→P2) | Claude Code | MERGED | `main` @ `897d2b5` (#56–#61) | none (released) | `buildWeeklyDigestMarkdown()`, `deriveProvisioning()`, `purgeExpiredOperationalRecords()`, `localeAlternates()`, community "Scan Job Management", "DB Repository Layer" | 2026-07-31 |
 | T-SERP-PROBE | Claude Code | MERGED | `main` @ `080bfb0` (#62) | none (released) | `createDiscoveryLead()`, `listAgentApiCapabilities()`, community "DB Repository Layer" | 2026-08-01 |
 | T-SITE-RECOVERY | Claude Code | MERGED | `main` @ `a1432f2` (#65-#70) | none (released) | `buildStableHash()`, `clampFutureIsoDate()`, `populatedStateBaselines`, `usAiCaseLawEntries`, `listRawItemIdentitiesBySource()`, community "Scan Pipeline" | 2026-08-03 |
+| T-US-STATE-DB-BATCH6 | Claude Code | DONE-LOCAL | `claude/us-state-db-batch2` | `src/content/ai-regulation/us-state-ai-law-baseline.ts`, `src/content/ai-regulation/us-legal-baseline.test.ts` | `populatedStateBaselines`, `prioritySources`, `usStateMapStatuses` | 2026-08-05 |
 | T-US-STATE-DB-BATCH5 | Claude Code | DONE-LOCAL | `claude/us-state-db-batch2` | `src/content/ai-regulation/us-state-ai-law-baseline.ts`, `src/content/ai-regulation/us-legal-baseline.test.ts` | `populatedStateBaselines`, `prioritySources`, `usStateMapStatuses` | 2026-08-05 |
 | T-US-STATE-DB-BATCH4 | Claude Code | DONE-LOCAL | `claude/us-state-db-batch2` | `src/content/ai-regulation/us-state-ai-law-baseline.ts`, `src/content/ai-regulation/us-legal-baseline.test.ts` | `populatedStateBaselines`, `prioritySources`, `usStateMapStatuses` | 2026-08-05 |
 | T-US-STATE-DB-BATCH3 | Claude Code | DONE-LOCAL | `claude/us-state-db-batch2` | `src/content/ai-regulation/us-state-ai-law-baseline.ts`, `src/content/ai-regulation/us-legal-baseline.test.ts` | `populatedStateBaselines`, `prioritySources`, `usStateMapStatuses` | 2026-08-05 |
@@ -52,6 +53,14 @@ YYYY-MM-DD · <Agent> · <TASK-ID> · <STATUS>
 ```
 
 ## Current status
+
+2026-08-05 · Claude Code · T-US-STATE-DB-BATCH6 · DONE-LOCAL
+- Intent:        seventh state-by-state batch of the AI-law database.
+- Files:         `src/content/ai-regulation/us-state-ai-law-baseline.ts`, `src/content/ai-regulation/us-legal-baseline.test.ts`
+- Graph anchors: `populatedStateBaselines`, `prioritySources`, `getPriorityUsStateProfiles()`, `usStateMapStatuses`
+- Verification:  `npm test` 1010/1010 · lint clean · typecheck clean · build succeeds.
+- Branch/commit: `claude/us-state-db-batch2` @ (this commit)
+- Next:          Claude Code, next batch. Added HI (HRS § 11-303) and MS (SB 2577) — 32 enacted states. Two hosts need non-default clients and this is recorded in their source notes: capitol.hawaii.gov returns 403 to a plain page-fetch tool but 200 to curl with a real User-Agent, and billstatus.ls.state.ms.us fails TLS chain validation in the fetch tool but serves 200 to curl. MS is pinned at medium confidence because the enrolled bill does not state its codified section number. Indiana is now a closed dead end: iga.in.gov is a client-rendered SPA that yields 314 characters of page chrome even in a JS-capable browser — it needs the bulk Code download, not scraping. Searched and found nothing: DC, KS. Remaining unpopulated: 18 states + DC.
 
 2026-08-05 · Claude Code · T-US-STATE-DB-BATCH5 · DONE-LOCAL
 - Intent:        sixth state-by-state batch of the AI-law database.

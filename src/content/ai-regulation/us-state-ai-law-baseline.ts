@@ -719,6 +719,35 @@ const prioritySources: Record<string, UsStateOfficialSource[]> = {
         "Official codified South Dakota statute confirmed through the Legal Data Hunter legislation corpus: § 12-26-32 defines 'artificial intelligence' as 'any machine-based system that, for any explicit or implicit objective, infers from the inputs received by the system how to generate content, decisions, predictions, recommendations' for the deepfake provisions §§ 12-26-32 to 12-26-37. Runtime check 2026-08-05 returned HTTP 200.",
     }),
   ],
+  HI: [
+    source({
+      label: "HRS § 11-303 — distribution of materially deceptive media; prohibited; penalties",
+      institution: "Hawaii State Legislature",
+      url: "https://www.capitol.hawaii.gov/hrscurrent/Vol01_Ch0001-0042F/HRS0011/HRS_0011-0303.htm",
+      sourceType: "state_code",
+      runtimeAccessible: true,
+      responseStatus: 200,
+      parserStatus: "manual_reference",
+      recommendation: "manual_review",
+      note:
+        "Official codified Hawaii section read in full at the source, with the credit line '[L 2024, c 191, pt of §2]'. It carries its own statutory definitions of 'artificial intelligence' and 'materially deceptive media'. Runtime check 2026-08-05 returned HTTP 200 via curl; note that a plain page-fetch tool received HTTP 403 from this host, so a scanner needs a real User-Agent. The Legal Data Hunter Hawaii corpus is a 2017 snapshot and cannot confirm this section.",
+    }),
+  ],
+  MS: [
+    source({
+      label:
+        "Mississippi SB 2577 (2024 Regular Session) — wrongful dissemination of digitizations, as sent to the Governor",
+      institution: "Mississippi Legislature",
+      url: "https://billstatus.ls.state.ms.us/documents/2024/html/SB/2500-2599/SB2577SG.htm",
+      sourceType: "legislature",
+      runtimeAccessible: true,
+      responseStatus: 200,
+      parserStatus: "manual_reference",
+      recommendation: "manual_review",
+      note:
+        "Official enrolled bill text read in full at the source: 'AN ACT TO CREATE A NEW SECTION IN TITLE 97, CHAPTER 13, MISSISSIPPI CODE OF 1972, TO CREATE CRIMINAL PENALTIES FOR THE WRONGFUL DISSEMINATION OF DIGITIZATIONS', with Section 2 setting the effective date at July 1, 2024. The bill text does not state the codified section number, so none is asserted here. Runtime check 2026-08-05 returned HTTP 200 via curl; a plain page-fetch tool failed on this host with a TLS chain error, so the host needs a client tolerant of its certificate chain.",
+    }),
+  ],
   NH: [
     source({
       label: "RSA 638:26-a — fraudulent use of deepfakes",
@@ -1435,6 +1464,26 @@ const populatedStateBaselines: Record<string, PopulatedStateBaseline> = {
     publicSummary:
       "Rhode Island regulates deceptive synthetic media in election communications through Chapter 17-30 of the General Laws, enacted by twin 2025 public laws effective July 2, 2025, with a 90-day pre-election window, an artificial-intelligence disclosure requirement and a statutory right of action.",
   },
+  // Seventh populated pass (2026-08-05), both read on the issuing site.
+  HI: {
+    status: "enacted_sector_specific_ai_law",
+    confidence: "high",
+    enactedAIStatutes: [
+      "HRS § 11-303, 'Distribution of materially deceptive media; prohibited; penalties' [L 2024, c 191, pt of §2]: from the first working day of February in every even-numbered year through the next general election, no person may recklessly distribute materially deceptive media in reckless disregard of the risk of harming a candidate's reputation or electoral prospects or of changing voter behaviour. A disclaimer that the media has been manipulated by technical means, with per-medium formatting rules, takes the conduct outside the prohibition. A violation is a misdemeanor, rising to a class C felony where the intent is to cause violence or bodily harm.",
+      "HRS § 11-303(h) defines 'artificial intelligence' as a machine-based system that can, for a given set of human-defined objectives, make predictions, recommendations or decisions influencing real or virtual environments, and defines 'materially deceptive media' to include media created by generative adversarial network techniques, by artificial intelligence, or by digital technology.",
+    ],
+    publicSummary:
+      "Hawaii prohibits the reckless distribution of materially deceptive media in the election period under HRS § 11-303 (Act 191, Session Laws of Hawaii 2024), with a disclaimer safe harbour, a misdemeanor penalty rising to a class C felony where violence is intended, and statutory carve-outs for broadcasters, interactive computer services and cloud providers not involved in creating the media. The section carries its own definition of artificial intelligence.",
+  },
+  MS: {
+    status: "enacted_sector_specific_ai_law",
+    confidence: "medium",
+    enactedAIStatutes: [
+      "SB 2577 (2024 Regular Session), 'AN ACT TO CREATE A NEW SECTION IN TITLE 97, CHAPTER 13, MISSISSIPPI CODE OF 1972, TO CREATE CRIMINAL PENALTIES FOR THE WRONGFUL DISSEMINATION OF DIGITIZATIONS', effective July 1, 2024. It defines 'digitization' as altering an image or audio in a realistic manner using an image or audio of another person or computer-generated images or audio, 'commonly called deepfakes', and expressly includes creation through software, machine learning artificial intelligence or any other computer-generated or technological means. Exemptions cover bona fide newscasts, paid broadcasts, general-circulation publications that carry a disclaimer, satire and parody, and detection or security work.",
+    ],
+    publicSummary:
+      "Mississippi criminalised the wrongful dissemination of 'digitizations' — its statutory term covering deepfakes and machine-learning-generated media — through SB 2577 (2024), effective July 1, 2024, adding a new section to Title 97, Chapter 13 of the Mississippi Code. Confidence is held at medium because the enrolled bill does not state the codified section number and it has not yet been read in the codified Code.",
+  },
 };
 
 function createProfile(code: string, name: string): UsStateAiLawProfile {
@@ -1538,7 +1587,7 @@ export function getPriorityUsStateProfiles() {
     "CA", "CO", "NY", "IL", "TX", "CT", "UT", "VA", "WA", "MD",
     "MT", "KY", "TN", "ND", "NM", "AZ", "SD", "AR",
     "OR", "NJ", "FL", "WI", "MI",
-    "MN", "PA", "LA", "ID", "NE", "DE", "NH", "RI",
+    "MN", "PA", "LA", "ID", "NE", "DE", "NH", "RI", "HI", "MS",
   ];
   return usStateAiLawProfiles.filter((profile) =>
     priorityCodes.includes(profile.stateCode),
