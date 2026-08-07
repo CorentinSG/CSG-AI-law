@@ -1775,6 +1775,96 @@ const finlandGovernmentAiSupervision: CountrySourceRecord = {
     "Official Finnish Government press release stating that acts regulating national authorities supervising the EU AI Act enter into force on 1 January 2026, and describing market-surveillance and fundamental-rights supervision roles.",
 };
 
+const lithuaniaTechnologyInnovationAmendment: CountrySourceRecord = {
+  label:
+    "Technologiju ir inovaciju istatymo pakeitimo istatymas Nr. XV-105 — Law amending the Law on Technology and Innovation (AI Act implementation)",
+  url: "https://www.e-tar.lt/portal/it/legalAct/9c30a402d88811efa5ddd96c482819f5",
+  institution: "Register of Legal Acts (e-TAR)",
+  sourceType: "legislation",
+  official: true,
+  public: true,
+  runtimeAccessible: true,
+  responseStatus: 200,
+  publicationDate: "2025-01-22",
+  lastCheckedDate: "2026-08-07T00:00:00.000Z",
+  parserStatus: "manual_reference",
+  recommendation: "manual_review",
+  note:
+    "Adopted by the Seimas on 14 January 2025, published in TAR on 22 January 2025 (No. 2025-00715), principally in force 1 April 2025 with staged provisions (art. 5(4) from 2 August 2025, art. 5(5) from 1 January 2026). ELI https://data.e-tar.lt/eli/valst/ist/tar/2025/715/op. The official register links the act to Regulation (EU) 2024/1689 and the Annex I sectoral acts. Register record read via crawl on 2026-08-07.",
+};
+
+const lithuaniaInformationSocietyAmendment: CountrySourceRecord = {
+  label:
+    "Informacines visuomenes paslaugu istatymo pakeitimo istatymas Nr. XV-106 — Law amending the Law on Information Society Services (AI Act implementation)",
+  url: "https://e-seimas.lrs.lt/portal/legalAct/lt/TAD/a41a24e2d27811efbd239e318cbd5b26",
+  institution: "Seimas of the Republic of Lithuania (e-seimas register)",
+  sourceType: "legislation",
+  official: true,
+  public: true,
+  runtimeAccessible: true,
+  responseStatus: 200,
+  publicationDate: "2025-01-22",
+  lastCheckedDate: "2026-08-07T00:00:00.000Z",
+  parserStatus: "manual_reference",
+  recommendation: "manual_review",
+  note:
+    "Adopted by the Seimas on 14 January 2025, published in TAR on 22 January 2025 (No. 2025-00716), in force 1 April 2025. The register record links the act to Regulation (EU) 2022/2065 and Regulation (EU) 2024/1689. Register record read via crawl on 2026-08-07.",
+};
+
+const lithuaniaRrtDesignationRelease: CountrySourceRecord = {
+  label:
+    "RRT press release — RRT to become Lithuania's principal AI supervision authority (16 January 2025)",
+  url: "https://www.rrt.lt/rysiu-reguliavimo-tarnyba-taps-pagrindine-dirbtinio-intelekto-prieziuros-institucija-lietuvoje/",
+  institution: "Communications Regulatory Authority of the Republic of Lithuania (RRT)",
+  sourceType: "regulator",
+  official: true,
+  public: true,
+  runtimeAccessible: true,
+  responseStatus: 200,
+  publicationDate: "2025-01-16",
+  lastCheckedDate: "2026-08-07T00:00:00.000Z",
+  parserStatus: "manual_reference",
+  recommendation: "manual_review",
+  note:
+    "RRT states that from 1 April 2025 it becomes the national competent market surveillance authority and single point of contact under the AI Act, with the Innovation Agency designated as notifying authority, per the amendments adopted by the Seimas on 14 January 2025. Full text read via crawl on 2026-08-07.",
+};
+
+const latviaCabinetImplementationReport: CountrySourceRecord = {
+  label:
+    "VARAM — Cabinet of Ministers examines the AI Act implementation report designating responsible institutions (25 February 2025)",
+  url: "https://www.varam.gov.lv/en/article/latvia-takes-step-towards-safe-and-responsible-artificial-intelligence-government-examines-implementation-plan-ai-act",
+  institution: "Ministry of Smart Administration and Regional Development (VARAM)",
+  sourceType: "government",
+  official: true,
+  public: true,
+  runtimeAccessible: true,
+  responseStatus: 200,
+  publicationDate: "2025-02-25",
+  lastCheckedDate: "2026-08-07T00:00:00.000Z",
+  parserStatus: "manual_reference",
+  recommendation: "manual_review",
+  note:
+    "Official VARAM article on the Cabinet information report 'On the implementation of the requirements of the Artificial Intelligence Act': VARAM responsible for implementation overall, Ministry of Economics as notifying authority, LATAK as accreditation body, Ombudsman for fundamental rights, market surveillance across twelve sectoral authorities, the Data State Inspectorate for prohibited practices and high-risk systems, and the Bank of Latvia for supervised financial institutions. The report also identifies statutory amendments still required. Full text read via crawl on 2026-08-07.",
+};
+
+const europeanCommissionSpocList: CountrySourceRecord = {
+  label:
+    "European Commission — Market Surveillance Authorities under the AI Act (list of Single Points of Contact)",
+  url: "https://digital-strategy.ec.europa.eu/en/policies/market-surveillance-authorities-under-ai-act",
+  institution: "European Commission (DG CNECT)",
+  sourceType: "government",
+  official: true,
+  public: true,
+  runtimeAccessible: true,
+  responseStatus: 200,
+  publicationDate: "2025-09-26",
+  lastCheckedDate: "2026-08-07T00:00:00.000Z",
+  parserStatus: "candidate_for_monitoring",
+  recommendation: "manual_review",
+  note:
+    "The Commission's continuously updated list of notified Single Points of Contact for AI Act market surveillance (last update 26 September 2025 when read). Entries marked with an asterisk are pending final national adoption. Read in full via crawl on 2026-08-07.",
+};
+
 const finlandAiSupervisionAct: CountrySourceRecord = {
   label:
     "Laki eräiden tekoälyjärjestelmien valvonnasta (1377/2025) — Act on the supervision of certain AI systems",
@@ -2440,16 +2530,39 @@ const firstWaveProfiles: EuropeCountryProfile[] = [
       "Supreme Court of Latvia",
     ],
     caseLawSources: [latviaETiesasCaseLaw, latviaSupremeCourtCaseLawArchive],
+    additionalRegulationSources: [latviaCabinetImplementationReport, europeanCommissionSpocList],
+    implementationStatus: "competent_authority_designated",
+    implementationConfidence: "medium",
+    aiActImplementationNotes:
+      "Latvia allocated AI Act roles through the Cabinet of Ministers information report 'On the implementation of the requirements of the Artificial Intelligence Act', considered on 25 February 2025: VARAM is responsible for implementation as a whole and for cooperation with the European Commission, the Ministry of Economics acts as notifying authority, LATAK as national accreditation body, and the Ombudsman as fundamental-rights authority. Market surveillance is distributed across twelve sectoral authorities, with the Data State Inspectorate covering prohibited practices and high-risk systems and the Bank of Latvia covering supervised financial institutions. The European Commission's list records the Consumer Rights Protection Centre as Latvia's notified single point of contact.",
+    implementationMeasures: [
+      "Cabinet of Ministers information report on AI Act implementation, considered 25 February 2025 (VARAM): allocation of implementation, notifying, accreditation, fundamental-rights and market-surveillance roles.",
+      "Market surveillance allocated to the Consumer Rights Protection Centre, Health Inspectorate, Civil Aviation Agency, Latvian Maritime Administration, State Railway Technical Inspectorate, State Technical Supervision Agency, Road Traffic Safety Directorate, State Service for Quality of Education, Data State Inspectorate, State Security Service, Military Intelligence and Security Service, and Office for Constitutional Protection.",
+      "The Data State Inspectorate performs market surveillance of prohibited AI practices and high-risk AI systems; the Bank of Latvia supervises AI systems used by financial institutions under its supervision.",
+      "The European Commission's list of Single Points of Contact records the Consumer Rights Protection Centre (Patērētāju tiesību aizsardzības centrs) as Latvia's notified single point of contact without a pending marker.",
+      "The Cabinet report identifies statutory amendments still required to complete implementation.",
+    ],
+    competentAuthorities: [
+      "Patērētāju tiesību aizsardzības centrs (Consumer Rights Protection Centre) — notified single point of contact and sectoral market surveillance authority",
+      "Datu valsts inspekcija (Data State Inspectorate) — market surveillance of prohibited AI practices and high-risk AI systems",
+      "Latvijas Banka (Bank of Latvia) — market surveillance of AI systems used by financial institutions under its supervision",
+      "Ten further sectoral authorities per the Cabinet report (health, aviation, maritime, rail, technical supervision, road traffic, education quality, state security, military intelligence, constitutional protection)",
+    ],
+    notifyingAuthorities: [
+      "Ekonomikas ministrija (Ministry of Economics) — notifying authority",
+    ],
     sourceVerificationStatus: "verified_official_sources_present",
     missingSourceWarnings: [],
+    nationalAIRegulationNotes:
+      "Latvia's designations currently rest on the Cabinet information report of 25 February 2025 and the Commission's notified single-point-of-contact list rather than on a single enacted implementing statute; the report itself records that statutory amendments are still required. Confidence stays at medium until those amendments are enacted.",
     nationalCaseLawNotes:
       "Latvia's eTiesas anonymised decisions database and Supreme Court case-law archive are attached as national case-law monitoring anchors. No Latvian AI Act-specific decision has been individually selected into this profile yet.",
     editorialNotes: [
-      "Latvia has verified legislation and case-law monitoring anchors, but no final AI Act competent-authority, market-surveillance, or notifying-authority designation has been verified from a binding national instrument.",
+      "Authority allocation verified from the official VARAM article on the Cabinet report and the European Commission single-point-of-contact list; upgrade confidence to high once the implementing statute is enacted.",
       "No Latvian AI Act-specific case-law item has been selected yet; eTiesas and the Supreme Court archive are attached as monitoring sources.",
     ],
     publicSummary:
-      "Latvia is included with verified official legislation, data-protection, courts, and Supreme Court case-law anchors. Final AI Act authority designations remain under review.",
+      "Latvia allocated AI Act supervision through a Cabinet-approved implementation plan: twelve sectoral market-surveillance authorities, the Data State Inspectorate for prohibited practices and high-risk systems, the Bank of Latvia for its supervised financial institutions, the Ministry of Economics as notifying authority, and the Consumer Rights Protection Centre as the notified single point of contact. Statutory amendments to complete the framework are still in progress.",
   }),
   createMonitoredInstitutionProfile({
     countryCode: "LT",
@@ -2462,9 +2575,44 @@ const firstWaveProfiles: EuropeCountryProfile[] = [
     governmentInstitution: "Register of Legal Acts",
     governmentSourceType: "legislation",
     relevantMinistriesOrAgencies: [
+      "Communications Regulatory Authority (RRT)",
+      "Innovation Agency",
+      "Ministry of the Economy and Innovation",
       "State Data Protection Inspectorate",
-      "Register of Legal Acts",
     ],
+    additionalRegulationSources: [
+      lithuaniaTechnologyInnovationAmendment,
+      lithuaniaInformationSocietyAmendment,
+      lithuaniaRrtDesignationRelease,
+      europeanCommissionSpocList,
+    ],
+    implementationStatus: "competent_authority_designated",
+    implementationConfidence: "high",
+    aiActImplementationNotes:
+      "Lithuania implemented the AI Act's institutional layer through a linked package adopted by the Seimas on 14 January 2025: Act No. XV-105 amending the Law on Technology and Innovation and Act No. XV-106 amending the Law on Information Society Services, both published in the Register of Legal Acts on 22 January 2025 and principally in force since 1 April 2025. The official register links both acts to Regulation (EU) 2024/1689; XV-105 is additionally linked to the Annex I sectoral acts. Certain notifying-authority provisions entered into force on 2 August 2025 and 1 January 2026.",
+    implementationMeasures: [
+      "Act No. XV-105 amending the Law on Technology and Innovation, adopted 14 January 2025, TAR 22 January 2025 (No. 2025-00715), principally in force 1 April 2025; staged provisions from 2 August 2025 and 1 January 2026 (ELI https://data.e-tar.lt/eli/valst/ist/tar/2025/715/op).",
+      "Act No. XV-106 amending the Law on Information Society Services, adopted 14 January 2025, TAR 22 January 2025 (No. 2025-00716), in force 1 April 2025.",
+      "RRT announcement of 16 January 2025: from 1 April 2025 RRT is the national competent market surveillance authority and single point of contact; the Innovation Agency is the notifying authority for high-risk conformity assessment.",
+      "The European Commission's list of Single Points of Contact records RRT as Lithuania's notified single point of contact without a pending marker.",
+      "The amendments provide for an AI regulatory sandbox operated with the Innovation Agency.",
+    ],
+    competentAuthorities: [
+      "Ryšių reguliavimo tarnyba (RRT, Communications Regulatory Authority) — national market surveillance authority and single point of contact under the AI Act, from 1 April 2025",
+    ],
+    notifyingAuthorities: [
+      "Inovacijų agentūra (Innovation Agency) — notifying authority for conformity-assessment bodies for high-risk AI systems; certain powers staged from 2 August 2025",
+    ],
+    sourceVerificationStatus: "verified_official_sources_present",
+    missingSourceWarnings: [],
+    nationalAIRegulationNotes:
+      "Lithuania's designations rest on enacted statute (Acts XV-105 and XV-106), the RRT's own announcement, and the European Commission's notified single-point-of-contact list. The distribution of functions between RRT and pre-existing sectoral market-surveillance authorities is still being worked out per the Ministry of the Economy and Innovation.",
+    editorialNotes: [
+      "Both amending acts were verified from the official registers (e-TAR and e-seimas), including their recorded links to Regulation (EU) 2024/1689.",
+      "No Lithuanian AI Act-specific case-law item has been selected yet.",
+    ],
+    publicSummary:
+      "Lithuania designated its AI Act authorities by statute in January 2025: the Communications Regulatory Authority (RRT) is the market surveillance authority and single point of contact from 1 April 2025, and the Innovation Agency is the notifying authority. The designation is confirmed by the enacted amending acts, the RRT itself, and the European Commission's single-point-of-contact list.",
   }),
   createMonitoredInstitutionProfile({
     countryCode: "LU",
