@@ -49,6 +49,14 @@ YYYY-MM-DD · <Agent> · <TASK-ID> · <STATUS>
 
 ## Current status
 
+2026-08-07 · Claude Code · T-EU-COUNTRY-DESIGNATIONS · DONE-LOCAL
+- Intent:        Verify AI Act authority designations for the remaining EU stub countries from official sources (LDH quota was exhausted; work done via Exa server-side fetches of official registers).
+- Files:         `src/content/ai-regulation/europe-member-state-implementation.ts` — 6 profiles upgraded: LT (acts XV-105/XV-106, e-TAR/e-seimas), LV (Cabinet report via VARAM + Commission SPOC list, medium), CY (Council of Ministers decision 22 Jan 2025 via gov.cy), SI (ZIUDHPUI read article-by-article from PISRS, Uradni list 85/25), MT (LN 226/227 of 2025, LN 227 text from IDPC), LU (bill 8476 in committee — draft status recorded, authority arrays left empty). Shared Commission SPOC-list source record added.
+- Graph anchors: `createMonitoredInstitutionProfile()`, `europeCountryProfiles`, `europeanCommissionSpocList`
+- Verification:  1003 tests, lint, typecheck, production build all pass (build needs >=16-char secrets).
+- Branch/commit: `claude/github-monitoring-recovery-lz4dos` @ (see git log)
+- Next:          Remaining unknowns: HR, CZ, EE, GR, PT, RO, SK (+ HU partial). LDH wakeup armed for 2026-08-08 09:00 UTC (trig_01E46ZERcXr5BXXoGQ9D1fuA) — cancel it if this session finishes them first. Egress still blocks EU/gazette hosts; Exa flaps intermittently. Commission SPOC page (26 Sep 2025 update) is stale for SI/DK/FI — statutes control.
+
 2026-08-06 · Claude Code · T-DATA-CASELAW-COUNTRIES · DONE-LOCAL
 - Intent:        Fill the case-law lane and the country base with source-verified data; owner's local session owns the US state base in parallel.
 - Files:         `src/content/ai-regulation/us-ai-case-law.ts` (+5 published opinions, +`courtListenerOpinionReference()`), `src/content/ai-regulation/europe-member-state-implementation.ts` (Denmark + Finland promoted from institutional stubs to statute-verified profiles; 3 optional overrides on the profile helper), `docs/handoffs/PROMPT-session-locale-scraping.md` (new).
