@@ -265,18 +265,25 @@ describe("U.S. state baseline", () => {
     }
   });
 
-  it("does not present unverified states as confirmed enacted law", () => {
-    const unverifiedStates = getUsStateAiLawProfiles().filter(
-      (profile) => profile.sourceReferences.length === 0,
+  // Coverage pass 2026-08-05: every state now carries at least one
+  // runtime-verified official source, so the old form of this test — "some
+  // states have zero sources, and those must not be shown as enacted" — no
+  // longer has a population to check. The invariant that actually protects the
+  // public map is restated here: a state with no reviewed statute must sit at
+  // no_specific_ai_law_verified, never at an enacted status.
+  it("gives every state an official source and never infers a law from one", () => {
+    const profiles = getUsStateAiLawProfiles();
+
+    expect(profiles.every((profile) => profile.sourceReferences.length > 0)).toBe(true);
+    expect(profiles.every((profile) => profile.aiLawStatus !== "needs_review")).toBe(true);
+
+    const unreviewed = profiles.filter(
+      (profile) => profile.enactedAIStatutes.length === 0 && profile.pendingAIBills.length === 0,
     );
 
-    expect(unverifiedStates.length).toBeGreaterThan(0);
+    expect(unreviewed.length).toBeGreaterThan(0);
     expect(
-      unverifiedStates.every(
-        (profile) =>
-          profile.aiLawStatus === "needs_review" ||
-          profile.aiLawStatus === "no_specific_ai_law_verified",
-      ),
+      unreviewed.every((profile) => profile.aiLawStatus === "no_specific_ai_law_verified"),
     ).toBe(true);
   });
 });

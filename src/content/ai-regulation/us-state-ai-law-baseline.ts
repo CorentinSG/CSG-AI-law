@@ -190,7 +190,174 @@ function source(input: Omit<UsStateOfficialSource, "lastCheckedAt" | "official" 
   } satisfies UsStateOfficialSource;
 }
 
+// Coverage pass (2026-08-05). Eighteen states carried no official source at
+// all, which left them at `needs_review` with zero citations on the public
+// map. Each URL below is the state's own legislature or code publisher and was
+// runtime-checked on 2026-08-05 (all returned HTTP 200). Adding them does NOT
+// assert that the state has no AI law — it asserts only that an official
+// source is now identified and that no AI statute has been verified yet.
+function baselineLegislatureSource(input: {
+  label: string;
+  institution: string;
+  url: string;
+  sourceType: UsStateOfficialSource["sourceType"];
+  searchNote: string;
+}) {
+  return [
+    source({
+      label: input.label,
+      institution: input.institution,
+      url: input.url,
+      sourceType: input.sourceType,
+      runtimeAccessible: true,
+      responseStatus: 200,
+      parserStatus: "needs_dedicated_parser",
+      recommendation: "manual_review",
+      note: `Official state source, runtime-checked 2026-08-05 (HTTP 200). ${input.searchNote} No AI statute is verified for this state yet, and absence of a verified statute must not be read as absence of law.`,
+    }),
+  ];
+}
+
 const prioritySources: Record<string, UsStateOfficialSource[]> = {
+  AL: baselineLegislatureSource({
+    label: "Code of Alabama",
+    institution: "Alabama Legislature",
+    url: "https://alison.legislature.state.al.us/code-of-alabama",
+    sourceType: "state_code",
+    searchNote:
+      "An AI/deepfake/synthetic-media sweep of the Legal Data Hunter Alabama corpus (snapshot 2025-01-01) returned no AI provision.",
+  }),
+  AK: baselineLegislatureSource({
+    label: "Alaska State Legislature",
+    institution: "Alaska State Legislature",
+    url: "https://www.akleg.gov/",
+    sourceType: "legislature",
+    searchNote: "No corpus sweep has been run for Alaska yet.",
+  }),
+  GA: baselineLegislatureSource({
+    label: "Georgia General Assembly",
+    institution: "Georgia General Assembly",
+    url: "https://www.legis.ga.gov/",
+    sourceType: "legislature",
+    searchNote:
+      "The Legal Data Hunter Georgia corpus holds only 60 documents and is unusable for a coverage sweep; a 2025 bill-level search surfaced AI-generated obscene-material provisions but nothing could be confirmed in the codified Code.",
+  }),
+  IN: baselineLegislatureSource({
+    label: "Indiana General Assembly",
+    institution: "Indiana General Assembly",
+    url: "https://iga.in.gov/",
+    sourceType: "legislature",
+    searchNote:
+      "Indiana Code text is unreachable by fetch or by a JS-capable browser — iga.in.gov is a client-rendered application that returns page chrome only. Verifying Indiana requires the bulk Indiana Code download rather than page access.",
+  }),
+  IA: baselineLegislatureSource({
+    label: "Iowa Legislature",
+    institution: "Iowa Legislature",
+    url: "https://www.legis.iowa.gov/",
+    sourceType: "legislature",
+    searchNote:
+      "An AI/deepfake/synthetic-media sweep of the Legal Data Hunter Iowa corpus (snapshot 2026-01-01) returned no AI provision.",
+  }),
+  KS: baselineLegislatureSource({
+    label: "Kansas Legislature",
+    institution: "Kansas Legislature",
+    url: "https://www.kslegislature.gov/",
+    sourceType: "legislature",
+    searchNote:
+      "An AI/deepfake/synthetic-media sweep of the Legal Data Hunter Kansas corpus returned no AI provision; that corpus carries no snapshot date, so the sweep is weak evidence.",
+  }),
+  ME: baselineLegislatureSource({
+    label: "Maine Legislature",
+    institution: "Maine Legislature",
+    url: "https://legislature.maine.gov/",
+    sourceType: "legislature",
+    searchNote: "No corpus sweep has been run for Maine yet.",
+  }),
+  MA: baselineLegislatureSource({
+    label: "Massachusetts General Court",
+    institution: "Massachusetts General Court",
+    url: "https://malegislature.gov/",
+    sourceType: "legislature",
+    searchNote: "No corpus sweep has been run for Massachusetts yet.",
+  }),
+  MO: baselineLegislatureSource({
+    label: "Missouri Revised Statutes",
+    institution: "Missouri Revisor of Statutes",
+    url: "https://revisor.mo.gov/",
+    sourceType: "state_code",
+    searchNote:
+      "An AI/deepfake/synthetic-media sweep of the Legal Data Hunter Missouri corpus (snapshot 2025-01-01) returned no AI provision.",
+  }),
+  NV: baselineLegislatureSource({
+    label: "Nevada Legislature",
+    institution: "Nevada Legislature",
+    url: "https://www.leg.state.nv.us/",
+    sourceType: "legislature",
+    searchNote:
+      "An AI/deepfake/synthetic-media sweep of the Legal Data Hunter Nevada corpus returned no AI provision; that corpus carries no snapshot date, so the sweep is weak evidence.",
+  }),
+  NC: baselineLegislatureSource({
+    label: "North Carolina General Assembly",
+    institution: "North Carolina General Assembly",
+    url: "https://www.ncleg.gov/",
+    sourceType: "legislature",
+    searchNote:
+      "An AI/deepfake/synthetic-media sweep of the Legal Data Hunter North Carolina corpus returned no AI provision, but that corpus is a 2023-06-01 snapshot and therefore predates most state AI legislation.",
+  }),
+  OH: baselineLegislatureSource({
+    label: "Ohio Revised Code",
+    institution: "Ohio Laws and Administrative Rules",
+    url: "https://codes.ohio.gov/",
+    sourceType: "state_code",
+    searchNote:
+      "An AI/deepfake/synthetic-media sweep of the Legal Data Hunter Ohio corpus returned no AI provision; that corpus carries no snapshot date, so the sweep is weak evidence.",
+  }),
+  OK: baselineLegislatureSource({
+    label: "Oklahoma Legislature",
+    institution: "Oklahoma Legislature",
+    url: "https://oklegislature.gov/",
+    sourceType: "legislature",
+    searchNote:
+      "The Legal Data Hunter Oklahoma corpus holds only 80 documents and is unusable for a coverage sweep.",
+  }),
+  SC: baselineLegislatureSource({
+    label: "South Carolina Legislature",
+    institution: "South Carolina General Assembly",
+    url: "https://www.scstatehouse.gov/",
+    sourceType: "legislature",
+    searchNote: "No corpus sweep has been run for South Carolina yet.",
+  }),
+  VT: baselineLegislatureSource({
+    label: "Vermont General Assembly",
+    institution: "Vermont General Assembly",
+    url: "https://legislature.vermont.gov/",
+    sourceType: "legislature",
+    searchNote:
+      "The Legal Data Hunter Vermont corpus holds only 15 documents and is unusable for a coverage sweep.",
+  }),
+  WV: baselineLegislatureSource({
+    label: "West Virginia Legislature",
+    institution: "West Virginia Legislature",
+    url: "https://www.wvlegislature.gov/",
+    sourceType: "legislature",
+    searchNote:
+      "An AI/deepfake/synthetic-media sweep of the Legal Data Hunter West Virginia corpus (snapshot 2026-04-19) returned no AI provision.",
+  }),
+  WY: baselineLegislatureSource({
+    label: "Wyoming Legislature",
+    institution: "Wyoming Legislature",
+    url: "https://wyoleg.gov/",
+    sourceType: "legislature",
+    searchNote: "No corpus sweep has been run for Wyoming yet.",
+  }),
+  DC: baselineLegislatureSource({
+    label: "Code of the District of Columbia",
+    institution: "Council of the District of Columbia",
+    url: "https://code.dccouncil.gov/",
+    sourceType: "state_code",
+    searchNote:
+      "An AI/deepfake/synthetic-media sweep of the Legal Data Hunter District of Columbia corpus (snapshot 2026-04-15) returned no AI provision.",
+  }),
   CA: [
     source({
       label: "CPPA CCPA rulemaking updates",
