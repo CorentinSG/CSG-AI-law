@@ -55,7 +55,7 @@ YYYY-MM-DD · <Agent> · <TASK-ID> · <STATUS>
 - Graph anchors: `usAiCaseLawEntries`, `courtListenerOpinionReference()`, `createMonitoredInstitutionProfile()`, `firstWaveProfiles`, `europeCountryProfiles`
 - Verification:  1003 tests, lint, typecheck and production build all pass. Case holdings quoted from opinion text read via the CourtListener API; Danish and Finnish designations read from the official gazette records (Retsinformation, Finlex).
 - Branch/commit: `claude/github-monitoring-recovery-lz4dos` @ `dfe6935`
-- Next:          Claude Code continues country coverage (17 EU states still carry institutional stubs only, no national measures). Dead code found, not deleted: the 8 `*-national-depth.ts` files (~2 000 lines, 1 entry each) are imported nowhere outside their own tests. Owner: watch the Supabase egress slope before 20 August.
+- Next:          Claude Code continues country coverage. Corrected count: 12 profiles carry zero national measures (HR, CZ, EE, GR, LV, LT, LU, MT, PT, RO, SK, SI); CY and HU are partial. Blocked 2026-08-07: Legal Data Hunter free daily quota exhausted, and this session's egress policy denies CONNECT to eur-lex.europa.eu, digital-strategy.ec.europa.eu and every national gazette host tested, so no primary source is reachable to verify designations. Dead code found, not deleted: the 8 `*-national-depth.ts` files (~2 000 lines, 1 entry each) are imported nowhere outside their own tests. Owner: watch the Supabase egress slope before 20 August.
 
 2026-08-05 · Claude Code · T-COUNTRY-DEPTH-AND-SOURCES · DONE-LOCAL
 - Intent:        close the two targets left open by T-US-STATE-BACKFILL — AI Act authority designations per member state, and live state-level monitoring sources.
