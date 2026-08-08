@@ -248,7 +248,7 @@ const prioritySources: Record<string, UsStateOfficialSource[]> = {
     url: "https://iga.in.gov/",
     sourceType: "legislature",
     searchNote:
-      "Indiana Code text is unreachable by fetch or by a JS-capable browser — iga.in.gov is a client-rendered application that returns page chrome only. Verifying Indiana requires the bulk Indiana Code download rather than page access.",
+      "Indiana Code text is unreachable by every route tried: page fetch, a JS-capable browser (returns 314 characters of page chrome), the bulk-download page (a 691-byte client-rendered shell with no file links) and api.iga.in.gov (HTTP 403, key required). Verifying Indiana needs either an API key or a copy of the Code obtained outside this runner.",
   }),
   IA: baselineLegislatureSource({
     label: "Iowa Legislature",
@@ -266,19 +266,28 @@ const prioritySources: Record<string, UsStateOfficialSource[]> = {
     searchNote:
       "An AI/deepfake/synthetic-media sweep of the Legal Data Hunter Kansas corpus returned no AI provision; that corpus carries no snapshot date, so the sweep is weak evidence.",
   }),
-  ME: baselineLegislatureSource({
-    label: "Maine Legislature",
-    institution: "Maine Legislature",
-    url: "https://legislature.maine.gov/",
-    sourceType: "legislature",
-    searchNote: "No corpus sweep has been run for Maine yet.",
-  }),
+  ME: [
+    source({
+      label:
+        "10 M.R.S. § 1500-DD — required disclosure of use of artificial intelligence chatbot to engage in trade and commerce",
+      institution: "Maine Legislature",
+      url: "https://legislature.maine.gov/statutes/10/title10sec1500-DD.html",
+      sourceType: "state_code",
+      runtimeAccessible: true,
+      responseStatus: 200,
+      parserStatus: "manual_reference",
+      recommendation: "manual_review",
+      note:
+        "Official codified Maine section read in full through the Legal Data Hunter legislation corpus, with the section history 'PL 2025, c. 294, §1 (NEW). RR 2025, c. 1, Pt. A, §16 (RAL).' — it was reallocated from Title 10, section 1500-Y. Runtime check 2026-08-05 returned HTTP 200.",
+    }),
+  ],
   MA: baselineLegislatureSource({
     label: "Massachusetts General Court",
     institution: "Massachusetts General Court",
     url: "https://malegislature.gov/",
     sourceType: "legislature",
-    searchNote: "No corpus sweep has been run for Massachusetts yet.",
+    searchNote:
+      "An AI/deepfake/synthetic-media sweep of the Legal Data Hunter Massachusetts corpus returned no AI provision; that corpus carries no snapshot date, so the sweep is weak evidence.",
   }),
   MO: baselineLegislatureSource({
     label: "Missouri Revised Statutes",
@@ -325,7 +334,8 @@ const prioritySources: Record<string, UsStateOfficialSource[]> = {
     institution: "South Carolina General Assembly",
     url: "https://www.scstatehouse.gov/",
     sourceType: "legislature",
-    searchNote: "No corpus sweep has been run for South Carolina yet.",
+    searchNote:
+      "An AI/deepfake/synthetic-media sweep of the Legal Data Hunter South Carolina corpus returned no AI provision; that corpus carries no snapshot date, so the sweep is weak evidence.",
   }),
   VT: baselineLegislatureSource({
     label: "Vermont General Assembly",
@@ -348,7 +358,8 @@ const prioritySources: Record<string, UsStateOfficialSource[]> = {
     institution: "Wyoming Legislature",
     url: "https://wyoleg.gov/",
     sourceType: "legislature",
-    searchNote: "No corpus sweep has been run for Wyoming yet.",
+    searchNote:
+      "An AI/deepfake/synthetic-media sweep of the Legal Data Hunter Wyoming corpus (snapshot 2026-04-19) returned no AI provision.",
   }),
   DC: baselineLegislatureSource({
     label: "Code of the District of Columbia",
@@ -1651,6 +1662,19 @@ const populatedStateBaselines: Record<string, PopulatedStateBaseline> = {
     publicSummary:
       "Mississippi criminalised the wrongful dissemination of 'digitizations' — its statutory term covering deepfakes and machine-learning-generated media — through SB 2577 (2024), effective July 1, 2024, adding a new section to Title 97, Chapter 13 of the Mississippi Code. Confidence is held at medium because the enrolled bill does not state the codified section number and it has not yet been read in the codified Code.",
   },
+  // Eighth populated pass (2026-08-05).
+  ME: {
+    status: "enacted_sector_specific_ai_law",
+    confidence: "high",
+    enactedAIStatutes: [
+      "10 M.R.S. § 1500-DD, 'Required disclosure of use of artificial intelligence chatbot to engage in trade and commerce' (PL 2025, c. 294, §1; reallocated from § 1500-Y by RR 2025, c. 1, Pt. A, §16). Subsection 1(A) defines an 'artificial intelligence chatbot' as a software application, web interface or computer program that simulates human conversation and interaction through textual or aural communications. Subsection 2 bars using such a chatbot, or any other computer technology, to engage in trade and commerce in a manner that may mislead or deceive a reasonable consumer into believing they are engaging with a human being, unless the consumer is notified clearly and conspicuously that they are not. Subsection 3 makes a violation a violation of the Maine Unfair Trade Practices Act.",
+    ],
+    privateSectorRules: [
+      "10 M.R.S. § 1500-DD routes enforcement through the Maine Unfair Trade Practices Act rather than creating a standalone penalty.",
+    ],
+    publicSummary:
+      "Maine requires any business using an AI chatbot in trade and commerce to tell consumers clearly and conspicuously that they are not talking to a human, where the interaction could otherwise mislead a reasonable consumer (10 M.R.S. § 1500-DD, PL 2025, c. 294). Enforcement runs through the Maine Unfair Trade Practices Act. Like Nebraska's Conversational AI Safety Act, this regulates AI behaviour rather than synthetic media.",
+  },
 };
 
 function createProfile(code: string, name: string): UsStateAiLawProfile {
@@ -1754,7 +1778,7 @@ export function getPriorityUsStateProfiles() {
     "CA", "CO", "NY", "IL", "TX", "CT", "UT", "VA", "WA", "MD",
     "MT", "KY", "TN", "ND", "NM", "AZ", "SD", "AR",
     "OR", "NJ", "FL", "WI", "MI",
-    "MN", "PA", "LA", "ID", "NE", "DE", "NH", "RI", "HI", "MS",
+    "MN", "PA", "LA", "ID", "NE", "DE", "NH", "RI", "HI", "MS", "ME",
   ];
   return usStateAiLawProfiles.filter((profile) =>
     priorityCodes.includes(profile.stateCode),

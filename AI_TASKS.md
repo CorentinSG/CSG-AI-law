@@ -14,6 +14,7 @@ Each agent edits only its own rows. Status vocabulary: `CLAIMED` · `WIP` · `BL
 | T-EFFICIENCY-PLAN (P0→P2) | Claude Code | MERGED | `main` @ `897d2b5` (#56–#61) | none (released) | `buildWeeklyDigestMarkdown()`, `deriveProvisioning()`, `purgeExpiredOperationalRecords()`, `localeAlternates()`, community "Scan Job Management", "DB Repository Layer" | 2026-07-31 |
 | T-SERP-PROBE | Claude Code | MERGED | `main` @ `080bfb0` (#62) | none (released) | `createDiscoveryLead()`, `listAgentApiCapabilities()`, community "DB Repository Layer" | 2026-08-01 |
 | T-SITE-RECOVERY | Claude Code | MERGED | `main` @ `a1432f2` (#65-#70) | none (released) | `buildStableHash()`, `clampFutureIsoDate()`, `populatedStateBaselines`, `usAiCaseLawEntries`, `listRawItemIdentitiesBySource()`, community "Scan Pipeline" | 2026-08-03 |
+| T-US-STATE-DB-BATCH7 | Claude Code | DONE-LOCAL | `claude/us-state-db-batch2` | `src/content/ai-regulation/us-state-ai-law-baseline.ts`, `src/content/ai-regulation/us-legal-baseline.test.ts` | `populatedStateBaselines`, `prioritySources`, `baselineLegislatureSource()` | 2026-08-05 |
 | T-US-STATE-DB-COVERAGE | Claude Code | DONE-LOCAL | `claude/us-state-db-batch2` | `src/content/ai-regulation/us-state-ai-law-baseline.ts`, `src/content/ai-regulation/us-legal-baseline.test.ts` | `baselineLegislatureSource()`, `prioritySources`, `createProfile()`, `usStateMapStatuses` | 2026-08-05 |
 | T-US-STATE-DB-BATCH6 | Claude Code | DONE-LOCAL | `claude/us-state-db-batch2` | `src/content/ai-regulation/us-state-ai-law-baseline.ts`, `src/content/ai-regulation/us-legal-baseline.test.ts` | `populatedStateBaselines`, `prioritySources`, `usStateMapStatuses` | 2026-08-05 |
 | T-US-STATE-DB-BATCH5 | Claude Code | DONE-LOCAL | `claude/us-state-db-batch2` | `src/content/ai-regulation/us-state-ai-law-baseline.ts`, `src/content/ai-regulation/us-legal-baseline.test.ts` | `populatedStateBaselines`, `prioritySources`, `usStateMapStatuses` | 2026-08-05 |
@@ -54,6 +55,14 @@ YYYY-MM-DD · <Agent> · <TASK-ID> · <STATUS>
 ```
 
 ## Current status
+
+2026-08-05 · Claude Code · T-US-STATE-DB-BATCH7 · DONE-LOCAL
+- Intent:        sweep the never-swept states and settle the Indiana access question.
+- Files:         `src/content/ai-regulation/us-state-ai-law-baseline.ts`, `src/content/ai-regulation/us-legal-baseline.test.ts`
+- Graph anchors: `populatedStateBaselines`, `prioritySources`, `baselineLegislatureSource()`, `usStateMapStatuses`
+- Verification:  `npm test` 1010/1010 · lint clean · typecheck clean · build succeeds.
+- Branch/commit: `claude/us-state-db-batch2` @ (this commit)
+- Next:          Claude Code. Added ME (10 M.R.S. § 1500-DD, PL 2025 c. 294) — 33 enacted states. Maine joins Nebraska as a behavioural AI statute rather than a synthetic-media one. Swept with no result: MA, SC, WY — their source notes were upgraded from "never swept" to the sweep result plus its snapshot date. Indiana is now settled as blocked, not pending: page fetch, JS browser, bulk-download page and api.iga.in.gov (403, key required) were all tried and recorded in the IN source note; it needs an API key or an out-of-band copy of the Code. Still never swept: AK, GA, OK, VT — all four have corpora too small to sweep (15–793 documents), so they need direct code reading.
 
 2026-08-05 · Claude Code · T-US-STATE-DB-COVERAGE · DONE-LOCAL
 - Intent:        close the coverage hole — 18 states carried no official source at all and sat at `needs_review` with zero citations on the public map.

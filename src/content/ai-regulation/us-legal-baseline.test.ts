@@ -172,6 +172,10 @@ describe("U.S. state baseline", () => {
     expect(byCode.get("HI")?.enactedAIStatutes.join(" ")).toContain("11-303");
     expect(byCode.get("MS")?.enactedAIStatutes.join(" ")).toContain("SB 2577");
 
+    // Eighth populated pass (2026-08-05). Maine joins Nebraska as a statute
+    // that regulates AI behaviour rather than synthetic media.
+    expect(byCode.get("ME")?.enactedAIStatutes.join(" ")).toContain("1500-DD");
+
     // Washington is deliberately pinned as pending: the LDH Washington corpus
     // returns bill texts only (SB 6120, HB 1170/1168 series), no enacted AI act.
     expect(byCode.get("WA")?.aiLawStatus).toBe("pending_ai_legislation");
@@ -227,6 +231,7 @@ describe("U.S. state baseline", () => {
       "KY",
       "LA",
       "MD",
+      "ME",
       "MI",
       "MN",
       "MS",
