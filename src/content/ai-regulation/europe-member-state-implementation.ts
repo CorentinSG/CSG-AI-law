@@ -1829,6 +1829,96 @@ const finlandGovernmentAiSupervision: CountrySourceRecord = {
     "Official Finnish Government press release stating that acts regulating national authorities supervising the EU AI Act enter into force on 1 January 2026, and describing market-surveillance and fundamental-rights supervision roles.",
 };
 
+const greeceAiActImplementationLaw: CountrySourceRecord = {
+  label:
+    "Nomos 5321/2026 — Measures implementing Regulation (EU) 2024/1689 (AI Act) and amending Law 4961/2022",
+  url: "https://www.hellenicparliament.gr/Nomothetiko-Ergo/Anazitisi-Nomothetikou-Ergou?law_id=e744abc6-3e81-4e56-a4cd-b47f0174f2b1",
+  institution: "Hellenic Parliament",
+  sourceType: "legislation",
+  official: true,
+  public: true,
+  runtimeAccessible: true,
+  responseStatus: 200,
+  publicationDate: "2026-07-20",
+  lastCheckedDate: "2026-08-09T00:00:00.000Z",
+  parserStatus: "manual_reference",
+  recommendation: "manual_review",
+  note:
+    "Greece's AI Act implementing statute, sponsored by the Ministry of Digital Governance, tabled 6 July 2026 and published in the Government Gazette as FEK A' 114 of 20 July 2026 (parliamentary phase recorded as completed). Part A chapter B designates the national competent market surveillance authorities, the single point of contact and the notifying authority; the law also covers sandboxes, sanctions, appeals, a public-sector AI register and the AI Observatory. Statutory text and parliamentary record read on 2026-08-09.",
+};
+
+const portugalAnacomFundamentalRightsList: CountrySourceRecord = {
+  label:
+    "ANACOM — List of entities supervising the protection of fundamental rights under Article 77 of the AI Regulation",
+  url: "https://www.anacom.pt/render.jsp?contentId=1800891",
+  institution: "Autoridade Nacional de Comunicações (ANACOM)",
+  sourceType: "regulator",
+  official: true,
+  public: true,
+  runtimeAccessible: true,
+  responseStatus: 200,
+  publicationDate: null,
+  lastCheckedDate: "2026-08-09T00:00:00.000Z",
+  parserStatus: "manual_reference",
+  recommendation: "manual_review",
+  note:
+    "Official ANACOM page publishing Portugal's Article 77 list of fundamental-rights authorities, which the page states has already been notified to the European Commission. It records that ANACOM additionally performs cross-cutting coordination of the other designated national entities. Read on 2026-08-09.",
+};
+
+const portugalAnacomSupervisionAnnouncement: CountrySourceRecord = {
+  label:
+    "ANACOM — 2025 Conference conclusions recording the Government's designation of ANACOM as AI Act supervisory authority (19 September 2025)",
+  url: "https://www.anacom.pt/render.jsp?contentId=1817086",
+  institution: "Autoridade Nacional de Comunicações (ANACOM)",
+  sourceType: "regulator",
+  official: true,
+  public: true,
+  runtimeAccessible: true,
+  responseStatus: 200,
+  publicationDate: "2025-09-22",
+  lastCheckedDate: "2026-08-09T00:00:00.000Z",
+  parserStatus: "manual_reference",
+  recommendation: "manual_review",
+  note:
+    "ANACOM's own record of its 19 September 2025 conference, at which the Minister for Infrastructure and Housing and the Secretary of State for Digitalisation announced that the Government had chosen ANACOM as the national authority for AI Act supervision, and asked it to design the national AI regulation model including its architecture and financing. This is a ministerial announcement reported by the regulator, not a published legal instrument. Read on 2026-08-09.",
+};
+
+const romaniaGovernmentMemorandum: CountrySourceRecord = {
+  label:
+    "Memorandum of the Romanian Government of 12 March 2026 on designating national competent authorities for Regulation (EU) 2024/1689",
+  url: "https://www.ancom.ro/wp-content/uploads/2026/07/MEMO-Ai-Act_2026.03.12.pdf",
+  institution: "Government of Romania (published by ANCOM)",
+  sourceType: "government",
+  official: true,
+  public: true,
+  runtimeAccessible: true,
+  responseStatus: 200,
+  publicationDate: "2026-03-12",
+  lastCheckedDate: "2026-08-09T00:00:00.000Z",
+  parserStatus: "manual_reference",
+  recommendation: "manual_review",
+  note:
+    "Full memorandum text. It records that no Romanian competent authority or single point of contact had been designated by the 2 August 2025 deadline, and proposes ANCOM as market surveillance authority and single point of contact, ASF and BNR for financial services, ANSPDCP for biometrics and justice/migration domains, the annexed sectoral authorities for Annex I Section A products, and ADR as notifying authority. It also tasks the General Secretariat of the Government with coordinating a draft primary law. Read on 2026-08-09.",
+};
+
+const romaniaAncomImplementationStatus: CountrySourceRecord = {
+  label:
+    "ANCOM — Artificial Intelligence Act in Romania: current state of the implementation framework (24 July 2026)",
+  url: "https://www.ancom.ro/en/about-us/media-en/press-releases/artificial-intelligence-act-in-romania-current-state-of-the-implementation-framework/",
+  institution: "Autoritatea Națională pentru Administrare și Reglementare în Comunicații (ANCOM)",
+  sourceType: "regulator",
+  official: true,
+  public: true,
+  runtimeAccessible: true,
+  responseStatus: 200,
+  publicationDate: "2026-07-24",
+  lastCheckedDate: "2026-08-09T00:00:00.000Z",
+  parserStatus: "manual_reference",
+  recommendation: "manual_review",
+  note:
+    "Official ANACOM-equivalent statement confirming the memorandum designations and stating explicitly that ANCOM and the other competent authorities will be able to verify and sanction non-compliance only after the national implementing act enters into force. Read on 2026-08-09.",
+};
+
 const maltaIdpcDesignationRegulations: CountrySourceRecord = {
   label:
     "Legal Notice 227 of 2025 — Artificial Intelligence (Designation of the Information and Data Protection Commissioner for the purposes of Regulation (EU) 2024/1689) Regulations, 2025",
@@ -2640,18 +2730,46 @@ const firstWaveProfiles: EuropeCountryProfile[] = [
       "General Secretariat of Legal and Parliamentary Affairs",
       "Special Secretariat of Artificial Intelligence and Data Governance",
     ],
-    additionalRegulationSources: [greeceAiGovResources],
+    additionalRegulationSources: [greeceAiActImplementationLaw, greeceAiGovResources],
     caseLawSources: [greeceAreiosPagosCaseLaw],
+    implementationStatus: "competent_authority_designated",
+    implementationConfidence: "high",
+    aiActImplementationNotes:
+      "Greece enacted Law 5321/2026 on measures implementing Regulation (EU) 2024/1689, published in the Government Gazette as FEK A' 114 of 20 July 2026. Article 3(1) designates the Hellenic Data Protection Authority (HDPA) as the competent market surveillance authority under Article 70(1) for prohibited practices under Article 5, for Annex III high-risk systems, and for systems subject to Article 50 transparency obligations. Article 3(2) designates the market surveillance authorities already established under the national legislation implementing the Annex I Section A harmonisation acts as the authorities for high-risk AI linked to those products. Article 4 makes the HDPA the single point of contact under Article 70(2), and article 5 designates the Hellenic Telecommunications and Post Commission (EETT) as notifying authority under Article 28(1). The law also amends Law 4961/2022.",
+    implementationMeasures: [
+      "Law 5321/2026, FEK A' 114 of 20 July 2026, sponsored by the Ministry of Digital Governance and tabled on 6 July 2026.",
+      "Article 3(1): the HDPA is market surveillance authority for Article 5 prohibited practices, Annex III high-risk systems, and Article 50 transparency obligations.",
+      "Article 3(2): sectoral market surveillance authorities designated under the national legislation implementing the Annex I Section A harmonisation acts supervise high-risk AI linked to the products they already cover.",
+      "Article 4: the HDPA is the single point of contact under Article 70(2), publishes the list of article 3(2) authorities on its website, and is responsible for AI Act reporting.",
+      "Article 5: EETT is the notifying authority under Article 28(1). The law establishes an AI coordination and expertise Centre within EETT to support the HDPA, the sectoral market surveillance authorities and the notifying authorities.",
+      "The law establishes a single complaints system at the HDPA, which forwards complaints falling to another article 3(2) authority and informs the complainant; article 8 governs cooperation between the market surveillance and customs authorities, and article 18 covers recovery of supervision costs.",
+      "Article 2 also provides for AI regulatory sandboxes and real-world testing, the sanctions regime and appeals, a single register of AI systems used by public-sector bodies at the Special Secretariat for AI and Data Governance, reinforcement of the AI Observatory, and measures to staff the HDPA for its market surveillance role.",
+    ],
+    competentAuthorities: [
+      "Αρχή Προστασίας Δεδομένων Προσωπικού Χαρακτήρα (Hellenic Data Protection Authority) — market surveillance authority for Article 5 prohibited practices, Annex III high-risk systems and Article 50 transparency; single point of contact",
+      "Εθνική Επιτροπή Τηλεπικοινωνιών και Ταχυδρομείων (EETT) — notifying authority; hosts the AI coordination and expertise Centre",
+      "Sectoral market surveillance authorities under the national legislation implementing the Annex I Section A harmonisation acts — high-risk AI linked to the products they already supervise (list published on the HDPA website)",
+    ],
+    marketSurveillanceAuthorities: [
+      "Hellenic Data Protection Authority (Article 5, Annex III, Article 50)",
+      "Sectoral authorities under the Annex I Section A harmonisation legislation",
+    ],
+    notifyingAuthorities: [
+      "Hellenic Telecommunications and Post Commission (EETT) — Article 28(1)",
+    ],
     sourceVerificationStatus: "verified_official_sources_present",
     missingSourceWarnings: [],
+    nationalAIRegulationNotes:
+      "Greece's designations are taken from the enacted text of Law 5321/2026, articles 2 to 5, with cooperation and cost-recovery provisions at articles 8 and 18. The Annex I Section A supervisors are designated by reference rather than by name, so the operative list is the one the HDPA publishes under article 4(3).",
     nationalCaseLawNotes:
       "The Supreme Court of Greece rulings page is attached as a national case-law monitoring source. No Greek AI Act-specific decision has been individually selected into this profile yet.",
     editorialNotes: [
-      "Greek AI/Data Governance resources and codification sources are verified official anchors, but no final AI Act competent-authority, market-surveillance, or notifying-authority designation has been verified from a binding national instrument.",
+      "Greece is unusual in giving its data protection authority the lead market surveillance role including Article 50 transparency; do not describe it as a telecoms-led model. EETT holds the notifying-authority role and the expertise Centre.",
+      "Track the HDPA's published article 4(3) list to enumerate the sectoral supervisors, which the statute designates by reference.",
       "No Greek AI Act-specific case-law item has been selected yet; Areios Pagos is attached as a high-court monitoring anchor.",
     ],
     publicSummary:
-      "Greece is included with verified official AI/Data Governance, codification, data-protection, and Supreme Court case-law anchors. Final AI Act authority designations remain under review.",
+      "Greece enacted Law 5321/2026 (Government Gazette A' 114 of 20 July 2026), making the Hellenic Data Protection Authority the market surveillance authority for prohibited practices, Annex III high-risk systems and transparency obligations as well as the single point of contact, and the telecoms regulator EETT the notifying authority with an AI coordination and expertise Centre.",
   }),
   createMonitoredInstitutionProfile({
     countryCode: "HU",
@@ -2893,9 +3011,42 @@ const firstWaveProfiles: EuropeCountryProfile[] = [
     governmentInstitution: "Diario da Republica",
     governmentSourceType: "legislation",
     relevantMinistriesOrAgencies: [
+      "Autoridade Nacional de Comunicações (ANACOM)",
       "National Data Protection Commission",
-      "Diario da Republica",
+      "Secretary of State for Digitalisation",
     ],
+    additionalRegulationSources: [
+      portugalAnacomSupervisionAnnouncement,
+      portugalAnacomFundamentalRightsList,
+      europeanCommissionSpocList,
+    ],
+    implementationStatus: "competent_authority_designated",
+    implementationConfidence: "medium",
+    aiActImplementationNotes:
+      "Portugal's AI Act supervisor was announced rather than enacted. At ANACOM's conference of 19 September 2025 the Minister for Infrastructure and Housing and the Secretary of State for Digitalisation announced that the Government had chosen ANACOM as the national market surveillance authority and single point of contact, and asked ANACOM to design the national AI regulation model including its architecture and financing. Portugal has separately notified the European Commission of its Article 77 fundamental-rights list, which ANACOM publishes and within which ANACOM performs cross-cutting coordination of the other designated entities. A sweep of the Diário da República for August to November 2025 found no published instrument effecting the designation, so confidence is held at medium.",
+    implementationMeasures: [
+      "Government announcement of 19 September 2025, recorded by ANACOM, designating ANACOM as principal market surveillance authority and single point of contact for the AI Act, and tasking it with designing the national regulatory model including architecture and financing.",
+      "Article 77 fundamental-rights list published by ANACOM and notified to the European Commission; the published list includes ERSE, IGMTSSS, ASAE, ERS, IGEC, IGAI, Polícia Judiciária, IGSJ, IGDN, ERC, GNS, IGF and ANACOM.",
+      "ANACOM performs cross-cutting coordination of the other designated national entities under the Article 77 list.",
+      "Portugal missed the 2 August 2025 designation deadline; no implementing instrument had been published in the Diário da República when checked.",
+    ],
+    competentAuthorities: [
+      "Autoridade Nacional de Comunicações (ANACOM) — announced as principal market surveillance authority and single point of contact; cross-cutting coordinator of the Article 77 entities",
+    ],
+    marketSurveillanceAuthorities: [
+      "Autoridade Nacional de Comunicações (ANACOM) — announced, pending a published instrument",
+    ],
+    sourceVerificationStatus: "verified_official_sources_present",
+    missingSourceWarnings: [],
+    nationalAIRegulationNotes:
+      "The ANACOM designation rests on a ministerial announcement reported by the regulator itself and on ANACOM's coordinating role in the published Article 77 list, not on a legal instrument published in the Diário da República. Treat the notifying-authority role as not yet verified: no source consulted names one. Upgrade to high confidence once an instrument is published.",
+    editorialNotes: [
+      "Do not describe Portugal's designation as enacted law — it is a government announcement plus a published Article 77 list. The Article 77 list is a fundamental-rights list under Article 77, distinct from market surveillance designation under Article 70.",
+      "No Portuguese notifying authority has been identified in any official source consulted; leave the notifying-authority array empty until one is.",
+      "No Portuguese AI Act-specific case-law item has been selected yet.",
+    ],
+    publicSummary:
+      "Portugal announced in September 2025 that ANACOM would be its AI Act market surveillance authority and single point of contact, and ANACOM already coordinates the Article 77 fundamental-rights entities notified to the European Commission. The designation had not been formalised in a published legal instrument when last checked.",
   }),
   createMonitoredInstitutionProfile({
     countryCode: "RO",
@@ -2910,9 +3061,56 @@ const firstWaveProfiles: EuropeCountryProfile[] = [
     governmentInstitution: "Romanian Ministry of Research, Innovation and Digitalisation",
     governmentSourceType: "policy",
     relevantMinistriesOrAgencies: [
+      "Autoritatea Națională pentru Administrare și Reglementare în Comunicații (ANCOM)",
+      "Autoritatea pentru Digitalizarea României (ADR)",
       "National Supervisory Authority for Personal Data Processing",
-      "Ministry of Research, Innovation and Digitalisation",
+      "General Secretariat of the Government",
     ],
+    additionalRegulationSources: [
+      romaniaGovernmentMemorandum,
+      romaniaAncomImplementationStatus,
+      europeanCommissionSpocList,
+    ],
+    implementationStatus: "competent_authority_designated",
+    implementationConfidence: "medium",
+    aiActImplementationNotes:
+      "Romania allocated AI Act roles by a Government Memorandum of 12 March 2026, which records that no competent authority or single point of contact had been designated by the 2 August 2025 deadline. The memorandum proposes ANCOM as market surveillance authority and national single point of contact, ASF and the National Bank of Romania for high-risk AI in financial services, ANSPDCP for high-risk biometrics used in law enforcement, border management and the safeguarding of justice and democracy as well as migration, asylum, border control, the administration of justice and democratic processes, the annexed sectoral authorities for Annex I Section A products, and ADR as notifying authority. It also tasks the General Secretariat of the Government with coordinating a draft primary law. ANCOM confirmed on 24 July 2026 that no national normative act is yet in force and that ANCOM and the other authorities will be able to verify and sanction non-compliance only once it is.",
+    implementationMeasures: [
+      "Government Memorandum of 12 March 2026 designating the national competent authorities; the European Commission was to be informed by the Ministry of Foreign Affairs.",
+      "ANCOM proposed as national market surveillance authority and single point of contact; it is already the supervisory authority for electromagnetic compatibility and radio equipment.",
+      "ASF and the National Bank of Romania for high-risk AI systems in financial services where placing on the market, putting into service or use is directly related to the provision of those services.",
+      "ANSPDCP for high-risk biometrics used for law enforcement, border management and safeguarding justice and democracy, and for high-risk systems in law enforcement, migration, asylum, border control, administration of justice and democratic processes.",
+      "ADR (Autoritatea pentru Digitalizarea României) as notifying authority for assessing, designating, notifying and monitoring conformity-assessment bodies.",
+      "Sectoral authorities listed in the memorandum annex for Annex I Section A products; ANCOM cites the National Authority for Consumer Protection and the Labour Inspectorate among them.",
+      "A working group under the General Secretariat of the Government is drafting the primary law that will set the authorities' powers, cooperation mechanisms and the sanctions regime. Until it enters into force, no AI Act sanctions can be imposed in Romania (ANCOM statement of 24 July 2026).",
+    ],
+    competentAuthorities: [
+      "ANCOM — market surveillance authority and national single point of contact (proposed by memorandum)",
+      "ASF and Banca Națională a României — high-risk AI in financial services",
+      "ANSPDCP — high-risk biometrics for law enforcement, border management, justice and democracy; migration, asylum, border control, administration of justice and democratic processes",
+      "Sectoral authorities in the memorandum annex — Annex I Section A products",
+    ],
+    marketSurveillanceAuthorities: [
+      "ANCOM",
+      "Autoritatea de Supraveghere Financiară",
+      "Banca Națională a României",
+      "ANSPDCP",
+      "Sectoral authorities listed in the memorandum annex",
+    ],
+    notifyingAuthorities: [
+      "Autoritatea pentru Digitalizarea României (ADR)",
+    ],
+    sourceVerificationStatus: "verified_official_sources_present",
+    missingSourceWarnings: [],
+    nationalAIRegulationNotes:
+      "Romania's allocation rests on a Government Memorandum, an internal instrument of political direction, not on a normative act. ANCOM states plainly that enforcement and sanctions must await the primary law still being drafted. Confidence stays at medium until that law is adopted, at which point the designations should be re-verified against its text.",
+    editorialNotes: [
+      "Do not present Romania as having an enforceable regime: the memorandum designates authorities but confers no sanctioning power, which ANCOM confirms explicitly.",
+      "Re-verify against the primary law once the General Secretariat of the Government's working group produces it; the memorandum notes the annexed sectoral list may be extended by that act.",
+      "No Romanian AI Act-specific case-law item has been selected yet.",
+    ],
+    publicSummary:
+      "Romania designated its AI Act authorities by Government Memorandum of 12 March 2026 — ANCOM as market surveillance authority and single point of contact, ASF and the central bank for financial services, the data protection authority for biometrics and justice-related systems, and ADR as notifying authority. The implementing law is still being drafted, so no sanctions can be imposed until it is in force.",
   }),
   createMonitoredInstitutionProfile({
     countryCode: "SK",
