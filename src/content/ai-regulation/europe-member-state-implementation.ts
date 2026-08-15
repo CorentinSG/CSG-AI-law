@@ -1829,6 +1829,76 @@ const finlandGovernmentAiSupervision: CountrySourceRecord = {
     "Official Finnish Government press release stating that acts regulating national authorities supervising the EU AI Act enter into force on 1 January 2026, and describing market-surveillance and fundamental-rights supervision roles.",
 };
 
+const croatiaFundamentalRightsList: CountrySourceRecord = {
+  label:
+    "Ministry of Justice, Public Administration and Digital Transformation — publication of the list of competent authorities under the AI Regulation (Article 77)",
+  url: "https://mpudt.gov.hr/vijesti/objavljen-popis-nadleznih-tijela-sukladno-uredbi-o-umjetnoj-inteligenciji/29657",
+  institution: "Ministarstvo pravosuđa, uprave i digitalne transformacije",
+  sourceType: "government",
+  official: true,
+  public: true,
+  runtimeAccessible: true,
+  responseStatus: 200,
+  publicationDate: "2024-12-05",
+  lastCheckedDate: "2026-08-09T00:00:00.000Z",
+  parserStatus: "manual_reference",
+  recommendation: "manual_review",
+  note:
+    "Official ministry announcement that Croatia transmitted to the European Commission, via its Permanent Representation, the Article 77(2) list of public authorities supervising fundamental-rights obligations: the Ombudswoman, the Ombudswoman for Children, the Gender Equality Ombudswoman, the Ombudswoman for Persons with Disabilities, the Personal Data Protection Agency, the State Election Commission and the Agency for Electronic Media. Read on 2026-08-09.",
+};
+
+const croatiaImplementingLawWorkingGroup: CountrySourceRecord = {
+  label:
+    "Working group drafting the bill implementing Regulation (EU) 2024/1689 in Croatia",
+  url: "https://mpudt.gov.hr/pristup-informacijama-6341/savjetovanja-s-javnoscu/radne-skupine-za-izradu-nacrta-prijedloga-zakona-drugih-propisa-i-akata/30044",
+  institution: "Ministarstvo pravosuđa, uprave i digitalne transformacije",
+  sourceType: "government",
+  official: true,
+  public: true,
+  runtimeAccessible: true,
+  responseStatus: 200,
+  publicationDate: null,
+  lastCheckedDate: "2026-08-09T00:00:00.000Z",
+  parserStatus: "candidate_for_monitoring",
+  recommendation: "manual_review",
+  note:
+    "Official ministry page for the working group drafting the bill implementing Regulation (EU) 2024/1689, listing its members including industry representatives. Croatia had not designated market surveillance or notifying authorities when checked. Read on 2026-08-09.",
+};
+
+const estoniaTtjaAiSystems: CountrySourceRecord = {
+  label: "TTJA — Artificial intelligence systems: scope of Regulation (EU) 2024/1689",
+  url: "https://ttja.ee/ariklient/ohutus/tooted-teenused/tehisintellektisusteemid",
+  institution: "Tarbijakaitse ja Tehnilise Järelevalve Amet (Consumer Protection and Technical Regulatory Authority)",
+  sourceType: "regulator",
+  official: true,
+  public: true,
+  runtimeAccessible: true,
+  responseStatus: 200,
+  publicationDate: null,
+  lastCheckedDate: "2026-08-09T00:00:00.000Z",
+  parserStatus: "manual_reference",
+  recommendation: "manual_review",
+  note:
+    "TTJA's own guidance page for businesses on the AI Act. It states that TTJA may approach developers, importers, distributors and deployers in the course of supervision, and describes its future task as ensuring AI is not used in Estonia for prohibited purposes. Written prospectively; no formal designation instrument was located. Read on 2026-08-09.",
+};
+
+const estoniaKratidArticle77: CountrySourceRecord = {
+  label: "Kratid — Designation of the authorities referred to in Article 77 of the AI Regulation",
+  url: "https://www.kratid.ee/tehisintellektimaarus",
+  institution: "Government of Estonia (Kratid AI initiative)",
+  sourceType: "government",
+  official: true,
+  public: true,
+  runtimeAccessible: true,
+  responseStatus: 200,
+  publicationDate: null,
+  lastCheckedDate: "2026-08-09T00:00:00.000Z",
+  parserStatus: "manual_reference",
+  recommendation: "manual_review",
+  note:
+    "Official Estonian government page stating that the Ministry of Economic Affairs and Communications, together with the Ministry of Justice, designated three fundamental-rights state agencies to receive the Article 77 information right, and stating explicitly that authorities designated under Article 77 are NOT AI Act market surveillance authorities and gain no supervisory competence. Read on 2026-08-09.",
+};
+
 const czechDraftAdaptationAct: CountrySourceRecord = {
   label:
     "Návrh zákona o umělé inteligenci — draft Czech AI Act adaptation bill (Ministry of Industry and Trade)",
@@ -2572,18 +2642,34 @@ const firstWaveProfiles: EuropeCountryProfile[] = [
       "Croatian Personal Data Protection Agency",
       "Ministry of Justice, Public Administration and Digital Transformation",
     ],
-    additionalRegulationSources: [croatiaJudgmentPublicationPortal],
+    additionalRegulationSources: [
+      croatiaFundamentalRightsList,
+      croatiaImplementingLawWorkingGroup,
+      croatiaJudgmentPublicationPortal,
+    ],
     caseLawSources: [croatiaSupraCaseLaw],
+    implementationStatus: "implementation_in_progress",
+    implementationConfidence: "medium",
+    aiActImplementationNotes:
+      "Croatia has completed its Article 77 obligation but not its Article 70 designation. On 5 December 2024 the Ministry of Justice, Public Administration and Digital Transformation announced that it had transmitted to the European Commission the list of seven public authorities supervising fundamental-rights obligations in the use of high-risk AI systems. The same ministry has convened a working group to draft the bill implementing Regulation (EU) 2024/1689. No market surveillance authority, notifying authority or single point of contact had been designated when checked, and the European Commission's single-point-of-contact list shows no Croatian entry.",
+    implementationMeasures: [
+      "Article 77(2) list transmitted to the European Commission (announced 5 December 2024): the Ombudswoman, the Ombudswoman for Children, the Gender Equality Ombudswoman, the Ombudswoman for Persons with Disabilities, the Personal Data Protection Agency (AZOP), the State Election Commission and the Agency for Electronic Media.",
+      "Ministry working group convened to draft the bill implementing Regulation (EU) 2024/1689; the ministry's published membership includes industry representatives.",
+      "No Article 70 market surveillance authority, notifying authority or single point of contact designated when checked; Croatia is absent from the European Commission's single-point-of-contact list.",
+    ],
     sourceVerificationStatus: "verified_official_sources_present",
     missingSourceWarnings: [],
+    nationalAIRegulationNotes:
+      "The seven bodies Croatia has designated are Article 77 fundamental-rights authorities, not market surveillance authorities. Trackers that count them as Croatia's AI Act supervisors are conflating the two regimes — Estonia's government guidance states the distinction explicitly. Croatia's Article 70 designation is still outstanding.",
     nationalCaseLawNotes:
       "SuPra is attached as Croatia's official Supreme Court case-law database, with the ministry judgment-publication page attached as an additional official monitoring source. No Croatian AI Act-specific decision has been individually selected into this profile yet.",
     editorialNotes: [
-      "No Croatian AI Act competent-authority, market-surveillance, or notifying-authority designation has been verified from a binding national instrument.",
+      "Never present the Article 77 list as Croatia's market surveillance designation; the two are distinct and only the former exists.",
+      "Watch the ministry working-group page for the draft implementing bill, then promote the designations once adopted.",
       "The Croatian judgment-publication page is useful legal-tech context because it describes an AI-based anonymisation and publication workflow for judgments.",
     ],
     publicSummary:
-      "Croatia is included with verified official data-protection, ministry, case-law, and judgment-publication anchors. Final AI Act authority designations remain under review, but the national case-law monitoring layer is now connected.",
+      "Croatia has notified the European Commission of the seven authorities that supervise fundamental rights in the use of high-risk AI, and a ministry working group is drafting the implementing bill. It has not yet designated a market surveillance authority, notifying authority or single point of contact.",
   }),
   createMonitoredInstitutionProfile({
     countryCode: "CY",
@@ -2754,16 +2840,31 @@ const firstWaveProfiles: EuropeCountryProfile[] = [
       "Government of Estonia / Kratid initiative",
     ],
     caseLawSources: [estoniaRiigiTeatajaCaseLaw, estonianCourtsJudicialDecisions],
+    additionalRegulationSources: [estoniaKratidArticle77, estoniaTtjaAiSystems],
+    implementationStatus: "implementation_in_progress",
+    implementationConfidence: "medium",
+    aiActImplementationNotes:
+      "Estonia has designated its Article 77 authorities but no Article 70 supervisor. The Ministry of Economic Affairs and Communications, together with the Ministry of Justice, designated three fundamental-rights state agencies to receive the Article 77 information right; the government's own guidance stresses that these are not market surveillance authorities and acquire no supervisory competence. A steering group led by the Ministry of Economic Affairs and Communications has coordinated implementation since autumn 2024, with the Data Protection Inspectorate represented. The Consumer Protection and Technical Regulatory Authority (TTJA) publishes AI Act guidance for businesses describing supervision it may carry out and framing its role prospectively, but no formal designation instrument was located, and Estonia is absent from the European Commission's single-point-of-contact list.",
+    implementationMeasures: [
+      "Article 77 designation: the Ministry of Economic Affairs and Communications and the Ministry of Justice designated three fundamental-rights state agencies for the Article 77 information right; the list may be extended over time.",
+      "Government guidance states that Article 77 authorities are not market surveillance authorities, gain no supervisory competence, and receive rights of access to documentation, to request supervisory information, to ask for technical testing of an AI solution, and to be informed of serious incidents.",
+      "Implementation steering group convened under the Ministry of Economic Affairs and Communications in autumn 2024, with the Data Protection Inspectorate represented; the Inspectorate described national implementation as still at an early stage.",
+      "TTJA publishes AI Act guidance for businesses covering risk categories, conformity assessment, CE marking and Article 21 information duties, describing supervision in prospective terms.",
+      "No Article 70 market surveillance authority, notifying authority or single point of contact designated when checked.",
+    ],
     sourceVerificationStatus: "verified_official_sources_present",
     missingSourceWarnings: [],
+    nationalAIRegulationNotes:
+      "Estonia's official guidance is unusually explicit that Article 77 designation and Article 70 market surveillance are separate regimes, which is a useful corrective when reading trackers that count Article 77 bodies as AI Act supervisors. TTJA is the strongest candidate on the evidence — it already publishes operational AI Act guidance — but its own page speaks of its role in the future tense, so no designation is recorded here.",
     nationalCaseLawNotes:
       "Riigi Teataja and the Estonian Courts judicial-decisions page are attached as official Estonian case-law monitoring anchors. No Estonian AI Act-specific decision has been individually selected into this profile yet.",
     editorialNotes: [
-      "Estonia has official digital-government and case-law monitoring anchors, but final AI Act competent-authority, market-surveillance, and notifying-authority designations remain under review.",
+      "Do not record TTJA as designated: its guidance is prospective and no instrument was found. Re-check ttja.ee and Riigi Teataja for the designation act.",
+      "The three Article 77 agencies were not named on the page consulted; identify them before listing.",
       "No Estonian AI Act-specific case-law item has been selected yet; Riigi Teataja is attached as the official publication/search anchor.",
     ],
     publicSummary:
-      "Estonia is included with verified official data-protection, digital-government, and case-law anchors. Final AI Act authority designations remain under review.",
+      "Estonia has designated three fundamental-rights agencies under Article 77 and runs an implementation steering group under the Ministry of Economic Affairs and Communications, while the Consumer Protection and Technical Regulatory Authority already publishes AI Act guidance for businesses. No market surveillance authority, notifying authority or single point of contact has been formally designated.",
   }),
   createMonitoredInstitutionProfile({
     countryCode: "FI",
