@@ -49,6 +49,14 @@ YYYY-MM-DD · <Agent> · <TASK-ID> · <STATUS>
 
 ## Current status
 
+2026-08-09 · Claude Code · T-EU-COUNTRY-DESIGNATIONS · DONE-LOCAL (COMPLETE)
+- Intent:        Finish AI Act authority verification for every remaining EU stub country. All 14 now done.
+- Files:         `src/content/ai-regulation/europe-member-state-implementation.ts` — this pass added GR (law 5321/2026, FEK A' 114/20.07.2026, arts. 2-5/8/18: HDPA market surveillance + SPOC, EETT notifying + expertise Centre), PT (ANACOM announced 19 Sep 2025, no DRE instrument found — medium), RO (Government Memorandum 12 Mar 2026, ANCOM + ASF/BNR + ANSPDCP + ADR notifying; no sanctions until the pending law — medium), CZ (MPO draft: CNB/CTU/UOOU supervisors, UNMZ notifying, CTU SPOC, CAS sandbox — draft), SK (two successive drafts: MIRRI bill LP/2025/401 superseded by Jan 2026 Office of Digital Integrity bill — draft, medium), HR (Art. 77 list of 7 bodies notified 5 Dec 2024 + drafting working group; no Art. 70 designation), EE (Art. 77 three agencies + MKM steering group; TTJA prospective only, not recorded as designated).
+- Graph anchors: `createMonitoredInstitutionProfile()`, `europeCountryProfiles`, `europeanCommissionSpocList`
+- Verification:  1003 tests, lint, typecheck, production build all pass.
+- Branch/commit: `claude/github-monitoring-recovery-lz4dos` @ (see git log)
+- Next:          Country sweep CLOSED. Key correction for future work: Article 77 fundamental-rights designations are NOT Article 70 market surveillance designations — Estonia's government guidance says so explicitly, and trackers conflate them (e.g. counting Croatia's 7 Art. 77 bodies as supervisors). Re-verify PT once an instrument is published, RO and CZ and SK once their statutes are adopted, HR and EE once they designate at all. Channel note: Exa's server-side fetch is the only tool that reaches government web pages from this environment; LDH covers enacted gazettes only; container egress denies all gazette hosts.
+
 2026-08-07 · Claude Code · T-EU-COUNTRY-DESIGNATIONS · DONE-LOCAL
 - Intent:        Verify AI Act authority designations for the remaining EU stub countries from official sources (LDH quota was exhausted; work done via Exa server-side fetches of official registers).
 - Files:         `src/content/ai-regulation/europe-member-state-implementation.ts` — 6 profiles upgraded: LT (acts XV-105/XV-106, e-TAR/e-seimas), LV (Cabinet report via VARAM + Commission SPOC list, medium), CY (Council of Ministers decision 22 Jan 2025 via gov.cy), SI (ZIUDHPUI read article-by-article from PISRS, Uradni list 85/25), MT (LN 226/227 of 2025, LN 227 text from IDPC), LU (bill 8476 in committee — draft status recorded, authority arrays left empty). Shared Commission SPOC-list source record added.
