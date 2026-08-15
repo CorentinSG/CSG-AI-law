@@ -1829,6 +1829,95 @@ const finlandGovernmentAiSupervision: CountrySourceRecord = {
     "Official Finnish Government press release stating that acts regulating national authorities supervising the EU AI Act enter into force on 1 January 2026, and describing market-surveillance and fundamental-rights supervision roles.",
 };
 
+const czechDraftAdaptationAct: CountrySourceRecord = {
+  label:
+    "Návrh zákona o umělé inteligenci — draft Czech AI Act adaptation bill (Ministry of Industry and Trade)",
+  url: "https://mpo.gov.cz/assets/cz/rozcestnik/ministerstvo/aplikace-zakona-c-106-1999-sb/informace-zverejnovane-podle-paragrafu-5-odstavec-3-zakona/2025/9/Navrh-zakona-o-umele-inteligenci.pdf",
+  institution: "Ministerstvo průmyslu a obchodu (Ministry of Industry and Trade)",
+  sourceType: "government",
+  official: true,
+  public: true,
+  runtimeAccessible: true,
+  responseStatus: 200,
+  publicationDate: "2025-09-01",
+  lastCheckedDate: "2026-08-09T00:00:00.000Z",
+  parserStatus: "candidate_for_monitoring",
+  recommendation: "manual_review",
+  note:
+    "Draft text published by the ministry. It designates the Czech National Bank, the Czech Telecommunication Office and the Office for Personal Data Protection as Article 70(1) supervisory authorities, ÚNMZ as notifying authority, ČTÚ as Article 73(10) national authority and Article 70(2) single point of contact, and establishes an Article 57(1) regulatory sandbox founded by ÚNMZ and operated by the Czech Agency for Standardisation. It amends Act 87/2023 Sb. on product market surveillance. Not yet adopted. Read on 2026-08-09.",
+};
+
+const czechImplementationPlanApproval: CountrySourceRecord = {
+  label:
+    "Government approval of the plan for implementing the AI Act in the Czech Republic (28 May 2025)",
+  url: "https://agenturacas.gov.cz/wp-content/uploads/TZ-UNMZ-Implementace-AI-Act-v-CR.pdf",
+  institution: "Úřad pro technickou normalizaci, metrologii a státní zkušebnictví / Česká agentura pro standardizaci",
+  sourceType: "government",
+  official: true,
+  public: true,
+  runtimeAccessible: true,
+  responseStatus: 200,
+  publicationDate: "2025-05-28",
+  lastCheckedDate: "2026-08-09T00:00:00.000Z",
+  parserStatus: "manual_reference",
+  recommendation: "manual_review",
+  note:
+    "Joint ÚNMZ/ČAS statement that the Government approved the national AI Act implementation plan on 28 May 2025, allocating roles to MPO (coordination, drafting the AI law, AI competence centre for eGovernment), ČTÚ (market surveillance), ÚNMZ (notifying authority) and ČAS (regulatory sandbox). Read on 2026-08-09.",
+};
+
+const slovakiaMirriAiBillLaunch: CountrySourceRecord = {
+  label:
+    "MIRRI — Slovakia launches the interministerial comment procedure on the artificial intelligence bill",
+  url: "https://mirri.gov.sk/aktuality/ministerstvo/slovensko-spusta-pripomienkove-konanie-k-zakonu-o-umelej-inteligencii-a-posilnuje-medzinarodnu-spolupracu/",
+  institution: "Ministerstvo investícií, regionálneho rozvoja a informatizácie SR (MIRRI)",
+  sourceType: "government",
+  official: true,
+  public: true,
+  runtimeAccessible: true,
+  responseStatus: 200,
+  publicationDate: "2025-07-29",
+  lastCheckedDate: "2026-08-09T00:00:00.000Z",
+  parserStatus: "manual_reference",
+  recommendation: "manual_review",
+  note:
+    "Official MIRRI announcement of the interministerial comment procedure on the AI bill implementing Regulation (EU) 2024/1689, presented by the State Secretary and Government Plenipotentiary for AI. Read on 2026-08-09.",
+};
+
+const slovakiaMirriUdiStatement: CountrySourceRecord = {
+  label: "MIRRI — Response on the Office of Digital Integrity and the AI bill (6 February 2026)",
+  url: "https://mirri.gov.sk/aktuality/splnomocnenec-vlady-pre-ai/reakcia-na-nepravdive-medialne-informacie-ohladom-uradu-digitalnej-integrity/",
+  institution: "Ministerstvo investícií, regionálneho rozvoja a informatizácie SR (MIRRI)",
+  sourceType: "government",
+  official: true,
+  public: true,
+  runtimeAccessible: true,
+  responseStatus: 200,
+  publicationDate: "2026-02-06",
+  lastCheckedDate: "2026-08-09T00:00:00.000Z",
+  parserStatus: "manual_reference",
+  recommendation: "manual_review",
+  note:
+    "MIRRI statement on the bill on artificial intelligence and European data regulation: it would create a central Office of Digital Integrity (Úrad digitálnej integrity) as a central state administration body with market-surveillance inspectors, designates the Office for Personal Data Protection as sectoral market surveillance authority in defined areas, and assigns supervision of AI used by courts to the Ministry of Justice. The institutional model follows the government-approved framework for Slovakia's digital transformation. Read on 2026-08-09.",
+};
+
+const slovakiaNrsrAiBillSummary: CountrySourceRecord = {
+  label:
+    "National Council of the Slovak Republic — parliamentary document summarising bill LP/2025/401 on the organisation of state administration in the field of artificial intelligence",
+  url: "https://www.nrsr.sk/web/Dynamic/DocumentPreview.aspx?DocID=582921",
+  institution: "Národná rada Slovenskej republiky (National Council of the Slovak Republic)",
+  sourceType: "parliament",
+  official: true,
+  public: true,
+  runtimeAccessible: true,
+  responseStatus: 200,
+  publicationDate: null,
+  lastCheckedDate: "2026-08-09T00:00:00.000Z",
+  parserStatus: "manual_reference",
+  recommendation: "manual_review",
+  note:
+    "Parliamentary record of the earlier MIRRI bill LP/2025/401 implementing Article 70: MIRRI as general market surveillance authority (§3(1)) and single point of contact (§3(2)), the Office for Personal Data Protection as notifying authority, sectoral market surveillance by the Office for Personal Data Protection, the National Security Authority and the bodies listed in §26 of Act 56/2018 Z. z. (Slovak Trade Inspection, Transport Authority, State Institute for Drug Control, Labour Inspectorate), and a sandbox administered by MIRRI (§7). Superseded in part by the January 2026 bill creating the Office of Digital Integrity. Read on 2026-08-09.",
+};
+
 const greeceAiActImplementationLaw: CountrySourceRecord = {
   label:
     "Nomos 5321/2026 — Measures implementing Regulation (EU) 2024/1689 (AI Act) and amending Law 4961/2022",
@@ -2570,18 +2659,38 @@ const firstWaveProfiles: EuropeCountryProfile[] = [
       "Office for Personal Data Protection",
       "Ministry of Industry and Trade",
     ],
-    additionalRegulationSources: [czechDigitalCzechiaAiAct],
+    additionalRegulationSources: [
+      czechDraftAdaptationAct,
+      czechImplementationPlanApproval,
+      czechDigitalCzechiaAiAct,
+    ],
     caseLawSources: [czechConstitutionalCourtDecisions],
+    implementationStatus: "consultation_or_draft_identified",
+    implementationConfidence: "high",
+    aiActImplementationNotes:
+      "Czechia has a complete draft framework but no adopted statute. The Government approved the national AI Act implementation plan on 28 May 2025, and the Ministry of Industry and Trade published a deliberately minimalist adaptation bill that has completed the interministerial comment procedure and awaits discussion by the Government. Under the published draft, the Article 70(1) supervisory authorities would be the Czech National Bank, the Czech Telecommunication Office and the Office for Personal Data Protection; ÚNMZ would be the notifying authority; ČTÚ would be both the Article 73(10) national authority and the Article 70(2) single point of contact, holding residual competence wherever ČNB and ÚOOÚ do not act. Authority arrays are left empty until adoption.",
+    implementationMeasures: [
+      "Government approval of the AI Act implementation plan, 28 May 2025, allocating roles to MPO (coordination and drafting), ČTÚ (market surveillance), ÚNMZ (notifying authority) and ČAS (regulatory sandbox).",
+      "Draft adaptation bill published by MPO; it has completed the interministerial comment procedure and awaits Government discussion, with adoption expected to align with the 2 August 2026 applicability date.",
+      "Draft: Article 70(1) supervisory authorities would be the Czech National Bank, the Czech Telecommunication Office and the Office for Personal Data Protection.",
+      "Draft: ČTÚ would hold general residual supervisory competence; ČNB would supervise entities operating under its own authorisations; ÚOOÚ would cover the high-risk systems referred to in Article 74(8) — law enforcement, justice, electoral matters, border management and migration.",
+      "Draft: ÚNMZ would be the notifying authority for conformity-assessment bodies, and ČTÚ the Article 70(2) single point of contact and the Article 73(10) national authority.",
+      "Draft: an Article 57(1) regulatory sandbox founded by ÚNMZ and operated by the Czech Agency for Standardisation, which would set and publish the eligibility and selection criteria.",
+      "Draft: amends Act 87/2023 Sb. on product market surveillance; provides a remediation mechanism allowing the supervisor to invite correction instead of opening offence proceedings for less serious breaches, and applies the lower of the two AI Act penalty limits to SMEs.",
+    ],
     sourceVerificationStatus: "verified_official_sources_present",
     missingSourceWarnings: [],
+    nationalAIRegulationNotes:
+      "The allocation above is taken from the ministry's published draft text and the government-approved implementation plan. Because the bill has not been adopted, the competent-authority, market-surveillance and notifying-authority arrays are deliberately left empty; promote them once the act is published in the Sbírka zákonů.",
     nationalCaseLawNotes:
       "The Constitutional Court decisions page is attached as a Czech national case-law monitoring source. No Czech AI Act-specific decision has been individually selected into this profile yet.",
     editorialNotes: [
-      "Czechia has official AI Act/draft-law context sources, but final competent-authority, market-surveillance, and notifying-authority designations remain under review.",
+      "Czechia is a draft, not a designation: describe the three-supervisor split as proposed. The MPO press release also flags a role for the Public Defender of Rights in fundamental-rights protection, which the draft text consulted does not itself allocate.",
+      "Re-verify against the adopted act, especially the article numbering, which is placeholder-style in the published draft.",
       "No Czech AI Act-specific case-law item has been selected yet; the Constitutional Court decisions page is a monitoring anchor, not a complete all-courts case-law map.",
     ],
     publicSummary:
-      "Czechia is included with verified official data-protection, ministry, Digital Czechia AI Act, and case-law anchors. Final AI Act authority designations remain under review.",
+      "Czechia approved a national AI Act implementation plan in May 2025 and has a minimalist adaptation bill through interministerial comments and awaiting Government discussion. It would split supervision between the Czech Telecommunication Office (residual competence and single point of contact), the Czech National Bank and the data protection authority, with ÚNMZ as notifying authority and a sandbox run by the Czech Agency for Standardisation.",
   }),
   createMonitoredInstitutionProfile({
     countryCode: "DK",
@@ -3123,9 +3232,38 @@ const firstWaveProfiles: EuropeCountryProfile[] = [
     governmentInstitution: "Slov-lex",
     governmentSourceType: "legislation",
     relevantMinistriesOrAgencies: [
+      "Ministry of Investments, Regional Development and Informatization (MIRRI)",
       "Office for Personal Data Protection",
-      "Slov-lex",
+      "Ministry of Justice",
     ],
+    additionalRegulationSources: [
+      slovakiaMirriUdiStatement,
+      slovakiaNrsrAiBillSummary,
+      slovakiaMirriAiBillLaunch,
+    ],
+    implementationStatus: "consultation_or_draft_identified",
+    implementationConfidence: "medium",
+    aiActImplementationNotes:
+      "Slovakia has legislated twice over and adopted neither. MIRRI opened an interministerial comment procedure in July 2025 on bill LP/2025/401 on the organisation of state administration in the field of AI, under which MIRRI itself would have been the general market surveillance authority and single point of contact, with the Office for Personal Data Protection as notifying authority. A later and broader bill on artificial intelligence and European data regulation, sent for comments on 27 January 2026, instead proposes creating a central Office of Digital Integrity (Úrad digitálnej integrity) as the general market surveillance authority with its own inspectors, sandbox powers and fining powers. That comment procedure closed on 4 February 2026 with 574 comments, 224 of them fundamental. Neither bill has been adopted, so the authority arrays are left empty.",
+    implementationMeasures: [
+      "Bill LP/2025/401 on the organisation of state administration in the field of AI, sent for interministerial comments by MIRRI in July 2025: MIRRI as general market surveillance authority (§3(1)) and single point of contact (§3(2)); the Office for Personal Data Protection as notifying authority under Article 28; sandbox administered by MIRRI (§7).",
+      "LP/2025/401 sectoral market surveillance: the Office for Personal Data Protection, the National Security Authority, and the bodies listed in §26 of Act 56/2018 Z. z. — including the Slovak Trade Inspection, the Transport Authority, the State Institute for Drug Control and the Labour Inspectorate.",
+      "Later bill on artificial intelligence and European data regulation, sent for comments on 27 January 2026: would create the Office of Digital Integrity (ÚDI) as a central state administration body and general market surveillance authority, managing the AI regulatory sandbox, conducting supervision through inspectors and imposing fines.",
+      "Under that bill MIRRI states the Office for Personal Data Protection remains a sectoral market surveillance authority in defined areas with its existing independent powers intact, and supervision of AI used by courts in the exercise of judicial power is assigned to the Ministry of Justice.",
+      "The comment procedure on the January 2026 bill closed on 4 February 2026 with 574 comments, 224 of them fundamental. Neither bill had been adopted when last checked.",
+      "MIRRI states the institutional model derives from an external analysis and from the government-approved institutional and coordination framework for Slovakia's digital transformation.",
+    ],
+    sourceVerificationStatus: "verified_official_sources_present",
+    missingSourceWarnings: [],
+    nationalAIRegulationNotes:
+      "Two successive drafts allocate the lead role differently — MIRRI itself in the July 2025 bill, a new Office of Digital Integrity in the January 2026 bill. Confidence is medium because the institutional design is still moving; do not present either allocation as settled, and re-verify against whichever text is finally adopted.",
+    editorialNotes: [
+      "Note the supersession explicitly when writing about Slovakia: citing the MIRRI-as-supervisor model alone would be out of date, and citing ÚDI alone would omit that it is not yet enacted.",
+      "The proposed penalty ceiling and inspector powers come from commentary on the January 2026 draft rather than from an official text read in full; do not state figures until the bill text or adopted act is read directly.",
+      "No Slovak AI Act-specific case-law item has been selected yet.",
+    ],
+    publicSummary:
+      "Slovakia has consulted on two successive AI Act implementation bills without adopting either. The July 2025 draft would have made MIRRI the market surveillance authority and single point of contact; the January 2026 draft instead proposes a new central Office of Digital Integrity, with the data protection authority as sectoral supervisor and the Ministry of Justice overseeing AI used by courts.",
   }),
   createMonitoredInstitutionProfile({
     countryCode: "SI",
