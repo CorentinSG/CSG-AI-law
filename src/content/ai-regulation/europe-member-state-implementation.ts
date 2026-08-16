@@ -1743,6 +1743,24 @@ const denmarkAiActAgencyPage: CountrySourceRecord = {
     "Official Danish Agency for Digital Government anchor listed by the Commission AI Act Service Desk as providing information about the AI Act and its development.",
 };
 
+const denmarkAiActImplementingAct: CountrySourceRecord = {
+  label:
+    "Lov om supplerende bestemmelser til forordningen om kunstig intelligens (Lov nr. 467 af 14. maj 2025)",
+  url: "https://retsinformation.dk/eli/lta/2025/467",
+  institution: "Retsinformation (Lovtidende A)",
+  sourceType: "legislation",
+  official: true,
+  public: true,
+  runtimeAccessible: true,
+  responseStatus: 200,
+  publicationDate: "2025-05-14",
+  lastCheckedDate: "2026-08-06T00:00:00.000Z",
+  parserStatus: "manual_reference",
+  recommendation: "manual_review",
+  note:
+    "Binding Danish act supplementing Regulation (EU) 2024/1689. Chapter 2, section 2 designates the national competent authorities; section 2(2) designates the notifying authority and single point of contact. Text read from the official consolidated record on 2026-08-06.",
+};
+
 const denmarkDomsdatabasenCaseLaw: CountrySourceRecord = {
   label: "Domsdatabasen Danish judgment database",
   url: "https://domsdatabasen.dk/",
@@ -1809,6 +1827,469 @@ const finlandGovernmentAiSupervision: CountrySourceRecord = {
   recommendation: "manual_review",
   note:
     "Official Finnish Government press release stating that acts regulating national authorities supervising the EU AI Act enter into force on 1 January 2026, and describing market-surveillance and fundamental-rights supervision roles.",
+};
+
+const croatiaFundamentalRightsList: CountrySourceRecord = {
+  label:
+    "Ministry of Justice, Public Administration and Digital Transformation — publication of the list of competent authorities under the AI Regulation (Article 77)",
+  url: "https://mpudt.gov.hr/vijesti/objavljen-popis-nadleznih-tijela-sukladno-uredbi-o-umjetnoj-inteligenciji/29657",
+  institution: "Ministarstvo pravosuđa, uprave i digitalne transformacije",
+  sourceType: "government",
+  official: true,
+  public: true,
+  runtimeAccessible: true,
+  responseStatus: 200,
+  publicationDate: "2024-12-05",
+  lastCheckedDate: "2026-08-09T00:00:00.000Z",
+  parserStatus: "manual_reference",
+  recommendation: "manual_review",
+  note:
+    "Official ministry announcement that Croatia transmitted to the European Commission, via its Permanent Representation, the Article 77(2) list of public authorities supervising fundamental-rights obligations: the Ombudswoman, the Ombudswoman for Children, the Gender Equality Ombudswoman, the Ombudswoman for Persons with Disabilities, the Personal Data Protection Agency, the State Election Commission and the Agency for Electronic Media. Read on 2026-08-09.",
+};
+
+const croatiaImplementingLawWorkingGroup: CountrySourceRecord = {
+  label:
+    "Working group drafting the bill implementing Regulation (EU) 2024/1689 in Croatia",
+  url: "https://mpudt.gov.hr/pristup-informacijama-6341/savjetovanja-s-javnoscu/radne-skupine-za-izradu-nacrta-prijedloga-zakona-drugih-propisa-i-akata/30044",
+  institution: "Ministarstvo pravosuđa, uprave i digitalne transformacije",
+  sourceType: "government",
+  official: true,
+  public: true,
+  runtimeAccessible: true,
+  responseStatus: 200,
+  publicationDate: null,
+  lastCheckedDate: "2026-08-09T00:00:00.000Z",
+  parserStatus: "candidate_for_monitoring",
+  recommendation: "manual_review",
+  note:
+    "Official ministry page for the working group drafting the bill implementing Regulation (EU) 2024/1689, listing its members including industry representatives. Croatia had not designated market surveillance or notifying authorities when checked. Read on 2026-08-09.",
+};
+
+const estoniaTtjaAiSystems: CountrySourceRecord = {
+  label: "TTJA — Artificial intelligence systems: scope of Regulation (EU) 2024/1689",
+  url: "https://ttja.ee/ariklient/ohutus/tooted-teenused/tehisintellektisusteemid",
+  institution: "Tarbijakaitse ja Tehnilise Järelevalve Amet (Consumer Protection and Technical Regulatory Authority)",
+  sourceType: "regulator",
+  official: true,
+  public: true,
+  runtimeAccessible: true,
+  responseStatus: 200,
+  publicationDate: null,
+  lastCheckedDate: "2026-08-09T00:00:00.000Z",
+  parserStatus: "manual_reference",
+  recommendation: "manual_review",
+  note:
+    "TTJA's own guidance page for businesses on the AI Act. It states that TTJA may approach developers, importers, distributors and deployers in the course of supervision, and describes its future task as ensuring AI is not used in Estonia for prohibited purposes. Written prospectively; no formal designation instrument was located. Read on 2026-08-09.",
+};
+
+const estoniaKratidArticle77: CountrySourceRecord = {
+  label: "Kratid — Designation of the authorities referred to in Article 77 of the AI Regulation",
+  url: "https://www.kratid.ee/tehisintellektimaarus",
+  institution: "Government of Estonia (Kratid AI initiative)",
+  sourceType: "government",
+  official: true,
+  public: true,
+  runtimeAccessible: true,
+  responseStatus: 200,
+  publicationDate: null,
+  lastCheckedDate: "2026-08-09T00:00:00.000Z",
+  parserStatus: "manual_reference",
+  recommendation: "manual_review",
+  note:
+    "Official Estonian government page stating that the Ministry of Economic Affairs and Communications, together with the Ministry of Justice, designated three fundamental-rights state agencies to receive the Article 77 information right, and stating explicitly that authorities designated under Article 77 are NOT AI Act market surveillance authorities and gain no supervisory competence. Read on 2026-08-09.",
+};
+
+const czechDraftAdaptationAct: CountrySourceRecord = {
+  label:
+    "Návrh zákona o umělé inteligenci — draft Czech AI Act adaptation bill (Ministry of Industry and Trade)",
+  url: "https://mpo.gov.cz/assets/cz/rozcestnik/ministerstvo/aplikace-zakona-c-106-1999-sb/informace-zverejnovane-podle-paragrafu-5-odstavec-3-zakona/2025/9/Navrh-zakona-o-umele-inteligenci.pdf",
+  institution: "Ministerstvo průmyslu a obchodu (Ministry of Industry and Trade)",
+  sourceType: "government",
+  official: true,
+  public: true,
+  runtimeAccessible: true,
+  responseStatus: 200,
+  publicationDate: "2025-09-01",
+  lastCheckedDate: "2026-08-09T00:00:00.000Z",
+  parserStatus: "candidate_for_monitoring",
+  recommendation: "manual_review",
+  note:
+    "Draft text published by the ministry. It designates the Czech National Bank, the Czech Telecommunication Office and the Office for Personal Data Protection as Article 70(1) supervisory authorities, ÚNMZ as notifying authority, ČTÚ as Article 73(10) national authority and Article 70(2) single point of contact, and establishes an Article 57(1) regulatory sandbox founded by ÚNMZ and operated by the Czech Agency for Standardisation. It amends Act 87/2023 Sb. on product market surveillance. Not yet adopted. Read on 2026-08-09.",
+};
+
+const czechImplementationPlanApproval: CountrySourceRecord = {
+  label:
+    "Government approval of the plan for implementing the AI Act in the Czech Republic (28 May 2025)",
+  url: "https://agenturacas.gov.cz/wp-content/uploads/TZ-UNMZ-Implementace-AI-Act-v-CR.pdf",
+  institution: "Úřad pro technickou normalizaci, metrologii a státní zkušebnictví / Česká agentura pro standardizaci",
+  sourceType: "government",
+  official: true,
+  public: true,
+  runtimeAccessible: true,
+  responseStatus: 200,
+  publicationDate: "2025-05-28",
+  lastCheckedDate: "2026-08-09T00:00:00.000Z",
+  parserStatus: "manual_reference",
+  recommendation: "manual_review",
+  note:
+    "Joint ÚNMZ/ČAS statement that the Government approved the national AI Act implementation plan on 28 May 2025, allocating roles to MPO (coordination, drafting the AI law, AI competence centre for eGovernment), ČTÚ (market surveillance), ÚNMZ (notifying authority) and ČAS (regulatory sandbox). Read on 2026-08-09.",
+};
+
+const slovakiaMirriAiBillLaunch: CountrySourceRecord = {
+  label:
+    "MIRRI — Slovakia launches the interministerial comment procedure on the artificial intelligence bill",
+  url: "https://mirri.gov.sk/aktuality/ministerstvo/slovensko-spusta-pripomienkove-konanie-k-zakonu-o-umelej-inteligencii-a-posilnuje-medzinarodnu-spolupracu/",
+  institution: "Ministerstvo investícií, regionálneho rozvoja a informatizácie SR (MIRRI)",
+  sourceType: "government",
+  official: true,
+  public: true,
+  runtimeAccessible: true,
+  responseStatus: 200,
+  publicationDate: "2025-07-29",
+  lastCheckedDate: "2026-08-09T00:00:00.000Z",
+  parserStatus: "manual_reference",
+  recommendation: "manual_review",
+  note:
+    "Official MIRRI announcement of the interministerial comment procedure on the AI bill implementing Regulation (EU) 2024/1689, presented by the State Secretary and Government Plenipotentiary for AI. Read on 2026-08-09.",
+};
+
+const slovakiaMirriUdiStatement: CountrySourceRecord = {
+  label: "MIRRI — Response on the Office of Digital Integrity and the AI bill (6 February 2026)",
+  url: "https://mirri.gov.sk/aktuality/splnomocnenec-vlady-pre-ai/reakcia-na-nepravdive-medialne-informacie-ohladom-uradu-digitalnej-integrity/",
+  institution: "Ministerstvo investícií, regionálneho rozvoja a informatizácie SR (MIRRI)",
+  sourceType: "government",
+  official: true,
+  public: true,
+  runtimeAccessible: true,
+  responseStatus: 200,
+  publicationDate: "2026-02-06",
+  lastCheckedDate: "2026-08-09T00:00:00.000Z",
+  parserStatus: "manual_reference",
+  recommendation: "manual_review",
+  note:
+    "MIRRI statement on the bill on artificial intelligence and European data regulation: it would create a central Office of Digital Integrity (Úrad digitálnej integrity) as a central state administration body with market-surveillance inspectors, designates the Office for Personal Data Protection as sectoral market surveillance authority in defined areas, and assigns supervision of AI used by courts to the Ministry of Justice. The institutional model follows the government-approved framework for Slovakia's digital transformation. Read on 2026-08-09.",
+};
+
+const slovakiaNrsrAiBillSummary: CountrySourceRecord = {
+  label:
+    "National Council of the Slovak Republic — parliamentary document summarising bill LP/2025/401 on the organisation of state administration in the field of artificial intelligence",
+  url: "https://www.nrsr.sk/web/Dynamic/DocumentPreview.aspx?DocID=582921",
+  institution: "Národná rada Slovenskej republiky (National Council of the Slovak Republic)",
+  sourceType: "parliament",
+  official: true,
+  public: true,
+  runtimeAccessible: true,
+  responseStatus: 200,
+  publicationDate: null,
+  lastCheckedDate: "2026-08-09T00:00:00.000Z",
+  parserStatus: "manual_reference",
+  recommendation: "manual_review",
+  note:
+    "Parliamentary record of the earlier MIRRI bill LP/2025/401 implementing Article 70: MIRRI as general market surveillance authority (§3(1)) and single point of contact (§3(2)), the Office for Personal Data Protection as notifying authority, sectoral market surveillance by the Office for Personal Data Protection, the National Security Authority and the bodies listed in §26 of Act 56/2018 Z. z. (Slovak Trade Inspection, Transport Authority, State Institute for Drug Control, Labour Inspectorate), and a sandbox administered by MIRRI (§7). Superseded in part by the January 2026 bill creating the Office of Digital Integrity. Read on 2026-08-09.",
+};
+
+const greeceAiActImplementationLaw: CountrySourceRecord = {
+  label:
+    "Nomos 5321/2026 — Measures implementing Regulation (EU) 2024/1689 (AI Act) and amending Law 4961/2022",
+  url: "https://www.hellenicparliament.gr/Nomothetiko-Ergo/Anazitisi-Nomothetikou-Ergou?law_id=e744abc6-3e81-4e56-a4cd-b47f0174f2b1",
+  institution: "Hellenic Parliament",
+  sourceType: "legislation",
+  official: true,
+  public: true,
+  runtimeAccessible: true,
+  responseStatus: 200,
+  publicationDate: "2026-07-20",
+  lastCheckedDate: "2026-08-09T00:00:00.000Z",
+  parserStatus: "manual_reference",
+  recommendation: "manual_review",
+  note:
+    "Greece's AI Act implementing statute, sponsored by the Ministry of Digital Governance, tabled 6 July 2026 and published in the Government Gazette as FEK A' 114 of 20 July 2026 (parliamentary phase recorded as completed). Part A chapter B designates the national competent market surveillance authorities, the single point of contact and the notifying authority; the law also covers sandboxes, sanctions, appeals, a public-sector AI register and the AI Observatory. Statutory text and parliamentary record read on 2026-08-09.",
+};
+
+const portugalAnacomFundamentalRightsList: CountrySourceRecord = {
+  label:
+    "ANACOM — List of entities supervising the protection of fundamental rights under Article 77 of the AI Regulation",
+  url: "https://www.anacom.pt/render.jsp?contentId=1800891",
+  institution: "Autoridade Nacional de Comunicações (ANACOM)",
+  sourceType: "regulator",
+  official: true,
+  public: true,
+  runtimeAccessible: true,
+  responseStatus: 200,
+  publicationDate: null,
+  lastCheckedDate: "2026-08-09T00:00:00.000Z",
+  parserStatus: "manual_reference",
+  recommendation: "manual_review",
+  note:
+    "Official ANACOM page publishing Portugal's Article 77 list of fundamental-rights authorities, which the page states has already been notified to the European Commission. It records that ANACOM additionally performs cross-cutting coordination of the other designated national entities. Read on 2026-08-09.",
+};
+
+const portugalAnacomSupervisionAnnouncement: CountrySourceRecord = {
+  label:
+    "ANACOM — 2025 Conference conclusions recording the Government's designation of ANACOM as AI Act supervisory authority (19 September 2025)",
+  url: "https://www.anacom.pt/render.jsp?contentId=1817086",
+  institution: "Autoridade Nacional de Comunicações (ANACOM)",
+  sourceType: "regulator",
+  official: true,
+  public: true,
+  runtimeAccessible: true,
+  responseStatus: 200,
+  publicationDate: "2025-09-22",
+  lastCheckedDate: "2026-08-09T00:00:00.000Z",
+  parserStatus: "manual_reference",
+  recommendation: "manual_review",
+  note:
+    "ANACOM's own record of its 19 September 2025 conference, at which the Minister for Infrastructure and Housing and the Secretary of State for Digitalisation announced that the Government had chosen ANACOM as the national authority for AI Act supervision, and asked it to design the national AI regulation model including its architecture and financing. This is a ministerial announcement reported by the regulator, not a published legal instrument. Read on 2026-08-09.",
+};
+
+const romaniaGovernmentMemorandum: CountrySourceRecord = {
+  label:
+    "Memorandum of the Romanian Government of 12 March 2026 on designating national competent authorities for Regulation (EU) 2024/1689",
+  url: "https://www.ancom.ro/wp-content/uploads/2026/07/MEMO-Ai-Act_2026.03.12.pdf",
+  institution: "Government of Romania (published by ANCOM)",
+  sourceType: "government",
+  official: true,
+  public: true,
+  runtimeAccessible: true,
+  responseStatus: 200,
+  publicationDate: "2026-03-12",
+  lastCheckedDate: "2026-08-09T00:00:00.000Z",
+  parserStatus: "manual_reference",
+  recommendation: "manual_review",
+  note:
+    "Full memorandum text. It records that no Romanian competent authority or single point of contact had been designated by the 2 August 2025 deadline, and proposes ANCOM as market surveillance authority and single point of contact, ASF and BNR for financial services, ANSPDCP for biometrics and justice/migration domains, the annexed sectoral authorities for Annex I Section A products, and ADR as notifying authority. It also tasks the General Secretariat of the Government with coordinating a draft primary law. Read on 2026-08-09.",
+};
+
+const romaniaAncomImplementationStatus: CountrySourceRecord = {
+  label:
+    "ANCOM — Artificial Intelligence Act in Romania: current state of the implementation framework (24 July 2026)",
+  url: "https://www.ancom.ro/en/about-us/media-en/press-releases/artificial-intelligence-act-in-romania-current-state-of-the-implementation-framework/",
+  institution: "Autoritatea Națională pentru Administrare și Reglementare în Comunicații (ANCOM)",
+  sourceType: "regulator",
+  official: true,
+  public: true,
+  runtimeAccessible: true,
+  responseStatus: 200,
+  publicationDate: "2026-07-24",
+  lastCheckedDate: "2026-08-09T00:00:00.000Z",
+  parserStatus: "manual_reference",
+  recommendation: "manual_review",
+  note:
+    "Official ANACOM-equivalent statement confirming the memorandum designations and stating explicitly that ANCOM and the other competent authorities will be able to verify and sanction non-compliance only after the national implementing act enters into force. Read on 2026-08-09.",
+};
+
+const maltaIdpcDesignationRegulations: CountrySourceRecord = {
+  label:
+    "Legal Notice 227 of 2025 — Artificial Intelligence (Designation of the Information and Data Protection Commissioner for the purposes of Regulation (EU) 2024/1689) Regulations, 2025",
+  url: "https://legislation.mt/eli/ln/2025/227/eng",
+  institution: "Leġiżlazzjoni Malta (official legislation portal)",
+  sourceType: "legislation",
+  official: true,
+  public: true,
+  runtimeAccessible: true,
+  responseStatus: 200,
+  publicationDate: "2025-10-10",
+  lastCheckedDate: "2026-08-07T00:00:00.000Z",
+  parserStatus: "manual_reference",
+  recommendation: "manual_review",
+  note:
+    "Made under article 33 of the Data Protection Act (Cap. 586), published in Government Gazette No. 21,519 of 10 October 2025. Regulation 3 designates the Commissioner as market surveillance authority for high-risk biometric systems used for law enforcement, border management, and justice and democracy; regulation 5 designates the Commissioner as Article 77 fundamental-rights authority for personal-data protection; regulation 8 makes the Commissioner the notified body where law-enforcement, immigration or asylum authorities put high-risk systems into service; regulations 5 to 7 and 9 to 12 come into force on 2 August 2026. Text read from the IDPC's published copy on 2026-08-07.",
+};
+
+const maltaAiRegulations2025: CountrySourceRecord = {
+  label: "Legal Notice 226 of 2025 — Artificial Intelligence Regulations, 2025 (MDIA designation)",
+  url: "https://legislation.mt/eli/ln/2025/226/eng",
+  institution: "Leġiżlazzjoni Malta (official legislation portal)",
+  sourceType: "legislation",
+  official: true,
+  public: true,
+  runtimeAccessible: null,
+  responseStatus: null,
+  publicationDate: "2025-10-10",
+  lastCheckedDate: "2026-08-07T00:00:00.000Z",
+  parserStatus: "manual_reference",
+  recommendation: "manual_review",
+  note:
+    "Made under the Malta Digital Innovation Authority Act (Cap. 591), published in Government Gazette No. 21,519 of 10 October 2025 alongside Legal Notice 227. Designates the MDIA as market surveillance authority for AI systems generally, national single point of contact, notifying authority for conformity-assessment bodies, and operator of the national AI regulatory sandbox. URL follows the official ELI scheme verified for LN 227; the full text has not yet been fetched at runtime — designation summary corroborated by the complementary LN 227 text and practice commentary.",
+};
+
+const luxembourgBill8476Dossier: CountrySourceRecord = {
+  label:
+    "Projet de loi n° 8476 portant mise en oeuvre de certaines dispositions du règlement (UE) 2024/1689 — dossier législatif",
+  url: "https://www.chd.lu/en/dossier/8476",
+  institution: "Chambre des Députés du Grand-Duché de Luxembourg",
+  sourceType: "parliament",
+  official: true,
+  public: true,
+  runtimeAccessible: true,
+  responseStatus: 200,
+  publicationDate: "2024-12-23",
+  lastCheckedDate: "2026-08-07T00:00:00.000Z",
+  parserStatus: "candidate_for_monitoring",
+  recommendation: "manual_review",
+  note:
+    "Bill implementing parts of the AI Act and amending the CNPD, CSSF and insurance-sector organic laws; deposited 23 December 2024, in committee when checked. Article 7 of the deposited text designates the CNPD as default horizontal market surveillance authority with sectoral derogations (judicial supervisory authority, CSSF, Commissariat aux assurances, ILNAS, ILR, medicines agency, ALIA); article 12 requires the CNPD to operate at least one AI regulatory sandbox by 2 August 2026. CSSF opinion 17 January 2025; CNPD opinion 10 June 2025. Dossier and deposited text read via crawl on 2026-08-07.",
+};
+
+const luxembourgCnpdAiActNews: CountrySourceRecord = {
+  label: "CNPD — Mise en oeuvre nationale de l'AI Act : la CNPD désignée comme autorité compétente",
+  url: "https://cnpd.public.lu/fr/actualites/national/2024/11/cnpd-ai-act.html",
+  institution: "Commission nationale pour la protection des données (CNPD)",
+  sourceType: "regulator",
+  official: true,
+  public: true,
+  runtimeAccessible: true,
+  responseStatus: 200,
+  publicationDate: "2024-11-01",
+  lastCheckedDate: "2026-08-07T00:00:00.000Z",
+  parserStatus: "manual_reference",
+  recommendation: "manual_review",
+  note:
+    "CNPD announcement that the Government Council of 29 November 2024 approved the AI Act implementation bill under which the CNPD is to become single point of contact, national coordinator, default market surveillance authority, and a fundamental-rights authority alongside ALIA and the ITM, with a regulatory-sandbox obligation. Written in the future tense — the bill had not been enacted. Read via crawl on 2026-08-07.",
+};
+
+const cyprusCouncilOfMinistersDesignation: CountrySourceRecord = {
+  label:
+    "DMRID press release — Council of Ministers designation of national competent authorities under Article 70 AI Act (decision of 22 January 2025)",
+  url: "https://www.gov.cy/dmrid/en/uncategorized/regulation-eu-2024-1689-establishing-harmonised-rules-on-artificial-intelligence-ai-act/",
+  institution: "Deputy Ministry of Research, Innovation and Digital Policy (Republic of Cyprus)",
+  sourceType: "government",
+  official: true,
+  public: true,
+  runtimeAccessible: true,
+  responseStatus: 200,
+  publicationDate: "2025-02-06",
+  lastCheckedDate: "2026-08-07T00:00:00.000Z",
+  parserStatus: "manual_reference",
+  recommendation: "manual_review",
+  note:
+    "Official announcement that the Council of Ministers, by decision of 22 January 2025, designated the Commissioner of Electronic Communications as notifying authority, market surveillance authority and single point of contact, and the Commissioner for Personal Data Protection as market surveillance authority for Annex III points 1, 6, 7 and 8 and for Article 5 prohibited practices within her competence. The decision was communicated to the European Commission; additional market surveillance authorities may be designated. Full text read via crawl on 2026-08-07.",
+};
+
+const sloveniaZiudhpuiAct: CountrySourceRecord = {
+  label:
+    "Zakon o izvajanju uredbe (EU) o določitvi harmoniziranih pravil o umetni inteligenci (ZIUDHPUI) — Uradni list RS 85/25",
+  url: "https://pisrs.si/Pis.web/pregledPredpisa?sop=2025-01-3035",
+  institution: "PISRS — Legal Information System of the Republic of Slovenia",
+  sourceType: "legislation",
+  official: true,
+  public: true,
+  runtimeAccessible: true,
+  responseStatus: 200,
+  publicationDate: "2025-11-06",
+  lastCheckedDate: "2026-08-07T00:00:00.000Z",
+  parserStatus: "manual_reference",
+  recommendation: "manual_review",
+  note:
+    "Slovenia's AI Act implementing statute: adopted by the National Assembly on 23 October 2025, published in Uradni list RS No. 85/25 on 6 November 2025, in force and applicable from 21 November 2025 (register data: ID ZAKO9225, EVA 2025-3150-0003, EPA 2331-IX; lead body Ministry of Digital Transformation). Articles 3 to 13 designate notifying, accreditation and market-surveillance authorities and the single point of contact, and the act establishes a national AI ethics council and the misdemeanour/fine regime. Statute text read from the official register on 2026-08-07.",
+};
+
+const lithuaniaTechnologyInnovationAmendment: CountrySourceRecord = {
+  label:
+    "Technologiju ir inovaciju istatymo pakeitimo istatymas Nr. XV-105 — Law amending the Law on Technology and Innovation (AI Act implementation)",
+  url: "https://www.e-tar.lt/portal/it/legalAct/9c30a402d88811efa5ddd96c482819f5",
+  institution: "Register of Legal Acts (e-TAR)",
+  sourceType: "legislation",
+  official: true,
+  public: true,
+  runtimeAccessible: true,
+  responseStatus: 200,
+  publicationDate: "2025-01-22",
+  lastCheckedDate: "2026-08-07T00:00:00.000Z",
+  parserStatus: "manual_reference",
+  recommendation: "manual_review",
+  note:
+    "Adopted by the Seimas on 14 January 2025, published in TAR on 22 January 2025 (No. 2025-00715), principally in force 1 April 2025 with staged provisions (art. 5(4) from 2 August 2025, art. 5(5) from 1 January 2026). ELI https://data.e-tar.lt/eli/valst/ist/tar/2025/715/op. The official register links the act to Regulation (EU) 2024/1689 and the Annex I sectoral acts. Register record read via crawl on 2026-08-07.",
+};
+
+const lithuaniaInformationSocietyAmendment: CountrySourceRecord = {
+  label:
+    "Informacines visuomenes paslaugu istatymo pakeitimo istatymas Nr. XV-106 — Law amending the Law on Information Society Services (AI Act implementation)",
+  url: "https://e-seimas.lrs.lt/portal/legalAct/lt/TAD/a41a24e2d27811efbd239e318cbd5b26",
+  institution: "Seimas of the Republic of Lithuania (e-seimas register)",
+  sourceType: "legislation",
+  official: true,
+  public: true,
+  runtimeAccessible: true,
+  responseStatus: 200,
+  publicationDate: "2025-01-22",
+  lastCheckedDate: "2026-08-07T00:00:00.000Z",
+  parserStatus: "manual_reference",
+  recommendation: "manual_review",
+  note:
+    "Adopted by the Seimas on 14 January 2025, published in TAR on 22 January 2025 (No. 2025-00716), in force 1 April 2025. The register record links the act to Regulation (EU) 2022/2065 and Regulation (EU) 2024/1689. Register record read via crawl on 2026-08-07.",
+};
+
+const lithuaniaRrtDesignationRelease: CountrySourceRecord = {
+  label:
+    "RRT press release — RRT to become Lithuania's principal AI supervision authority (16 January 2025)",
+  url: "https://www.rrt.lt/rysiu-reguliavimo-tarnyba-taps-pagrindine-dirbtinio-intelekto-prieziuros-institucija-lietuvoje/",
+  institution: "Communications Regulatory Authority of the Republic of Lithuania (RRT)",
+  sourceType: "regulator",
+  official: true,
+  public: true,
+  runtimeAccessible: true,
+  responseStatus: 200,
+  publicationDate: "2025-01-16",
+  lastCheckedDate: "2026-08-07T00:00:00.000Z",
+  parserStatus: "manual_reference",
+  recommendation: "manual_review",
+  note:
+    "RRT states that from 1 April 2025 it becomes the national competent market surveillance authority and single point of contact under the AI Act, with the Innovation Agency designated as notifying authority, per the amendments adopted by the Seimas on 14 January 2025. Full text read via crawl on 2026-08-07.",
+};
+
+const latviaCabinetImplementationReport: CountrySourceRecord = {
+  label:
+    "VARAM — Cabinet of Ministers examines the AI Act implementation report designating responsible institutions (25 February 2025)",
+  url: "https://www.varam.gov.lv/en/article/latvia-takes-step-towards-safe-and-responsible-artificial-intelligence-government-examines-implementation-plan-ai-act",
+  institution: "Ministry of Smart Administration and Regional Development (VARAM)",
+  sourceType: "government",
+  official: true,
+  public: true,
+  runtimeAccessible: true,
+  responseStatus: 200,
+  publicationDate: "2025-02-25",
+  lastCheckedDate: "2026-08-07T00:00:00.000Z",
+  parserStatus: "manual_reference",
+  recommendation: "manual_review",
+  note:
+    "Official VARAM article on the Cabinet information report 'On the implementation of the requirements of the Artificial Intelligence Act': VARAM responsible for implementation overall, Ministry of Economics as notifying authority, LATAK as accreditation body, Ombudsman for fundamental rights, market surveillance across twelve sectoral authorities, the Data State Inspectorate for prohibited practices and high-risk systems, and the Bank of Latvia for supervised financial institutions. The report also identifies statutory amendments still required. Full text read via crawl on 2026-08-07.",
+};
+
+const europeanCommissionSpocList: CountrySourceRecord = {
+  label:
+    "European Commission — Market Surveillance Authorities under the AI Act (list of Single Points of Contact)",
+  url: "https://digital-strategy.ec.europa.eu/en/policies/market-surveillance-authorities-under-ai-act",
+  institution: "European Commission (DG CNECT)",
+  sourceType: "government",
+  official: true,
+  public: true,
+  runtimeAccessible: true,
+  responseStatus: 200,
+  publicationDate: "2025-09-26",
+  lastCheckedDate: "2026-08-07T00:00:00.000Z",
+  parserStatus: "candidate_for_monitoring",
+  recommendation: "manual_review",
+  note:
+    "The Commission's continuously updated list of notified Single Points of Contact for AI Act market surveillance (last update 26 September 2025 when read). Entries marked with an asterisk are pending final national adoption. Read in full via crawl on 2026-08-07.",
+};
+
+const finlandAiSupervisionAct: CountrySourceRecord = {
+  label:
+    "Laki eräiden tekoälyjärjestelmien valvonnasta (1377/2025) — Act on the supervision of certain AI systems",
+  url: "https://data.finlex.fi/eli/sd/2025/1377/alkup",
+  institution: "Finlex (Finnish Government / Ministry of Justice)",
+  sourceType: "legislation",
+  official: true,
+  public: true,
+  runtimeAccessible: true,
+  responseStatus: 200,
+  publicationDate: "2025-12-22",
+  lastCheckedDate: "2026-08-06T00:00:00.000Z",
+  parserStatus: "manual_reference",
+  recommendation: "manual_review",
+  note:
+    "Binding Finnish act supplementing Regulation (EU) 2024/1689, in force 1 January 2026 (section 29). Chapter 2 allocates market-surveillance competence authority by authority; chapter 3 designates the notifying authorities; chapter 4 sets the penalty regime. Full text read from the official Finlex record on 2026-08-06.",
 };
 
 const finlandFinlexCaseLaw: CountrySourceRecord = {
@@ -1946,6 +2427,9 @@ function createMonitoredInstitutionProfile(input: {
   caseLawSources?: CountrySourceRecord[];
   implementationMeasures?: string[];
   competentAuthorities?: string[];
+  implementationStatus?: EuropeImplementationStatus;
+  implementationConfidence?: EuropeImplementationConfidence;
+  aiActImplementationNotes?: string;
   marketSurveillanceAuthorities?: string[];
   notifyingAuthorities?: string[];
   sourceVerificationStatus?: EuropeCountryProfile["sourceVerificationStatus"];
@@ -1993,13 +2477,18 @@ function createMonitoredInstitutionProfile(input: {
     slug: input.slug,
     region: "Europe",
     euMemberState: true,
-    implementationStatus: "implementation_in_progress",
+    implementationStatus: input.implementationStatus ?? "implementation_in_progress",
     implementationStatusLabel:
-      europeImplementationStatusTaxonomy.implementation_in_progress.label,
+      europeImplementationStatusTaxonomy[
+        input.implementationStatus ?? "implementation_in_progress"
+      ].label,
     implementationStatusDescription:
-      europeImplementationStatusTaxonomy.implementation_in_progress.shortExplanation,
-    implementationConfidence: "low",
+      europeImplementationStatusTaxonomy[
+        input.implementationStatus ?? "implementation_in_progress"
+      ].shortExplanation,
+    implementationConfidence: input.implementationConfidence ?? "low",
     aiActImplementationNotes:
+      input.aiActImplementationNotes ??
       `${input.countryName} is an EU member state to which the EU AI Act applies directly. Official sources verify a national data-protection authority and at least one government or official public implementation-context source relevant to AI governance. This profile does not yet verify a final national AI Act implementation act, competent-authority designation, market-surveillance authority, or notifying authority.`,
     nationalImplementationMeasures: input.implementationMeasures ?? [],
     nationalCompetentAuthorities: input.competentAuthorities ?? [],
@@ -2153,18 +2642,34 @@ const firstWaveProfiles: EuropeCountryProfile[] = [
       "Croatian Personal Data Protection Agency",
       "Ministry of Justice, Public Administration and Digital Transformation",
     ],
-    additionalRegulationSources: [croatiaJudgmentPublicationPortal],
+    additionalRegulationSources: [
+      croatiaFundamentalRightsList,
+      croatiaImplementingLawWorkingGroup,
+      croatiaJudgmentPublicationPortal,
+    ],
     caseLawSources: [croatiaSupraCaseLaw],
+    implementationStatus: "implementation_in_progress",
+    implementationConfidence: "medium",
+    aiActImplementationNotes:
+      "Croatia has completed its Article 77 obligation but not its Article 70 designation. On 5 December 2024 the Ministry of Justice, Public Administration and Digital Transformation announced that it had transmitted to the European Commission the list of seven public authorities supervising fundamental-rights obligations in the use of high-risk AI systems. The same ministry has convened a working group to draft the bill implementing Regulation (EU) 2024/1689. No market surveillance authority, notifying authority or single point of contact had been designated when checked, and the European Commission's single-point-of-contact list shows no Croatian entry.",
+    implementationMeasures: [
+      "Article 77(2) list transmitted to the European Commission (announced 5 December 2024): the Ombudswoman, the Ombudswoman for Children, the Gender Equality Ombudswoman, the Ombudswoman for Persons with Disabilities, the Personal Data Protection Agency (AZOP), the State Election Commission and the Agency for Electronic Media.",
+      "Ministry working group convened to draft the bill implementing Regulation (EU) 2024/1689; the ministry's published membership includes industry representatives.",
+      "No Article 70 market surveillance authority, notifying authority or single point of contact designated when checked; Croatia is absent from the European Commission's single-point-of-contact list.",
+    ],
     sourceVerificationStatus: "verified_official_sources_present",
     missingSourceWarnings: [],
+    nationalAIRegulationNotes:
+      "The seven bodies Croatia has designated are Article 77 fundamental-rights authorities, not market surveillance authorities. Trackers that count them as Croatia's AI Act supervisors are conflating the two regimes — Estonia's government guidance states the distinction explicitly. Croatia's Article 70 designation is still outstanding.",
     nationalCaseLawNotes:
       "SuPra is attached as Croatia's official Supreme Court case-law database, with the ministry judgment-publication page attached as an additional official monitoring source. No Croatian AI Act-specific decision has been individually selected into this profile yet.",
     editorialNotes: [
-      "No Croatian AI Act competent-authority, market-surveillance, or notifying-authority designation has been verified from a binding national instrument.",
+      "Never present the Article 77 list as Croatia's market surveillance designation; the two are distinct and only the former exists.",
+      "Watch the ministry working-group page for the draft implementing bill, then promote the designations once adopted.",
       "The Croatian judgment-publication page is useful legal-tech context because it describes an AI-based anonymisation and publication workflow for judgments.",
     ],
     publicSummary:
-      "Croatia is included with verified official data-protection, ministry, case-law, and judgment-publication anchors. Final AI Act authority designations remain under review, but the national case-law monitoring layer is now connected.",
+      "Croatia has notified the European Commission of the seven authorities that supervise fundamental rights in the use of high-risk AI, and a ministry working group is drafting the implementing bill. It has not yet designated a market surveillance authority, notifying authority or single point of contact.",
   }),
   createMonitoredInstitutionProfile({
     countryCode: "CY",
@@ -2184,26 +2689,45 @@ const firstWaveProfiles: EuropeCountryProfile[] = [
       "Commissioner for Personal Data Protection",
       "Deputy Ministry of Research, Innovation and Digital Policy",
     ],
-    additionalRegulationSources: [cyprusAiActAuthorityPortal],
-    caseLawSources: [cyprusCyLawCaseLaw],
-    implementationMeasures: [
-      "Commission AI Act Service Desk lists the Commissioner of Communications of the Republic of Cyprus as notifying authority, market surveillance authority, and national Single Point of Contact for the AI Act.",
+    additionalRegulationSources: [
+      cyprusCouncilOfMinistersDesignation,
+      cyprusAiActAuthorityPortal,
+      europeanCommissionSpocList,
     ],
-    competentAuthorities: ["Commissioner of Communications of the Republic of Cyprus"],
-    marketSurveillanceAuthorities: ["Commissioner of Communications of the Republic of Cyprus"],
-    notifyingAuthorities: ["Commissioner of Communications of the Republic of Cyprus"],
+    caseLawSources: [cyprusCyLawCaseLaw],
+    implementationStatus: "competent_authority_designated",
+    implementationConfidence: "high",
+    aiActImplementationNotes:
+      "Cyprus designated its AI Act authorities by Council of Ministers decision of 22 January 2025 under Article 70, announced by the Deputy Ministry of Research, Innovation and Digital Policy on 6 February 2025 and communicated to the European Commission. The Commissioner of Electronic Communications combines the notifying-authority, market-surveillance and single-point-of-contact roles; the Commissioner for Personal Data Protection supervises Annex III points 1, 6, 7 and 8 and enforces Article 5 prohibited practices within her competence. In November 2024 Cyprus also notified its Article 77 fundamental-rights authorities (Commissioner for Personal Data Protection, Ombudsman, Attorney-General).",
+    implementationMeasures: [
+      "Council of Ministers decision of 22 January 2025 designating the national competent authorities under Article 70, announced 6 February 2025 and communicated to the European Commission.",
+      "The Commissioner of Electronic Communications is notifying authority, market surveillance authority and single point of contact; the DMRID announcement notes additional market surveillance authorities may be designated for specific areas.",
+      "The Commissioner for Personal Data Protection is market surveillance authority for Annex III points 1, 6, 7 and 8 and enforces Article 5 prohibited practices within her domain of competence.",
+      "The Deputy Ministry of Research, Innovation and Digital Policy coordinates implementation and represents Cyprus on the European Artificial Intelligence Board; a National AI Taskforce advises the government.",
+      "The European Commission's list of Single Points of Contact records the Commissioner of Communications as Cyprus's notified single point of contact without a pending marker.",
+    ],
+    competentAuthorities: [
+      "Commissioner of (Electronic) Communications — notifying authority, market surveillance authority and single point of contact",
+      "Commissioner for Personal Data Protection — market surveillance authority for Annex III points 1, 6, 7 and 8; Article 5 prohibited practices within her competence",
+      "Deputy Ministry of Research, Innovation and Digital Policy — overall coordination and representation on the European AI Board",
+    ],
+    marketSurveillanceAuthorities: [
+      "Commissioner of (Electronic) Communications",
+      "Commissioner for Personal Data Protection (Annex III points 1, 6, 7, 8; Article 5 within competence)",
+    ],
+    notifyingAuthorities: ["Commissioner of (Electronic) Communications"],
     sourceVerificationStatus: "verified_official_sources_present",
     missingSourceWarnings: [],
     nationalAIRegulationNotes:
-      "Cyprus has a verified AI Act authority anchor: the Commission AI Act Service Desk identifies the Commissioner of Communications as notifying authority, market surveillance authority, and national Single Point of Contact. The Deputy Ministry page remains a government implementation-context source.",
+      "Cyprus's designation rests on the Council of Ministers decision of 22 January 2025 as announced by the DMRID, corroborated by the national AI portal and the European Commission's single-point-of-contact list. The designation instrument is a government decision rather than a statute; the announcement itself notes that further market surveillance authorities may be added.",
     nationalCaseLawNotes:
       "CyLaw is attached as Cyprus's national legal-information and case-law monitoring source. No Cyprus AI Act-specific decision has been individually selected into this profile yet.",
     editorialNotes: [
-      "Keep the Commissioner of Communications designation tied to the Commission AI Act Service Desk and Cyprus AI Act portal; do not generalise it beyond the AI Act functions stated there.",
+      "Designations are anchored to the Council of Ministers decision of 22 January 2025 via the official DMRID announcement; cite the split with its Annex III point numbers rather than as a single-supervisor model.",
       "No Cyprus AI Act-specific case-law item has been selected yet; CyLaw is attached as the monitoring source.",
     ],
     publicSummary:
-      "Cyprus is included with verified official AI Act authority, data-protection, government, and case-law anchors. The Commissioner of Communications is tracked as notifying authority, market surveillance authority, and national Single Point of Contact for the AI Act based on the Commission AI Act Service Desk.",
+      "Cyprus designated its AI Act authorities by Council of Ministers decision of 22 January 2025: the Commissioner of Electronic Communications is notifying authority, market surveillance authority and single point of contact, and the Commissioner for Personal Data Protection supervises the fundamental-rights-sensitive Annex III areas and Article 5 prohibited practices within her competence.",
   }),
   createMonitoredInstitutionProfile({
     countryCode: "CZ",
@@ -2221,18 +2745,38 @@ const firstWaveProfiles: EuropeCountryProfile[] = [
       "Office for Personal Data Protection",
       "Ministry of Industry and Trade",
     ],
-    additionalRegulationSources: [czechDigitalCzechiaAiAct],
+    additionalRegulationSources: [
+      czechDraftAdaptationAct,
+      czechImplementationPlanApproval,
+      czechDigitalCzechiaAiAct,
+    ],
     caseLawSources: [czechConstitutionalCourtDecisions],
+    implementationStatus: "consultation_or_draft_identified",
+    implementationConfidence: "high",
+    aiActImplementationNotes:
+      "Czechia has a complete draft framework but no adopted statute. The Government approved the national AI Act implementation plan on 28 May 2025, and the Ministry of Industry and Trade published a deliberately minimalist adaptation bill that has completed the interministerial comment procedure and awaits discussion by the Government. Under the published draft, the Article 70(1) supervisory authorities would be the Czech National Bank, the Czech Telecommunication Office and the Office for Personal Data Protection; ÚNMZ would be the notifying authority; ČTÚ would be both the Article 73(10) national authority and the Article 70(2) single point of contact, holding residual competence wherever ČNB and ÚOOÚ do not act. Authority arrays are left empty until adoption.",
+    implementationMeasures: [
+      "Government approval of the AI Act implementation plan, 28 May 2025, allocating roles to MPO (coordination and drafting), ČTÚ (market surveillance), ÚNMZ (notifying authority) and ČAS (regulatory sandbox).",
+      "Draft adaptation bill published by MPO; it has completed the interministerial comment procedure and awaits Government discussion, with adoption expected to align with the 2 August 2026 applicability date.",
+      "Draft: Article 70(1) supervisory authorities would be the Czech National Bank, the Czech Telecommunication Office and the Office for Personal Data Protection.",
+      "Draft: ČTÚ would hold general residual supervisory competence; ČNB would supervise entities operating under its own authorisations; ÚOOÚ would cover the high-risk systems referred to in Article 74(8) — law enforcement, justice, electoral matters, border management and migration.",
+      "Draft: ÚNMZ would be the notifying authority for conformity-assessment bodies, and ČTÚ the Article 70(2) single point of contact and the Article 73(10) national authority.",
+      "Draft: an Article 57(1) regulatory sandbox founded by ÚNMZ and operated by the Czech Agency for Standardisation, which would set and publish the eligibility and selection criteria.",
+      "Draft: amends Act 87/2023 Sb. on product market surveillance; provides a remediation mechanism allowing the supervisor to invite correction instead of opening offence proceedings for less serious breaches, and applies the lower of the two AI Act penalty limits to SMEs.",
+    ],
     sourceVerificationStatus: "verified_official_sources_present",
     missingSourceWarnings: [],
+    nationalAIRegulationNotes:
+      "The allocation above is taken from the ministry's published draft text and the government-approved implementation plan. Because the bill has not been adopted, the competent-authority, market-surveillance and notifying-authority arrays are deliberately left empty; promote them once the act is published in the Sbírka zákonů.",
     nationalCaseLawNotes:
       "The Constitutional Court decisions page is attached as a Czech national case-law monitoring source. No Czech AI Act-specific decision has been individually selected into this profile yet.",
     editorialNotes: [
-      "Czechia has official AI Act/draft-law context sources, but final competent-authority, market-surveillance, and notifying-authority designations remain under review.",
+      "Czechia is a draft, not a designation: describe the three-supervisor split as proposed. The MPO press release also flags a role for the Public Defender of Rights in fundamental-rights protection, which the draft text consulted does not itself allocate.",
+      "Re-verify against the adopted act, especially the article numbering, which is placeholder-style in the published draft.",
       "No Czech AI Act-specific case-law item has been selected yet; the Constitutional Court decisions page is a monitoring anchor, not a complete all-courts case-law map.",
     ],
     publicSummary:
-      "Czechia is included with verified official data-protection, ministry, Digital Czechia AI Act, and case-law anchors. Final AI Act authority designations remain under review.",
+      "Czechia approved a national AI Act implementation plan in May 2025 and has a minimalist adaptation bill through interministerial comments and awaiting Government discussion. It would split supervision between the Czech Telecommunication Office (residual competence and single point of contact), the Czech National Bank and the data protection authority, with ÚNMZ as notifying authority and a sandbox run by the Czech Agency for Standardisation.",
   }),
   createMonitoredInstitutionProfile({
     countryCode: "DK",
@@ -2250,18 +2794,36 @@ const firstWaveProfiles: EuropeCountryProfile[] = [
       "Danish Data Protection Agency",
       "Agency for Digital Government",
     ],
-    additionalRegulationSources: [denmarkAiActAgencyPage],
+    additionalRegulationSources: [denmarkAiActImplementingAct, denmarkAiActAgencyPage],
     caseLawSources: [denmarkDomsdatabasenCaseLaw],
+    implementationStatus: "competent_authority_designated",
+    implementationConfidence: "high",
+    aiActImplementationNotes:
+      "Denmark has adopted a binding national act supplementing the EU AI Act: Lov om supplerende bestemmelser til forordningen om kunstig intelligens (Lov nr. 467 af 14. maj 2025, Lovtidende A). Chapter 2, section 2 designates the Agency for Digital Government, the Danish Data Protection Agency and the Danish Court Administration as national competent authorities under Article 70(1) of Regulation (EU) 2024/1689. Section 2(2) designates the Agency for Digital Government as notifying authority under Article 28(1) and as the single point of contact. A further bill (L 111) was introduced on 18 February 2026 by the Minister for Digitalisation and is not yet enacted.",
+    implementationMeasures: [
+      "Lov om supplerende bestemmelser til forordningen om kunstig intelligens (Lov nr. 467 af 14. maj 2025), published in Lovtidende A, supplementing Regulation (EU) 2024/1689 and reproducing the Regulation as Annex 1 for practical reference only.",
+      "Bill L 111, Forslag til Lov om supplerende bestemmelser til forordningen om kunstig intelligens (AI-loven), introduced 18 February 2026 by the Minister for Digitalisation — introduced, not enacted.",
+    ],
+    competentAuthorities: [
+      "Digitaliseringsstyrelsen (Agency for Digital Government) — Article 70(1)",
+      "Datatilsynet (Danish Data Protection Agency) — Article 70(1)",
+      "Domstolsstyrelsen (Danish Court Administration) — Article 70(1)",
+    ],
+    notifyingAuthorities: [
+      "Digitaliseringsstyrelsen (Agency for Digital Government) — Article 28(1), also single point of contact",
+    ],
     sourceVerificationStatus: "verified_official_sources_present",
-    missingSourceWarnings: [],
+    missingSourceWarnings: [
+      "Market-surveillance authority allocation per sector is not separately itemised in this profile.",
+    ],
     nationalCaseLawNotes:
       "Domsdatabasen is attached as Denmark's official courts judgment database. No Danish AI Act-specific decision has been individually selected into this profile yet.",
     editorialNotes: [
-      "Denmark has official Agency for Digital Government AI Act/guidance anchors and an official judgment database, but final AI Act authority designations should remain tied to a binding national law source before being displayed as final.",
+      "Authority designations are tied to the binding national act (Lov nr. 467 af 14. maj 2025, chapter 2), read from the official Retsinformation record on 2026-08-06.",
       "No Danish AI Act-specific case-law item has been selected yet; Domsdatabasen is attached as the monitoring source.",
     ],
     publicSummary:
-      "Denmark is included with verified official data-protection, Agency for Digital Government, AI Act guidance, and case-law anchors. Final authority-designation details remain under review pending binding-source confirmation.",
+      "Denmark has enacted a binding act supplementing the EU AI Act (Lov nr. 467 of 14 May 2025), designating the Agency for Digital Government, the Data Protection Agency and the Court Administration as national competent authorities, with the Agency for Digital Government as notifying authority and single point of contact. A further bill was introduced in February 2026.",
   }),
   createMonitoredInstitutionProfile({
     countryCode: "EE",
@@ -2278,16 +2840,31 @@ const firstWaveProfiles: EuropeCountryProfile[] = [
       "Government of Estonia / Kratid initiative",
     ],
     caseLawSources: [estoniaRiigiTeatajaCaseLaw, estonianCourtsJudicialDecisions],
+    additionalRegulationSources: [estoniaKratidArticle77, estoniaTtjaAiSystems],
+    implementationStatus: "implementation_in_progress",
+    implementationConfidence: "medium",
+    aiActImplementationNotes:
+      "Estonia has designated its Article 77 authorities but no Article 70 supervisor. The Ministry of Economic Affairs and Communications, together with the Ministry of Justice, designated three fundamental-rights state agencies to receive the Article 77 information right; the government's own guidance stresses that these are not market surveillance authorities and acquire no supervisory competence. A steering group led by the Ministry of Economic Affairs and Communications has coordinated implementation since autumn 2024, with the Data Protection Inspectorate represented. The Consumer Protection and Technical Regulatory Authority (TTJA) publishes AI Act guidance for businesses describing supervision it may carry out and framing its role prospectively, but no formal designation instrument was located, and Estonia is absent from the European Commission's single-point-of-contact list.",
+    implementationMeasures: [
+      "Article 77 designation: the Ministry of Economic Affairs and Communications and the Ministry of Justice designated three fundamental-rights state agencies for the Article 77 information right; the list may be extended over time.",
+      "Government guidance states that Article 77 authorities are not market surveillance authorities, gain no supervisory competence, and receive rights of access to documentation, to request supervisory information, to ask for technical testing of an AI solution, and to be informed of serious incidents.",
+      "Implementation steering group convened under the Ministry of Economic Affairs and Communications in autumn 2024, with the Data Protection Inspectorate represented; the Inspectorate described national implementation as still at an early stage.",
+      "TTJA publishes AI Act guidance for businesses covering risk categories, conformity assessment, CE marking and Article 21 information duties, describing supervision in prospective terms.",
+      "No Article 70 market surveillance authority, notifying authority or single point of contact designated when checked.",
+    ],
     sourceVerificationStatus: "verified_official_sources_present",
     missingSourceWarnings: [],
+    nationalAIRegulationNotes:
+      "Estonia's official guidance is unusually explicit that Article 77 designation and Article 70 market surveillance are separate regimes, which is a useful corrective when reading trackers that count Article 77 bodies as AI Act supervisors. TTJA is the strongest candidate on the evidence — it already publishes operational AI Act guidance — but its own page speaks of its role in the future tense, so no designation is recorded here.",
     nationalCaseLawNotes:
       "Riigi Teataja and the Estonian Courts judicial-decisions page are attached as official Estonian case-law monitoring anchors. No Estonian AI Act-specific decision has been individually selected into this profile yet.",
     editorialNotes: [
-      "Estonia has official digital-government and case-law monitoring anchors, but final AI Act competent-authority, market-surveillance, and notifying-authority designations remain under review.",
+      "Do not record TTJA as designated: its guidance is prospective and no instrument was found. Re-check ttja.ee and Riigi Teataja for the designation act.",
+      "The three Article 77 agencies were not named on the page consulted; identify them before listing.",
       "No Estonian AI Act-specific case-law item has been selected yet; Riigi Teataja is attached as the official publication/search anchor.",
     ],
     publicSummary:
-      "Estonia is included with verified official data-protection, digital-government, and case-law anchors. Final AI Act authority designations remain under review.",
+      "Estonia has designated three fundamental-rights agencies under Article 77 and runs an implementation steering group under the Ministry of Economic Affairs and Communications, while the Consumer Protection and Technical Regulatory Authority already publishes AI Act guidance for businesses. No market surveillance authority, notifying authority or single point of contact has been formally designated.",
   }),
   createMonitoredInstitutionProfile({
     countryCode: "FI",
@@ -2305,23 +2882,48 @@ const firstWaveProfiles: EuropeCountryProfile[] = [
       "Finnish Transport and Communications Agency Traficom",
       "Ministry of Economic Affairs and Employment",
     ],
-    additionalRegulationSources: [finlandGovernmentAiSupervision],
+    additionalRegulationSources: [finlandAiSupervisionAct, finlandGovernmentAiSupervision],
     caseLawSources: [finlandFinlexCaseLaw],
+    implementationStatus: "competent_authority_designated",
+    implementationConfidence: "high",
+    aiActImplementationNotes:
+      "Finland has enacted the Act on the supervision of certain AI systems (1377/2025), given on 22 December 2025 and in force since 1 January 2026 (section 29), supplementing Regulation (EU) 2024/1689. Chapter 2 allocates market-surveillance competence sector by sector, chapter 3 designates the notifying authorities, and chapter 4 establishes a dedicated sanctions board and penalty ceilings. The Act does not apply to Parliament's legislative activity, the Parliamentary Office, the Parliamentary Ombudsman or the Chancellor of Justice (section 1).",
     implementationMeasures: [
-      "Finnish Government press release states that acts regulating national authorities supervising the EU AI Act enter into force on 1 January 2026.",
+      "Laki eräiden tekoälyjärjestelmien valvonnasta (1377/2025), in force 1 January 2026 (section 29); preparatory works HE 46/2025, TaVM 18/2025, EV 162/2025.",
+      "Section 6: Traficom acts as the single point of contact under Article 70(2) of the AI Act and reports to the European Commission under Article 99(11).",
+      "Section 13: a sanctions board (seuraamusmaksulautakunta) sits in connection with Traficom and imposes penalty payments on a competent market-surveillance authority's proposal.",
+      "Section 23 penalty ceilings: EUR 35 000 000 or 7% of worldwide annual turnover for prohibited practices; EUR 15 000 000 or 3% for provider, representative, importer, distributor, deployer, notified-body and transparency breaches; EUR 7 500 000 or 1% for incorrect or misleading information — whichever is higher, and for SMEs whichever is lower.",
+      "Section 24: no penalty payment may be imposed on state or municipal authorities, wellbeing services counties, independent public-law institutions, the Office of the President, or the Evangelical Lutheran and Orthodox Churches of Finland and their parishes.",
+      "Laki Finanssivalvonnasta annetun lain muuttamisesta (1380/2025) amends the Financial Supervisory Authority Act so its Director may propose a penalty payment to the sanctions board referred to in section 13 of Act 1377/2025.",
+    ],
+    competentAuthorities: [
+      "Turvallisuus- ja kemikaalivirasto (Tukes) — Annex I Section A items 4, 5, 7 and 10; items 1 and 9 for consumer products; item 2 outside Customs' remit; Annex III critical infrastructure for the gas subsector and water supply",
+      "Tulli (Finnish Customs) — Annex I Section A item 2, per the Market Surveillance Act (1137/2016) section 4(2) and the Toy Safety Act (1154/2011) section 56(2)",
+      "Liikenne- ja viestintävirasto (Traficom) — Annex I Section A items 3 and 6; Annex III critical infrastructure for road traffic and critical digital infrastructure; Article 50 transparency obligations (section 5)",
+      "Lupa- ja valvontavirasto, as occupational safety and health authority — Annex I Section A item 8, items 1 and 9 for occupational-safety products; Annex III points 5(a) and 5(d)",
+      "Lääkealan turvallisuus- ja kehittämiskeskus (Fimea) — Annex I Section A items 11 and 12",
+      "Energiavirasto (Energy Authority) — Annex III critical infrastructure where the system is a safety component in heating or electricity supply, or in gas supply for distribution and transmission system operators",
+      "Tietosuojavaltuutettu (Data Protection Ombudsman) — Annex III points 1, 3, 4 and 6-8 and use cases under point 5(b) outside the FIN-FSA's remit; also supervises prohibited AI practices under Article 5 (section 4)",
+      "Finanssivalvonta (Financial Supervisory Authority) — Annex III point 5(c), point 5(a) for unemployment and insurance funds, non-life insurers and pension institutions, and point 5(b) for its supervised entities; notifies the European Central Bank under Article 74(7) (section 7)",
+    ],
+    notifyingAuthorities: [
+      "Työ- ja elinkeinoministeriö (Ministry of Economic Affairs and Employment) — Annex I Section A items 2, 4, 5, 7 and 10, and Annex III point 1",
+      "Liikenne- ja viestintävirasto (Traficom) — Annex I Section A items 3 and 6",
+      "Lääkealan turvallisuus- ja kehittämiskeskus (Fimea) — Annex I Section A items 11 and 12",
+      "Sosiaali- ja terveysministeriö (Ministry of Social Affairs and Health) — Annex I Section A items 1, 8 and 9",
     ],
     sourceVerificationStatus: "verified_official_sources_present",
     missingSourceWarnings: [],
     nationalAIRegulationNotes:
-      "Finland has verified official AI Act implementation/supervision anchors through Traficom materials and the Finnish Government press release on national AI Act supervision. Final authority-by-authority mapping should remain tied to the enacted acts and detailed official authority materials.",
+      "Finland's authority matrix is taken directly from the enacted Act on the supervision of certain AI systems (1377/2025), sections 3 to 8, read in full from the official Finlex record. The Data Protection Ombudsman additionally acts as notified body where law-enforcement, immigration or asylum authorities deploy an Annex III point 1 high-risk system (section 11).",
     nationalCaseLawNotes:
       "Finlex is attached as Finland's official legal-information and case-law database, covering decisions of Finnish courts over several decades. No Finnish AI Act-specific decision has been individually selected into this profile yet.",
     editorialNotes: [
-      "The Finnish Government source verifies the national supervision framework entering into force on 1 January 2026, but the detailed authority matrix still needs pinpointing before public copy describes it as exhaustive.",
+      "Authority designations are pinpointed to sections 3 to 8 of Act 1377/2025; the allocation is sector-by-sector and should be cited with its Annex references rather than summarised as a single supervisor.",
       "No Finnish AI Act-specific case-law item has been selected yet; Finlex is attached as the national case-law monitoring source.",
     ],
     publicSummary:
-      "Finland is included with verified official AI Act supervision, Traficom, data-protection, and Finlex case-law anchors. The national supervision framework is tracked as entering into force on 1 January 2026, while detailed authority mapping remains under review.",
+      "Finland enacted the Act on the supervision of certain AI systems (1377/2025), in force since 1 January 2026, which distributes AI Act market surveillance across eight authorities by sector, makes Traficom the single point of contact, gives the Data Protection Ombudsman oversight of prohibited practices, and creates a dedicated sanctions board with ceilings up to EUR 35 million or 7% of worldwide turnover.",
   }),
   createMonitoredInstitutionProfile({
     countryCode: "GR",
@@ -2338,18 +2940,46 @@ const firstWaveProfiles: EuropeCountryProfile[] = [
       "General Secretariat of Legal and Parliamentary Affairs",
       "Special Secretariat of Artificial Intelligence and Data Governance",
     ],
-    additionalRegulationSources: [greeceAiGovResources],
+    additionalRegulationSources: [greeceAiActImplementationLaw, greeceAiGovResources],
     caseLawSources: [greeceAreiosPagosCaseLaw],
+    implementationStatus: "competent_authority_designated",
+    implementationConfidence: "high",
+    aiActImplementationNotes:
+      "Greece enacted Law 5321/2026 on measures implementing Regulation (EU) 2024/1689, published in the Government Gazette as FEK A' 114 of 20 July 2026. Article 3(1) designates the Hellenic Data Protection Authority (HDPA) as the competent market surveillance authority under Article 70(1) for prohibited practices under Article 5, for Annex III high-risk systems, and for systems subject to Article 50 transparency obligations. Article 3(2) designates the market surveillance authorities already established under the national legislation implementing the Annex I Section A harmonisation acts as the authorities for high-risk AI linked to those products. Article 4 makes the HDPA the single point of contact under Article 70(2), and article 5 designates the Hellenic Telecommunications and Post Commission (EETT) as notifying authority under Article 28(1). The law also amends Law 4961/2022.",
+    implementationMeasures: [
+      "Law 5321/2026, FEK A' 114 of 20 July 2026, sponsored by the Ministry of Digital Governance and tabled on 6 July 2026.",
+      "Article 3(1): the HDPA is market surveillance authority for Article 5 prohibited practices, Annex III high-risk systems, and Article 50 transparency obligations.",
+      "Article 3(2): sectoral market surveillance authorities designated under the national legislation implementing the Annex I Section A harmonisation acts supervise high-risk AI linked to the products they already cover.",
+      "Article 4: the HDPA is the single point of contact under Article 70(2), publishes the list of article 3(2) authorities on its website, and is responsible for AI Act reporting.",
+      "Article 5: EETT is the notifying authority under Article 28(1). The law establishes an AI coordination and expertise Centre within EETT to support the HDPA, the sectoral market surveillance authorities and the notifying authorities.",
+      "The law establishes a single complaints system at the HDPA, which forwards complaints falling to another article 3(2) authority and informs the complainant; article 8 governs cooperation between the market surveillance and customs authorities, and article 18 covers recovery of supervision costs.",
+      "Article 2 also provides for AI regulatory sandboxes and real-world testing, the sanctions regime and appeals, a single register of AI systems used by public-sector bodies at the Special Secretariat for AI and Data Governance, reinforcement of the AI Observatory, and measures to staff the HDPA for its market surveillance role.",
+    ],
+    competentAuthorities: [
+      "Αρχή Προστασίας Δεδομένων Προσωπικού Χαρακτήρα (Hellenic Data Protection Authority) — market surveillance authority for Article 5 prohibited practices, Annex III high-risk systems and Article 50 transparency; single point of contact",
+      "Εθνική Επιτροπή Τηλεπικοινωνιών και Ταχυδρομείων (EETT) — notifying authority; hosts the AI coordination and expertise Centre",
+      "Sectoral market surveillance authorities under the national legislation implementing the Annex I Section A harmonisation acts — high-risk AI linked to the products they already supervise (list published on the HDPA website)",
+    ],
+    marketSurveillanceAuthorities: [
+      "Hellenic Data Protection Authority (Article 5, Annex III, Article 50)",
+      "Sectoral authorities under the Annex I Section A harmonisation legislation",
+    ],
+    notifyingAuthorities: [
+      "Hellenic Telecommunications and Post Commission (EETT) — Article 28(1)",
+    ],
     sourceVerificationStatus: "verified_official_sources_present",
     missingSourceWarnings: [],
+    nationalAIRegulationNotes:
+      "Greece's designations are taken from the enacted text of Law 5321/2026, articles 2 to 5, with cooperation and cost-recovery provisions at articles 8 and 18. The Annex I Section A supervisors are designated by reference rather than by name, so the operative list is the one the HDPA publishes under article 4(3).",
     nationalCaseLawNotes:
       "The Supreme Court of Greece rulings page is attached as a national case-law monitoring source. No Greek AI Act-specific decision has been individually selected into this profile yet.",
     editorialNotes: [
-      "Greek AI/Data Governance resources and codification sources are verified official anchors, but no final AI Act competent-authority, market-surveillance, or notifying-authority designation has been verified from a binding national instrument.",
+      "Greece is unusual in giving its data protection authority the lead market surveillance role including Article 50 transparency; do not describe it as a telecoms-led model. EETT holds the notifying-authority role and the expertise Centre.",
+      "Track the HDPA's published article 4(3) list to enumerate the sectoral supervisors, which the statute designates by reference.",
       "No Greek AI Act-specific case-law item has been selected yet; Areios Pagos is attached as a high-court monitoring anchor.",
     ],
     publicSummary:
-      "Greece is included with verified official AI/Data Governance, codification, data-protection, and Supreme Court case-law anchors. Final AI Act authority designations remain under review.",
+      "Greece enacted Law 5321/2026 (Government Gazette A' 114 of 20 July 2026), making the Hellenic Data Protection Authority the market surveillance authority for prohibited practices, Annex III high-risk systems and transparency obligations as well as the single point of contact, and the telecoms regulator EETT the notifying authority with an AI coordination and expertise Centre.",
   }),
   createMonitoredInstitutionProfile({
     countryCode: "HU",
@@ -2407,16 +3037,39 @@ const firstWaveProfiles: EuropeCountryProfile[] = [
       "Supreme Court of Latvia",
     ],
     caseLawSources: [latviaETiesasCaseLaw, latviaSupremeCourtCaseLawArchive],
+    additionalRegulationSources: [latviaCabinetImplementationReport, europeanCommissionSpocList],
+    implementationStatus: "competent_authority_designated",
+    implementationConfidence: "medium",
+    aiActImplementationNotes:
+      "Latvia allocated AI Act roles through the Cabinet of Ministers information report 'On the implementation of the requirements of the Artificial Intelligence Act', considered on 25 February 2025: VARAM is responsible for implementation as a whole and for cooperation with the European Commission, the Ministry of Economics acts as notifying authority, LATAK as national accreditation body, and the Ombudsman as fundamental-rights authority. Market surveillance is distributed across twelve sectoral authorities, with the Data State Inspectorate covering prohibited practices and high-risk systems and the Bank of Latvia covering supervised financial institutions. The European Commission's list records the Consumer Rights Protection Centre as Latvia's notified single point of contact.",
+    implementationMeasures: [
+      "Cabinet of Ministers information report on AI Act implementation, considered 25 February 2025 (VARAM): allocation of implementation, notifying, accreditation, fundamental-rights and market-surveillance roles.",
+      "Market surveillance allocated to the Consumer Rights Protection Centre, Health Inspectorate, Civil Aviation Agency, Latvian Maritime Administration, State Railway Technical Inspectorate, State Technical Supervision Agency, Road Traffic Safety Directorate, State Service for Quality of Education, Data State Inspectorate, State Security Service, Military Intelligence and Security Service, and Office for Constitutional Protection.",
+      "The Data State Inspectorate performs market surveillance of prohibited AI practices and high-risk AI systems; the Bank of Latvia supervises AI systems used by financial institutions under its supervision.",
+      "The European Commission's list of Single Points of Contact records the Consumer Rights Protection Centre (Patērētāju tiesību aizsardzības centrs) as Latvia's notified single point of contact without a pending marker.",
+      "The Cabinet report identifies statutory amendments still required to complete implementation.",
+    ],
+    competentAuthorities: [
+      "Patērētāju tiesību aizsardzības centrs (Consumer Rights Protection Centre) — notified single point of contact and sectoral market surveillance authority",
+      "Datu valsts inspekcija (Data State Inspectorate) — market surveillance of prohibited AI practices and high-risk AI systems",
+      "Latvijas Banka (Bank of Latvia) — market surveillance of AI systems used by financial institutions under its supervision",
+      "Ten further sectoral authorities per the Cabinet report (health, aviation, maritime, rail, technical supervision, road traffic, education quality, state security, military intelligence, constitutional protection)",
+    ],
+    notifyingAuthorities: [
+      "Ekonomikas ministrija (Ministry of Economics) — notifying authority",
+    ],
     sourceVerificationStatus: "verified_official_sources_present",
     missingSourceWarnings: [],
+    nationalAIRegulationNotes:
+      "Latvia's designations currently rest on the Cabinet information report of 25 February 2025 and the Commission's notified single-point-of-contact list rather than on a single enacted implementing statute; the report itself records that statutory amendments are still required. Confidence stays at medium until those amendments are enacted.",
     nationalCaseLawNotes:
       "Latvia's eTiesas anonymised decisions database and Supreme Court case-law archive are attached as national case-law monitoring anchors. No Latvian AI Act-specific decision has been individually selected into this profile yet.",
     editorialNotes: [
-      "Latvia has verified legislation and case-law monitoring anchors, but no final AI Act competent-authority, market-surveillance, or notifying-authority designation has been verified from a binding national instrument.",
+      "Authority allocation verified from the official VARAM article on the Cabinet report and the European Commission single-point-of-contact list; upgrade confidence to high once the implementing statute is enacted.",
       "No Latvian AI Act-specific case-law item has been selected yet; eTiesas and the Supreme Court archive are attached as monitoring sources.",
     ],
     publicSummary:
-      "Latvia is included with verified official legislation, data-protection, courts, and Supreme Court case-law anchors. Final AI Act authority designations remain under review.",
+      "Latvia allocated AI Act supervision through a Cabinet-approved implementation plan: twelve sectoral market-surveillance authorities, the Data State Inspectorate for prohibited practices and high-risk systems, the Bank of Latvia for its supervised financial institutions, the Ministry of Economics as notifying authority, and the Consumer Rights Protection Centre as the notified single point of contact. Statutory amendments to complete the framework are still in progress.",
   }),
   createMonitoredInstitutionProfile({
     countryCode: "LT",
@@ -2429,9 +3082,44 @@ const firstWaveProfiles: EuropeCountryProfile[] = [
     governmentInstitution: "Register of Legal Acts",
     governmentSourceType: "legislation",
     relevantMinistriesOrAgencies: [
+      "Communications Regulatory Authority (RRT)",
+      "Innovation Agency",
+      "Ministry of the Economy and Innovation",
       "State Data Protection Inspectorate",
-      "Register of Legal Acts",
     ],
+    additionalRegulationSources: [
+      lithuaniaTechnologyInnovationAmendment,
+      lithuaniaInformationSocietyAmendment,
+      lithuaniaRrtDesignationRelease,
+      europeanCommissionSpocList,
+    ],
+    implementationStatus: "competent_authority_designated",
+    implementationConfidence: "high",
+    aiActImplementationNotes:
+      "Lithuania implemented the AI Act's institutional layer through a linked package adopted by the Seimas on 14 January 2025: Act No. XV-105 amending the Law on Technology and Innovation and Act No. XV-106 amending the Law on Information Society Services, both published in the Register of Legal Acts on 22 January 2025 and principally in force since 1 April 2025. The official register links both acts to Regulation (EU) 2024/1689; XV-105 is additionally linked to the Annex I sectoral acts. Certain notifying-authority provisions entered into force on 2 August 2025 and 1 January 2026.",
+    implementationMeasures: [
+      "Act No. XV-105 amending the Law on Technology and Innovation, adopted 14 January 2025, TAR 22 January 2025 (No. 2025-00715), principally in force 1 April 2025; staged provisions from 2 August 2025 and 1 January 2026 (ELI https://data.e-tar.lt/eli/valst/ist/tar/2025/715/op).",
+      "Act No. XV-106 amending the Law on Information Society Services, adopted 14 January 2025, TAR 22 January 2025 (No. 2025-00716), in force 1 April 2025.",
+      "RRT announcement of 16 January 2025: from 1 April 2025 RRT is the national competent market surveillance authority and single point of contact; the Innovation Agency is the notifying authority for high-risk conformity assessment.",
+      "The European Commission's list of Single Points of Contact records RRT as Lithuania's notified single point of contact without a pending marker.",
+      "The amendments provide for an AI regulatory sandbox operated with the Innovation Agency.",
+    ],
+    competentAuthorities: [
+      "Ryšių reguliavimo tarnyba (RRT, Communications Regulatory Authority) — national market surveillance authority and single point of contact under the AI Act, from 1 April 2025",
+    ],
+    notifyingAuthorities: [
+      "Inovacijų agentūra (Innovation Agency) — notifying authority for conformity-assessment bodies for high-risk AI systems; certain powers staged from 2 August 2025",
+    ],
+    sourceVerificationStatus: "verified_official_sources_present",
+    missingSourceWarnings: [],
+    nationalAIRegulationNotes:
+      "Lithuania's designations rest on enacted statute (Acts XV-105 and XV-106), the RRT's own announcement, and the European Commission's notified single-point-of-contact list. The distribution of functions between RRT and pre-existing sectoral market-surveillance authorities is still being worked out per the Ministry of the Economy and Innovation.",
+    editorialNotes: [
+      "Both amending acts were verified from the official registers (e-TAR and e-seimas), including their recorded links to Regulation (EU) 2024/1689.",
+      "No Lithuanian AI Act-specific case-law item has been selected yet.",
+    ],
+    publicSummary:
+      "Lithuania designated its AI Act authorities by statute in January 2025: the Communications Regulatory Authority (RRT) is the market surveillance authority and single point of contact from 1 April 2025, and the Innovation Agency is the notifying authority. The designation is confirmed by the enacted amending acts, the RRT itself, and the European Commission's single-point-of-contact list.",
   }),
   createMonitoredInstitutionProfile({
     countryCode: "LU",
@@ -2444,9 +3132,36 @@ const firstWaveProfiles: EuropeCountryProfile[] = [
     governmentInstitution: "Legilux",
     governmentSourceType: "legislation",
     relevantMinistriesOrAgencies: [
-      "National Commission for Data Protection",
-      "Legilux",
+      "National Commission for Data Protection (CNPD)",
+      "Chambre des Députés",
+      "Commission de Surveillance du Secteur Financier (CSSF)",
     ],
+    additionalRegulationSources: [
+      luxembourgBill8476Dossier,
+      luxembourgCnpdAiActNews,
+      europeanCommissionSpocList,
+    ],
+    implementationStatus: "consultation_or_draft_identified",
+    implementationConfidence: "high",
+    aiActImplementationNotes:
+      "Luxembourg's AI Act implementation rests on bill n° 8476, approved by the Government Council on 29 November 2024, deposited in the Chamber of Deputies on 23 December 2024, and still in committee when last checked. Article 7 of the deposited text designates the CNPD as the default horizontal market surveillance authority, with derogations for the judicial supervisory authority (courts and prosecution), the CSSF and the Commissariat aux assurances for their supervised entities, ILNAS for Annex I points 1 to 10 and Annex III point 2, the ILR for Annex III point 2 deployers that are NIS2 essential or important entities, the medicines and health-products agency for Annex I points 11 and 12, and ALIA for Article 50(2) and (4) transparency. Article 12 requires the CNPD to operate at least one AI regulatory sandbox by 2 August 2026. The European Commission's single-point-of-contact list records the CNPD with a pending-final-adoption marker.",
+    implementationMeasures: [
+      "Bill n° 8476 deposited 23 December 2024 (Government Council approval 29 November 2024); in committee — not yet enacted. The bill also amends the CNPD, CSSF and insurance-sector organic laws.",
+      "Article 7 of the deposited text: CNPD as default market surveillance authority; sectoral derogations for the judicial supervisory authority, CSSF, Commissariat aux assurances, ILNAS, ILR, the medicines agency and ALIA.",
+      "Article 12 of the deposited text: the CNPD must establish at least one AI regulatory sandbox by 2 August 2026.",
+      "CSSF opinion of 17 January 2025 and CNPD opinion of 10 June 2025 filed in the dossier.",
+      "The European Commission's list of Single Points of Contact records the CNPD as Luxembourg's single point of contact marked as pending final national adoption.",
+    ],
+    sourceVerificationStatus: "verified_official_sources_present",
+    missingSourceWarnings: [],
+    nationalAIRegulationNotes:
+      "No designation is final: bill n° 8476 remains in committee, and the Commission list carries Luxembourg's CNPD entry with a pending marker. Authority arrays are deliberately left empty until enactment; the draft allocation is recorded in the implementation measures with its article numbers.",
+    editorialNotes: [
+      "Watch the chd.lu dossier for adoption; on enactment, promote the article 7 allocation into the authority arrays and cite the Legilux publication.",
+      "No Luxembourgish AI Act-specific case-law item has been selected yet.",
+    ],
+    publicSummary:
+      "Luxembourg has a complete draft framework: bill n° 8476 would make the CNPD the default market surveillance authority and single point of contact with seven sectoral derogations, and requires a CNPD-run AI sandbox by August 2026. The bill was still in committee when last checked, so no designation is final yet.",
   }),
   createMonitoredInstitutionProfile({
     countryCode: "MT",
@@ -2459,9 +3174,41 @@ const firstWaveProfiles: EuropeCountryProfile[] = [
     governmentInstitution: "Legislation Malta",
     governmentSourceType: "legislation",
     relevantMinistriesOrAgencies: [
+      "Malta Digital Innovation Authority (MDIA)",
       "Information and Data Protection Commissioner",
-      "Legislation Malta",
     ],
+    additionalRegulationSources: [maltaAiRegulations2025, maltaIdpcDesignationRegulations],
+    implementationStatus: "competent_authority_designated",
+    implementationConfidence: "high",
+    aiActImplementationNotes:
+      "Malta designated its AI Act authorities through two legal notices published together in Government Gazette No. 21,519 of 10 October 2025. Legal Notice 226 of 2025 (under the MDIA Act, Cap. 591) makes the Malta Digital Innovation Authority the market surveillance authority for AI systems generally, the national single point of contact, the notifying authority for conformity-assessment bodies, and the operator of the national AI regulatory sandbox. Legal Notice 227 of 2025 (under the Data Protection Act, Cap. 586) designates the Information and Data Protection Commissioner as market surveillance authority for high-risk biometric systems in law-enforcement, border-management and justice contexts, as the Article 77 fundamental-rights authority for personal-data protection, and as notified body where law-enforcement, immigration or asylum authorities put high-risk systems into service; several of its regulations enter into force on 2 August 2026.",
+    implementationMeasures: [
+      "Legal Notice 226 of 2025 (Artificial Intelligence Regulations, 2025), Government Gazette No. 21,519, 10 October 2025: MDIA designated market surveillance authority, single point of contact, notifying authority, and sandbox operator.",
+      "Legal Notice 227 of 2025, same gazette: the Information and Data Protection Commissioner designated market surveillance authority for high-risk biometric systems used for law enforcement, border management, and justice and democracy (regulation 3).",
+      "LN 227 regulation 5: the Commissioner is the Article 77 fundamental-rights authority insofar as personal-data protection is concerned; regulation 8: the Commissioner acts as notified body for high-risk systems put into service by law-enforcement, immigration or asylum authorities.",
+      "LN 227 regulation 1(3): regulations 5 to 7 and 9 to 12 come into force on 2 August 2026; regulation 11 requires a national registry of the high-risk systems within the Commissioner's remit; regulation 13 provides administrative penalties with appeal to the Information and Data Protection Appeals Tribunal.",
+    ],
+    competentAuthorities: [
+      "Malta Digital Innovation Authority (MDIA) — market surveillance authority for AI systems generally; single point of contact; sandbox operator (LN 226 of 2025)",
+      "Information and Data Protection Commissioner (IDPC) — market surveillance authority for high-risk biometric systems in law-enforcement, border-management and justice contexts; Article 77 fundamental-rights authority; notified body for law-enforcement, immigration and asylum deployments (LN 227 of 2025)",
+    ],
+    marketSurveillanceAuthorities: [
+      "Malta Digital Innovation Authority (general)",
+      "Information and Data Protection Commissioner (high-risk biometric systems per LN 227 regulation 3)",
+    ],
+    notifyingAuthorities: [
+      "Malta Digital Innovation Authority — notifying authority for conformity-assessment bodies (LN 226 of 2025)",
+    ],
+    sourceVerificationStatus: "verified_official_sources_present",
+    missingSourceWarnings: [],
+    nationalAIRegulationNotes:
+      "Legal Notice 227's text was read from the IDPC's published copy; Legal Notice 226's designation summary is corroborated by the complementary LN 227 text and practice commentary, with its official ELI record still to be fetched at runtime. Both notices were published in the same Government Gazette of 10 October 2025.",
+    editorialNotes: [
+      "Fetch and pin the LN 226 text from legislation.mt to complete primary-text coverage; the MDIA-side designation currently rests on the gazette publication and corroborating sources.",
+      "No Maltese AI Act-specific case-law item has been selected yet.",
+    ],
+    publicSummary:
+      "Malta designated its AI Act authorities by legal notices of 10 October 2025: the Malta Digital Innovation Authority is market surveillance authority, single point of contact, notifying authority and sandbox operator, while the Information and Data Protection Commissioner supervises high-risk biometric systems in law-enforcement and justice contexts and serves as fundamental-rights authority, with parts of its mandate entering into force on 2 August 2026.",
   }),
   createMonitoredInstitutionProfile({
     countryCode: "PT",
@@ -2474,9 +3221,42 @@ const firstWaveProfiles: EuropeCountryProfile[] = [
     governmentInstitution: "Diario da Republica",
     governmentSourceType: "legislation",
     relevantMinistriesOrAgencies: [
+      "Autoridade Nacional de Comunicações (ANACOM)",
       "National Data Protection Commission",
-      "Diario da Republica",
+      "Secretary of State for Digitalisation",
     ],
+    additionalRegulationSources: [
+      portugalAnacomSupervisionAnnouncement,
+      portugalAnacomFundamentalRightsList,
+      europeanCommissionSpocList,
+    ],
+    implementationStatus: "competent_authority_designated",
+    implementationConfidence: "medium",
+    aiActImplementationNotes:
+      "Portugal's AI Act supervisor was announced rather than enacted. At ANACOM's conference of 19 September 2025 the Minister for Infrastructure and Housing and the Secretary of State for Digitalisation announced that the Government had chosen ANACOM as the national market surveillance authority and single point of contact, and asked ANACOM to design the national AI regulation model including its architecture and financing. Portugal has separately notified the European Commission of its Article 77 fundamental-rights list, which ANACOM publishes and within which ANACOM performs cross-cutting coordination of the other designated entities. A sweep of the Diário da República for August to November 2025 found no published instrument effecting the designation, so confidence is held at medium.",
+    implementationMeasures: [
+      "Government announcement of 19 September 2025, recorded by ANACOM, designating ANACOM as principal market surveillance authority and single point of contact for the AI Act, and tasking it with designing the national regulatory model including architecture and financing.",
+      "Article 77 fundamental-rights list published by ANACOM and notified to the European Commission; the published list includes ERSE, IGMTSSS, ASAE, ERS, IGEC, IGAI, Polícia Judiciária, IGSJ, IGDN, ERC, GNS, IGF and ANACOM.",
+      "ANACOM performs cross-cutting coordination of the other designated national entities under the Article 77 list.",
+      "Portugal missed the 2 August 2025 designation deadline; no implementing instrument had been published in the Diário da República when checked.",
+    ],
+    competentAuthorities: [
+      "Autoridade Nacional de Comunicações (ANACOM) — announced as principal market surveillance authority and single point of contact; cross-cutting coordinator of the Article 77 entities",
+    ],
+    marketSurveillanceAuthorities: [
+      "Autoridade Nacional de Comunicações (ANACOM) — announced, pending a published instrument",
+    ],
+    sourceVerificationStatus: "verified_official_sources_present",
+    missingSourceWarnings: [],
+    nationalAIRegulationNotes:
+      "The ANACOM designation rests on a ministerial announcement reported by the regulator itself and on ANACOM's coordinating role in the published Article 77 list, not on a legal instrument published in the Diário da República. Treat the notifying-authority role as not yet verified: no source consulted names one. Upgrade to high confidence once an instrument is published.",
+    editorialNotes: [
+      "Do not describe Portugal's designation as enacted law — it is a government announcement plus a published Article 77 list. The Article 77 list is a fundamental-rights list under Article 77, distinct from market surveillance designation under Article 70.",
+      "No Portuguese notifying authority has been identified in any official source consulted; leave the notifying-authority array empty until one is.",
+      "No Portuguese AI Act-specific case-law item has been selected yet.",
+    ],
+    publicSummary:
+      "Portugal announced in September 2025 that ANACOM would be its AI Act market surveillance authority and single point of contact, and ANACOM already coordinates the Article 77 fundamental-rights entities notified to the European Commission. The designation had not been formalised in a published legal instrument when last checked.",
   }),
   createMonitoredInstitutionProfile({
     countryCode: "RO",
@@ -2491,9 +3271,56 @@ const firstWaveProfiles: EuropeCountryProfile[] = [
     governmentInstitution: "Romanian Ministry of Research, Innovation and Digitalisation",
     governmentSourceType: "policy",
     relevantMinistriesOrAgencies: [
+      "Autoritatea Națională pentru Administrare și Reglementare în Comunicații (ANCOM)",
+      "Autoritatea pentru Digitalizarea României (ADR)",
       "National Supervisory Authority for Personal Data Processing",
-      "Ministry of Research, Innovation and Digitalisation",
+      "General Secretariat of the Government",
     ],
+    additionalRegulationSources: [
+      romaniaGovernmentMemorandum,
+      romaniaAncomImplementationStatus,
+      europeanCommissionSpocList,
+    ],
+    implementationStatus: "competent_authority_designated",
+    implementationConfidence: "medium",
+    aiActImplementationNotes:
+      "Romania allocated AI Act roles by a Government Memorandum of 12 March 2026, which records that no competent authority or single point of contact had been designated by the 2 August 2025 deadline. The memorandum proposes ANCOM as market surveillance authority and national single point of contact, ASF and the National Bank of Romania for high-risk AI in financial services, ANSPDCP for high-risk biometrics used in law enforcement, border management and the safeguarding of justice and democracy as well as migration, asylum, border control, the administration of justice and democratic processes, the annexed sectoral authorities for Annex I Section A products, and ADR as notifying authority. It also tasks the General Secretariat of the Government with coordinating a draft primary law. ANCOM confirmed on 24 July 2026 that no national normative act is yet in force and that ANCOM and the other authorities will be able to verify and sanction non-compliance only once it is.",
+    implementationMeasures: [
+      "Government Memorandum of 12 March 2026 designating the national competent authorities; the European Commission was to be informed by the Ministry of Foreign Affairs.",
+      "ANCOM proposed as national market surveillance authority and single point of contact; it is already the supervisory authority for electromagnetic compatibility and radio equipment.",
+      "ASF and the National Bank of Romania for high-risk AI systems in financial services where placing on the market, putting into service or use is directly related to the provision of those services.",
+      "ANSPDCP for high-risk biometrics used for law enforcement, border management and safeguarding justice and democracy, and for high-risk systems in law enforcement, migration, asylum, border control, administration of justice and democratic processes.",
+      "ADR (Autoritatea pentru Digitalizarea României) as notifying authority for assessing, designating, notifying and monitoring conformity-assessment bodies.",
+      "Sectoral authorities listed in the memorandum annex for Annex I Section A products; ANCOM cites the National Authority for Consumer Protection and the Labour Inspectorate among them.",
+      "A working group under the General Secretariat of the Government is drafting the primary law that will set the authorities' powers, cooperation mechanisms and the sanctions regime. Until it enters into force, no AI Act sanctions can be imposed in Romania (ANCOM statement of 24 July 2026).",
+    ],
+    competentAuthorities: [
+      "ANCOM — market surveillance authority and national single point of contact (proposed by memorandum)",
+      "ASF and Banca Națională a României — high-risk AI in financial services",
+      "ANSPDCP — high-risk biometrics for law enforcement, border management, justice and democracy; migration, asylum, border control, administration of justice and democratic processes",
+      "Sectoral authorities in the memorandum annex — Annex I Section A products",
+    ],
+    marketSurveillanceAuthorities: [
+      "ANCOM",
+      "Autoritatea de Supraveghere Financiară",
+      "Banca Națională a României",
+      "ANSPDCP",
+      "Sectoral authorities listed in the memorandum annex",
+    ],
+    notifyingAuthorities: [
+      "Autoritatea pentru Digitalizarea României (ADR)",
+    ],
+    sourceVerificationStatus: "verified_official_sources_present",
+    missingSourceWarnings: [],
+    nationalAIRegulationNotes:
+      "Romania's allocation rests on a Government Memorandum, an internal instrument of political direction, not on a normative act. ANCOM states plainly that enforcement and sanctions must await the primary law still being drafted. Confidence stays at medium until that law is adopted, at which point the designations should be re-verified against its text.",
+    editorialNotes: [
+      "Do not present Romania as having an enforceable regime: the memorandum designates authorities but confers no sanctioning power, which ANCOM confirms explicitly.",
+      "Re-verify against the primary law once the General Secretariat of the Government's working group produces it; the memorandum notes the annexed sectoral list may be extended by that act.",
+      "No Romanian AI Act-specific case-law item has been selected yet.",
+    ],
+    publicSummary:
+      "Romania designated its AI Act authorities by Government Memorandum of 12 March 2026 — ANCOM as market surveillance authority and single point of contact, ASF and the central bank for financial services, the data protection authority for biometrics and justice-related systems, and ADR as notifying authority. The implementing law is still being drafted, so no sanctions can be imposed until it is in force.",
   }),
   createMonitoredInstitutionProfile({
     countryCode: "SK",
@@ -2506,9 +3333,38 @@ const firstWaveProfiles: EuropeCountryProfile[] = [
     governmentInstitution: "Slov-lex",
     governmentSourceType: "legislation",
     relevantMinistriesOrAgencies: [
+      "Ministry of Investments, Regional Development and Informatization (MIRRI)",
       "Office for Personal Data Protection",
-      "Slov-lex",
+      "Ministry of Justice",
     ],
+    additionalRegulationSources: [
+      slovakiaMirriUdiStatement,
+      slovakiaNrsrAiBillSummary,
+      slovakiaMirriAiBillLaunch,
+    ],
+    implementationStatus: "consultation_or_draft_identified",
+    implementationConfidence: "medium",
+    aiActImplementationNotes:
+      "Slovakia has legislated twice over and adopted neither. MIRRI opened an interministerial comment procedure in July 2025 on bill LP/2025/401 on the organisation of state administration in the field of AI, under which MIRRI itself would have been the general market surveillance authority and single point of contact, with the Office for Personal Data Protection as notifying authority. A later and broader bill on artificial intelligence and European data regulation, sent for comments on 27 January 2026, instead proposes creating a central Office of Digital Integrity (Úrad digitálnej integrity) as the general market surveillance authority with its own inspectors, sandbox powers and fining powers. That comment procedure closed on 4 February 2026 with 574 comments, 224 of them fundamental. Neither bill has been adopted, so the authority arrays are left empty.",
+    implementationMeasures: [
+      "Bill LP/2025/401 on the organisation of state administration in the field of AI, sent for interministerial comments by MIRRI in July 2025: MIRRI as general market surveillance authority (§3(1)) and single point of contact (§3(2)); the Office for Personal Data Protection as notifying authority under Article 28; sandbox administered by MIRRI (§7).",
+      "LP/2025/401 sectoral market surveillance: the Office for Personal Data Protection, the National Security Authority, and the bodies listed in §26 of Act 56/2018 Z. z. — including the Slovak Trade Inspection, the Transport Authority, the State Institute for Drug Control and the Labour Inspectorate.",
+      "Later bill on artificial intelligence and European data regulation, sent for comments on 27 January 2026: would create the Office of Digital Integrity (ÚDI) as a central state administration body and general market surveillance authority, managing the AI regulatory sandbox, conducting supervision through inspectors and imposing fines.",
+      "Under that bill MIRRI states the Office for Personal Data Protection remains a sectoral market surveillance authority in defined areas with its existing independent powers intact, and supervision of AI used by courts in the exercise of judicial power is assigned to the Ministry of Justice.",
+      "The comment procedure on the January 2026 bill closed on 4 February 2026 with 574 comments, 224 of them fundamental. Neither bill had been adopted when last checked.",
+      "MIRRI states the institutional model derives from an external analysis and from the government-approved institutional and coordination framework for Slovakia's digital transformation.",
+    ],
+    sourceVerificationStatus: "verified_official_sources_present",
+    missingSourceWarnings: [],
+    nationalAIRegulationNotes:
+      "Two successive drafts allocate the lead role differently — MIRRI itself in the July 2025 bill, a new Office of Digital Integrity in the January 2026 bill. Confidence is medium because the institutional design is still moving; do not present either allocation as settled, and re-verify against whichever text is finally adopted.",
+    editorialNotes: [
+      "Note the supersession explicitly when writing about Slovakia: citing the MIRRI-as-supervisor model alone would be out of date, and citing ÚDI alone would omit that it is not yet enacted.",
+      "The proposed penalty ceiling and inspector powers come from commentary on the January 2026 draft rather than from an official text read in full; do not state figures until the bill text or adopted act is read directly.",
+      "No Slovak AI Act-specific case-law item has been selected yet.",
+    ],
+    publicSummary:
+      "Slovakia has consulted on two successive AI Act implementation bills without adopting either. The July 2025 draft would have made MIRRI the market surveillance authority and single point of contact; the January 2026 draft instead proposes a new central Office of Digital Integrity, with the data protection authority as sectoral supervisor and the Ministry of Justice overseeing AI used by courts.",
   }),
   createMonitoredInstitutionProfile({
     countryCode: "SI",
@@ -2522,9 +3378,56 @@ const firstWaveProfiles: EuropeCountryProfile[] = [
     governmentInstitution: "Government of Slovenia",
     governmentSourceType: "policy",
     relevantMinistriesOrAgencies: [
+      "Agency for Communication Networks and Services (AKOS)",
       "Information Commissioner",
-      "Government of Slovenia",
+      "Ministry of Digital Transformation",
+      "Bank of Slovenia",
     ],
+    additionalRegulationSources: [sloveniaZiudhpuiAct, europeanCommissionSpocList],
+    implementationStatus: "competent_authority_designated",
+    implementationConfidence: "high",
+    aiActImplementationNotes:
+      "Slovenia enacted the Act on the implementation of the EU Regulation laying down harmonised rules on artificial intelligence (ZIUDHPUI), adopted by the National Assembly on 23 October 2025, published in Uradni list RS No. 85/25 on 6 November 2025 and in force since 21 November 2025. Articles 3 to 5 designate the notifying and accreditation authorities, article 6 lists the five market surveillance authorities, article 7 makes AKOS the single point of contact, article 10 allocates supervision annex point by annex point, and article 11 gives the Information Society Inspectorate oversight of notified bodies, AI literacy and public-sector publication duties. The act also establishes a national AI ethics council and the misdemeanour and fine regime.",
+    implementationMeasures: [
+      "ZIUDHPUI (Uradni list RS 85/25): adopted 23 October 2025, in force 21 November 2025; lead body Ministry of Digital Transformation.",
+      "Article 6: market surveillance authorities are AKOS, the Information Commissioner, the Bank of Slovenia, the Insurance Supervision Agency and the Market Inspectorate.",
+      "Article 7: AKOS is the single point of contact under Article 70(2); it also runs regulatory sandboxes, the national registry of high-risk critical-infrastructure AI systems and a helpdesk per the government's national AI ecosystem page.",
+      "Article 10: the Information Commissioner supervises Article 5 prohibited practices and Annex III points 1, 3 and 6-8; the Bank of Slovenia point 5(b) for credit institutions; the Market Inspectorate point 5(b) for consumer-credit lenders; the Insurance Supervision Agency point 5(c); AKOS Annex I Section A, Annex III points 2, 4, 5(a) and 5(d), and Article 50 transparency.",
+      "Article 11: the Information Society Inspectorate supervises notified-body obligations, Article 4 AI literacy and the act's public-sector publication duty.",
+      "Article 8: enforcement tasks of AKOS, the Bank of Slovenia and the Insurance Supervision Agency under the act are financed from the state budget.",
+    ],
+    competentAuthorities: [
+      "Agencija za komunikacijska omrežja in storitve (AKOS) — market surveillance for Annex I Section A, Annex III points 2, 4, 5(a) and 5(d), Article 50 transparency; single point of contact",
+      "Informacijski pooblaščenec (Information Commissioner) — Article 5 prohibited practices; Annex III points 1, 3 and 6-8",
+      "Banka Slovenije — Annex III point 5(b) for credit institutions",
+      "Tržni inšpektorat RS (Market Inspectorate) — Annex III point 5(b) for consumer-credit lenders",
+      "Agencija za zavarovalni nadzor (Insurance Supervision Agency) — Annex III point 5(c)",
+      "Inšpekcija za informacijsko družbo (Information Society Inspectorate) — notified-body obligations, AI literacy, public-sector publication duty",
+    ],
+    marketSurveillanceAuthorities: [
+      "AKOS",
+      "Information Commissioner",
+      "Bank of Slovenia",
+      "Insurance Supervision Agency",
+      "Market Inspectorate of the Republic of Slovenia",
+    ],
+    notifyingAuthorities: [
+      "Ministry responsible for the market — Annex I Section A points 1, 3-7, 9 and 10",
+      "Ministry responsible for infrastructure — Annex I Section A point 8",
+      "Ministry responsible for health — Annex I Section A point 2",
+      "Public Agency for Medicinal Products and Medical Devices (JAZMP) — Annex I Section A points 11 and 12",
+      "Ministry responsible for the information society (Ministry of Digital Transformation) — Annex III point 1",
+    ],
+    sourceVerificationStatus: "verified_official_sources_present",
+    missingSourceWarnings: [],
+    nationalAIRegulationNotes:
+      "Slovenia's authority matrix is taken from the enacted ZIUDHPUI, articles 3 to 13, read from the official PISRS register. The European Commission's single-point-of-contact list still showed AKOS with a pending marker on its 26 September 2025 update, which predates the act's adoption; the statute is the controlling source.",
+    editorialNotes: [
+      "Designations are pinpointed to ZIUDHPUI articles 3 to 13; cite annex points rather than summarising Slovenia as having one supervisor.",
+      "No Slovenian AI Act-specific case-law item has been selected yet.",
+    ],
+    publicSummary:
+      "Slovenia enacted its AI Act implementing statute (ZIUDHPUI), in force since 21 November 2025, distributing market surveillance across five authorities, making AKOS the single point of contact and sandbox operator, giving the Information Commissioner the prohibited-practices and fundamental-rights-sensitive areas, and establishing a national AI ethics council.",
   }),
   {
     countryCode: "FR",
