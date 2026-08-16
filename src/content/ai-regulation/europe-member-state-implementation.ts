@@ -3663,7 +3663,7 @@ const firstWaveProfiles: EuropeCountryProfile[] = [
     slug: "germany",
     region: "Europe",
     euMemberState: true,
-    implementationStatus: "implementation_in_progress",
+    implementationStatus: "consultation_or_draft_identified",
     implementationStatusLabel: europeImplementationStatusTaxonomy.implementation_in_progress.label,
     implementationStatusDescription:
       europeImplementationStatusTaxonomy.implementation_in_progress.shortExplanation,
@@ -3768,7 +3768,7 @@ const firstWaveProfiles: EuropeCountryProfile[] = [
     slug: "spain",
     region: "Europe",
     euMemberState: true,
-    implementationStatus: "implementation_in_progress",
+    implementationStatus: "consultation_or_draft_identified",
     implementationStatusLabel: europeImplementationStatusTaxonomy.implementation_in_progress.label,
     implementationStatusDescription:
       europeImplementationStatusTaxonomy.implementation_in_progress.shortExplanation,
@@ -4353,11 +4353,11 @@ const firstWaveProfiles: EuropeCountryProfile[] = [
     slug: "ireland",
     region: "Europe",
     euMemberState: true,
-    implementationStatus: "implementation_in_progress",
+    implementationStatus: "competent_authority_designated",
     implementationStatusLabel: europeImplementationStatusTaxonomy.implementation_in_progress.label,
     implementationStatusDescription:
       europeImplementationStatusTaxonomy.implementation_in_progress.shortExplanation,
-    implementationConfidence: "medium",
+    implementationConfidence: "high",
     aiActImplementationNotes:
       "Ireland is an EU member state to which the EU AI Act applies directly, and it is the EU establishment of many major AI and technology companies, which increases its practical relevance under the Act. The Department of Enterprise, Tourism and Employment states on its own site that Ireland had designated 15 national competent authorities as of 16 September 2025, under a distributed model with a designated central authority for coordination and a national single point of contact inside the department, and that a National AI Office will be established by 2 August 2026. The individual identities of the 15 authorities are not enumerated here because the departmental announcement does not list them, so this profile records the count and the model, not a named roster.",
     nationalImplementationMeasures: [
@@ -4379,7 +4379,7 @@ const firstWaveProfiles: EuropeCountryProfile[] = [
       irelandDeteAuthorityDesignationNews,
     ],
     nationalAIRegulationNotes:
-      "DPC, the Department of Enterprise, Trade and Employment, and the main government portal (gov.ie) are the principal verified official institutional anchors for Irish AI and data governance. The DPC is registered as a live-monitoring candidate given its role as lead supervisory authority for many major AI and technology companies established in Ireland. Specific national AI Act implementation acts and authority-designation details remain under review.",
+      "Ireland's designation is verified from the Department of Enterprise, Tourism and Employment announcement of 16 September 2025 and corroborated by the European Commission's single-point-of-contact list, which records the Minister for Enterprise, Tourism and Employment without a pending marker. The department's announcement does not name the 15 authorities individually, so no roster is asserted here — that itemisation is the outstanding gap, not the designation itself.",
     nationalCaseLawSources: [],
     nationalCaseLawNotes:
       "No Irish AI-specific case-law source has been reviewed into the public baseline in this phase.",
@@ -4405,10 +4405,11 @@ const firstWaveProfiles: EuropeCountryProfile[] = [
     editorialNotes: [
       "Ireland has identifiable official institutions and is now enrolled in full live monitoring with the DPC as the primary live-monitoring anchor.",
       "Ireland's role as EU home of many major AI and technology companies gives the DPC's actions heightened practical relevance under both GDPR and the AI Act; this should be reflected in monitoring priority, not in overclaiming DPC's AI Act role.",
+      "The 15 designated authorities are not named in the department's announcement; enumerate them once an official roster is published, and keep the market-surveillance and notifying arrays empty until then.",
       "Absence of detailed verified data here does not mean absence of national Irish AI law or regulatory activity.",
     ],
     publicSummary:
-      "Ireland is included in the EU AI baseline with live monitoring now active. The DPC (Data Protection Commission) is the primary monitoring anchor and Ireland's lead supervisory authority for many major AI and technology companies established in Ireland. DETE and gov.ie provide the national implementation context. Specific national implementation acts and authority-designation details remain under review.",
+      "Ireland designated 15 national competent authorities for AI Act oversight and enforcement as of 16 September 2025, on a distributed model coordinated by the Department of Enterprise, Tourism and Employment, which also hosts the national single point of contact. A National AI Office is to be established by 2 August 2026. The Data Protection Commission remains the primary live-monitoring anchor given its lead-supervisory role for many major AI companies established in Ireland.",
   },
 ];
 

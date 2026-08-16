@@ -47,11 +47,20 @@ describe("Europe country profiles", () => {
     expect(getEuropeCountryProfileBySlug("france")?.implementationStatus).toBe(
       "competent_authority_designated",
     );
+    // Ireland designated 15 competent authorities on 16 September 2025 and the
+    // Commission's SPOC list carries it without a pending marker.
+    expect(getEuropeCountryProfileBySlug("ireland")?.implementationStatus).toBe(
+      "competent_authority_designated",
+    );
+    // Germany and Spain both have an official draft but no final designation —
+    // BNetzA's own page calls its role provisional and the Commission list has
+    // no German entry; Spain's SPOC entry is marked pending final adoption.
+    // Same taxonomy branch as the Dutch uitvoeringswet below.
     expect(getEuropeCountryProfileBySlug("germany")?.implementationStatus).toBe(
-      "implementation_in_progress",
+      "consultation_or_draft_identified",
     );
     expect(getEuropeCountryProfileBySlug("spain")?.implementationStatus).toBe(
-      "implementation_in_progress",
+      "consultation_or_draft_identified",
     );
     expect(getEuropeCountryProfileBySlug("italy")?.implementationStatus).toBe(
       "national_implementation_identified",
