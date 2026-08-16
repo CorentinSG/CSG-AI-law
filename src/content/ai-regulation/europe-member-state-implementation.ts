@@ -4513,9 +4513,43 @@ export function getEuropeCountryProfileBySlug(slug: string) {
   return europeCountryProfiles.find((profile) => profile.slug === slug) ?? null;
 }
 
+// Ranked strongest-evidence first, so the hub surfaces whichever member states
+// currently have a verified designation instead of a frozen editorial list. A
+// country promoted to `competent_authority_designated` appears here on its own.
+const implementationStatusRank: Record<EuropeImplementationStatus, number> = {
+  competent_authority_designated: 0,
+  national_implementation_identified: 1,
+  consultation_or_draft_identified: 2,
+  implementation_in_progress: 3,
+  eu_framework_applies: 4,
+  no_specific_national_implementation_verified: 5,
+  needs_review: 6,
+  not_applicable: 7,
+};
+
+const implementationConfidenceRank: Record<EuropeImplementationConfidence, number> = {
+  high: 0,
+  medium: 1,
+  low: 2,
+  needs_review: 3,
+};
+
+export function getEuropeCountryProfilesByEvidenceStrength() {
+  return [...europeCountryProfiles].sort(
+    (a, b) =>
+      implementationStatusRank[a.implementationStatus] -
+        implementationStatusRank[b.implementationStatus] ||
+      implementationConfidenceRank[a.implementationConfidence] -
+        implementationConfidenceRank[b.implementationConfidence] ||
+      a.countryName.localeCompare(b.countryName),
+  );
+}
+
+// The hub pill row: every member state whose competent authority is designated,
+// strongest confidence first. Derived, not hardcoded — see the note above.
 export function getPriorityEuropeCountryProfiles() {
-  return europeCountryProfiles.filter((profile) =>
-    ["FR", "DE", "ES", "IT", "NL", "PL", "SE", "IE", "BE", "AT"].includes(profile.countryCode),
+  return getEuropeCountryProfilesByEvidenceStrength().filter(
+    (profile) => profile.implementationStatus === "competent_authority_designated",
   );
 }
 

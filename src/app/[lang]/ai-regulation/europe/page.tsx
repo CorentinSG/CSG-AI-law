@@ -278,11 +278,17 @@ export default async function EuropeAiRegulationPage({
       <section className="space-y-4">
         <div className="flex items-center justify-between gap-4">
           <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-zinc-400">
-            {fr ? "Profils pays prioritaires" : "Priority country profiles"}
+            {fr ? "Autorité compétente désignée" : "Competent authority designated"}
           </p>
+          <Link
+            href={localeHref(lang, "/ai-regulation/europe/countries")}
+            className="font-mono text-[10px] uppercase tracking-[0.2em] text-zinc-500 underline-offset-4 transition-colors hover:text-zinc-900 hover:underline"
+          >
+            {fr ? "Les 27 États membres" : "All 27 member states"}
+          </Link>
         </div>
         <MotionStagger className="flex flex-wrap gap-2">
-          {countryProfiles.slice(0, 9).map((profile) => (
+          {countryProfiles.map((profile) => (
             <MotionStaggerItem key={profile.slug}>
               <Link
                 href={localeHref(lang, `/ai-regulation/europe/${profile.slug}`)}
